@@ -168,6 +168,34 @@
                             <p class="text-[10px] text-indigo-500 mt-1 italic">Hỗ trợ giữ nguyên định dạng xuống dòng từ file text.</p>
                         </div>
 
+                        <!-- Khu vực tải lên Mã QR 2FA -->
+                        <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-100">
+                            <label class="block text-sm font-medium text-teal-800 mb-2 flex items-center gap-1">
+                                <i class="ph ph-qr-code"></i> Mã QR 2FA (Hình ảnh)
+                            </label>
+                            
+                            <!-- Input ẩn để lưu chuỗi Base64 của ảnh -->
+                            <input type="hidden" id="entryQrBase64" value="">
+                            
+                            <div id="qrUploadUI" class="flex items-center justify-center w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-teal-200 border-dashed rounded-xl cursor-pointer bg-white hover:bg-teal-50/50 transition-colors">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i class="ph ph-upload-simple text-2xl text-teal-500 mb-1"></i>
+                                        <p class="text-xs text-teal-600"><span class="font-semibold">Bấm để tải lên</span> hoặc kéo thả ảnh QR</p>
+                                    </div>
+                                    <input type="file" id="qrFileInput" class="hidden" accept="image/*" onchange="handleQrUpload(event)" />
+                                </label>
+                            </div>
+
+                            <!-- Vùng hiển thị ảnh xem trước (ẩn mặc định) -->
+                            <div id="qrPreviewUI" class="hidden relative inline-block mt-2">
+                                <img id="qrPreviewImg" src="" class="max-h-32 rounded-lg border border-teal-200 shadow-sm" alt="QR Preview">
+                                <button type="button" onclick="removeQrCode()" class="absolute -top-2 -right-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-full p-1 shadow-md transition-colors">
+                                    <i class="ph ph-x text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú thêm</label>
                             <textarea id="entryNotes" rows="2" placeholder="Ghi chú khác (nếu có)" 
@@ -192,6 +220,24 @@
     <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 hidden z-50">
         <i class="ph ph-check-circle text-green-400 text-xl"></i>
         <span id="toastMessage" class="font-medium text-sm">Đã copy thành công!</span>
+    </div>
+
+    <!-- Modal Xem Ảnh Phóng To -->
+    <div id="imageViewerModal" class="fixed inset-0 z-[60] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeImageViewer()"></div>
+        <div class="relative z-10 max-w-[90vw] max-h-[90vh] flex flex-col items-center">
+            <div class="w-full flex justify-end mb-4">
+                <button onclick="closeImageViewer()" class="text-white hover:text-gray-300 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md shadow-lg">
+                    <i class="ph ph-x text-2xl"></i>
+                </button>
+            </div>
+            <img id="viewerImage" src="" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border-4 border-white/20 bg-white" alt="Full size QR">
+            <div class="mt-6 flex gap-4">
+                <button id="viewerDownloadBtn" class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/40 transition-transform transform hover:-translate-y-1 flex items-center gap-2">
+                    <i class="ph ph-download-simple text-2xl"></i> Tải ảnh chất lượng gốc
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -324,6 +370,32 @@
                             </div>
                         ` : '';
 
+                        // Khối hiển thị Ảnh QR 2FA (Nếu có)
+                        const safeFileName = `QR_2FA_${firstEntry.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                        const qrCodeHTML = entry.qrCode ? `
+                            <div class="bg-teal-50/70 rounded-xl p-3 border border-teal-100/80 mt-3 relative group/item">
+                                <span class="text-[11px] uppercase tracking-wider text-teal-600 font-bold block mb-2 flex items-center gap-1">
+                                    <i class="ph ph-qr-code text-sm"></i> Mã QR 2FA
+                                </span>
+                                <div class="relative flex justify-center bg-white p-2 rounded-lg border border-teal-100/50 group/qr cursor-pointer overflow-hidden" onclick="viewImageFullscreen('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();">
+                                    <img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-md" alt="QR Code">
+                                    
+                                    <!-- Lớp phủ (Overlay) hiện lên khi di chuột -->
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-lg flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
+                                        <div class="flex gap-4">
+                                            <button onclick="viewImageFullscreen('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-3 bg-white/90 text-gray-800 hover:bg-white rounded-full shadow-lg transition-transform transform hover:scale-110" title="Phóng to ảnh">
+                                                <i class="ph ph-arrows-out text-xl"></i>
+                                            </button>
+                                            <button onclick="downloadImage('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-3 bg-teal-500 text-white hover:bg-teal-600 rounded-full shadow-lg transition-transform transform hover:scale-110" title="Tải xuống máy tính">
+                                                <i class="ph ph-download-simple text-xl"></i>
+                                            </button>
+                                        </div>
+                                        <span class="text-white text-xs font-medium drop-shadow-md">Bấm để phóng to</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : '';
+
                         accountsHTML += `
                             <div class="${isNotLast ? 'border-b border-gray-200/60 pb-5 mb-5' : ''}">
                                 <div class="flex justify-between items-center mb-3">
@@ -368,6 +440,7 @@
                                 </div>
 
                                 ${backupCodesHTML}
+                                ${qrCodeHTML}
                                 ${entry.notes ? `<p class="mt-4 text-xs text-gray-500 italic"><i class="ph ph-info mr-1"></i>${escapeHTML(entry.notes)}</p>` : ''}
                             </div>
                         `;
@@ -495,6 +568,9 @@
             document.getElementById('entryPassword').type = 'password';
             document.getElementById('modalEyeIcon').classList.replace('ph-eye-slash', 'ph-eye');
 
+            // Reset khu vực tải ảnh QR mỗi lần mở modal
+            removeQrCode();
+
             if (id) {
                 const entry = appData.find(item => item.id === id);
                 if (entry) {
@@ -507,6 +583,14 @@
                     document.getElementById('entryBackupTitle').value = entry.backupTitle || '';
                     document.getElementById('entryBackupCodes').value = entry.backupCodes || '';
                     document.getElementById('entryNotes').value = entry.notes || '';
+
+                    // Nếu tài khoản đã có ảnh QR, thì hiển thị nó lên
+                    if (entry.qrCode) {
+                        document.getElementById('entryQrBase64').value = entry.qrCode;
+                        document.getElementById('qrPreviewImg').src = entry.qrCode;
+                        document.getElementById('qrUploadUI').classList.add('hidden');
+                        document.getElementById('qrPreviewUI').classList.remove('hidden');
+                    }
                 }
             }
         }
@@ -539,6 +623,7 @@
                 password: document.getElementById('entryPassword').value,
                 backupTitle: document.getElementById('entryBackupTitle').value.trim(),
                 backupCodes: document.getElementById('entryBackupCodes').value.trim(),
+                qrCode: document.getElementById('entryQrBase64').value,
                 notes: document.getElementById('entryNotes').value.trim(),
                 createdAt: new Date().toISOString()
             };
@@ -573,6 +658,74 @@
                     showToast('Đã xóa tài khoản!');
                 }
             }
+        }
+
+        // --- CÁC HÀM XỬ LÝ ẢNH QR CODE ---
+        function handleQrUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Kiểm tra dung lượng (giới hạn 1MB để tránh làm đầy Local Storage quá nhanh)
+            if (file.size > 1024 * 1024) {
+                showToast("Lỗi: Vui lòng chọn ảnh QR có dung lượng dưới 1MB!");
+                event.target.value = '';
+                return;
+            }
+
+            // Đọc file ảnh và chuyển đổi sang chuỗi Base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                document.getElementById('entryQrBase64').value = base64String;
+                document.getElementById('qrPreviewImg').src = base64String;
+                
+                document.getElementById('qrUploadUI').classList.add('hidden');
+                document.getElementById('qrPreviewUI').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeQrCode() {
+            document.getElementById('qrFileInput').value = '';
+            document.getElementById('entryQrBase64').value = '';
+            document.getElementById('qrPreviewImg').src = '';
+            
+            document.getElementById('qrUploadUI').classList.remove('hidden');
+            document.getElementById('qrPreviewUI').classList.add('hidden');
+        }
+
+        // --- CÁC HÀM XEM VÀ TẢI ẢNH QR FULLSCREEN ---
+        function viewImageFullscreen(base64Src, fileName) {
+            const modal = document.getElementById('imageViewerModal');
+            const img = document.getElementById('viewerImage');
+            const btn = document.getElementById('viewerDownloadBtn');
+            
+            img.src = base64Src;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Cập nhật sự kiện tải xuống cho nút trong Modal
+            btn.onclick = function() {
+                downloadImage(base64Src, fileName);
+            };
+        }
+
+        function closeImageViewer() {
+            const modal = document.getElementById('imageViewerModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            // Dọn dẹp ảnh sau khi animation kết thúc để giải phóng bộ nhớ
+            setTimeout(() => { document.getElementById('viewerImage').src = ''; }, 300);
+        }
+
+        function downloadImage(base64Src, fileName) {
+            const a = document.createElement('a');
+            a.href = base64Src;
+            a.download = fileName || 'QR_Code.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Đã tải ảnh QR xuống máy!');
         }
     </script>
 </body>
