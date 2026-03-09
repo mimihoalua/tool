@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Phân Tích Lỗi - Suno Bot V33</title>
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --secondary: #1a1a2e;
+            --accent: #16213e;
+            --success: #00d4aa;
+            --warning: #ffc107;
+            --danger: #ff4757;
+            --info: #3498db;
+            --dark: #0f0f1a;
+            --light: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8c42 100%);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+        
+        header .subtitle {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        header .version {
+            display: inline-block;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--accent);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card.critical .number { color: var(--danger); }
+        .stat-card.warning .number { color: var(--warning); }
+        .stat-card.info .number { color: var(--info); }
+        .stat-card.success .number { color: var(--success); }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .section {
+            background: var(--accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2 .icon {
+            font-size: 1.3em;
+        }
+        
+        .error-block {
+            background: rgba(255, 71, 87, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .error-block h3 {
+            color: var(--danger);
+            margin-bottom: 10px;
+        }
+        
+        .warning-block {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .warning-block h3 {
+            color: var(--warning);
+            margin-bottom: 10px;
+        }
+        
+        .success-block {
+            background: rgba(0, 212, 170, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .success-block h3 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        
+        .code-block {
+            background: var(--dark);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .code-block .keyword { color: #ff79c6; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .comment { color: #6272a4; }
+        .code-block .function { color: #50fa7b; }
+        .code-block .number { color: #bd93f9; }
+        
+        .log-output {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .log-output .timestamp { color: #888; }
+        .log-output .info { color: var(--info); }
+        .log-output .warning { color: var(--warning); }
+        .log-output .error { color: var(--danger); }
+        .log-output .success { color: var(--success); }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 20px 0 20px 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark);
+        }
+        
+        .timeline-item.error::before { background: var(--danger); }
+        .timeline-item.warning::before { background: var(--warning); }
+        .timeline-item.success::before { background: var(--success); }
+        
+        .solution-card {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(0, 212, 170, 0.05) 100%);
+            border: 1px solid var(--success);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+        
+        .solution-card h3 {
+            color: var(--success);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        ul.analysis-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        ul.analysis-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        ul.analysis-list li::before {
+            content: '▸';
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-critical { background: var(--danger); color: white; }
+        .badge-warning { background: var(--warning); color: black; }
+        .badge-info { background: var(--info); color: white; }
+        
+        .image-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .image-card {
+            background: var(--dark);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-card .caption {
+            padding: 15px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        th {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger) 0%, var(--warning) 50%, var(--success) 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .image-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ SENTINEL QA REPORT</h1>
+            <div class="subtitle">Báo Cáo Phân Tích Lỗi - Suno Bot Automation</div>
+            <div class="version">Version 33 | Dynamic Selectors & Debug Mode</div>
+        </header>
+        
+        <div class="stats-grid">
+            <div class="stat-card critical">
+                <div class="number">3</div>
+                <div class="label">Lỗi Nghiêm Trọng</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="number">4</div>
+                <div class="label">Cảnh Báo</div>
+            </div>
+            <div class="stat-card info">
+                <div class="number">5</div>
+                <div class="label">Vấn Đề UI/Selector</div>
+            </div>
+            <div class="stat-card success">
+                <div class="number">2</div>
+                <div class="label">Fallback Hoạt Động</div>
+            </div>
+        </div>
+        
+        <!-- SECTION 1: TÓM TẮT VẤN ĐỀ -->
+        <section class="section">
+            <h2><span class="icon">📋</span> 1. TÓM TẮT VẤN ĐỀ CHÍNH</h2>
+            
+            <div class="error-block">
+                <h3>🚨 Lỗi Hiện Tại</h3>
+                <p>Bot không thể tải file audio từ Suno do <strong>Menu Download không xuất hiện</strong> sau khi click vào Menu 3 chấm. Hệ thống ghi nhận lỗi tại dòng 354-358 trong code.</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thời điểm</th>
+                        <th>Sự kiện</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:18:45</td>
+                        <td>Khởi chạy LLM xử lý thông số âm nhạc</td>
+                        <td><span style="color: var(--info)">Processing</span></td>
+                    </tr>
+                    <tr>
+                        <td>09:19:21</td>
+                        <td>AI Error: Phát hiện văn bản mẫu rác</td>
+                        <td><span style="color: var(--warning)">Warning</span></td>
+                    </tr>
+                    <tr>
+                        <td>09:22:11</td>
+                        <td>Không tìm thấy Tùy chọn Tải Xuống (Target #1)</td>
+                        <td><span style="color: var(--danger)">Error</span></td>
+                    </tr>
+                    <tr>
+                        <td>09:22:19</td>
+                        <td>Không tìm thấy Tùy chọn Tải Xuống (Target #2)</td>
+                        <td><span style="color: var(--danger)">Error</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- SECTION 2: PHÂN TÍCH LỖI AI/LLM -->
+        <section class="section">
+            <h2><span class="icon">🤖</span> 2. PHÂN TÍCH LỖI AI/LLM MODULE</h2>
+            
+            <div class="error-block">
+                <h3>❌ Lỗi: "Định dạng xuất ra không phải JSON hợp lệ"</h3>
+                <p>Module AI sử dụng <strong>llama-cli.exe</strong> từ đường dẫn <code>C:\AI Local\llama.cpp\llama-cli.exe</code> với model <strong>Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf</strong></p>
+            </div>
+            
+            <div class="code-block">
+<span class="comment"># Đường dẫn cấu hình (Dòng 36-37)</span>
+<span class="keyword">MODEL_PATH</span> = <span class="string">r"C:\AI Local\AI_Models\Ai Thuc chien\Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"</span>
+<span class="keyword">LLAMA_CLI_PATH</span> = <span class="string">r"C:\AI Local\llama.cpp\llama-cli.exe"</span>
+
+<span class="comment"># Gọi LLM (Dòng 150-154)</span>
+<span class="keyword">cmd</span> = [<span class="keyword">LLAMA_CLI_PATH</span>, <span class="string">"-m"</span>, <span class="keyword">MODEL_PATH</span>, <span class="string">"-p"</span>, <span class="keyword">system_prompt</span>, 
+         <span class="string">"-n"</span>, <span class="string">"250"</span>, <span class="string">"--temp"</span>, <span class="string">"0.8"</span>]
+            </div>
+            
+            <h3 style="margin-top: 20px; color: var(--warning);">⚠️ Nguyên nhân lỗi:</h3>
+            
+            <ul class="analysis-list">
+                <li>
+                    <div>
+                        <strong>Output không có cấu trúc JSON:</strong> Llama 3.1 có thể tạo ra text tự do thay vì JSON do không có instruction tuning cho format cụ thể.
+                        <span class="badge badge-warning">Medium</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Thiếu tham số quan trọng:</strong> Không có flag <code>--grammar</code> hoặc <code>-j</code> để buộc output JSON hợp lệ.
+                        <span class="badge badge-critical">Critical</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Temperature cao (0.8):</strong> Tăng tính ngẫu nhiên, làm giảm khả năng tuân thủ format.
+                        <span class="badge badge-info">Info</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Không có JSON schema enforcement:</strong> Prompt yêu cầu JSON nhưng không có validation layer.
+                        <span class="badge badge-warning">Medium</span>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="log-output">
+<span class="timestamp">[09:19:21]</span> <span class="warning">[Warning]</span> AI Error: Phát hiện văn bản mẫu rác.. Fallback activated.
+<span class="timestamp">[09:19:21]</span> <span class="info">[Data]</span> Thông số Tags: saxophone, romantic chill, beautiful, instrumental, cinematic, masterpiece, deep resonance, warm pads
+<span class="timestamp">[09:19:21]</span> <span class="info">[Data]</span> Định danh Title: SAXOPHONE LÃNG MẠN CHỮA LÀNH
+            </div>
+            
+            <div class="success-block">
+                <h3>✅ Fallback Hoạt Động</h3>
+                <p>Hệ thống đã kích hoạt fallback sang <strong>STATIC_DATASET</strong> (dòng 127-132), sử dụng dữ liệu mẫu có sẵn. Điều này đảm bảo bot vẫn hoạt động dù LLM lỗi.</p>
+            </div>
+            
+            <div class="code-block">
+<span class="comment"># Fallback data (Dòng 127-132)</span>
+<span class="keyword">STATIC_DATASET</span> = [
+    (<span class="string">"Nhạc Chữa Lành Cảm Xúc Tiếng Nước Chảy"</span>, <span class="string">"beautiful, instrumental..."</span>),
+    (<span class="string">"Piano Thư Giãn Và Tiếng Chim Hót"</span>, <span class="string">"soft piano, bird sounds..."</span>),
+    (<span class="string">"Saxophone Lãng Mạn Chữa Lành"</span>, <span class="string">"saxophone, romantic chill..."</span>),
+    (<span class="string">"Khúc Nhạc Cổ Cầm Tự Do Phiêu Lãng"</span>, <span class="string">"guqin, traditional chinese..."</span>)
+]
+            </div>
+        </section>
+        
+        <!-- SECTION 3: PHÂN TÍCH LỖI UI/DOWNLOAD -->
+        <section class="section">
+            <h2><span class="icon">🖼️</span> 3. PHÂN TÍCH LỖI UI - MENU DOWNLOAD</h2>
+            
+            <div class="error-block">
+                <h3>❌ Lỗi: "Không tìm thấy Tùy chọn Tải Xuống"</h3>
+                <p>Đây là lỗi <strong>nghiêm trọng nhất</strong> khiến bot không thể hoàn thành nhiệm vụ tải file.</p>
+            </div>
+            
+            <h3 style="margin: 20px 0 15px;">📸 Phân tích Screenshot Lỗi:</h3>
+            
+            <div class="image-container">
+                <div class="image-card">
+                    <img src="Error_Loi_Menu_Download_20260307_092211.png" alt="Screenshot lỗi 1">
+                    <div class="caption">
+                        <strong>Screenshot 1 (09:22:11):</strong> Menu 3 chấm đã mở nhưng không có tùy chọn Download
+                    </div>
+                </div>
+                <div class="image-card">
+                    <img src="Error_Loi_Menu_Download_20260307_092219.png" alt="Screenshot lỗi 2">
+                    <div class="caption">
+                        <strong>Screenshot 2 (09:22:19):</strong> Tương tự - UI Suno không hiển thị menu download
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 25px 0 15px;">🔍 Phân tích chi tiết từ VLM:</h3>
+            
+            <div class="warning-block">
+                <h3>⚠️ Phát hiện quan trọng từ UI Analysis:</h3>
+                <p><strong>Giao diện Suno hiện tại KHÔNG có nút Download trong menu 3 chấm.</strong> Menu chỉ chứa các tùy chọn: Like, Dislike, Share. Đây là thay đổi từ phía Suno, không phải lỗi code.</p>
+            </div>
+            
+            <h3 style="margin: 20px 0 15px;">🎯 Các Selector đang sử dụng:</h3>
+            
+            <div class="code-block">
+<span class="comment"># Selector tìm Menu 3 chấm (Dòng 336-339)</span>
+<span class="keyword">menu_btn</span> = <span class="keyword">await</span> <span class="function">find_element_with_fallbacks</span>(target_row, [
+    <span class="string">"button[data-context-menu-trigger='true']"</span>,
+    <span class="string">"button[aria-label='More']"</span>, 
+    <span class="string">"button[aria-label='Options']"</span>,
+    <span class="string">"button[class*='more']"</span>,
+    <span class="string">"button:has(svg)"</span>
+], <span class="string">"Menu 3 chấm"</span>)
+
+<span class="comment"># Selector tìm Menu Download (Dòng 349-352)</span>
+<span class="keyword">dl_menu</span> = <span class="keyword">await</span> <span class="function">find_element_with_fallbacks</span>(page, [
+    <span class="string">"text=/Download/i"</span>,
+    <span class="string">"text=/Tải xuống/i"</span>,
+    <span class="string">"text=/Export/i"</span>, 
+    <span class="string">"[role='menuitem']:has-text('Download')"</span>,
+    <span class="string">"li:has-text('Download')"</span>
+], <span class="string">"Menu Download"</span>)
+            </div>
+            
+            <h3 style="margin: 20px 0 15px;">🐛 Các "Tử Huyệt" được phát hiện:</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Vấn đề</th>
+                        <th>Mô tả</th>
+                        <th>Mức độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><strong>UI Suno đã thay đổi</strong></td>
+                        <td>Suno có thể đã loại bỏ hoặc di chuyển chức năng Download sang vị trí khác</td>
+                        <td><span style="color: var(--danger)">Nghiêm trọng</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><strong>Menu ngữ cảnh khác</strong></td>
+                        <td>Menu 3 chấm có thể mở menu phụ khác, không phải menu chứa Download</td>
+                        <td><span style="color: var(--warning)">Cao</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><strong>Cần click vào bài hát</strong></td>
+                        <td>Download có thể chỉ xuất hiện khi mở trang chi tiết bài hát</td>
+                        <td><span style="color: var(--warning)">Cao</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><strong>Yêu cầu đăng nhập Pro</strong></td>
+                        <td>Menu Download có thể chỉ hiện cho tài khoản Pro/Subscribe</td>
+                        <td><span style="color: var(--info)">Trung bình</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><strong>Timing issue</strong></td>
+                        <td>Menu có thể cần nhiều thời gian hơn để load (hiện tại 1.5s)</td>
+                        <td><span style="color: var(--info)">Thấp</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="margin: 25px 0 15px;">📊 Timeline lỗi:</h3>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>09:22:04</strong> - Bắt đầu chu trình quét Target #1
+                    <div class="tag">div[data-testid='clip-row']</div>
+                </div>
+                <div class="timeline-item success">
+                    <strong>09:22:08</strong> - Định vị Menu 3 chấm thành công
+                    <div class="tag">button[data-context-menu-trigger='true']</div>
+                </div>
+                <div class="timeline-item error">
+                    <strong>09:22:11</strong> - Không tìm thấy Tùy chọn Tải Xuống
+                    <div class="tag">FAILED</div>
+                </div>
+                <div class="timeline-item">
+                    <strong>09:22:14</strong> - Bắt đầu chu trình quét Target #2
+                </div>
+                <div class="timeline-item error">
+                    <strong>09:22:19</strong> - Lặp lại lỗi tương tự
+                    <div class="tag">FAILED</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SECTION 4: PHÂN TÍCH CODE CHI TIẾT -->
+        <section class="section">
+            <h2><span class="icon">💻</span> 4. PHÂN TÍCH CODE CHI TIẾT</h2>
+            
+            <h3 style="margin: 15px 0;">4.1. Luồng xử lý chính:</h3>
+            
+            <div class="code-block">
+<span class="comment"># MAIN EXECUTION LOOP (Dòng 396-498)</span>
+<span class="keyword">async def</span> <span class="function">main_execution_loop</span>():
+    <span class="comment"># 1. Khởi tạo browser với Playwright</span>
+    browser = <span class="keyword">await</span> p.chromium.launch(headless=<span class="keyword">False</span>, channel=<span class="string">"chrome"</span>)
+    
+    <span class="comment"># 2. Load session từ file (để tránh login lại)</span>
+    context = <span class="keyword">await</span> browser.new_context(storage_state=SESSION_FILE)
+    
+    <span class="comment"># 3. Vòng lặp tạo nhạc</span>
+    <span class="keyword">while</span> loop_counter <= DAILY_LIMIT:
+        prompt_tags, vi_title = <span class="keyword">await</span> <span class="function">generate_music_parameters</span>()  <span class="comment"># Gọi LLM</span>
+        <span class="comment"># ... tạo nhạc ...</span>
+        
+        <span class="comment"># 4. Trích xuất file</span>
+        <span class="keyword">for</span> track_idx <span class="keyword">in</span> range(1, 3):
+            downloaded_path = <span class="keyword">await</span> <span class="function">extraction_protocol</span>(...)  <span class="comment"># LỖI XẢY RA Ở ĐÂY</span>
+            </div>
+            
+            <h3 style="margin: 20px 0 15px;">4.2. Điểm yếu trong code:</h3>
+            
+            <ul class="analysis-list">
+                <li>
+                    <div>
+                        <strong>Dòng 272-274:</strong> Selector <code>div[data-testid='clip-row']</code> được hardcode. Nếu Suno thay đổi testid, code sẽ fail ngay lập tức.
+                        <span class="badge badge-warning">Fragile</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Dòng 346:</strong> Chỉ đợi 1.5 giây sau khi mở menu - có thể không đủ thời gian cho animation.
+                        <span class="badge badge-info">Timing</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Dòng 349-352:</strong> Selector cho Download menu dựa vào text matching, dễ bị thay đổi ngôn ngữ/label.
+                        <span class="badge badge-warning">Locale</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Dòng 296-312:</strong> Phase 1 quét network requests để lấy URL trực tiếp - chiến lược tốt nhưng có thể bị Suno block.
+                        <span class="badge badge-info">Network</span>
+                    </div>
+                </li>
+            </ul>
+            
+            <h3 style="margin: 20px 0 15px;">4.3. Code Quality Assessment:</h3>
+            
+            <div class="progress-bar">
+                <div class="fill" style="width: 65%;"></div>
+            </div>
+            <p style="text-align: center; font-size: 0.9em; color: #aaa;">Overall Code Quality: 65%</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tiêu chí</th>
+                        <th>Điểm</th>
+                        <th>Nhận xét</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Error Handling</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>Tốt - có try/catch và fallback</td>
+                    </tr>
+                    <tr>
+                        <td>Selector Robustness</td>
+                        <td>⭐⭐⭐</td>
+                        <td>Trung bình - cần cập nhật cho Suno mới</td>
+                    </tr>
+                    <tr>
+                        <td>Logging</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>Xuất sắc - chi tiết và có debug mode</td>
+                    </tr>
+                    <tr>
+                        <td>LLM Integration</td>
+                        <td>⭐⭐⭐</td>
+                        <td>Trung bình - thiếu JSON enforcement</td>
+                    </tr>
+                    <tr>
+                        <td>UI Automation</td>
+                        <td>⭐⭐⭐</td>
+                        <td>Cần cải thiện - phụ thuộc vào UI ổn định</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- SECTION 5: GIẢI PHÁP -->
+        <section class="section">
+            <h2><span class="icon">🔧</span> 5. GIẢI PHÁP KHẮC PHỤC</h2>
+            
+            <div class="solution-card">
+                <h3>✅ Giải pháp 1: Cập nhật Selector cho Suno mới</h3>
+                <p>Phân tích lại UI Suno hiện tại và cập nhật các selector phù hợp. Menu Download có thể đã được di chuyển hoặc thay đổi tên.</p>
+                <div class="code-block">
+<span class="comment"># Cần điều tra lại cấu trúc menu mới</span>
+<span class="comment"># Có thể cần click vào bài hát để mở trang chi tiết</span>
+<span class="comment"># Sau đó tìm nút Download từ trang chi tiết</span>
+                </div>
+            </div>
+            
+            <div class="solution-card">
+                <h3>✅ Giải pháp 2: Sử dụng phương pháp Network Interception</h3>
+                <p>Thay vì dựa vào UI, intercept network request để lấy URL download trực tiếp khi nhạc được phát.</p>
+                <div class="code-block">
+<span class="comment"># Lắng nghe network requests</span>
+<span class="keyword">async def</span> <span class="function">intercept_download</span>(page):
+    <span class="keyword">async def</span> <span class="function">handle_response</span>(response):
+        <span class="keyword">if</span> <span class="string">"cdn.suno.ai"</span> <span class="keyword">in</span> response.url <span class="keyword">and</span> <span class="string">".mp3"</span> <span class="keyword">in</span> response.url:
+            <span class="keyword">return</span> response.url
+    
+    page.on(<span class="string">"response"</span>, handle_response)
+                </div>
+            </div>
+            
+            <div class="solution-card">
+                <h3>✅ Giải pháp 3: Cải thiện LLM JSON Output</h3>
+                <p>Thêm grammar constraint để buộc LLM xuất JSON hợp lệ.</p>
+                <div class="code-block">
+<span class="comment"># Thêm tham số grammar cho llama.cpp</span>
+<span class="keyword">cmd</span> = [
+    <span class="keyword">LLAMA_CLI_PATH</span>, <span class="string">"-m"</span>, <span class="keyword">MODEL_PATH</span>,
+    <span class="string">"-p"</span>, <span class="keyword">system_prompt</span>,
+    <span class="string">"-n"</span>, <span class="string">"250"</span>,
+    <span class="string">"--temp"</span>, <span class="string">"0.5"</span>,  <span class="comment"># Giảm temperature</span>
+    <span class="string">"--grammar"</span>, <span class="string">'root ::= "{" ... "}"'</span>  <span class="comment"># JSON grammar</span>
+]
+                </div>
+            </div>
+            
+            <div class="solution-card">
+                <h3>✅ Giải pháp 4: Mở trang chi tiết bài hát</h3>
+                <p>Click vào bài hát để mở trang riêng, nơi nút Download có thể xuất hiện.</p>
+                <div class="code-block">
+<span class="comment"># Click vào bài hát để mở trang chi tiết</span>
+<span class="keyword">await</span> target_row.click()
+<span class="keyword">await</span> asyncio.sleep(2)
+
+<span class="comment"># Tìm nút Download trong trang chi tiết</span>
+download_btn = <span class="keyword">await</span> page.locator(<span class="string">"button:has-text('Download')"</span>).first
+<span class="keyword">if await</span> download_btn.count() > 0:
+    <span class="keyword">await</span> download_btn.click()
+                </div>
+            </div>
+            
+            <div class="solution-card">
+                <h3>✅ Giải pháp 5: Kiểm tra tài khoản Pro</h3>
+                <p>Menu Download có thể chỉ xuất hiện cho tài khoản Pro. Kiểm tra xem user có cần nâng cấp không.</p>
+            </div>
+        </section>
+        
+        <!-- SECTION 6: KẾT LUẬN -->
+        <section class="section">
+            <h2><span class="icon">📊</span> 6. KẾT LUẬN & KHUYẾN NGHỊ</h2>
+            
+            <div class="error-block">
+                <h3>🎯 Nguyên nhân chính</h3>
+                <p><strong>UI Suno đã thay đổi</strong> - Menu Download không còn xuất hiện trong menu ngữ cảnh 3 chấm như trước. Đây là thay đổi từ phía Suno, có thể do:</p>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li>Cập nhật giao diện mới</li>
+                    <li>Yêu cầu tài khoản Pro để download</li>
+                    <li>Di chuyển chức năng sang vị trí khác</li>
+                </ul>
+            </div>
+            
+            <h3 style="margin: 20px 0 15px;">📌 Hành động tiếp theo được khuyến nghị:</h3>
+            
+            <ol style="margin-left: 20px;">
+                <li style="padding: 10px 0;">
+                    <strong>Điều tra UI mới:</strong> Mở Suno manually và xác định vị trí mới của nút Download
+                </li>
+                <li style="padding: 10px 0;">
+                    <strong>Test với tài khoản Pro:</strong> Xác nhận xem Download có phải là tính năng Pro không
+                </li>
+                <li style="padding: 10px 0;">
+                    <strong>Cập nhật selectors:</strong> Dựa trên cấu trúc UI mới
+                </li>
+                <li style="padding: 10px 0;">
+                    <strong>Thêm network interception:</strong> Lấy URL trực tiếp từ network requests
+                </li>
+                <li style="padding: 10px 0;">
+                    <strong>Cải thiện LLM:</strong> Thêm JSON grammar constraint
+                </li>
+            </ol>
+            
+            <div style="margin-top: 30px; padding: 20px; background: rgba(255,107,53,0.1); border-radius: 10px; text-align: center;">
+                <p style="font-size: 1.1em; color: var(--primary);">
+                    <strong>Tổng điểm nghiêm trọng:</strong> 7.5/10
+                </p>
+                <p style="font-size: 0.9em; color: #aaa; margin-top: 10px;">
+                    Bot cần cập nhật gấp để hoạt động với giao diện Suno mới
+                </p>
+            </div>
+        </section>
+        
+        <footer>
+            <p>Báo cáo được tạo tự động bởi Sentinel QA System</p>
+            <p>Ngày tạo: 07/03/2026 | Phiên bản: V33 Analysis Report</p>
+        </footer>
+    </div>
+</body>
+</html>
