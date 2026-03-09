@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Lưu Trữ Mật Khẩu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdfa;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(200, 200, 200, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #8ec5fc;
+            box-shadow: 0 0 0 3px rgba(142, 197, 252, 0.3);
+        }
+
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); } /* Màu thanh cuộn cho khu vực Backup code */
+
+        @keyframes slideInUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 antialiased relative pb-20">
+
+    <!-- Cảnh báo bảo mật -->
+    <div class="bg-yellow-100/90 backdrop-blur-sm border-b border-yellow-200 text-yellow-800 px-4 py-2 text-sm text-center font-medium shadow-sm">
+        <i class="ph ph-warning-circle inline-block align-text-bottom text-lg mr-1"></i>
+        Dữ liệu được lưu trữ trực tiếp trên trình duyệt (Local Storage). Hãy đảm bảo đây là thiết bị cá nhân của bạn!
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                    <div class="bg-white p-2 rounded-xl shadow-sm text-blue-500">
+                        <i class="ph ph-vault"></i>
+                    </div>
+                    Kho Mật Khẩu Cá Nhân
+                </h1>
+                <p class="text-gray-600 mt-2 ml-14">Quản lý tài khoản an toàn, thông minh và tiện lợi.</p>
+            </div>
+            
+            <div class="flex gap-3 w-full md:w-auto">
+                <div class="relative w-full md:w-64">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm dịch vụ..." 
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-sm"
+                           onkeyup="filterData()">
+                </div>
+                <button onclick="openModal()" class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-md shadow-blue-500/30 flex items-center gap-2">
+                    <i class="ph ph-plus-bold"></i> <span class="hidden sm:inline">Thêm mới</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Danh sách thẻ -->
+        <div id="cardsContainer" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
+            <!-- Nội dung sẽ được render bằng Javascript -->
+        </div>
+
+        <!-- Trạng thái trống -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="bg-white/50 p-6 rounded-full mb-4">
+                <i class="ph ph-ghost text-6xl text-gray-400"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-700">Chưa có dữ liệu nào</h3>
+            <p class="text-gray-500 mt-2 max-w-sm">Hãy bấm nút "Thêm mới" ở góc trên để bắt đầu lưu trữ mật khẩu của bạn.</p>
+        </div>
+
+    </div>
+
+    <!-- Modal Thêm/Sửa -->
+    <div id="formModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md max-h-[90vh] overflow-y-auto p-4 custom-scrollbar">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100 relative">
+                <div class="flex justify-between items-center mb-5 sticky top-0 bg-white z-10 pb-2 border-b border-gray-50">
+                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800">Thêm Tài Khoản</h2>
+                    <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition-colors">
+                        <i class="ph ph-x text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="passwordForm" onsubmit="saveEntry(event)">
+                    <input type="hidden" id="entryId">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Dịch Vụ / Ứng dụng <span class="text-red-500">*</span></label>
+                            <input type="text" id="entryName" required placeholder="VD: Google, Facebook..." 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Đường dẫn (URL)</label>
+                            <input type="url" id="entryUrl" placeholder="VD: https://accounts.google.com" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email / Tên Đăng Nhập <span class="text-red-500">*</span></label>
+                            <input type="text" id="entryUsername" required placeholder="Email hoặc Username" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="password" id="entryPassword" required placeholder="Nhập mật khẩu" 
+                                       class="w-full pl-4 pr-10 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                <button type="button" onclick="toggleModalPassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <i id="modalEyeIcon" class="ph ph-eye text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Khu vực nhập mã dự phòng mới -->
+                        <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="ph ph-shield-check text-indigo-600 text-lg"></i>
+                                <input type="text" id="entryBackupTitle" placeholder="Tiêu đề (Mặc định: Mã dự phòng 2FA)" 
+                                       class="flex-1 bg-transparent border-b border-indigo-200/60 focus:border-indigo-500 focus:outline-none text-sm font-bold text-indigo-800 placeholder-indigo-400 py-0.5 transition-colors">
+                            </div>
+                            <textarea id="entryBackupCodes" rows="3" placeholder="Dán toàn bộ nội dung file text mã dự phòng, Recovery Key, Secret Token... vào đây" 
+                                      class="w-full px-4 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-mono text-xs"></textarea>
+                            <p class="text-[10px] text-indigo-500 mt-1 italic">Hỗ trợ giữ nguyên định dạng xuống dòng từ file text.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú thêm</label>
+                            <textarea id="entryNotes" rows="2" placeholder="Ghi chú khác (nếu có)" 
+                                      class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex gap-3 sticky bottom-0 bg-white pt-2">
+                        <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/30 transition-colors">
+                            Lưu thông tin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 hidden z-50">
+        <i class="ph ph-check-circle text-green-400 text-xl"></i>
+        <span id="toastMessage" class="font-medium text-sm">Đã copy thành công!</span>
+    </div>
+
+    <script>
+        // Dữ liệu mẫu chứa cả tài khoản Google có mã dự phòng bạn cung cấp
+        const defaultData = [
+            {
+                id: "1",
+                name: "Internet Archive",
+                url: "https://archive.org/login",
+                username: "thiensutinhquang@gmail.com",
+                password: "Xiem@1985",
+                notes: "Tài khoản lưu trữ sách báo",
+                createdAt: new Date(Date.now() - 20000).toISOString()
+            },
+            {
+                id: "2",
+                name: "GitHub",
+                url: "https://github.com/login",
+                username: "thiensutinhquang@gmail.com",
+                password: "Xiem@1985",
+                notes: "Tài khoản GitHub chính",
+                createdAt: new Date(Date.now() - 10000).toISOString()
+            },
+            {
+                id: "3",
+                name: "Google Account",
+                url: "https://myaccount.google.com/",
+                username: "thiensutinhquang@gmail.com",
+                password: "Xiem@1985",
+                backupTitle: "Mã dự phòng (Google)",
+                backupCodes: "LƯU MÃ DỰ PHÒNG CỦA BẠN\nGiữ các mã dự phòng này ở nơi nào đó an toàn nhưng có thể lấy được.\n\n1. 7182 4975\t\t 6. 5530 9693\n2. 8685 1688\t\t 7. 5228 5237\n3. 8002 5953\t\t 8. 4336 3094\n4. 9449 1249\t\t 9. 9976 5571\n5. 4039 9988\t\t10. 4530 2720\n\n(thiensutinhquang@gmail.com)\n\n* Bạn chỉ có thể sử dụng mỗi mã dự phòng một lần.\n* Cần thêm mã? Hãy truy cập https://g.co/2sv\n* Các mã này được tạo vào: 9 thg 3, 2026.",
+                notes: "Tài khoản Google cực kỳ quan trọng",
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        let appData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderCards(appData);
+        });
+
+        function loadData() {
+            let savedData = localStorage.getItem('passwordManagerData');
+            
+            // Ép làm mới dữ liệu để hiển thị demo Backup Code nếu bản cũ không có
+            if (savedData && !JSON.parse(savedData).some(item => item.backupCodes)) {
+                savedData = null; 
+            }
+
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            } else {
+                appData = [...defaultData];
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('passwordManagerData', JSON.stringify(appData));
+        }
+
+        // Hàm bảo vệ chống mã độc (XSS) khi render văn bản
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        function renderCards(dataToRender) {
+            const container = document.getElementById('cardsContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            container.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+                
+                const groupedData = {};
+                dataToRender.forEach(entry => {
+                    const key = entry.name.trim().toLowerCase();
+                    if (!groupedData[key]) groupedData[key] = [];
+                    groupedData[key].push(entry);
+                });
+
+                const sortedGroups = Object.values(groupedData).sort((a, b) => {
+                    const maxTimeA = Math.max(...a.map(item => new Date(item.createdAt || 0).getTime()));
+                    const maxTimeB = Math.max(...b.map(item => new Date(item.createdAt || 0).getTime()));
+                    return maxTimeB - maxTimeA; 
+                });
+                
+                sortedGroups.forEach(group => {
+                    const firstEntry = group[0];
+                    const domain = getDomainInfo(firstEntry.url, firstEntry.name);
+                    const groupId = firstEntry.id;
+                    const accountCount = group.length;
+
+                    const card = document.createElement('div');
+                    card.className = 'glass-card rounded-2xl mb-6 break-inside-avoid hover:shadow-xl transition-all duration-300 transform group relative overflow-hidden';
+                    
+                    const quickActionUI = accountCount === 1 ? `
+                        <button onclick="copyToClipboard('${escapeHTML(firstEntry.password)}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Copy nhanh Mật khẩu">
+                            <i class="ph ph-copy text-lg"></i>
+                        </button>
+                    ` : `<span class="px-2.5 py-1 bg-blue-100/80 text-blue-700 text-[11px] font-bold rounded-md whitespace-nowrap shadow-sm border border-blue-200">${accountCount} tài khoản</span>`;
+
+                    let accountsHTML = '';
+                    group.forEach((entry, index) => {
+                        const isNotLast = index < group.length - 1;
+                        
+                        // Khối hiển thị Mã Dự Phòng (Nếu có)
+                        const displayBackupTitle = entry.backupTitle ? escapeHTML(entry.backupTitle) : 'Mã dự phòng (2FA)';
+                        const backupCodesHTML = entry.backupCodes ? `
+                            <div class="bg-indigo-50/70 rounded-xl p-3 border border-indigo-100/80 relative group/item mt-3">
+                                <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-bold block mb-1.5 flex items-center gap-1">
+                                    <i class="ph ph-shield-check text-sm"></i> ${displayBackupTitle}
+                                </span>
+                                <!-- Hiển thị nguyên văn bản, có thanh cuộn nếu quá dài -->
+                                <div id="backup-code-content-${entry.id}" class="font-mono text-[11px] text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">${escapeHTML(entry.backupCodes)}</div>
+                                
+                                <button onclick="copyElementText('backup-code-content-${entry.id}'); event.stopPropagation();" class="absolute right-2 top-2 p-1.5 bg-indigo-100 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-200 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100 shadow-sm" title="Copy toàn bộ mã">
+                                    <i class="ph ph-copy text-lg"></i>
+                                </button>
+                            </div>
+                        ` : '';
+
+                        accountsHTML += `
+                            <div class="${isNotLast ? 'border-b border-gray-200/60 pb-5 mb-5' : ''}">
+                                <div class="flex justify-between items-center mb-3">
+                                    ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation();" class="text-xs text-blue-600 hover:underline truncate inline-flex items-center gap-1"><i class="ph ph-link"></i> Mở trang</a>` : '<span></span>'}
+                                    <div class="flex gap-1">
+                                        <button onclick="editEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-blue-100/80 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Sửa">
+                                            <i class="ph ph-pencil-simple text-sm"></i>
+                                        </button>
+                                        <button onclick="deleteEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-red-100/80 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Xóa">
+                                            <i class="ph ph-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <!-- Khu vực Username -->
+                                    <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
+                                        <span class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Tài khoản ${accountCount > 1 ? `#${index + 1}` : ''}</span>
+                                        <div class="font-medium text-gray-800 truncate pr-8">${escapeHTML(entry.username)}</div>
+                                        <button onclick="copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100">
+                                            <i class="ph ph-copy text-lg"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Khu vực Mật khẩu -->
+                                    <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
+                                        <span class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Mật khẩu</span>
+                                        <div class="font-medium text-gray-800 tracking-widest flex items-center">
+                                            <span id="pwd-mask-${entry.id}">••••••••</span>
+                                            <span id="pwd-text-${entry.id}" class="hidden tracking-normal">${escapeHTML(entry.password)}</span>
+                                        </div>
+                                        
+                                        <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                            <button onclick="togglePassword('${entry.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                                                <i id="eye-icon-${entry.id}" class="ph ph-eye text-lg"></i>
+                                            </button>
+                                            <button onclick="copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                                <i class="ph ph-copy text-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${backupCodesHTML}
+                                ${entry.notes ? `<p class="mt-4 text-xs text-gray-500 italic"><i class="ph ph-info mr-1"></i>${escapeHTML(entry.notes)}</p>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    card.innerHTML = `
+                        <div onclick="toggleCardDetail('${groupId}')" class="p-4 flex items-center justify-between cursor-pointer hover:bg-white/40 transition-colors z-10 relative">
+                            <div class="flex items-center gap-3 overflow-hidden pr-2">
+                                <div class="w-10 h-10 flex-shrink-0 rounded-xl ${domain.color} flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                    ${domain.initial}
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg truncate">${escapeHTML(firstEntry.name)}</h3>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                ${quickActionUI}
+                                <div class="p-1.5 text-gray-500 bg-gray-100/50 rounded-lg">
+                                    <i id="chevron-${groupId}" class="ph ph-caret-down transition-transform duration-300"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="detail-${groupId}" class="max-h-0 opacity-0 overflow-hidden transition-all duration-500 ease-in-out px-4 bg-white/30">
+                            <div class="pb-4 pt-2 border-t border-gray-100/80">
+                                ${accountsHTML}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function toggleCardDetail(id) {
+            const detail = document.getElementById(`detail-${id}`);
+            const chevron = document.getElementById(`chevron-${id}`);
+            
+            if (detail.classList.contains('max-h-0')) {
+                detail.classList.remove('max-h-0', 'opacity-0');
+                detail.classList.add('max-h-[3000px]', 'opacity-100');
+                chevron.classList.add('rotate-180');
+            } else {
+                detail.classList.add('max-h-0', 'opacity-0');
+                detail.classList.remove('max-h-[3000px]', 'opacity-100');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function getDomainInfo(url, name) {
+            const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-rose-500', 'bg-teal-500', 'bg-cyan-500', 'bg-orange-500'];
+            let initial = name ? name.charAt(0).toUpperCase() : '?';
+            let colorIndex = 0;
+            for(let i=0; i < name.length; i++) {
+                colorIndex += name.charCodeAt(i);
+            }
+            return {
+                initial: initial,
+                color: colors[colorIndex % colors.length]
+            };
+        }
+
+        function togglePassword(id) {
+            const mask = document.getElementById(`pwd-mask-${id}`);
+            const text = document.getElementById(`pwd-text-${id}`);
+            const icon = document.getElementById(`eye-icon-${id}`);
+            
+            if (text.classList.contains('hidden')) {
+                text.classList.remove('hidden');
+                mask.classList.add('hidden');
+                icon.classList.replace('ph-eye', 'ph-eye-slash');
+            } else {
+                text.classList.add('hidden');
+                mask.classList.remove('hidden');
+                icon.classList.replace('ph-eye-slash', 'ph-eye');
+            }
+        }
+
+        // Copy chuỗi ký tự thường
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast('Đã sao chép vào bộ nhớ tạm!');
+        }
+
+        // Hàm hỗ trợ copy an toàn nội dung từ HTML (Dành riêng cho khối Backup Code có chứa dấu xuống dòng, khoảng trắng)
+        function copyElementText(elementId) {
+            const text = document.getElementById(elementId).innerText || document.getElementById(elementId).textContent;
+            copyToClipboard(text);
+        }
+
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            
+            toast.classList.remove('hidden');
+            toast.classList.add('toast-animate');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('toast-animate');
+            }, 3000);
+        }
+
+        function filterData() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = appData.filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                item.username.toLowerCase().includes(query) ||
+                (item.url && item.url.toLowerCase().includes(query))
+            );
+            renderCards(filtered);
+        }
+
+        function openModal(id = null) {
+            document.getElementById('formModal').classList.remove('hidden');
+            document.getElementById('passwordForm').reset();
+            document.getElementById('entryId').value = '';
+            document.getElementById('modalTitle').textContent = 'Thêm Tài Khoản';
+            
+            document.getElementById('entryPassword').type = 'password';
+            document.getElementById('modalEyeIcon').classList.replace('ph-eye-slash', 'ph-eye');
+
+            if (id) {
+                const entry = appData.find(item => item.id === id);
+                if (entry) {
+                    document.getElementById('modalTitle').textContent = 'Sửa Tài Khoản';
+                    document.getElementById('entryId').value = entry.id;
+                    document.getElementById('entryName').value = entry.name;
+                    document.getElementById('entryUrl').value = entry.url || '';
+                    document.getElementById('entryUsername').value = entry.username;
+                    document.getElementById('entryPassword').value = entry.password;
+                    document.getElementById('entryBackupTitle').value = entry.backupTitle || '';
+                    document.getElementById('entryBackupCodes').value = entry.backupCodes || '';
+                    document.getElementById('entryNotes').value = entry.notes || '';
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('formModal').classList.add('hidden');
+        }
+
+        function toggleModalPassword() {
+            const input = document.getElementById('entryPassword');
+            const icon = document.getElementById('modalEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('ph-eye', 'ph-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('ph-eye-slash', 'ph-eye');
+            }
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('entryId').value;
+            const newEntry = {
+                id: id ? id : Date.now().toString(),
+                name: document.getElementById('entryName').value.trim(),
+                url: document.getElementById('entryUrl').value.trim(),
+                username: document.getElementById('entryUsername').value.trim(),
+                password: document.getElementById('entryPassword').value,
+                backupTitle: document.getElementById('entryBackupTitle').value.trim(),
+                backupCodes: document.getElementById('entryBackupCodes').value.trim(),
+                notes: document.getElementById('entryNotes').value.trim(),
+                createdAt: new Date().toISOString()
+            };
+
+            if (id) {
+                const index = appData.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    appData[index] = newEntry;
+                    showToast('Đã cập nhật thông tin!');
+                }
+            } else {
+                appData.push(newEntry);
+                showToast('Đã thêm tài khoản mới!');
+            }
+
+            saveToLocalStorage();
+            renderCards(appData);
+            closeModal();
+            document.getElementById('searchInput').value = ''; 
+        }
+
+        function editEntry(id) { openModal(id); }
+
+        function deleteEntry(id) {
+            const entryIndex = appData.findIndex(item => item.id === id);
+            if (entryIndex > -1) {
+                const isConfirm = window.confirm('Bạn có chắc chắn muốn xóa tài khoản này?'); 
+                if (isConfirm) {
+                    appData.splice(entryIndex, 1);
+                    saveToLocalStorage();
+                    filterData(); 
+                    showToast('Đã xóa tài khoản!');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
