@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trạm Lưu Trữ Mật Khẩu</title>
+    <title>Trạm Lưu Trữ Đa Năng</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -22,6 +22,8 @@
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             background-attachment: fixed;
         }
+
+        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.65);
@@ -49,7 +51,7 @@
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); } /* Màu thanh cuộn cho khu vực Backup code */
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); }
 
         @keyframes slideInUp {
             from { transform: translateY(100%); opacity: 0; }
@@ -62,7 +64,6 @@
 </head>
 <body class="min-h-screen text-gray-800 antialiased relative pb-20">
 
-    <!-- Cảnh báo bảo mật -->
     <div class="bg-yellow-100/90 backdrop-blur-sm border-b border-yellow-200 text-yellow-800 px-4 py-2 text-sm text-center font-medium shadow-sm">
         <i class="ph ph-warning-circle inline-block align-text-bottom text-lg mr-1"></i>
         Dữ liệu được lưu trữ trực tiếp trên trình duyệt (Local Storage). Hãy đảm bảo đây là thiết bị cá nhân của bạn!
@@ -75,17 +76,17 @@
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
                     <div class="bg-white p-2 rounded-xl shadow-sm text-blue-500">
-                        <i class="ph ph-vault"></i>
+                        <i class="ph ph-hard-drives"></i>
                     </div>
-                    Kho Mật Khẩu Cá Nhân
+                    Kho Lưu Trữ Đa Năng
                 </h1>
-                <p class="text-gray-600 mt-2 ml-14">Quản lý tài khoản an toàn, thông minh và tiện lợi.</p>
+                <p class="text-gray-600 mt-2 ml-14">Quản lý Mật khẩu, Crypto, Danh bạ & Ghi chú thông minh.</p>
             </div>
             
             <div class="flex gap-3 w-full md:w-auto">
                 <div class="relative w-full md:w-64">
                     <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm dịch vụ..." 
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm mọi thứ..." 
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-sm"
                            onkeyup="filterData()">
                 </div>
@@ -100,24 +101,21 @@
             <!-- Nội dung sẽ được render bằng Javascript -->
         </div>
 
-        <!-- Trạng thái trống -->
         <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
             <div class="bg-white/50 p-6 rounded-full mb-4">
                 <i class="ph ph-ghost text-6xl text-gray-400"></i>
             </div>
             <h3 class="text-xl font-semibold text-gray-700">Chưa có dữ liệu nào</h3>
-            <p class="text-gray-500 mt-2 max-w-sm">Hãy bấm nút "Thêm mới" ở góc trên để bắt đầu lưu trữ mật khẩu của bạn.</p>
         </div>
-
     </div>
 
-    <!-- Modal Thêm/Sửa -->
+    <!-- Modal Thêm/Sửa ĐA NĂNG -->
     <div id="formModal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md max-h-[90vh] overflow-y-auto p-4 custom-scrollbar">
             <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100 relative">
                 <div class="flex justify-between items-center mb-5 sticky top-0 bg-white z-10 pb-2 border-b border-gray-50">
-                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800">Thêm Tài Khoản</h2>
+                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800">Thêm Mục Mới</h2>
                     <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition-colors">
                         <i class="ph ph-x text-xl"></i>
                     </button>
@@ -127,79 +125,111 @@
                     <input type="hidden" id="entryId">
                     
                     <div class="space-y-4">
+                        <!-- Phân loại -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Dịch Vụ / Ứng dụng <span class="text-red-500">*</span></label>
-                            <input type="text" id="entryName" required placeholder="VD: Google, Facebook..." 
-                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Loại dữ liệu <span class="text-red-500">*</span></label>
+                            <select id="entryCategory" class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer font-medium">
+                                <option value="account">🔑 Tài khoản đăng nhập</option>
+                                <option value="crypto">💰 Tài chính / Crypto / Ngân hàng</option>
+                                <option value="note">📝 Ghi chú cá nhân / Kiến thức</option>
+                                <option value="service">📞 Dịch vụ / Danh bạ</option>
+                            </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Đường dẫn (URL)</label>
-                            <input type="url" id="entryUrl" placeholder="VD: https://accounts.google.com" 
-                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Ứng dụng / Tiêu đề <span class="text-red-500">*</span></label>
+                            <input type="text" id="entryName" required placeholder="VD: Lwex Ví Lạnh, Xe Anh Cường..." 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all font-bold">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email / Tên Đăng Nhập <span class="text-red-500">*</span></label>
-                            <input type="text" id="entryUsername" required placeholder="Email hoặc Username" 
-                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
-                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản / Username <span class="text-xs text-gray-400 font-normal">(Tùy chọn)</span></label>
+                                <input type="text" id="entryUsername" placeholder="Email, SĐT, Username..." 
+                                       class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                            </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <input type="password" id="entryPassword" required placeholder="Nhập mật khẩu" 
-                                       class="w-full pl-4 pr-10 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
-                                <button type="button" onclick="toggleModalPassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    <i id="modalEyeIcon" class="ph ph-eye text-lg"></i>
-                                </button>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span class="text-xs text-gray-400 font-normal">(Tùy chọn)</span></label>
+                                <div class="relative">
+                                    <input type="password" id="entryPassword" placeholder="Nhập mật khẩu" 
+                                           class="w-full pl-4 pr-10 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                    <button type="button" onclick="toggleModalPassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        <i id="modalEyeIcon" class="ph ph-eye text-lg"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Khu vực nhập mã dự phòng mới -->
+                        <!-- KHU VỰC TRƯỜNG TÙY CHỈNH (CUSTOM FIELDS) -->
+                        <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-medium text-amber-800 flex items-center gap-1">
+                                    <i class="ph ph-list-plus"></i> Trường thông tin mở rộng
+                                </label>
+                                <button type="button" onclick="addCustomField()" class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded hover:bg-amber-200 font-semibold transition-colors">
+                                    + Thêm trường
+                                </button>
+                            </div>
+                            <div id="customFieldsContainer" class="space-y-2">
+                                <!-- JS sẽ chèn các input vào đây -->
+                            </div>
+                            <p class="text-[10px] text-amber-600 mt-2 italic">Dùng để thêm: Mã ví, Mật khẩu Trade, Biển số xe, Số tài khoản...</p>
+                        </div>
+
+                        <!-- Trường Khóa 2FA (Secret Key) Mới Thêm -->
+                        <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
+                            <label class="block text-sm font-medium text-indigo-800 mb-1 flex items-center gap-1">
+                                <i class="ph ph-key"></i> Khóa 2FA (Secret Key)
+                            </label>
+                            <input type="text" id="entryTwoFactorKey" placeholder="VD: JBSWY3DPEHPK3PXP..." 
+                                   class="w-full px-4 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-mono text-sm tracking-wider">
+                            <p class="text-[10px] text-indigo-500 mt-1 italic">Chuỗi ký tự dùng để nhập tay vào Google Authenticator/Authy.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1 flex justify-between items-center">
+                                <span>Đường dẫn (URL) <span class="text-xs text-gray-400 font-normal">(Tùy chọn)</span></span>
+                            </label>
+                            <input type="url" id="entryUrl" placeholder="VD: https://google.com" 
+                                   class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        </div>
+
                         <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
                             <div class="flex items-center gap-2 mb-2">
                                 <i class="ph ph-shield-check text-indigo-600 text-lg"></i>
-                                <input type="text" id="entryBackupTitle" placeholder="Tiêu đề (Mặc định: Mã dự phòng 2FA)" 
+                                <input type="text" id="entryBackupTitle" placeholder="Tiêu đề Mã dự phòng (Tùy chọn)" 
                                        class="flex-1 bg-transparent border-b border-indigo-200/60 focus:border-indigo-500 focus:outline-none text-sm font-bold text-indigo-800 placeholder-indigo-400 py-0.5 transition-colors">
                             </div>
-                            <textarea id="entryBackupCodes" rows="3" placeholder="Dán toàn bộ nội dung file text mã dự phòng, Recovery Key, Secret Token... vào đây" 
-                                      class="w-full px-4 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-mono text-xs"></textarea>
-                            <p class="text-[10px] text-indigo-500 mt-1 italic">Hỗ trợ giữ nguyên định dạng xuống dòng từ file text.</p>
+                            <textarea id="entryBackupCodes" rows="2" placeholder="Dán nội dung mã 2FA..." 
+                                      class="w-full px-4 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"></textarea>
                         </div>
 
-                        <!-- Khu vực tải lên Mã QR 2FA -->
                         <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-100">
                             <label class="block text-sm font-medium text-teal-800 mb-2 flex items-center gap-1">
-                                <i class="ph ph-qr-code"></i> Mã QR 2FA (Hình ảnh)
+                                <i class="ph ph-qr-code"></i> Mã QR Hình ảnh (Tùy chọn)
                             </label>
-                            
-                            <!-- Input ẩn để lưu chuỗi Base64 của ảnh -->
                             <input type="hidden" id="entryQrBase64" value="">
-                            
                             <div id="qrUploadUI" class="flex items-center justify-center w-full">
-                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-teal-200 border-dashed rounded-xl cursor-pointer bg-white hover:bg-teal-50/50 transition-colors">
-                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <i class="ph ph-upload-simple text-2xl text-teal-500 mb-1"></i>
-                                        <p class="text-xs text-teal-600"><span class="font-semibold">Bấm để tải lên</span> hoặc kéo thả ảnh QR</p>
+                                <label class="flex flex-col items-center justify-center w-full h-16 border-2 border-teal-200 border-dashed rounded-xl cursor-pointer bg-white hover:bg-teal-50">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <p class="text-xs text-teal-600 font-semibold">Tải ảnh QR lên</p>
                                     </div>
                                     <input type="file" id="qrFileInput" class="hidden" accept="image/*" onchange="handleQrUpload(event)" />
                                 </label>
                             </div>
-
-                            <!-- Vùng hiển thị ảnh xem trước (ẩn mặc định) -->
                             <div id="qrPreviewUI" class="hidden relative inline-block mt-2">
-                                <img id="qrPreviewImg" src="" class="max-h-32 rounded-lg border border-teal-200 shadow-sm" alt="QR Preview">
-                                <button type="button" onclick="removeQrCode()" class="absolute -top-2 -right-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-full p-1 shadow-md transition-colors">
+                                <img id="qrPreviewImg" src="" class="max-h-24 rounded-lg border border-teal-200" alt="QR Preview">
+                                <button type="button" onclick="removeQrCode()" class="absolute -top-2 -right-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-full p-1 shadow-md">
                                     <i class="ph ph-x text-sm"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú thêm</label>
-                            <textarea id="entryNotes" rows="2" placeholder="Ghi chú khác (nếu có)" 
-                                      class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung / Ghi chú chi tiết</label>
+                            <textarea id="entryNotes" rows="4" placeholder="Nhập ghi chú, công thức trade, thông tin chi tiết (Hỗ trợ giữ nguyên định dạng xuống dòng, dấu cách)..." 
+                                      class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all whitespace-pre-wrap"></textarea>
                         </div>
                     </div>
 
@@ -216,24 +246,22 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 hidden z-50">
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 hidden z-[70]">
         <i class="ph ph-check-circle text-green-400 text-xl"></i>
-        <span id="toastMessage" class="font-medium text-sm">Đã copy thành công!</span>
+        <span id="toastMessage" class="font-medium text-sm">Thành công!</span>
     </div>
 
-    <!-- Modal Xem Ảnh Phóng To -->
+    <!-- Image Viewer Modal -->
     <div id="imageViewerModal" class="fixed inset-0 z-[60] hidden items-center justify-center">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeImageViewer()"></div>
         <div class="relative z-10 max-w-[90vw] max-h-[90vh] flex flex-col items-center">
             <div class="w-full flex justify-end mb-4">
-                <button onclick="closeImageViewer()" class="text-white hover:text-gray-300 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md shadow-lg">
-                    <i class="ph ph-x text-2xl"></i>
-                </button>
+                <button onclick="closeImageViewer()" class="text-white hover:text-gray-300 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md shadow-lg"><i class="ph ph-x text-2xl"></i></button>
             </div>
             <img id="viewerImage" src="" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border-4 border-white/20 bg-white" alt="Full size QR">
             <div class="mt-6 flex gap-4">
-                <button id="viewerDownloadBtn" class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/40 transition-transform transform hover:-translate-y-1 flex items-center gap-2">
+                <button id="viewerDownloadBtn" class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/40 flex items-center gap-2">
                     <i class="ph ph-download-simple text-2xl"></i> Tải ảnh chất lượng gốc
                 </button>
             </div>
@@ -241,40 +269,198 @@
     </div>
 
     <script>
-        // Dữ liệu mẫu chứa cả tài khoản Google có mã dự phòng bạn cung cấp
+        // --- TOÀN BỘ DỮ LIỆU CỦA BẠN ĐÃ ĐƯỢC CHUẨN HÓA VÀ ĐƯA VÀO ĐÂY ---
         const defaultData = [
             {
-                id: "1",
-                name: "Internet Archive",
-                url: "https://archive.org/login",
-                username: "thiensutinhquang@gmail.com",
-                password: "Xiem@1985",
-                notes: "Tài khoản lưu trữ sách báo",
-                createdAt: new Date(Date.now() - 20000).toISOString()
+                id: "d1", name: "Ghi chú Sinh Em Bé", category: "note",
+                notes: "Đẻ lúc 5h 08 ngày 21.10.2021. 3.5 kg\nĐẻ kêu 1 tiếng bé rồi thôi, sau khóc lúc bế khóc nhiều đòi bú, cho bú xong sữa bình thường ko khóc nữa ngủ ngon.",
+                createdAt: new Date(Date.now() - 1000).toISOString()
             },
             {
-                id: "2",
-                name: "GitHub",
-                url: "https://github.com/login",
-                username: "thiensutinhquang@gmail.com",
-                password: "Xiem@1985",
-                notes: "Tài khoản GitHub chính",
+                id: "d2", name: "Xe Anh Cường (Ghép/Hàng)", category: "service",
+                customFields: [{key: "Điện thoại 1", value: "0943.312.500"}, {key: "Điện thoại 2 (Giao)", value: "0987.880.233"}, {key: "Biển số xe", value: "20C – 119.08"}],
+                notes: "ĐC: Trâu Bò Sữa.\nXe đi từ hoàng mai hn",
+                createdAt: new Date(Date.now() - 2000).toISOString()
+            },
+            {
+                id: "d3", name: "Nhà Mạng FPT & Tân Thành Phát", category: "service",
+                customFields: [{key: "Tổng đài FPT", value: "19006600"}, {key: "SĐT Tân Thành Phát", value: "093 616 82 19"}],
+                url: "https://maps.app.goo.gl/Mas5sUZ7DG1pPNia9", notes: "Trung tâm kỹ thuật máy văn phòng Tân Thành Phát",
+                createdAt: new Date(Date.now() - 3000).toISOString()
+            },
+            {
+                id: "d4", name: "Camera P6slite", category: "account",
+                username: "Nguyenvanvui01011977t@gmail.com", password: "Trungvui123",
+                createdAt: new Date(Date.now() - 4000).toISOString()
+            },
+            {
+                id: "d5", name: "Camera Acesee", category: "account",
+                password: "Admin@12345",
+                createdAt: new Date(Date.now() - 5000).toISOString()
+            },
+            {
+                id: "d6", name: "Sàn Lwex - Cúc", category: "crypto",
+                username: "Cucsocson@gmail.com", password: "Cucsocson@1960", customFields: [{key: "Mật khẩu phụ", value: "Cuc@1960"}],
+                createdAt: new Date(Date.now() - 6000).toISOString()
+            },
+            {
+                id: "d7", name: "Ví lạnh - Cúc", category: "crypto",
+                username: "Cucsocson@gmail.com", password: "Cucsocson1960@", customFields: [{key: "Pass Trade", value: "Cucsocson1960@"}, {key: "Mã ví (Address)", value: "TYFsu4R9gCsrw1M6qMc28Mko9Gbk9Vb1DA"}],
+                createdAt: new Date(Date.now() - 7000).toISOString()
+            },
+            {
+                id: "d8", name: "Sàn Lwex - Mỹ", category: "crypto",
+                username: "thuongdemy@gmail.com", password: "My1961@@@", customFields: [{key: "Mật khẩu phụ", value: "My1961@"}],
+                createdAt: new Date(Date.now() - 8000).toISOString()
+            },
+            {
+                id: "d9", name: "Ví lạnh - Mỹ", category: "crypto",
+                username: "Nguyenthithuy01011965n@gmail.com", password: "Thuy1965@", customFields: [{key: "Pass Trade", value: "Thuy1965@"}],
+                createdAt: new Date(Date.now() - 9000).toISOString()
+            },
+            {
+                id: "d10", name: "Sàn Lwex - Huệ", category: "crypto",
+                username: "thuongdethihue@gmail.com", password: "Hue1956@@@", customFields: [{key: "Mật khẩu phụ", value: "Hue@1956"}],
                 createdAt: new Date(Date.now() - 10000).toISOString()
             },
             {
-                id: "3",
-                name: "Google Account",
-                url: "https://myaccount.google.com/",
-                username: "thiensutinhquang@gmail.com",
-                password: "Xiem@1985",
-                backupTitle: "Mã dự phòng (Google)",
-                backupCodes: "LƯU MÃ DỰ PHÒNG CỦA BẠN\nGiữ các mã dự phòng này ở nơi nào đó an toàn nhưng có thể lấy được.\n\n1. 7182 4975\t\t 6. 5530 9693\n2. 8685 1688\t\t 7. 5228 5237\n3. 8002 5953\t\t 8. 4336 3094\n4. 9449 1249\t\t 9. 9976 5571\n5. 4039 9988\t\t10. 4530 2720\n\n(thiensutinhquang@gmail.com)\n\n* Bạn chỉ có thể sử dụng mỗi mã dự phòng một lần.\n* Cần thêm mã? Hãy truy cập https://g.co/2sv\n* Các mã này được tạo vào: 9 thg 3, 2026.",
-                notes: "Tài khoản Google cực kỳ quan trọng",
+                id: "d11", name: "Ví lạnh - Huệ", category: "crypto",
+                username: "Huesocson@gmail.com", password: "Hue1956@", customFields: [{key: "Pass Trade", value: "Hue1956@"}],
+                createdAt: new Date(Date.now() - 11000).toISOString()
+            },
+            {
+                id: "d12", name: "Sàn Lwex - Xiêm", category: "crypto",
+                username: "Socson@1985", password: "Xiem@1985",
+                createdAt: new Date(Date.now() - 12000).toISOString()
+            },
+            {
+                id: "d13", name: "Ví lạnh - Xiêm", category: "crypto",
+                username: "Xiemsansang@gmail.com", password: "Xiem@1985", customFields: [{key: "Pass Trade", value: "85198"}, {key: "Mã ví (Address)", value: "TQKK7KcTU5XJ5gn1pJ3nYQJgsgMMaMHBoR"}],
+                createdAt: new Date(Date.now() - 13000).toISOString()
+            },
+            {
+                id: "d14", name: "U2U Wallet (Bscscan)", category: "crypto",
+                username: "Xiemsansang", password: "Xiemsansang@1985",
+                createdAt: new Date(Date.now() - 14000).toISOString()
+            },
+            {
+                id: "d15", name: "Sàn Lwex - Tuyết", category: "crypto",
+                username: "Damthituyet1949@gmail.com", password: "Tuyet@1949",
+                createdAt: new Date(Date.now() - 15000).toISOString()
+            },
+            {
+                id: "d16", name: "Ví lạnh - Tuyết", category: "crypto",
+                username: "Damthituyet1949@gmail.com", password: "Tuyet1949@", customFields: [{key: "Pass Trade", value: "Tuyet1949@"}, {key: "Mã ví (Address)", value: "TLTVjuugmVMt785RdXB2aUstw7xpvwuCEB"}],
+                createdAt: new Date(Date.now() - 16000).toISOString()
+            },
+            {
+                id: "d17", name: "Mã giới thiệu Ví lạnh Lwex", category: "note",
+                customFields: [{key: "Mã giới thiệu", value: "ALAIQYG0LBW0"}], notes: "Chào các con. Đây là mã giới thiệu để cho các con lập ví lạnh Lwex các con nhé",
+                createdAt: new Date(Date.now() - 17000).toISOString()
+            },
+            {
+                id: "d18", name: "AGA Member / GoldFun", category: "account",
+                username: "Xiemsansang", password: "Xiem123@", url: "https://members.goldfun24k.com/login",
+                customFields: [{key: "Đăng nhập phụ (Email)", value: "xiemsansang@gmail.com"}, {key: "Zoom ID", value: "322 002 2025"}, {key: "Zoom Pass", value: "2025"}],
+                notes: "GoldFun đăng nhập bằng Email và mật khẩu cũng là Xiem123@ cho dễ nhớ.\nLink Zoom: https://us06web.zoom.us/my/goldenlifeacademy?pwd=pU5AZTa63FWzyQ6qrOZbdD2TdryLpH.1\nThời gian: 20h00 – Tối\nTạo tk aga member.theagalliance.com/home",
+                createdAt: new Date(Date.now() - 18000).toISOString()
+            },
+            {
+                id: "d19", name: "Binance", category: "crypto",
+                username: "xiemsansang@gmail.com", customFields: [{key: "Mã chống lừa đảo", value: "Xiem1985"}],
+                notes: "CẢNH BÁO: Nhớ giao dich trên binance tránh bọn này\nBend The Trend, VIP-GiaoDichNhanh, GD_Hóa Tốc 247, Thương Gia TiếnSo_VIP chuyên đi LỬA ĐẢO",
+                createdAt: new Date(Date.now() - 19000).toISOString()
+            },
+            {
+                id: "d20", name: "Web dự phòng Lwex", category: "note",
+                customFields: [{key: "Zalo SĐT", value: "0936"}, {key: "Mật khẩu Zalo/Web", value: "X@180585"}],
+                notes: "Khi những trang web khác không vào được thì các con hãy vào trang web này để nhận tín hiệu nhé.\nlwex1.com\nlwex2.com\nlwex4.com\nlwex5.com\nlwex7.com\nlwex8.com\nlwex9.com\nlwexsk.com\nlwex-sk.com",
+                createdAt: new Date(Date.now() - 20000).toISOString()
+            },
+            {
+                id: "d21", name: "Bitnagdag", category: "crypto",
+                username: "936168..", password: "Xiem@1985", customFields: [{key: "Pass khôi phục", value: "Xiem@8587"}, {key: "Tên đăng nhập phụ", value: "Winner"}, {key: "Pass Chuyển khoản (Ck)", value: "Xiem@8587"}],
+                createdAt: new Date(Date.now() - 21000).toISOString()
+            },
+            {
+                id: "d22", name: "Ngân Hàng MB Bank", category: "crypto",
+                customFields: [{key: "Số Tài Khoản", value: "0376060870"}, {key: "Chủ Tài Khoản", value: "PHUONG THI THU"}],
+                notes: "Số tham khảo khác (Không rõ): 19037215563016",
+                createdAt: new Date(Date.now() - 22000).toISOString()
+            },
+            {
+                id: "d23", name: "ZFX (App Trade)", category: "crypto",
+                url: "https://my.cn-zfx.com/home", username: "2952745", password: "nJr5tps3wIx",
+                customFields: [{key: "Máy chủ (Server)", value: "ZealCapitalMarketSC-Live02"}], notes: "Tải app về đt xong đăng nhập và Trade",
+                createdAt: new Date(Date.now() - 23000).toISOString()
+            },
+            {
+                id: "d24", name: "Titanex3", category: "crypto",
+                url: "https://Titanex3.net", username: "Tbmayvpttp@gmail.com", password: "Xiem@19",
+                customFields: [{key: "Tài khoản phụ", value: "locphatss"}],
+                createdAt: new Date(Date.now() - 24000).toISOString()
+            },
+            {
+                id: "d25", name: "Loom-X", category: "crypto",
+                customFields: [{key: "Mật khẩu Ck", value: "Xiem@198x"}, {key: "Mạng Network", value: "bep20"}],
+                createdAt: new Date(Date.now() - 25000).toISOString()
+            },
+            {
+                id: "d26", name: "glaxbit / Monatex", category: "crypto",
+                username: "Xiemsansang@gmail.com", password: "Xiem1985",
+                createdAt: new Date(Date.now() - 26000).toISOString()
+            },
+            {
+                id: "d27", name: "BiamexBo", category: "crypto",
+                username: "Thegioisieutichcuc@gmail.com", password: "Xiem1985",
+                customFields: [{key: "Biệt danh", value: "Xiemss85"}, {key: "Mật khẩu 2", value: "Xiem@1985"}],
+                createdAt: new Date(Date.now() - 27000).toISOString()
+            },
+            {
+                id: "d28", name: "Aicoin", category: "crypto",
+                customFields: [{key: "Pass Chuyển khoản (Ck)", value: "ss851985"}],
+                createdAt: new Date(Date.now() - 28000).toISOString()
+            },
+            {
+                id: "d29", name: "133x", category: "crypto",
+                url: "https://www.133exs.com/wap//?usercode=76212374", username: "76212374", password: "Xiem@1985",
+                customFields: [{key: "Pass Chuyển khoản (Ck)", value: "8519.."}],
+                createdAt: new Date(Date.now() - 29000).toISOString()
+            },
+            {
+                id: "d30", name: "Xmapp", category: "crypto",
+                username: "Xiemsansang@gmail.com", password: "Xiemss@1985",
+                customFields: [{key: "Pass Giao dịch", value: "Xiem@19851987"}, {key: "Mã OTP", value: "1985"}],
+                createdAt: new Date(Date.now() - 30000).toISOString()
+            },
+            {
+                id: "d31", name: "Livestream Tatao", category: "account",
+                url: "https://www.tataovn.com/", username: "376741339", password: "Thu123",
+                notes: "Tên thư",
+                createdAt: new Date(Date.now() - 31000).toISOString()
+            },
+            {
+                id: "d32", name: "Remitano", category: "crypto",
+                notes: "Tk trung gian việt nam Remitano",
+                createdAt: new Date(Date.now() - 32000).toISOString()
+            },
+            {
+                id: "d33", name: "BÍ KÍP & CÔNG THỨC TRADE VIP", category: "note",
+                customFields: [{key: "Mật khẩu CK chung", value: "Xiem@8587"}, {key: "Pass 2", value: "232527"}],
+                notes: `Ct1.             CT2.               CT3.                  CT4\n Đ                    X                    X                        Đ\n X                    X                    Đ                        Đ\n X                    X                    Đ                        Đ\n X                    X                    Đ                        Đ\n Đ                    X                    X                        Đ\n Đ                    X                    X                        Đ\n\nCT3 Chọn bàn chân ngắn (LÀ CÓ 2 ĐỎ 2 XANH), nhiều đỏ. Kỵ 3 XANH\n\nCHỌN BÀN: QUYẾT ĐỊNH 80%\nBÀN ĐẸP LÀ CÁCH NHAU 10 VÁN XANH\n\nCT1 SANG CỘT MỚI : ĐỎ (KO ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN) ---> ĐỎ (KO ĂN) ---> ĐỎ (KO ĂN)\n\nCT2 SANG CỘT MỚI : ĐỎ (ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN) ---> XANH (KO ĂN)\n\nXanh nhiều được ăn 3 ván hòa là dừng 1 lần.\n\nCt ăn tự nghiên cứu\nVị trí 3 mà đảo\nVị trí 4 đồng màu thì vị trí 5 đồng màu và vị trí 6 đảo\n\nVị trí 3 mà không đảo\nThì vị trí 6 sẽ đảo\n\nVị trí 3 mà đảo cùng vị trí 5 đảo và Ai livestream tatao`,
                 createdAt: new Date().toISOString()
             }
         ];
 
         let appData = [];
+
+        // Hệ thống phân loại
+        const categories = {
+            'account': { icon: 'ph-identification-card', color: 'text-blue-600', bg: 'bg-blue-100/80', border: 'border-blue-200', label: 'Tài khoản' },
+            'crypto': { icon: 'ph-currency-btc', color: 'text-amber-600', bg: 'bg-amber-100/80', border: 'border-amber-200', label: 'Tài chính' },
+            'note': { icon: 'ph-notebook', color: 'text-emerald-600', bg: 'bg-emerald-100/80', border: 'border-emerald-200', label: 'Ghi chú' },
+            'service': { icon: 'ph-address-book', color: 'text-purple-600', bg: 'bg-purple-100/80', border: 'border-purple-200', label: 'Danh bạ/Dịch vụ' }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
@@ -282,15 +468,11 @@
         });
 
         function loadData() {
-            let savedData = localStorage.getItem('passwordManagerData');
-            
-            // Ép làm mới dữ liệu để hiển thị demo Backup Code nếu bản cũ không có
-            if (savedData && !JSON.parse(savedData).some(item => item.backupCodes)) {
-                savedData = null; 
-            }
-
+            let savedData = localStorage.getItem('multiVaultData');
             if (savedData) {
                 appData = JSON.parse(savedData);
+                // Migrate old data missing categories
+                appData.forEach(item => { if(!item.category) item.category = 'account'; });
             } else {
                 appData = [...defaultData];
                 saveToLocalStorage();
@@ -298,10 +480,9 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('passwordManagerData', JSON.stringify(appData));
+            localStorage.setItem('multiVaultData', JSON.stringify(appData));
         }
 
-        // Hàm bảo vệ chống mã độc (XSS) khi render văn bản
         function escapeHTML(str) {
             if (!str) return '';
             return str.replace(/[&<>'"]/g, tag => ({
@@ -309,10 +490,46 @@
             }[tag] || tag));
         }
 
+        // --- CUSTOM FIELDS LOGIC ---
+        let customFieldsArray = [];
+
+        function addCustomField(key = '', value = '') {
+            const container = document.getElementById('customFieldsContainer');
+            const fieldId = 'cf_' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-start';
+            div.id = fieldId;
+            div.innerHTML = `
+                <input type="text" placeholder="Tên (VD: Biển số)" value="${escapeHTML(key)}" class="w-1/3 px-3 py-1.5 rounded-lg bg-white border border-amber-200 focus:outline-none focus:border-amber-500 text-sm">
+                <input type="text" placeholder="Giá trị" value="${escapeHTML(value)}" class="flex-1 px-3 py-1.5 rounded-lg bg-white border border-amber-200 focus:outline-none focus:border-amber-500 text-sm font-mono-custom">
+                <button type="button" onclick="removeCustomField('${fieldId}')" class="p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors mt-0.5">
+                    <i class="ph ph-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeCustomField(id) {
+            document.getElementById(id).remove();
+        }
+
+        function getCustomFieldsData() {
+            const container = document.getElementById('customFieldsContainer');
+            const fields = [];
+            Array.from(container.children).forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const key = inputs[0].value.trim();
+                const val = inputs[1].value.trim();
+                if (key || val) fields.push({ key: key, value: val });
+            });
+            return fields;
+        }
+
+        // --- RENDER CARDS ---
         function renderCards(dataToRender) {
             const container = document.getElementById('cardsContainer');
             const emptyState = document.getElementById('emptyState');
-            
             container.innerHTML = '';
 
             if (dataToRender.length === 0) {
@@ -337,7 +554,8 @@
                 
                 sortedGroups.forEach(group => {
                     const firstEntry = group[0];
-                    const domain = getDomainInfo(firstEntry.url, firstEntry.name);
+                    const cat = categories[firstEntry.category || 'account'];
+                    const domain = getDomainInfo(firstEntry.name);
                     const groupId = firstEntry.id;
                     const accountCount = group.length;
 
@@ -345,103 +563,127 @@
                     card.className = 'glass-card rounded-2xl mb-6 break-inside-avoid hover:shadow-xl transition-all duration-300 transform group relative overflow-hidden';
                     
                     const quickActionUI = accountCount === 1 ? `
-                        <button onclick="copyToClipboard('${escapeHTML(firstEntry.password)}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Copy nhanh Mật khẩu">
-                            <i class="ph ph-copy text-lg"></i>
-                        </button>
-                    ` : `<span class="px-2.5 py-1 bg-blue-100/80 text-blue-700 text-[11px] font-bold rounded-md whitespace-nowrap shadow-sm border border-blue-200">${accountCount} tài khoản</span>`;
+                        <span class="px-2 py-1 ${cat.bg} ${cat.color} ${cat.border} border text-[10px] font-bold rounded-md shadow-sm uppercase tracking-wider flex items-center gap-1">
+                            <i class="ph ${cat.icon}"></i> ${cat.label}
+                        </span>
+                    ` : `<span class="px-2.5 py-1 bg-blue-100/80 text-blue-700 text-[11px] font-bold rounded-md shadow-sm border border-blue-200">${accountCount} mục</span>`;
 
                     let accountsHTML = '';
                     group.forEach((entry, index) => {
                         const isNotLast = index < group.length - 1;
                         
-                        // Khối hiển thị Mã Dự Phòng (Nếu có)
+                        // Render Username & Password Only if they exist
+                        let coreFieldsHTML = '';
+                        if (entry.username) {
+                            coreFieldsHTML += `
+                                <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Tài khoản/ID</span>
+                                    <div class="font-medium text-gray-800 truncate pr-8 font-mono-custom text-sm">${escapeHTML(entry.username)}</div>
+                                    <button onclick="copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100">
+                                        <i class="ph ph-copy text-lg"></i>
+                                    </button>
+                                </div>`;
+                        }
+                        if (entry.password) {
+                            coreFieldsHTML += `
+                                <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Mật khẩu chính</span>
+                                    <div class="font-medium text-gray-800 flex items-center">
+                                        <span id="pwd-mask-${entry.id}" class="tracking-widest">••••••••</span>
+                                        <span id="pwd-text-${entry.id}" class="hidden font-mono-custom text-sm">${escapeHTML(entry.password)}</span>
+                                    </div>
+                                    <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-0 group-hover/item:opacity-100 transition-opacity bg-white/80 rounded-lg shadow-sm">
+                                        <button onclick="togglePassword('${entry.id}'); event.stopPropagation();" class="p-1.5 text-gray-500 hover:text-gray-900 transition-colors"><i id="eye-icon-${entry.id}" class="ph ph-eye text-lg"></i></button>
+                                        <button onclick="copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-1.5 text-gray-500 hover:text-blue-600 transition-colors"><i class="ph ph-copy text-lg"></i></button>
+                                    </div>
+                                </div>`;
+                        }
+
+                        // Render Custom Fields dynamically
+                        let customFieldsHTML = '';
+                        if (entry.customFields && entry.customFields.length > 0) {
+                            customFieldsHTML = entry.customFields.map((cf, i) => `
+                                <div class="bg-amber-50/60 rounded-xl p-2.5 border border-amber-100/60 relative group/item">
+                                    <span class="text-[10px] uppercase tracking-wider text-amber-700/80 font-bold block mb-0.5">${escapeHTML(cf.key)}</span>
+                                    <div class="font-medium text-gray-800 truncate pr-8 font-mono-custom text-sm">${escapeHTML(cf.value)}</div>
+                                    <button onclick="copyToClipboard('${escapeHTML(cf.value)}'); event.stopPropagation();" class="absolute right-1 top-1/2 transform -translate-y-1/2 p-1.5 text-amber-600/50 hover:text-amber-700 hover:bg-amber-100 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100">
+                                        <i class="ph ph-copy text-lg"></i>
+                                    </button>
+                                </div>
+                            `).join('');
+                            // Bọc vào grid 2 cột nếu nhiều
+                            customFieldsHTML = `<div class="grid grid-cols-1 gap-2 mt-2">${customFieldsHTML}</div>`;
+                        }
+
+                        // Code Khóa 2FA (Secret Key)
+                        const twoFactorKeyHTML = entry.twoFactorKey ? `
+                            <div class="bg-indigo-50/70 rounded-xl p-3 border border-indigo-100/80 mt-3 relative group/item">
+                                <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-bold block mb-1.5 flex items-center gap-1"><i class="ph ph-key"></i> Khóa 2FA (Secret Key)</span>
+                                <div class="font-medium text-gray-800 truncate pr-8 font-mono-custom text-sm tracking-wider">${escapeHTML(entry.twoFactorKey)}</div>
+                                <button onclick="copyToClipboard('${escapeHTML(entry.twoFactorKey)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 bg-indigo-100 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-200 rounded-lg opacity-0 group-hover/item:opacity-100 shadow-sm transition-colors"><i class="ph ph-copy text-lg"></i></button>
+                            </div>` : '';
+
+                        // Code Backup & QR & Notes (Giữ nguyên logic cũ, chỉ chỉnh nhẹ UI)
                         const displayBackupTitle = entry.backupTitle ? escapeHTML(entry.backupTitle) : 'Mã dự phòng (2FA)';
                         const backupCodesHTML = entry.backupCodes ? `
-                            <div class="bg-indigo-50/70 rounded-xl p-3 border border-indigo-100/80 relative group/item mt-3">
-                                <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-bold block mb-1.5 flex items-center gap-1">
-                                    <i class="ph ph-shield-check text-sm"></i> ${displayBackupTitle}
-                                </span>
-                                <!-- Hiển thị nguyên văn bản, có thanh cuộn nếu quá dài -->
-                                <div id="backup-code-content-${entry.id}" class="font-mono text-[11px] text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">${escapeHTML(entry.backupCodes)}</div>
-                                
-                                <button onclick="copyElementText('backup-code-content-${entry.id}'); event.stopPropagation();" class="absolute right-2 top-2 p-1.5 bg-indigo-100 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-200 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100 shadow-sm" title="Copy toàn bộ mã">
-                                    <i class="ph ph-copy text-lg"></i>
-                                </button>
-                            </div>
-                        ` : '';
+                            <div class="bg-indigo-50/70 rounded-xl p-3 border border-indigo-100/80 mt-3 relative group/item">
+                                <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-bold block mb-1.5 flex items-center gap-1"><i class="ph ph-shield-check"></i> ${displayBackupTitle}</span>
+                                <div id="backup-${entry.id}" class="font-mono-custom text-[11px] text-gray-700 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">${escapeHTML(entry.backupCodes)}</div>
+                                <button onclick="copyElementText('backup-${entry.id}'); event.stopPropagation();" class="absolute right-2 top-2 p-1.5 bg-indigo-100 text-indigo-500 hover:bg-indigo-200 rounded-lg opacity-0 group-hover/item:opacity-100 shadow-sm"><i class="ph ph-copy text-lg"></i></button>
+                            </div>` : '';
 
-                        // Khối hiển thị Ảnh QR 2FA (Nếu có)
-                        const safeFileName = `QR_2FA_${firstEntry.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                        const safeFileName = `QR_${firstEntry.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
                         const qrCodeHTML = entry.qrCode ? `
                             <div class="bg-teal-50/70 rounded-xl p-3 border border-teal-100/80 mt-3 relative group/item">
-                                <span class="text-[11px] uppercase tracking-wider text-teal-600 font-bold block mb-2 flex items-center gap-1">
-                                    <i class="ph ph-qr-code text-sm"></i> Mã QR 2FA
-                                </span>
+                                <span class="text-[11px] uppercase tracking-wider text-teal-600 font-bold block mb-2 flex items-center gap-1"><i class="ph ph-qr-code"></i> Mã QR</span>
                                 <div class="relative flex justify-center bg-white p-2 rounded-lg border border-teal-100/50 group/qr cursor-pointer overflow-hidden" onclick="viewImageFullscreen('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();">
-                                    <img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-md" alt="QR Code">
-                                    
-                                    <!-- Lớp phủ (Overlay) hiện lên khi di chuột -->
-                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-lg flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
-                                        <div class="flex gap-4">
-                                            <button onclick="viewImageFullscreen('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-3 bg-white/90 text-gray-800 hover:bg-white rounded-full shadow-lg transition-transform transform hover:scale-110" title="Phóng to ảnh">
-                                                <i class="ph ph-arrows-out text-xl"></i>
-                                            </button>
-                                            <button onclick="downloadImage('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-3 bg-teal-500 text-white hover:bg-teal-600 rounded-full shadow-lg transition-transform transform hover:scale-110" title="Tải xuống máy tính">
-                                                <i class="ph ph-download-simple text-xl"></i>
-                                            </button>
-                                        </div>
-                                        <span class="text-white text-xs font-medium drop-shadow-md">Bấm để phóng to</span>
+                                    <img src="${entry.qrCode}" class="max-w-full h-auto max-h-40 rounded-md">
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-lg flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                        <button onclick="viewImageFullscreen('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-2 bg-white/90 rounded-full hover:scale-110"><i class="ph ph-arrows-out text-lg"></i></button>
+                                        <button onclick="downloadImage('${entry.qrCode}', '${safeFileName}'); event.stopPropagation();" class="p-2 bg-teal-500 text-white rounded-full hover:scale-110"><i class="ph ph-download-simple text-lg"></i></button>
                                     </div>
                                 </div>
+                            </div>` : '';
+
+                        // Tự động kiểm tra xem mục này có 2FA hay không để hiện Nút Tiêu Đề
+                        const has2FA = entry.qrCode || entry.twoFactorKey || entry.backupCodes;
+                        const badge2FA = has2FA ? `
+                            <div class="flex items-center gap-2 bg-indigo-50/90 pr-3 p-1 rounded-xl border border-indigo-100 shadow-sm cursor-default">
+                                <div class="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold shadow-inner">
+                                    <i class="ph ph-shield-check text-sm"></i>
+                                </div>
+                                <span class="text-indigo-700 font-bold text-[11px] tracking-wide">2FA LƯU TRỮ</span>
                             </div>
                         ` : '';
 
                         accountsHTML += `
                             <div class="${isNotLast ? 'border-b border-gray-200/60 pb-5 mb-5' : ''}">
-                                <div class="flex justify-between items-center mb-3">
-                                    ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation();" class="text-xs text-blue-600 hover:underline truncate inline-flex items-center gap-1"><i class="ph ph-link"></i> Mở trang</a>` : '<span></span>'}
-                                    <div class="flex gap-1">
-                                        <button onclick="editEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-blue-100/80 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Sửa">
-                                            <i class="ph ph-pencil-simple text-sm"></i>
-                                        </button>
-                                        <button onclick="deleteEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-red-100/80 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Xóa">
-                                            <i class="ph ph-trash text-sm"></i>
-                                        </button>
+                                <div class="flex justify-between items-center mb-4">
+                                    <div class="flex items-center gap-2">
+                                        ${badge2FA}
+                                        ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation();" class="text-[11px] font-medium text-blue-600 hover:bg-blue-50 px-2 py-1.5 rounded-lg transition-colors truncate inline-flex items-center gap-1 border border-transparent hover:border-blue-100"><i class="ph ph-link text-sm"></i> ${has2FA ? 'Link' : 'Mở liên kết'}</a>` : (!has2FA ? '<span></span>' : '')}
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <button onclick="editEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100" title="Sửa"><i class="ph ph-pencil-simple text-sm"></i></button>
+                                        <button onclick="deleteEntry('${entry.id}'); event.stopPropagation();" class="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors border border-red-100" title="Xóa"><i class="ph ph-trash text-sm"></i></button>
                                     </div>
                                 </div>
 
-                                <div class="space-y-3">
-                                    <!-- Khu vực Username -->
-                                    <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
-                                        <span class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Tài khoản ${accountCount > 1 ? `#${index + 1}` : ''}</span>
-                                        <div class="font-medium text-gray-800 truncate pr-8">${escapeHTML(entry.username)}</div>
-                                        <button onclick="copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100">
-                                            <i class="ph ph-copy text-lg"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Khu vực Mật khẩu -->
-                                    <div class="bg-white/70 rounded-xl p-3 border border-gray-100 relative group/item">
-                                        <span class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block mb-0.5">Mật khẩu</span>
-                                        <div class="font-medium text-gray-800 tracking-widest flex items-center">
-                                            <span id="pwd-mask-${entry.id}">••••••••</span>
-                                            <span id="pwd-text-${entry.id}" class="hidden tracking-normal">${escapeHTML(entry.password)}</span>
-                                        </div>
-                                        
-                                        <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                            <button onclick="togglePassword('${entry.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
-                                                <i id="eye-icon-${entry.id}" class="ph ph-eye text-lg"></i>
-                                            </button>
-                                            <button onclick="copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                                <i class="ph ph-copy text-lg"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="space-y-2">
+                                    ${coreFieldsHTML}
                                 </div>
-
+                                
+                                ${customFieldsHTML}
+                                ${twoFactorKeyHTML}
                                 ${backupCodesHTML}
                                 ${qrCodeHTML}
-                                ${entry.notes ? `<p class="mt-4 text-xs text-gray-500 italic"><i class="ph ph-info mr-1"></i>${escapeHTML(entry.notes)}</p>` : ''}
+                                
+                                ${entry.notes ? `
+                                    <div class="mt-4 bg-gray-50/80 rounded-xl p-3 border border-gray-100">
+                                        <span class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold block mb-1 flex items-center gap-1"><i class="ph ph-text-align-left"></i> Ghi chú / Chi tiết</span>
+                                        <div class="text-[13px] text-gray-700 whitespace-pre-wrap leading-relaxed font-mono-custom custom-scrollbar overflow-x-auto">${escapeHTML(entry.notes)}</div>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                     });
@@ -456,7 +698,7 @@
                             </div>
                             <div class="flex items-center gap-2 flex-shrink-0">
                                 ${quickActionUI}
-                                <div class="p-1.5 text-gray-500 bg-gray-100/50 rounded-lg">
+                                <div class="p-1 text-gray-400 bg-gray-50 rounded-lg group-hover:bg-gray-100 group-hover:text-gray-600 transition-colors">
                                     <i id="chevron-${groupId}" class="ph ph-caret-down transition-transform duration-300"></i>
                                 </div>
                             </div>
@@ -473,118 +715,101 @@
             }
         }
 
+        // --- UTILS ---
         function toggleCardDetail(id) {
             const detail = document.getElementById(`detail-${id}`);
             const chevron = document.getElementById(`chevron-${id}`);
-            
             if (detail.classList.contains('max-h-0')) {
                 detail.classList.remove('max-h-0', 'opacity-0');
-                detail.classList.add('max-h-[3000px]', 'opacity-100');
+                detail.classList.add('max-h-[5000px]', 'opacity-100'); // Tăng rất to vì nội dung Trade có thể dài
                 chevron.classList.add('rotate-180');
             } else {
                 detail.classList.add('max-h-0', 'opacity-0');
-                detail.classList.remove('max-h-[3000px]', 'opacity-100');
+                detail.classList.remove('max-h-[5000px]', 'opacity-100');
                 chevron.classList.remove('rotate-180');
             }
         }
 
-        function getDomainInfo(url, name) {
-            const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-rose-500', 'bg-teal-500', 'bg-cyan-500', 'bg-orange-500'];
+        function getDomainInfo(name) {
+            const colors = ['bg-slate-700', 'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-pink-500'];
             let initial = name ? name.charAt(0).toUpperCase() : '?';
             let colorIndex = 0;
-            for(let i=0; i < name.length; i++) {
-                colorIndex += name.charCodeAt(i);
-            }
-            return {
-                initial: initial,
-                color: colors[colorIndex % colors.length]
-            };
+            for(let i=0; i < name.length; i++) colorIndex += name.charCodeAt(i);
+            return { initial: initial, color: colors[colorIndex % colors.length] };
         }
 
         function togglePassword(id) {
             const mask = document.getElementById(`pwd-mask-${id}`);
             const text = document.getElementById(`pwd-text-${id}`);
             const icon = document.getElementById(`eye-icon-${id}`);
-            
             if (text.classList.contains('hidden')) {
-                text.classList.remove('hidden');
-                mask.classList.add('hidden');
-                icon.classList.replace('ph-eye', 'ph-eye-slash');
+                text.classList.remove('hidden'); mask.classList.add('hidden'); icon.classList.replace('ph-eye', 'ph-eye-slash');
             } else {
-                text.classList.add('hidden');
-                mask.classList.remove('hidden');
-                icon.classList.replace('ph-eye-slash', 'ph-eye');
+                text.classList.add('hidden'); mask.classList.remove('hidden'); icon.classList.replace('ph-eye-slash', 'ph-eye');
             }
         }
 
-        // Copy chuỗi ký tự thường
         function copyToClipboard(text) {
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast('Đã sao chép vào bộ nhớ tạm!');
+            const el = document.createElement('textarea'); el.value = text;
+            document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            showToast('Đã sao chép vào bộ nhớ!');
         }
 
-        // Hàm hỗ trợ copy an toàn nội dung từ HTML (Dành riêng cho khối Backup Code có chứa dấu xuống dòng, khoảng trắng)
-        function copyElementText(elementId) {
-            const text = document.getElementById(elementId).innerText || document.getElementById(elementId).textContent;
-            copyToClipboard(text);
+        function copyElementText(id) {
+            copyToClipboard(document.getElementById(id).innerText || document.getElementById(id).textContent);
         }
 
         let toastTimeout;
         function showToast(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').textContent = message;
-            
-            toast.classList.remove('hidden');
-            toast.classList.add('toast-animate');
-            
+            toast.classList.remove('hidden'); toast.classList.add('toast-animate');
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('toast-animate');
-            }, 3000);
+            toastTimeout = setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-animate'); }, 3000);
         }
 
         function filterData() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtered = appData.filter(item => 
                 item.name.toLowerCase().includes(query) || 
-                item.username.toLowerCase().includes(query) ||
-                (item.url && item.url.toLowerCase().includes(query))
+                (item.username && item.username.toLowerCase().includes(query)) ||
+                (item.notes && item.notes.toLowerCase().includes(query)) ||
+                (item.customFields && item.customFields.some(cf => cf.value.toLowerCase().includes(query)))
             );
             renderCards(filtered);
         }
 
+        // --- CRUD LOGIC ---
         function openModal(id = null) {
             document.getElementById('formModal').classList.remove('hidden');
             document.getElementById('passwordForm').reset();
             document.getElementById('entryId').value = '';
-            document.getElementById('modalTitle').textContent = 'Thêm Tài Khoản';
+            document.getElementById('modalTitle').textContent = 'Thêm Mục Mới';
+            document.getElementById('customFieldsContainer').innerHTML = ''; // Xóa sạch custom fields cũ
             
             document.getElementById('entryPassword').type = 'password';
             document.getElementById('modalEyeIcon').classList.replace('ph-eye-slash', 'ph-eye');
-
-            // Reset khu vực tải ảnh QR mỗi lần mở modal
             removeQrCode();
 
             if (id) {
                 const entry = appData.find(item => item.id === id);
                 if (entry) {
-                    document.getElementById('modalTitle').textContent = 'Sửa Tài Khoản';
+                    document.getElementById('modalTitle').textContent = 'Sửa Thông Tin';
                     document.getElementById('entryId').value = entry.id;
+                    document.getElementById('entryCategory').value = entry.category || 'account';
                     document.getElementById('entryName').value = entry.name;
                     document.getElementById('entryUrl').value = entry.url || '';
-                    document.getElementById('entryUsername').value = entry.username;
-                    document.getElementById('entryPassword').value = entry.password;
+                    document.getElementById('entryUsername').value = entry.username || '';
+                    document.getElementById('entryPassword').value = entry.password || '';
+                    document.getElementById('entryTwoFactorKey').value = entry.twoFactorKey || '';
                     document.getElementById('entryBackupTitle').value = entry.backupTitle || '';
                     document.getElementById('entryBackupCodes').value = entry.backupCodes || '';
                     document.getElementById('entryNotes').value = entry.notes || '';
 
-                    // Nếu tài khoản đã có ảnh QR, thì hiển thị nó lên
+                    if (entry.customFields) {
+                        entry.customFields.forEach(cf => addCustomField(cf.key, cf.value));
+                    }
+
                     if (entry.qrCode) {
                         document.getElementById('entryQrBase64').value = entry.qrCode;
                         document.getElementById('qrPreviewImg').src = entry.qrCode;
@@ -595,48 +820,37 @@
             }
         }
 
-        function closeModal() {
-            document.getElementById('formModal').classList.add('hidden');
-        }
-
+        function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
         function toggleModalPassword() {
-            const input = document.getElementById('entryPassword');
-            const icon = document.getElementById('modalEyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('ph-eye', 'ph-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('ph-eye-slash', 'ph-eye');
-            }
+            const input = document.getElementById('entryPassword'); const icon = document.getElementById('modalEyeIcon');
+            if (input.type === 'password') { input.type = 'text'; icon.classList.replace('ph-eye', 'ph-eye-slash'); } 
+            else { input.type = 'password'; icon.classList.replace('ph-eye-slash', 'ph-eye'); }
         }
 
         function saveEntry(e) {
             e.preventDefault();
-
             const id = document.getElementById('entryId').value;
             const newEntry = {
-                id: id ? id : Date.now().toString(),
+                id: id ? id : 'd' + Date.now(),
+                category: document.getElementById('entryCategory').value,
                 name: document.getElementById('entryName').value.trim(),
                 url: document.getElementById('entryUrl').value.trim(),
                 username: document.getElementById('entryUsername').value.trim(),
                 password: document.getElementById('entryPassword').value,
+                twoFactorKey: document.getElementById('entryTwoFactorKey').value.trim(),
+                customFields: getCustomFieldsData(), // Lưu các trường tùy chỉnh
                 backupTitle: document.getElementById('entryBackupTitle').value.trim(),
                 backupCodes: document.getElementById('entryBackupCodes').value.trim(),
                 qrCode: document.getElementById('entryQrBase64').value,
-                notes: document.getElementById('entryNotes').value.trim(),
-                createdAt: new Date().toISOString()
+                notes: document.getElementById('entryNotes').value.trim(), // Giữ nguyên khoảng trắng/xuống dòng
+                createdAt: id ? appData.find(i=>i.id===id).createdAt : new Date().toISOString()
             };
 
             if (id) {
                 const index = appData.findIndex(item => item.id === id);
-                if (index !== -1) {
-                    appData[index] = newEntry;
-                    showToast('Đã cập nhật thông tin!');
-                }
+                if (index !== -1) { appData[index] = newEntry; showToast('Đã cập nhật thông tin!'); }
             } else {
-                appData.push(newEntry);
-                showToast('Đã thêm tài khoản mới!');
+                appData.push(newEntry); showToast('Đã thêm mục mới!');
             }
 
             saveToLocalStorage();
@@ -646,86 +860,47 @@
         }
 
         function editEntry(id) { openModal(id); }
-
         function deleteEntry(id) {
-            const entryIndex = appData.findIndex(item => item.id === id);
-            if (entryIndex > -1) {
-                const isConfirm = window.confirm('Bạn có chắc chắn muốn xóa tài khoản này?'); 
-                if (isConfirm) {
-                    appData.splice(entryIndex, 1);
-                    saveToLocalStorage();
-                    filterData(); 
-                    showToast('Đã xóa tài khoản!');
-                }
+            if (window.confirm('Bạn có chắc chắn muốn xóa mục này?')) {
+                appData = appData.filter(item => item.id !== id);
+                saveToLocalStorage(); filterData(); showToast('Đã xóa thành công!');
             }
         }
 
-        // --- CÁC HÀM XỬ LÝ ẢNH QR CODE ---
-        function handleQrUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Kiểm tra dung lượng (giới hạn 1MB để tránh làm đầy Local Storage quá nhanh)
-            if (file.size > 1024 * 1024) {
-                showToast("Lỗi: Vui lòng chọn ảnh QR có dung lượng dưới 1MB!");
-                event.target.value = '';
-                return;
-            }
-
-            // Đọc file ảnh và chuyển đổi sang chuỗi Base64
+        // --- QR ---
+        function handleQrUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            if (file.size > 1024 * 1024) { showToast("Ảnh QR phải dưới 1MB!"); e.target.value = ''; return; }
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64String = e.target.result;
-                document.getElementById('entryQrBase64').value = base64String;
-                document.getElementById('qrPreviewImg').src = base64String;
-                
+            reader.onload = function(ev) {
+                document.getElementById('entryQrBase64').value = ev.target.result;
+                document.getElementById('qrPreviewImg').src = ev.target.result;
                 document.getElementById('qrUploadUI').classList.add('hidden');
                 document.getElementById('qrPreviewUI').classList.remove('hidden');
             };
             reader.readAsDataURL(file);
         }
-
         function removeQrCode() {
-            document.getElementById('qrFileInput').value = '';
-            document.getElementById('entryQrBase64').value = '';
+            document.getElementById('qrFileInput').value = ''; document.getElementById('entryQrBase64').value = '';
             document.getElementById('qrPreviewImg').src = '';
-            
-            document.getElementById('qrUploadUI').classList.remove('hidden');
-            document.getElementById('qrPreviewUI').classList.add('hidden');
+            document.getElementById('qrUploadUI').classList.remove('hidden'); document.getElementById('qrPreviewUI').classList.add('hidden');
         }
 
-        // --- CÁC HÀM XEM VÀ TẢI ẢNH QR FULLSCREEN ---
-        function viewImageFullscreen(base64Src, fileName) {
-            const modal = document.getElementById('imageViewerModal');
-            const img = document.getElementById('viewerImage');
-            const btn = document.getElementById('viewerDownloadBtn');
-            
-            img.src = base64Src;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Cập nhật sự kiện tải xuống cho nút trong Modal
-            btn.onclick = function() {
-                downloadImage(base64Src, fileName);
-            };
+        // --- VIEW QR FULLSCREEN ---
+        function viewImageFullscreen(src, fileName) {
+            document.getElementById('viewerImage').src = src;
+            document.getElementById('imageViewerModal').classList.remove('hidden');
+            document.getElementById('imageViewerModal').classList.add('flex');
+            document.getElementById('viewerDownloadBtn').onclick = () => downloadImage(src, fileName);
         }
-
         function closeImageViewer() {
-            const modal = document.getElementById('imageViewerModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            // Dọn dẹp ảnh sau khi animation kết thúc để giải phóng bộ nhớ
+            document.getElementById('imageViewerModal').classList.add('hidden');
+            document.getElementById('imageViewerModal').classList.remove('flex');
             setTimeout(() => { document.getElementById('viewerImage').src = ''; }, 300);
         }
-
-        function downloadImage(base64Src, fileName) {
-            const a = document.createElement('a');
-            a.href = base64Src;
-            a.download = fileName || 'QR_Code.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast('Đã tải ảnh QR xuống máy!');
+        function downloadImage(src, fileName) {
+            const a = document.createElement('a'); a.href = src; a.download = fileName || 'QR.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); showToast('Đã tải ảnh!');
         }
     </script>
 </body>
