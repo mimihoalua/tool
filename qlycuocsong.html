@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LifeOS V5 - Ultimate Edition</title>
+    <title>LifeOS V7 - Pure Voice AI</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,7 +24,6 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         
-        /* Layout Responsive PC/Mobile */
         .view-section { display: none; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         @media (min-width: 1024px) { 
@@ -33,7 +32,6 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Swipe & Items */
         .swipe-item { position: relative; border-radius: 1rem; margin-bottom: 0.75rem; background: #fff; border: 1px solid #f1f5f9; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); overflow: hidden; transition: all 0.2s; }
         .dark .swipe-item { background: #1e293b; border-color: #334155; }
         .swipe-bg-left { position: absolute; inset: 0; background: #10b981; display: flex; align-items: center; justify-content: flex-start; padding-left: 1.5rem; color: white; opacity: 0; }
@@ -41,7 +39,6 @@
         .swipe-front { position: relative; z-index: 10; touch-action: pan-y; background: inherit; }
         .priority-bar { position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 0 4px 4px 0; }
 
-        /* Modals - Tự động đổi Bottom-Sheet (Mobile) hoặc Căn giữa (PC) */
         .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; animation: fadeInOverlay 0.2s; }
         @media (min-width: 1024px) { .modal-overlay { align-items: center; padding: 1rem; } }
         @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
@@ -51,7 +48,6 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Hiệu ứng Sentinel & Alarm */
         .sentinel-pulse { animation: sentinelPulse 2s infinite; }
         @keyframes sentinelPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } }
         .alarm-flash { animation: alarmFlash 0.5s infinite alternate; }
@@ -63,21 +59,38 @@
         
         input[type="time"]::-webkit-calendar-picker-indicator, input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
         .dark input[type="time"]::-webkit-calendar-picker-indicator, .dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+        @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        @keyframes slideOutRight { to { transform: translateX(120%); opacity: 0; } }
+        .slide-out { animation: slideOutRight 0.35s ease-in forwards; }
+
+        .action-btn-mobile { 
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateX(10px);
+        }
+        .swipe-item.show-actions .action-btn-mobile {
+            opacity: 1; pointer-events: auto; transform: translateX(0);
+        }
+        
+        /* Hiệu ứng loa khi Chị Google đang nói */
+        .speaking-glow { animation: speakGlow 1s infinite alternate; }
+        @keyframes speakGlow { from { text-shadow: 0 0 5px #10b981; color: #10b981; } to { text-shadow: 0 0 15px #10b981; color: #34d399; } }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
 
     <header class="flex justify-between items-center px-4 md:px-8 py-3 lg:py-4 bg-white/90 dark:bg-darkcard/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-br from-primary to-secondary p-2.5 rounded-xl text-white shadow-lg hidden sm:flex items-center justify-center cursor-pointer transition hover:scale-105" onclick="initAudioContext()" title="Đánh thức Audio API">
-                <i class="ph-bold ph-robot text-2xl" id="bot-icon"></i>
+            <div class="bg-gradient-to-br from-primary to-secondary p-2.5 rounded-xl text-white shadow-lg hidden sm:flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95" onclick="initTTS()" title="Đánh thức Giọng Nói AI">
+                <i class="ph-bold ph-robot text-2xl transition-all duration-300" id="bot-icon"></i>
             </div>
             <div>
-                <h1 class="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight">LifeOS.V5</h1>
+                <h1 class="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight">LifeOS.Voice</h1>
                 <div class="flex items-center gap-2 mt-0.5">
                     <span id="current-date" class="hidden sm:inline text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider"></span>
                     <span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all" onclick="showSentinelPanel()">
-                        <i class="ph-fill ph-shield-check text-sm"></i> <span class="hidden sm:inline">Sentinel Guard</span>
+                        <i class="ph-fill ph-shield-check text-sm"></i> <span class="hidden sm:inline">Voice Guard</span>
                     </span>
                 </div>
             </div>
@@ -107,13 +120,14 @@
 
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
+                    <div class="w-12 h-12 rounded-full border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative flex-shrink-0">
                         <svg class="absolute inset-0 w-full h-full transform -rotate-90"><circle id="progress-ring" cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" class="text-primary transition-all duration-700" stroke-dasharray="113" stroke-dashoffset="113"></circle></svg>
                         <span id="progress-text" class="text-[10px] font-black text-slate-700 dark:text-slate-200 z-10">0%</span>
                     </div>
                     <div class="flex gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto hide-scrollbar">
                         <button data-filter="all" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-600 text-primary shadow-sm transition whitespace-nowrap">Tất cả</button>
                         <button data-filter="active" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 transition whitespace-nowrap">Chưa xong</button>
+                        <button data-filter="overdue" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 transition whitespace-nowrap">Quá hạn</button>
                     </div>
                 </div>
                 <button onclick="cleanupTasks()" class="text-xs font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 px-4 py-2.5 rounded-xl transition flex items-center gap-2 active:scale-95 w-full sm:w-auto justify-center"><i class="ph-bold ph-broom text-base"></i> Dọn rác</button>
@@ -124,6 +138,7 @@
                 <div id="empty-state" class="hidden absolute inset-0 flex-col items-center justify-center text-slate-400 z-0 opacity-60 pointer-events-none">
                     <i class="ph-duotone ph-leaf text-6xl mb-3 text-emerald-500"></i>
                     <p class="text-lg font-bold text-slate-700 dark:text-slate-200">Không gian thanh tịnh</p>
+                    <p class="text-xs mt-1">Thêm nhiệm vụ mới để bắt đầu</p>
                 </div>
             </div>
         </div>
@@ -161,8 +176,8 @@
         </div>
     </main>
 
-    <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-30 transition-transform duration-300 pointer-events-none">
-        <form id="form-mobile" class="w-full flex items-center bg-white/95 dark:bg-carddark/95 backdrop-blur-md rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-700 pointer-events-auto">
+    <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-30 transition-transform duration-300">
+        <form id="form-mobile" class="w-full flex items-center bg-white/95 dark:bg-darkcard/95 backdrop-blur-md rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-700">
             <button type="button" class="btn-voice p-3 text-slate-400 transition rounded-xl"><i class="ph-fill ph-microphone text-xl"></i></button>
             <input type="text" id="input-mobile" placeholder="Tạo nhanh (@14h, !gấp, #tag)..." class="flex-grow bg-transparent border-none outline-none text-[15px] font-semibold py-2 px-1 text-slate-800 dark:text-white" autocomplete="off">
             <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
@@ -185,26 +200,26 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"><i class="ph-fill ph-shield-check text-2xl text-emerald-600"></i></div>
-                    <div><h2 class="text-xl font-black text-slate-800 dark:text-white">Sentinel Guard</h2><p class="text-xs text-slate-500 font-medium">Giám sát báo thức AI 24/7</p></div>
+                    <div><h2 class="text-xl font-black text-slate-800 dark:text-white">Voice Guard AI</h2><p class="text-xs text-slate-500 font-medium">Giám sát qua Giọng nói Trợ lý 24/7</p></div>
                 </div>
-                <button onclick="closeSentinelPanel()" class="hidden lg:block p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"><i class="ph-bold ph-x text-lg"></i></button>
+                <button onclick="closeSentinelPanel()" class="hidden lg:block p-2 text-slate-400 hover:bg-slate-100 dark:bg-slate-800 rounded-full transition"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
             <div id="sentinel-log" class="space-y-2 mb-6 max-h-[40vh] overflow-y-auto pr-1"></div>
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="playAlarm('urgent'); showToast('Loa cảnh báo tốt!', 'ph-bell-ringing')" class="py-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 font-bold text-sm active:scale-95 transition border border-amber-200 dark:border-amber-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-bell-ringing"></i> Thử Chuông</button>
-                <button onclick="speak('Xin chào! Hệ thống Giọng nói AI hoạt động xuất sắc.', 1.1, 1); showToast('Đang phát giọng nói...', 'ph-speaker-high')" class="py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 font-bold text-sm active:scale-95 transition border border-indigo-200 dark:border-indigo-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
+                <button onclick="speak('Báo động khẩn cấp! Đây là giọng nói thử nghiệm từ hệ thống Sentinel.', 1.15, 1.1); showToast('Đang phát cảnh báo...', 'ph-warning-circle')" class="py-3.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 font-bold text-sm active:scale-95 transition border border-rose-200 dark:border-rose-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-warning-circle"></i> Thử Cảnh Báo</button>
+                <button onclick="speak('Xin chào! Hệ thống Giọng nói AI hoạt động xuất sắc.', 1.05, 1); showToast('Đang phát giọng nói...', 'ph-speaker-high')" class="py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 font-bold text-sm active:scale-95 transition border border-indigo-200 dark:border-indigo-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
             </div>
             <button onclick="closeSentinelPanel()" class="w-full mt-4 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition lg:hidden">Đóng bảng điều khiển</button>
         </div>
     </div>
 
     <div id="alarm-overlay" class="hidden fixed inset-0 z-[300] flex-col items-center justify-center alarm-flash backdrop-blur-md px-6">
-        <div class="text-8xl mb-6 flex justify-center w-36 h-36 border-4 border-white/80 bg-white/20 rounded-full items-center shadow-[0_0_60px_rgba(255,255,255,0.4)]" style="animation:pulseRed 0.5s infinite"><i class="ph-fill ph-alarm text-white"></i></div>
-        <h2 id="alarm-title" class="text-4xl lg:text-6xl font-black text-white mb-4 tracking-widest drop-shadow-xl text-center uppercase">BÁO ĐỘNG ĐỎ!</h2>
+        <div class="text-8xl mb-6 flex justify-center w-36 h-36 border-4 border-white/80 bg-white/20 rounded-full items-center shadow-[0_0_60px_rgba(255,255,255,0.4)]" style="animation:pulseRed 0.5s infinite"><i class="ph-fill ph-speaker-high text-white"></i></div>
+        <h2 id="alarm-title" class="text-4xl lg:text-6xl font-black text-white mb-4 tracking-widest drop-shadow-xl text-center uppercase">ĐẾN GIỜ RỒI!</h2>
         <p id="alarm-message" class="text-xl lg:text-2xl text-white font-bold mb-10 max-w-md text-center bg-black/30 p-5 rounded-2xl border border-white/20 leading-relaxed"></p>
         <div class="flex flex-col gap-4 w-full max-w-sm">
             <button id="btn-alarm-complete" class="bg-white text-rose-600 font-black text-xl py-5 rounded-2xl shadow-2xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> ĐÃ HOÀN THÀNH</button>
-            <button id="btn-alarm-dismiss" class="bg-transparent border-2 border-white/50 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition hover:bg-white/10">Bỏ qua / Tắt chuông</button>
+            <button id="btn-alarm-dismiss" class="bg-transparent border-2 border-white/50 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition hover:bg-white/10">Bỏ qua / Tắt nhắc nhở</button>
         </div>
     </div>
 
@@ -225,146 +240,197 @@ window.showToast = (msg, icon='ph-check-circle') => {
     t.style.position='absolute'; t.style.left='50%';
     t.innerHTML=`<i class="ph-fill ${icon} text-xl text-primary"></i><span>${escapeHTML(msg)}</span>`;
     document.getElementById('toast-container').appendChild(t);
-    setTimeout(()=>{ t.classList.add('opacity-0', 'transition-opacity', 'duration-300'); setTimeout(()=>t.remove(),300); }, 3000);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
 };
 
-// ===================== 2. WEB AUDIO & TTS ENGINE (TINH TÚY 1 & 2) =====================
-let audioCtx = null; let audioUnlocked = false;
+// ===================== 2. PURE GOOGLE TTS ENGINE =====================
+let ttsUnlocked = false;
 
-window.initAudioContext = () => { 
-    if(!audioUnlocked){ 
-        audioCtx = new (window.AudioContext||window.webkitAudioContext)(); 
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        audioUnlocked=true; 
-        document.getElementById('bot-icon').classList.add('text-emerald-300');
-        
-        // Mở khóa Speech API
-        if('speechSynthesis' in window) {
-            let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.speechSynthesis.speak(u);
-        }
+// Đánh thức Speech API trên trình duyệt di động bằng 1 đoạn âm thanh rỗng
+window.initTTS = () => { 
+    if(!ttsUnlocked && 'speechSynthesis' in window){ 
+        let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.speechSynthesis.speak(u);
+        ttsUnlocked = true; 
+        const bot = document.getElementById('bot-icon');
+        if(bot) bot.classList.add('text-emerald-300');
     } 
 };
-document.body.addEventListener('click', initAudioContext, {once:true});
-document.body.addEventListener('touchstart', initAudioContext, {once:true});
-
-window.playAlarm = (pattern='urgent') => {
-    initAudioContext(); if(!audioCtx) return;
-    const patterns = {
-        urgent: [[880,.15],[0,.1],[880,.15],[0,.1],[1100,.3],[0,.1],[880,.15],[0,.1],[1100,.3],[0,.1],[880,.5]],
-        gentle: [[523,.3],[659,.3],[784,.6]],
-        warning: [[660,.2],[660,.2],[0,.1],[880,.4],[0,.1],[660,.2],[660,.2]],
-        success: [[523,.15],[659,.15],[784,.15],[1047,.4]]
-    };
-    let t = audioCtx.currentTime;
-    (patterns[pattern]||patterns.urgent).forEach(([freq,dur])=>{
-        if(freq===0){ t+=dur; return; }
-        try{
-            const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
-            osc.type = (pattern==='gentle'||pattern==='success') ? 'sine' : 'square';
-            osc.frequency.value=freq; gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.01,t+dur-0.02);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t+dur);
-        }catch(e){} t+=dur;
-    });
-};
+document.body.addEventListener('click', initTTS, {once:true});
+document.body.addEventListener('touchstart', initTTS, {once:true});
 
 let ttsQueue = [], ttsSpeaking = false;
 window.speak = (text, rate=1.05, pitch=1) => {
     if(!('speechSynthesis' in window)) return;
-    initAudioContext(); ttsQueue.push({text, rate, pitch}); if(!ttsSpeaking) processTTSQueue();
+    initTTS(); // Đảm bảo API đã được đánh thức
+    ttsQueue.push({text, rate, pitch}); 
+    if(!ttsSpeaking) processTTSQueue();
 };
+
 function processTTSQueue(){
-    if(ttsQueue.length===0){ ttsSpeaking=false; return; }
-    ttsSpeaking=true; const {text, rate, pitch} = ttsQueue.shift();
+    if(ttsQueue.length===0){ 
+        ttsSpeaking=false; 
+        const bot = document.getElementById('bot-icon');
+        if(bot) bot.classList.remove('speaking-glow');
+        return; 
+    }
+    ttsSpeaking=true; 
+    const {text, rate, pitch} = ttsQueue.shift();
+    
+    const bot = document.getElementById('bot-icon');
+    if(bot) bot.classList.add('speaking-glow'); // Hiệu ứng chớp sáng khi nói
+    
     const voices = window.speechSynthesis.getVoices();
     let voice = voices.find(v => v.lang==='vi-VN' && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('vi'));
+    
     const utt = new SpeechSynthesisUtterance(text);
-    if(voice) utt.voice = voice; utt.lang = 'vi-VN'; utt.rate = rate; utt.pitch = pitch;
-    utt.onend = () => processTTSQueue(); utt.onerror = () => processTTSQueue();
-    window.speechSynthesis.cancel(); window.speechSynthesis.speak(utt);
+    if(voice) utt.voice = voice; 
+    utt.lang = 'vi-VN'; utt.rate = rate; utt.pitch = pitch;
+    
+    utt.onend = () => processTTSQueue(); 
+    utt.onerror = () => processTTSQueue();
+    
+    window.speechSynthesis.cancel(); 
+    window.speechSynthesis.speak(utt);
 }
-// Chrome anti-pause
+
+// Anti-pause Chrome bug
 if('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
 }
 
-// ===================== 3. SENTINEL AI GUARD (TINH TÚY 3) =====================
-let sentinelInterval = null, alarmedTasks = new Set(), sentinelLogs = JSON.parse(localStorage.getItem('lifeos_logs')) || [];
+// ===================== 3. SENTINEL VOICE GUARD =====================
+let sentinelInterval = null, alarmedTasks = new Set(), sentinelLogs = JSON.parse(localStorage.getItem('lifeos_v7_logs'))||[];
 let activeAlarmTaskId = null, alarmLoop = null;
 
 function initSentinel(){
     if(sentinelInterval) clearInterval(sentinelInterval);
-    sentinelInterval = setInterval(checkDeadlines, 10000); setTimeout(checkDeadlines, 1500);
+    sentinelInterval = setInterval(checkDeadlines, 10000);
+    setTimeout(checkDeadlines, 1500);
 }
 
 function checkDeadlines(){
-    const now = nowHHMM(), todayStr = getTodayStr(); let hasWarning = false;
+    const now = nowHHMM(), todayStr = getTodayStr();
+    let hasWarning = false;
     
     todos.forEach(task => {
         if(task.completed || !task.alarmTime) return;
         const taskDate = task.date || todayStr;
-        if(taskDate > todayStr) return; // Future
+        if(taskDate > todayStr) return;
         
-        // Quá hạn
         if(taskDate < todayStr){
             if(!alarmedTasks.has('overdue_'+task.id)){
-                alarmedTasks.add('overdue_'+task.id); hasWarning = true; addLog(task, 'QUÁ HẠN');
-                playAlarm('warning'); speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn.`); showToast(`Quá hạn: ${task.text}`, 'ph-warning-circle');
-            } return;
+                alarmedTasks.add('overdue_'+task.id); hasWarning = true;
+                addLog(task, 'QUÁ HẠN');
+                vibrate([300,100,300]);
+                speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn. Hãy xử lý ngay!`, 0.95);
+                showToast(`Quá hạn: ${task.text}`, 'ph-warning-circle');
+            }
+            return;
         }
         
-        // Đúng giờ
         if(task.alarmTime <= now && !alarmedTasks.has(task.id)){
-            alarmedTasks.add(task.id); hasWarning = true; addLog(task, 'BÁO ĐỘNG'); triggerFullAlarm(task);
+            alarmedTasks.add(task.id); hasWarning = true;
+            addLog(task, 'BÁO ĐỘNG');
+            triggerFullAlarm(task);
         }
         
-        // Cảnh báo 5 phút
         const [h,m] = task.alarmTime.split(':').map(Number);
         let tMin = h*60 + m - 5; if(tMin < 0) tMin = 0;
         const warnTime = `${String(Math.floor(tMin/60)).padStart(2,'0')}:${String(tMin%60).padStart(2,'0')}`;
         if(warnTime <= now && now < task.alarmTime && !alarmedTasks.has('warn5_'+task.id)){
-            alarmedTasks.add('warn5_'+task.id); addLog(task, 'CÒN 5 PHÚT');
-            playAlarm('gentle'); speak(`Chú ý, còn 5 phút nữa là đến giờ: ${task.text}`); showToast(`Sắp đến giờ: ${task.text}`, 'ph-clock');
+            alarmedTasks.add('warn5_'+task.id);
+            addLog(task, 'CÒN 5 PHÚT');
+            vibrate([100,50,100]);
+            speak(`Nhắc nhở nhẹ. Còn 5 phút nữa là đến giờ làm nhiệm vụ: ${task.text}`);
+            showToast(`Sắp đến giờ: ${task.text}`, 'ph-clock');
         }
     });
     
-    // Cập nhật Badge
+    updateSentinelBadge(hasWarning);
+}
+
+function updateSentinelBadge(hasWarning){
     const badge = document.getElementById('sentinel-badge');
-    if(hasWarning || Array.from(alarmedTasks).some(id => typeof id === 'number' || id.startsWith('overdue_'))){
+    if(hasWarning){
         badge.className='text-[10px] sm:text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/40 px-2 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-md shadow-rose-500/20';
-        badge.innerHTML='<i class="ph-fill ph-warning-circle text-lg"></i> <span class="hidden sm:inline">Cảnh báo Đỏ</span>'; badge.style.animation='pulseRed 1s infinite';
+        badge.innerHTML='<i class="ph-fill ph-warning-circle text-lg"></i> <span class="hidden sm:inline">Cảnh báo Đỏ</span>';
+        badge.style.animation='pulseRed 1s infinite';
     } else {
         badge.className='text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-2 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-colors';
-        badge.innerHTML='<i class="ph-fill ph-shield-check text-lg"></i> <span class="hidden sm:inline">An toàn</span>'; badge.style.animation='sentinelPulse 2s infinite';
+        badge.innerHTML='<i class="ph-fill ph-shield-check text-lg"></i> <span class="hidden sm:inline">An toàn</span>';
+        badge.style.animation='sentinelPulse 2s infinite';
     }
 }
 
-function addLog(task, type){ sentinelLogs.unshift({ text: task.text, type, time: nowHHMM() }); if(sentinelLogs.length > 25) sentinelLogs.pop(); localStorage.setItem('lifeos_logs', JSON.stringify(sentinelLogs)); }
-
-function triggerFullAlarm(task){
-    if(activeAlarmTaskId) return; activeAlarmTaskId = task.id;
-    playAlarm('urgent'); vibrate([500,200,500,200,500]);
-    speak(`Báo động khẩn cấp! Yêu cầu thực hiện ngay: ${task.text}.`, 1.15, 1);
-    document.getElementById('alarm-message').textContent = `"${task.text}"`; document.getElementById('alarm-overlay').classList.remove('hidden'); document.getElementById('alarm-overlay').classList.add('flex');
-    if(alarmLoop) clearInterval(alarmLoop); alarmLoop = setInterval(()=>{ playAlarm('urgent'); speak(`Nhắc lại, đến giờ làm: ${task.text}`, 1.15); }, 10000);
+function addLog(task, type){
+    sentinelLogs.unshift({ text: task.text, type, time: nowHHMM() });
+    if(sentinelLogs.length > 30) sentinelLogs.pop();
+    localStorage.setItem('lifeos_v7_logs', JSON.stringify(sentinelLogs));
 }
 
-document.getElementById('btn-alarm-complete').onclick = () => { if(activeAlarmTaskId) toggleTask(activeAlarmTaskId, true); closeFullAlarm(); };
-document.getElementById('btn-alarm-dismiss').onclick = () => { closeFullAlarm(); speak('Đã tắt chuông. Hãy tự giác hoàn thành nhé.'); saveAndRender(); };
-function closeFullAlarm(){ document.getElementById('alarm-overlay').classList.replace('flex','hidden'); clearInterval(alarmLoop); window.speechSynthesis.cancel(); activeAlarmTaskId = null; }
+function triggerFullAlarm(task){
+    if(activeAlarmTaskId) return;
+    activeAlarmTaskId = task.id;
+    vibrate([500,200,500,200,500]);
+    speak(`Báo động khẩn cấp! Đã đến giờ thực hiện nhiệm vụ: ${task.text}. Yêu cầu xác nhận!`, 1.15, 1.2);
+    
+    document.getElementById('alarm-message').textContent = `"${task.text}"`;
+    const overlay = document.getElementById('alarm-overlay');
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+    
+    if(alarmLoop) clearInterval(alarmLoop);
+    alarmLoop = setInterval(()=>{
+        vibrate([500,200,500]);
+        speak(`Tôi nhắc lại. Yêu cầu hoàn thành nhiệm vụ: ${task.text}`, 1.1, 1.1);
+    }, 12000); // Lặp lại bằng giọng nói mỗi 12 giây thay vì tiếng chuông
+}
+
+function closeFullAlarm(){
+    const overlay = document.getElementById('alarm-overlay');
+    overlay.classList.add('hidden');
+    overlay.style.display = '';
+    clearInterval(alarmLoop);
+    window.speechSynthesis.cancel();
+    activeAlarmTaskId = null;
+}
+
+document.getElementById('btn-alarm-complete').onclick = () => {
+    if(activeAlarmTaskId){
+        toggleTask(activeAlarmTaskId, true);
+        if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[0].click();
+    }
+    closeFullAlarm();
+};
+document.getElementById('btn-alarm-dismiss').onclick = () => {
+    closeFullAlarm();
+    speak('Đã tắt cảnh báo giọng nói. Bạn nhớ tự giác làm việc nhé.');
+    saveAndRender();
+};
 
 window.showSentinelPanel = () => {
-    document.getElementById('sentinel-panel').classList.remove('hidden'); const logEl = document.getElementById('sentinel-log');
+    document.getElementById('sentinel-panel').classList.remove('hidden');
+    const logEl = document.getElementById('sentinel-log');
+    const alarmCount = todos.filter(t=>!t.completed&&t.alarmTime).length;
+    
     if(sentinelLogs.length === 0){
-        logEl.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="ph-duotone ph-shield-check text-6xl mb-4 text-emerald-400"></i><p class="font-bold text-lg text-slate-600 dark:text-slate-300">Hệ thống Bình An!</p><p class="text-sm mt-1">Đang bảo vệ ${todos.filter(t=>!t.completed&&t.alarmTime).length} báo thức.</p></div>`;
+        logEl.innerHTML = `<div class="text-center py-10 text-slate-400">
+            <i class="ph-duotone ph-shield-check text-6xl mb-4 text-emerald-400"></i>
+            <p class="font-bold text-lg text-slate-600 dark:text-slate-300">Hệ thống Bình An!</p>
+            <p class="text-sm mt-1">Đang bảo vệ ${alarmCount} báo thức bằng Giọng nói AI.</p>
+        </div>`;
     } else {
         logEl.innerHTML = sentinelLogs.map(log => {
             const isRed = log.type.includes('QUÁ') || log.type.includes('BÁO ĐỘNG');
             return `<div class="flex items-center gap-3.5 p-4 rounded-xl mb-3 ${isRed?'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800':'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'}">
-                <i class="ph-fill ${isRed?'ph-warning-circle text-rose-500':'ph-clock text-amber-500'} text-3xl"></i>
+                <i class="ph-fill ${isRed?'ph-warning-circle text-rose-500':'ph-clock text-amber-500'} text-3xl flex-shrink-0"></i>
                 <div class="flex-grow min-w-0">
                     <p class="text-[15px] font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHTML(log.text)}</p>
-                    <div class="flex items-center gap-2 mt-1.5"><span class="text-[10px] font-black ${isRed?'text-rose-600 bg-rose-200 dark:bg-rose-900':'text-amber-600 bg-amber-200 dark:bg-amber-900'} px-2 py-0.5 rounded uppercase">${log.type}</span><span class="text-[11px] font-bold text-slate-500">${log.time}</span></div>
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <span class="text-[10px] font-black ${isRed?'text-rose-600 bg-rose-200 dark:bg-rose-900':'text-amber-600 bg-amber-200 dark:bg-amber-900'} px-2 py-0.5 rounded uppercase">${log.type}</span>
+                        <span class="text-[11px] font-bold text-slate-500">${log.time}</span>
+                    </div>
                 </div>
             </div>`;
         }).join('');
@@ -372,46 +438,64 @@ window.showSentinelPanel = () => {
 };
 window.closeSentinelPanel = () => document.getElementById('sentinel-panel').classList.add('hidden');
 
-// ===================== 4. NLP PARSER (@ GIỜ) =====================
+// ===================== 4. NLP PARSER =====================
 function parseSmartInput(text){
-    let priority='medium', category='Mục tiêu', dateStr='', alarmTime=''; let cleanText=text; const today=new Date();
-    if(cleanText.match(/!gấp|!khẩn/i)){priority='high';cleanText=cleanText.replace(/!gấp|!khẩn/ig,'');}
-    const catMatch=cleanText.match(/#([\p{L}0-9_]+)/u); if(catMatch){category=catMatch[1];cleanText=cleanText.replace(catMatch[0],'');}
+    let priority='medium', category='Mục tiêu', dateStr='', alarmTime='';
+    let cleanText=text; const today=new Date();
     
-    // Tinh túy 5: Cú pháp @
+    if(cleanText.match(/!gấp|!khẩn|!urgent/i)){priority='high';cleanText=cleanText.replace(/!gấp|!khẩn|!urgent/ig,'');}
+    else if(cleanText.match(/!thấp|!chill/i)){priority='low';cleanText=cleanText.replace(/!thấp|!chill/ig,'');}
+    
+    const catMatch=cleanText.match(/#([\p{L}0-9_]+)/u);
+    if(catMatch){category=catMatch[1];cleanText=cleanText.replace(catMatch[0],'');}
+    
     const timeMatch=cleanText.match(/@(\d{1,2})[h:](\d{2})?(p)?/i) || cleanText.match(/@(\d{1,2})h(\d{2})?/i);
     if(timeMatch){
         let hh=parseInt(timeMatch[1]), mm=parseInt(timeMatch[2]||'0');
-        if(timeMatch[3]||hh<6) hh+=12; if(hh>=24) hh=24;
+        if(timeMatch[3]||hh<6) hh+=12;
+        if(hh>=24) hh=24;
         alarmTime=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
         cleanText=cleanText.replace(timeMatch[0],'');
     }
     
-    if(cleanText.match(/\b(ngày mai|mai)\b/i)){ const tmr=new Date(today); tmr.setDate(tmr.getDate()+1); dateStr=tmr.toISOString().split('T')[0]; cleanText=cleanText.replace(/\b(ngày mai|mai)\b/ig,''); }
+    if(cleanText.match(/\b(ngày mai|mai)\b/i)){
+        const tmr=new Date(today); tmr.setDate(tmr.getDate()+1);
+        dateStr=tmr.toISOString().split('T')[0];
+        cleanText=cleanText.replace(/\b(ngày mai|mai)\b/ig,'');
+    } else if(cleanText.match(/\b(hôm nay|nay)\b/i)){
+        dateStr=getTodayStr();
+        cleanText=cleanText.replace(/\b(hôm nay|nay)\b/ig,'');
+    }
+    
     if(alarmTime && !dateStr) dateStr=getTodayStr();
-    return {text:cleanText.trim().replace(/\s+/g,' '), priority, category:category.charAt(0).toUpperCase()+category.slice(1), date:dateStr, alarmTime};
+    
+    return { text:cleanText.trim().replace(/\s+/g,' '), priority, category:category.charAt(0).toUpperCase()+category.slice(1), date:dateStr, alarmTime };
 }
 
-let todos = JSON.parse(localStorage.getItem('lifeos_v5'))||[];
-let stats = JSON.parse(localStorage.getItem('lifeos_stats'))||{streak:0,lastDate:null};
-let currentFilter='all'; let pinnedTaskId=null;
+// ===================== 5. STATE =====================
+let todos = JSON.parse(localStorage.getItem('lifeos_v7'))||[];
+let stats = JSON.parse(localStorage.getItem('lifeos_stats_v7'))||{streak:0,lastDate:null};
+let currentFilter='all'; let pinnedTaskId=null; let openActionId = null; 
 
 function checkStreak(){
     const today=getTodayStr();
     if(stats.lastDate && stats.lastDate!==today){
         const diff=Math.floor((new Date(today)-new Date(stats.lastDate))/(1000*60*60*24));
-        if(diff>1 && stats.streak>0){ stats.streak=0; showToast('Rất tiếc, chuỗi kỷ luật đã đứt!','ph-heart-break'); }
+        if(diff>1 && stats.streak>0){ 
+            stats.streak=0; 
+            speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!'); 
+        }
     }
-    const streakEl = document.getElementById('streak-count');
-    if(streakEl) streakEl.textContent=stats.streak;
-    localStorage.setItem('lifeos_stats',JSON.stringify(stats));
+    document.getElementById('streak-count').textContent=stats.streak;
+    localStorage.setItem('lifeos_stats_v7',JSON.stringify(stats));
 }
 checkStreak();
 
-// ===================== 5. MODALS (BOTTOM SHEET - TINH TÚY 4) =====================
+// ===================== 6. MODALS =====================
 window.openEditModal = id => {
     const task = todos.find(t => t.id === id); if(!task) return;
-    document.getElementById('modal-container').innerHTML = `
+    const mc = document.getElementById('modal-container');
+    mc.innerHTML = `
     <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-sheet shadow-2xl">
             <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 lg:hidden"></div>
@@ -444,48 +528,64 @@ window.openEditModal = id => {
                         <input id="edit-date" type="date" value="${task.date||''}" class="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-800 dark:text-white outline-none border border-slate-200 dark:border-slate-700 focus:border-primary transition">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 flex items-center gap-1"><i class="ph-fill ph-bell-ringing text-amber-500"></i> Báo thức</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 flex items-center gap-1"><i class="ph-fill ph-speaker-high text-amber-500"></i> Nhắc nhở AI</label>
                         <input id="edit-alarm" type="time" value="${task.alarmTime||''}" class="w-full bg-amber-50 dark:bg-amber-900/10 rounded-xl px-4 py-3.5 text-sm font-bold text-amber-700 dark:text-amber-400 outline-none border border-amber-200 dark:border-amber-800/50 focus:border-amber-500 transition">
                     </div>
+                </div>
+                <div class="flex items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <input id="edit-completed" type="checkbox" ${task.completed?'checked':''} class="w-5 h-5 rounded accent-emerald-500 cursor-pointer">
+                    <label for="edit-completed" class="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">Đánh dấu đã hoàn thành</label>
                 </div>
             </div>
             <div class="flex gap-3 mt-8">
                 <button onclick="closeModal()" class="px-6 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition lg:hidden">Đóng</button>
-                <button onclick="saveEdit(${task.id})" class="flex-1 py-4 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg shadow-indigo-500/30 flex justify-center items-center gap-2 hover:bg-indigo-600">
-                    <i class="ph-bold ph-floppy-disk text-lg"></i> Lưu Thay Đổi
-                </button>
+                <button onclick="deleteFromEdit(${task.id})" class="px-5 py-4 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-500 font-bold active:scale-95 transition border border-rose-200 dark:border-rose-800/50 flex items-center gap-2"><i class="ph-bold ph-trash"></i></button>
+                <button onclick="saveEdit(${task.id})" class="flex-1 py-4 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg shadow-indigo-500/30 flex justify-center items-center gap-2 hover:bg-indigo-600"><i class="ph-bold ph-floppy-disk text-lg"></i> Lưu</button>
             </div>
         </div>
     </div>`;
+    setTimeout(()=>{ const el = document.getElementById('edit-text'); if(el) el.focus(); }, 350);
 };
 
 window.saveEdit = id => {
-    const task = todos.find(t => t.id === id);
+    const task = todos.find(t => t.id === id); if(!task) return;
     const newText = document.getElementById('edit-text').value.trim();
-    if(!newText){ showToast('Vui lòng nhập tên công việc!','ph-warning'); return; }
+    if(!newText){ showToast('Vui lòng nhập tên!','ph-warning'); return; }
     
+    const wasCompleted = task.completed; const newAlarm = document.getElementById('edit-alarm').value;
     task.text = newText; task.priority = document.getElementById('edit-priority').value;
     task.category = document.getElementById('edit-category').value.trim() || 'Chung';
-    task.date = document.getElementById('edit-date').value; 
-    const newAlarm = document.getElementById('edit-alarm').value;
-    if(task.alarmTime !== newAlarm){
-        task.alarmTime = newAlarm; alarmedTasks.delete(task.id); alarmedTasks.delete('warn5_'+task.id); alarmedTasks.delete('overdue_'+task.id);
-        if(newAlarm) speak(`Đã thiết lập lại giờ báo thức là ${newAlarm.replace(':',' giờ ')} phút.`);
+    task.date = document.getElementById('edit-date').value; task.alarmTime = newAlarm;
+    task.completed = document.getElementById('edit-completed').checked;
+    
+    if(newAlarm !== task.alarmTime || task.date !== document.getElementById('edit-date').value){
+        alarmedTasks.delete(task.id); alarmedTasks.delete('warn5_'+task.id); alarmedTasks.delete('overdue_'+task.id);
     }
+    if(task.completed && !wasCompleted){
+        vibrate([30,50]); confetti({particleCount:80,spread:60,origin:{y:0.7},colors:['#6366f1','#10b981']});
+        speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`);
+        if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
+        if(stats.lastDate!==today){stats.streak+=1;stats.lastDate=today;checkStreak();}
+    }
+    if(!task.completed && wasCompleted){ alarmedTasks.delete(task.id); alarmedTasks.delete('overdue_'+task.id); }
+    if(newAlarm && !wasCompleted && newAlarm !== task.alarmTime) speak(`Đã cập nhật, Chị Google sẽ nhắc bạn lúc ${newAlarm.replace(':',' giờ ')} phút.`);
+    
     closeModal(); saveAndRender(); showToast('Đã lưu chỉnh sửa!', 'ph-check-circle');
 };
 
+window.deleteFromEdit = id => { closeModal(); setTimeout(()=> confirmDelete(id), 200); };
+
 window.confirmDelete = id => {
     const task = todos.find(t => t.id === id); if(!task) return;
-    document.getElementById('modal-container').innerHTML=`
+    document.getElementById('modal-container').innerHTML = `
     <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-sheet !max-w-sm text-center">
             <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 lg:hidden"></div>
             <div class="w-24 h-24 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-6"><i class="ph-fill ph-trash text-5xl text-rose-500"></i></div>
-            <h2 class="text-2xl font-black mb-3">Xóa Vĩnh Viễn?</h2>
-            <p class="text-sm text-slate-500 mb-8 font-medium">Bạn có chắc muốn xóa "${escapeHTML(task.text)}" không?</p>
+            <h2 class="text-2xl font-black mb-3 text-slate-800 dark:text-white">Xóa Vĩnh Viễn?</h2>
+            <p class="text-sm text-slate-500 mb-8 font-medium leading-relaxed">Bạn có chắc muốn xóa<br>"<span class="font-bold text-slate-700 dark:text-slate-300">${escapeHTML(task.text)}</span>"?</p>
             <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold active:scale-95 transition hover:bg-slate-200">Giữ lại</button>
+                <button onclick="closeModal()" class="flex-1 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold active:scale-95 transition hover:bg-slate-200 text-slate-600 dark:text-slate-300">Giữ lại</button>
                 <button onclick="execDelete(${id})" class="flex-1 py-4 rounded-xl bg-rose-500 text-white font-bold active:scale-95 transition shadow-lg hover:bg-rose-600">Vâng, Xóa</button>
             </div>
         </div>
@@ -493,183 +593,251 @@ window.confirmDelete = id => {
 };
 
 window.execDelete = id => {
-    todos = todos.filter(t => t.id !== id); if(pinnedTaskId===id) unpinTask();
-    alarmedTasks.delete(id); alarmedTasks.delete('overdue_'+id); alarmedTasks.delete('warn5_'+id);
-    closeModal(); saveAndRender(); showToast('Đã xóa bỏ!', 'ph-trash');
+    const li = document.querySelector(`[data-task-id="${id}"]`);
+    const doDelete = () => {
+        todos = todos.filter(t => t.id !== id); if(pinnedTaskId===id) unpinTask();
+        alarmedTasks.delete(id); alarmedTasks.delete('overdue_'+id); alarmedTasks.delete('warn5_'+id);
+        openActionId = null; closeModal(); saveAndRender(); showToast('Đã xóa bỏ!', 'ph-trash');
+    };
+    if(li){ li.classList.add('slide-out'); setTimeout(doDelete, 300); } else doDelete();
 };
-window.closeModal = () => document.getElementById('modal-container').innerHTML='';
+window.closeModal = () => { document.getElementById('modal-container').innerHTML=''; };
 
-// ===================== 6. RENDERING & GESTURES =====================
+// ===================== 7. ACTIONS =====================
 window.toggleTask = (id, forceComplete=false) => {
-    initAudioContext();
-    const task = todos.find(t=>t.id===id); task.completed = forceComplete ? true : !task.completed;
+    initTTS();
+    const task = todos.find(t=>t.id===id); if(!task) return;
+    task.completed = forceComplete ? true : !task.completed;
     if(task.completed){
-        vibrate([30,50]); confetti({particleCount:100,spread:70,origin:{y:0.6},colors:['#6366f1','#10b981']});
-        playAlarm('success'); speak(`Xuất sắc! Bạn đã hoàn thành: ${task.text}`);
-        if(pinnedTaskId===id) unpinTask();
-        const today=getTodayStr(); if(stats.lastDate!==today){stats.streak+=1;stats.lastDate=today;checkStreak();showToast(`Chuỗi ${stats.streak} ngày!`,'ph-fire');}
-    } else { alarmedTasks.delete(id); alarmedTasks.delete('overdue_'+id); vibrate(20); }
+        vibrate([30,50]); confetti({particleCount:100,spread:70,origin:{y:0.6},colors:['#6366f1','#10b981','#f59e0b']});
+        speak(`Làm tốt lắm! Bạn đã xử lý xong: ${task.text}`);
+        if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
+        if(stats.lastDate!==today){ stats.streak+=1; stats.lastDate=today; checkStreak(); showToast(`Chuỗi ${stats.streak} ngày liên tiếp!`,'ph-fire'); }
+        else { showToast('Hoàn thành!','ph-check-circle'); } openActionId = null;
+    } else {
+        alarmedTasks.delete(id); alarmedTasks.delete('overdue_'+id); vibrate(20);
+    }
     saveAndRender();
 };
 
-window.pinTask = (id, text) => { pinnedTaskId=id; document.getElementById('focus-task-name').textContent=text; document.getElementById('focus-task-card').classList.remove('hidden'); if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[1].click(); showToast('Đã ghim!','ph-target'); saveAndRender(); };
+window.pinTask = (id, text) => { pinnedTaskId=id; document.getElementById('focus-task-name').textContent=text; document.getElementById('focus-task-card').classList.remove('hidden'); if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[1].click(); showToast('Đã ghim! Tập trung hoàn thành nó.','ph-target'); saveAndRender(); };
 window.unpinTask = () => { pinnedTaskId=null; document.getElementById('focus-task-card').classList.add('hidden'); saveAndRender(); };
 
-function saveAndRender(){
-    localStorage.setItem('lifeos_v5', JSON.stringify(todos));
-    const list=document.getElementById('todo-list'); list.innerHTML=''; const todayStr=getTodayStr();
-    
-    let filtered=todos.filter(t=>{ if(currentFilter==='active') return !t.completed; if(currentFilter==='overdue') return !t.completed && t.date && t.date < todayStr; return true; });
+document.addEventListener('click', (e) => {
+    if(openActionId !== null && window.innerWidth < 1024){
+        if(!e.target.closest('.action-btn-mobile') && !e.target.closest('[data-more-btn]')){
+            openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions'));
+        }
+    }
+});
+window.toggleMobileActions = (id, e) => {
+    e.stopPropagation();
+    if(openActionId === id){ openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); } 
+    else { openActionId = id; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); const item = document.querySelector(`[data-task-id="${id}"]`); if(item) item.classList.add('show-actions'); }
+};
 
-    filtered.sort((a,b)=>{
-        if(a.completed!==b.completed) return a.completed?1:-1;
-        const aO=(!a.completed&&a.date&&a.date<todayStr)?1:0, bO=(!b.completed&&b.date&&b.date<todayStr)?1:0;
-        if(aO!==bO) return bO-aO;
-        if(a.alarmTime&&!b.alarmTime) return -1; if(!a.alarmTime&&b.alarmTime) return 1;
-        if(a.alarmTime&&b.alarmTime) return a.alarmTime.localeCompare(b.alarmTime);
-        const w={high:3,medium:2,low:1}; if(w[b.priority]!==w[a.priority]) return w[b.priority]-w[a.priority];
-        return b.id-a.id;
+// ===================== 8. RENDER =====================
+function saveAndRender(){
+    localStorage.setItem('lifeos_v7', JSON.stringify(todos));
+    const list = document.getElementById('todo-list'); list.innerHTML = ''; const todayStr = getTodayStr();
+    
+    let filtered = todos.filter(t => { if(currentFilter==='active') return !t.completed; if(currentFilter==='overdue') return !t.completed && t.date && t.date < todayStr; return true; });
+
+    filtered.sort((a,b) => {
+        if(a.completed !== b.completed) return a.completed ? 1 : -1;
+        const aO = (!a.completed && a.date && a.date < todayStr) ? 1 : 0, bO = (!b.completed && b.date && b.date < todayStr) ? 1 : 0;
+        if(aO !== bO) return bO - aO;
+        if(a.alarmTime && !b.alarmTime) return -1; if(!a.alarmTime && b.alarmTime) return 1;
+        if(a.alarmTime && b.alarmTime) return a.alarmTime.localeCompare(b.alarmTime);
+        const w = {high:3, medium:2, low:1}; if(w[b.priority] !== w[a.priority]) return w[b.priority] - w[a.priority]; return b.id - a.id;
     });
 
-    document.getElementById('empty-state').style.display=filtered.length===0?'flex':'none';
+    document.getElementById('empty-state').style.display = filtered.length === 0 ? 'flex' : 'none';
 
-    filtered.forEach(t=>{
-        const isOverdue=!t.completed&&t.date&&t.date<todayStr, isToday=t.date===todayStr, isPinned=pinnedTaskId===t.id;
-        // Check nếu tác vụ này đã đến giờ chưa xong (Alarmed) thì cho nháy đỏ
-        const isAlarmed=!t.completed && (alarmedTasks.has(t.id) || (isOverdue && alarmedTasks.has('overdue_'+t.id)));
+    filtered.forEach(t => {
+        const isOverdue = !t.completed && t.date && t.date < todayStr, isToday = t.date === todayStr, isPinned = pinnedTaskId === t.id, isAlarmed = !t.completed && (alarmedTasks.has(t.id) || (isOverdue && alarmedTasks.has('overdue_'+t.id))), isShowingActions = openActionId === t.id;
         
         let metaHtml = `<span class="bg-slate-100 dark:bg-slate-800 font-bold px-2 py-0.5 rounded-lg text-slate-500">#${escapeHTML(t.category)}</span>`;
-        if(t.date) metaHtml += `<span class="${isOverdue?'text-rose-600 bg-rose-100 dark:bg-rose-900/30':(isToday?'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30':'text-slate-500 bg-slate-100 dark:bg-slate-800')} px-2 py-0.5 rounded-lg font-bold">${isOverdue?'Quá hạn':(isToday?'Hôm nay':new Date(t.date).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'}))}</span>`;
-        if(t.alarmTime && !t.completed) metaHtml += `<span class="${isAlarmed?'text-rose-600 bg-rose-100 dark:bg-rose-900/40 border border-rose-200 dark:border-rose-800 animate-pulse':'text-amber-600 bg-amber-50 dark:bg-amber-900/30'} px-2 py-0.5 rounded-lg font-bold flex items-center gap-1"><i class="ph-fill ph-bell-ringing text-[10px]"></i>${t.alarmTime}</span>`;
+        if(t.date) metaHtml += `<span class="${isOverdue?'text-rose-600 bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800':(isToday?'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30':'text-slate-500 bg-slate-100 dark:bg-slate-800')} px-2 py-0.5 rounded-lg font-bold">${isOverdue?'Quá hạn':(isToday?'Hôm nay':new Date(t.date).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'}))}</span>`;
+        if(t.alarmTime && !t.completed) metaHtml += `<span class="${isAlarmed?'text-rose-600 bg-rose-100 dark:bg-rose-900/40 border border-rose-200 dark:border-rose-800 animate-pulse':'text-amber-600 bg-amber-50 dark:bg-amber-900/30'} px-2 py-0.5 rounded-lg font-bold flex items-center gap-1"><i class="ph-fill ph-speaker-high text-[10px]"></i>${t.alarmTime}</span>`;
 
-        const pColor=t.priority==='high'?'bg-rose-500':(t.priority==='low'?'bg-emerald-500':'bg-amber-500');
-        const li=document.createElement('li');
-        li.className=`swipe-item group bg-white dark:bg-darkcard border ${isAlarmed?'border-rose-400 dark:border-rose-600 alarm-flash':'border-slate-200 dark:border-slate-800'} rounded-2xl shadow-sm mb-3 transition-all ${isPinned?'ring-2 ring-indigo-500/50':''} hover:shadow-md`;
+        const pColor = t.priority==='high'?'bg-rose-500':(t.priority==='low'?'bg-emerald-500':'bg-amber-500');
+        const safeText = escapeHTML(t.text).replace(/'/g, "\\'");
+        
+        const li = document.createElement('li');
+        li.className = `swipe-item ${isShowingActions?'show-actions':''} group bg-white dark:bg-darkcard border ${isAlarmed?'border-rose-400 dark:border-rose-600 alarm-flash':'border-slate-200 dark:border-slate-800'} rounded-2xl shadow-sm mb-3 transition-all ${isPinned?'ring-2 ring-indigo-500/50':''} hover:shadow-md`;
+        li.setAttribute('data-task-id', t.id);
 
-        li.innerHTML=`
+        li.innerHTML = `
             <div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div>
             <div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div>
             <div class="swipe-front flex flex-col sm:flex-row sm:items-center w-full p-4 gap-3 transition-transform ${t.completed?'opacity-50 grayscale-[30%]':''}">
                 <div class="priority-bar ${pColor} hidden sm:block"></div>
                 <div class="flex items-start sm:items-center gap-3.5 flex-grow min-w-0 cursor-pointer pl-1" onclick="toggleTask(${t.id})">
-                    <button class="flex-shrink-0 w-6 h-6 mt-0.5 sm:mt-0 rounded-full border-2 flex items-center justify-center transition-all ${t.completed?'border-emerald-500 bg-emerald-500 shadow-md':'border-slate-300 dark:border-slate-500 group-hover:border-primary'} pointer-events-none sm:pointer-events-auto">
+                    <div class="flex-shrink-0 w-6 h-6 mt-0.5 sm:mt-0 rounded-full border-2 flex items-center justify-center transition-all ${t.completed?'border-emerald-500 bg-emerald-500 shadow-md':'border-slate-300 dark:border-slate-500 group-hover:border-primary'} pointer-events-none sm:pointer-events-auto">
                         ${t.completed?'<i class="ph-bold ph-check text-white text-[10px]"></i>':''}
-                    </button>
+                    </div>
                     <div class="flex-grow min-w-0">
                         <div class="flex items-center gap-2 mb-0.5">
                             <h3 class="text-[16px] font-bold truncate ${t.completed?'line-through text-slate-400':(isOverdue?'text-rose-600':'text-slate-800 dark:text-slate-100')}">${escapeHTML(t.text)}</h3>
-                            ${t.priority==='high'&&!t.completed?'<span class="text-[9px] font-black bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded uppercase border border-rose-200 flex-shrink-0">Khẩn</span>':''}
+                            ${t.priority==='high'&&!t.completed?'<span class="text-[9px] font-black bg-rose-100 dark:bg-rose-900/40 text-rose-600 px-1.5 py-0.5 rounded uppercase border border-rose-200 dark:border-rose-800 flex-shrink-0">Khẩn</span>':''}
                         </div>
-                        <div class="flex flex-wrap gap-2 text-[10px] mt-1.5 uppercase tracking-wide">${metaHtml}</div>
+                        <div class="flex flex-wrap gap-1.5 text-[10px] mt-1.5 uppercase tracking-wide">${metaHtml}</div>
                     </div>
                 </div>
                 
-                <div class="hidden lg:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${!t.completed?`<button onclick="pinTask(${t.id},'${escapeHTML(t.text.replace(/'/g,"\\'"))}')" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition" title="Ghim"><i class="ph-bold ph-target text-base"></i></button>`:''}
-                    <button onclick="openEditModal(${t.id})" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition" title="Sửa"><i class="ph-bold ph-pencil-simple text-base"></i></button>
-                    <button onclick="confirmDelete(${t.id})" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition" title="Xóa"><i class="ph-bold ph-trash text-base"></i></button>
+                <div class="hidden lg:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    ${!t.completed?`<button onclick="event.stopPropagation();pinTask(${t.id},'${safeText}')" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition" title="Ghim vào Timer"><i class="ph-bold ph-target text-base"></i></button>`:''}
+                    <button onclick="event.stopPropagation();openEditModal(${t.id})" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition" title="Sửa"><i class="ph-bold ph-pencil-simple text-base"></i></button>
+                    <button onclick="event.stopPropagation();confirmDelete(${t.id})" class="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition" title="Xóa"><i class="ph-bold ph-trash text-base"></i></button>
                 </div>
 
-                <div class="lg:hidden absolute right-3 top-1/2 -translate-y-1/2">
-                     <button onclick="openEditModal(${t.id})" class="p-2 text-slate-400 active:bg-slate-200 dark:active:bg-slate-700 rounded-full transition"><i class="ph-bold ph-dots-three-vertical text-xl"></i></button>
+                <div class="lg:hidden absolute right-3 top-1/2 -translate-y-1/2 flex-shrink-0">
+                    <button data-more-btn onclick="toggleMobileActions(${t.id}, event)" class="p-2 text-slate-400 active:bg-slate-200 dark:active:bg-slate-700 rounded-full transition">
+                        <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="action-btn-mobile lg:hidden absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white dark:bg-darkcard rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-1">
+                    ${!t.completed?`<button onclick="event.stopPropagation();pinTask(${t.id},'${safeText}')" class="p-2.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition active:scale-90" title="Ghim"><i class="ph-bold ph-target text-lg"></i></button>`:''}
+                    <button onclick="event.stopPropagation();openEditModal(${t.id})" class="p-2.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                    <button onclick="event.stopPropagation();confirmDelete(${t.id})" class="p-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-lg"></i></button>
                 </div>
             </div>
         `;
         list.appendChild(li);
 
-        // Mobile Swipe Cảm ứng
         if(window.innerWidth < 1024){
-            const front=li.querySelector('.swipe-front'), bgLeft=li.querySelector('.swipe-bg-left'), bgRight=li.querySelector('.swipe-bg-right');
-            let startX=0, currentX=0, isDragging=false; const threshold=75;
-            front.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;isDragging=true;front.style.transition='none';},{passive:true});
-            front.addEventListener('touchmove',e=>{
-                if(!isDragging)return; const diffX=e.touches[0].clientX-startX; if(t.completed&&diffX>0)return;
-                let moveX=diffX; if(moveX>threshold)moveX=threshold+(moveX-threshold)*0.3; if(moveX<-threshold)moveX=-threshold+(moveX+threshold)*0.3;
-                front.style.transform=`translateX(${moveX}px)`;
-                if(diffX>0){bgLeft.style.opacity=Math.min(diffX/threshold,1);bgRight.style.opacity=0;} else{bgRight.style.opacity=Math.min(Math.abs(diffX)/threshold,1);bgLeft.style.opacity=0;}
-                currentX=diffX;
-            },{passive:true});
-            front.addEventListener('touchend',()=>{
-                if(!isDragging)return; isDragging=false; front.style.transition='transform 0.3s cubic-bezier(0.2,0.8,0.2,1)';
-                if(currentX>threshold&&!t.completed){front.style.transform='translateX(100%)';setTimeout(()=>toggleTask(t.id),200);}
-                else if(currentX<-threshold){front.style.transform='translateX(-100%)';setTimeout(()=>{confirmDelete(t.id);front.style.transform='translateX(0)';},200);}
-                else{front.style.transform='translateX(0)';bgLeft.style.opacity=0;bgRight.style.opacity=0;} currentX=0;
+            const front = li.querySelector('.swipe-front'), bgLeft = li.querySelector('.swipe-bg-left'), bgRight = li.querySelector('.swipe-bg-right');
+            let startX=0, currentX=0, isDragging=false; const threshold = 75;
+            front.addEventListener('touchstart', e => {
+                if(openActionId !== null){ openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); }
+                startX = e.touches[0].clientX; isDragging = true; front.style.transition = 'none';
+            }, {passive:true});
+            front.addEventListener('touchmove', e => {
+                if(!isDragging) return; const diffX = e.touches[0].clientX - startX; if(t.completed && diffX > 0) return;
+                let moveX = diffX; if(moveX > threshold) moveX = threshold + (moveX - threshold) * 0.3; if(moveX < -threshold) moveX = -threshold + (moveX + threshold) * 0.3;
+                front.style.transform = `translateX(${moveX}px)`;
+                if(diffX > 0){ bgLeft.style.opacity = Math.min(diffX/threshold, 1); bgRight.style.opacity = 0; } else { bgRight.style.opacity = Math.min(Math.abs(diffX)/threshold, 1); bgLeft.style.opacity = 0; }
+                currentX = diffX;
+            }, {passive:true});
+            front.addEventListener('touchend', () => {
+                if(!isDragging) return; isDragging = false; front.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                if(currentX > threshold && !t.completed){ front.style.transform = 'translateX(100%)'; setTimeout(()=>toggleTask(t.id), 200); } 
+                else if(currentX < -threshold){ front.style.transform = 'translateX(-100%)'; setTimeout(()=>{confirmDelete(t.id); front.style.transform = 'translateX(0)';}, 250); } 
+                else { front.style.transform = 'translateX(0)'; bgLeft.style.opacity = 0; bgRight.style.opacity = 0; } currentX = 0;
             });
         }
     });
     
-    const total=todos.length, done=todos.filter(x=>x.completed).length, percent=total===0?0:Math.round((done/total)*100);
-    document.getElementById('progress-text').textContent=`${percent}%`;
-    const ring=document.getElementById('progress-ring'); if(ring) ring.style.strokeDashoffset=113-(percent/100)*113;
+    const total = todos.length, done = todos.filter(x=>x.completed).length, percent = total === 0 ? 0 : Math.round((done/total)*100);
+    document.getElementById('progress-text').textContent = `${percent}%`;
+    const ring = document.getElementById('progress-ring'); if(ring) ring.style.strokeDashoffset = 113 - (percent/100)*113;
     checkDeadlines();
 }
 
-// ===================== 7. FORM SUBMIT & UI EVENTS =====================
+// ===================== 9. FORM SUBMIT & VOICE =====================
 const handleAdd = (e, inputSelector) => {
     e.preventDefault(); const inputEl = e.target.querySelector(inputSelector);
-    if(!inputEl.value.trim()) return;
-    initAudioContext();
+    if(!inputEl.value.trim()) return; initTTS();
+    
     const data = parseSmartInput(inputEl.value);
-    todos.unshift({ id:Date.now(), text:data.text.charAt(0).toUpperCase()+data.text.slice(1), priority:data.priority, category:data.category, date:data.date, alarmTime:data.alarmTime, completed:false });
-    inputEl.value=''; inputEl.blur(); vibrate([20]);
-    if(data.alarmTime){ showToast(`Đã hẹn giờ ${data.alarmTime}`,'ph-bell-ringing'); speak(`Đã ghi nhận, chuông báo lúc ${data.alarmTime.replace(':',' giờ ')} phút.`); } else showToast('Đã lên kế hoạch mới!','ph-check-circle');
+    todos.unshift({ id: Date.now(), text: data.text.charAt(0).toUpperCase() + data.text.slice(1), priority: data.priority, category: data.category, date: data.date, alarmTime: data.alarmTime, completed: false });
+    
+    inputEl.value = ''; inputEl.blur(); vibrate([20]);
+    if(data.alarmTime){ showToast(`Đã hẹn giọng AI lúc ${data.alarmTime}`, 'ph-speaker-high'); speak(`Đã ghi nhận, chuông báo giọng nói lúc ${data.alarmTime.replace(':',' giờ ')} phút.`); } else { showToast('Đã lên kế hoạch!', 'ph-check-circle'); }
     saveAndRender();
 };
-document.getElementById('form-pc').addEventListener('submit', e=>handleAdd(e, '#input-pc'));
-document.getElementById('form-mobile').addEventListener('submit', e=>handleAdd(e, '#input-mobile'));
 
-// Voice Input
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+document.getElementById('form-pc').addEventListener('submit', e => handleAdd(e, '#input-pc'));
+document.getElementById('form-mobile').addEventListener('submit', e => handleAdd(e, '#input-mobile'));
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if(SpeechRecognition){
-    const rec=new SpeechRecognition(); rec.lang='vi-VN';
-    rec.onstart=()=>{ document.querySelectorAll('.btn-voice').forEach(b=>b.classList.add('text-rose-500','animate-pulse')); vibrate(30); };
-    rec.onresult=e=>{ const val=e.results[0][0].transcript; if(window.innerWidth>=1024){document.getElementById('input-pc').value=val;document.getElementById('form-pc').dispatchEvent(new Event('submit'));}else{document.getElementById('input-mobile').value=val;document.getElementById('form-mobile').dispatchEvent(new Event('submit'));} };
-    rec.onend=()=>{ document.querySelectorAll('.btn-voice').forEach(b=>b.classList.remove('text-rose-500','animate-pulse')); };
-    document.querySelectorAll('.btn-voice').forEach(b=>b.addEventListener('click',()=>{initAudioContext();rec.start();}));
-} else { document.querySelectorAll('.btn-voice').forEach(b=>b.style.display='none'); }
+    const rec = new SpeechRecognition(); rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false;
+    rec.onstart = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.add('text-rose-500','animate-pulse')); vibrate(30); };
+    rec.onresult = e => {
+        const val = e.results[0][0].transcript;
+        if(window.innerWidth >= 1024){ document.getElementById('input-pc').value = val; document.getElementById('form-pc').dispatchEvent(new Event('submit')); } 
+        else { document.getElementById('input-mobile').value = val; document.getElementById('form-mobile').dispatchEvent(new Event('submit')); }
+    };
+    rec.onend = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); };
+    rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); showToast('Không nghe được, thử lại nhé','ph-microphone-slash'); };
+    
+    document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { initTTS(); try{rec.start();}catch(e){showToast('Đang nghe...','ph-microphone');} }); });
+} else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
 
-window.cleanupTasks = () => { const c=todos.filter(t=>t.completed).length; if(c===0)return showToast('Không có rác!','ph-broom'); todos=todos.filter(t=>!t.completed); saveAndRender(); vibrate(30); showToast(`Đã dọn ${c} mục!`); };
+window.cleanupTasks = () => {
+    const c = todos.filter(t=>t.completed).length; if(c === 0) return showToast('Không có mục nào để dọn!','ph-broom');
+    todos = todos.filter(t=>!t.completed); saveAndRender(); vibrate(30);
+    speak(`Đã dọn dẹp sạch sẽ ${c} nhiệm vụ trong thùng rác.`); showToast(`Đã dọn ${c} mục!`, 'ph-broom');
+};
 
-document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',e=>{
-    document.querySelectorAll('.filter-btn').forEach(b=>b.className='filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 transition whitespace-nowrap');
-    e.target.className='filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-600 text-primary shadow-sm transition whitespace-nowrap';
-    currentFilter=e.target.dataset.filter; saveAndRender();
-}));
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 transition whitespace-nowrap');
+        e.target.className = 'filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-600 text-primary shadow-sm transition whitespace-nowrap';
+        currentFilter = e.target.dataset.filter; openActionId = null; saveAndRender();
+    });
+});
 
-// ===================== 8. POMODORO TIMER =====================
+// ===================== 10. POMODORO TIMER =====================
 let pTimer, expectedEnd=0, pRun=false, pDur=25*60, pWork=true;
-const tDisp=document.getElementById('timer-display'), tCirc=document.getElementById('timer-circle'), pBtn=document.getElementById('btn-timer-start');
-const updT = s => { if(s<0)s=0; tDisp.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; tCirc.style.strokeDashoffset=289-(s/(pWork?25*60:5*60))*289; };
-window.setMode = m => { clearInterval(pTimer); pRun=false; pWork=m==='work'; pDur=pWork?25*60:5*60; document.getElementById('timer-mode').textContent=pWork?'Làm việc':'Nghỉ ngơi'; tCirc.classList.toggle('stroke-primary',pWork); tCirc.classList.toggle('stroke-emerald-500',!pWork); pBtn.innerHTML=`Bắt đầu`; pBtn.className=`flex-1 ${pWork?'bg-primary shadow-indigo-500/30 hover:bg-indigo-600':'bg-emerald-500 shadow-emerald-500/30 hover:bg-emerald-600'} text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition flex justify-center items-center gap-2`; updT(pDur); };
-pBtn.addEventListener('click',()=>{
-    initAudioContext(); vibrate(30);
-    if(pRun){ clearInterval(pTimer); pRun=false; pDur=Math.round((expectedEnd-Date.now())/1000); pBtn.innerHTML=`Tiếp tục`; speak('Tạm dừng thời gian.'); }
+const tDisp = document.getElementById('timer-display'), tCirc = document.getElementById('timer-circle'), pBtn = document.getElementById('btn-timer-start');
+const updT = s => { if(s < 0) s = 0; tDisp.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; tCirc.style.strokeDashoffset = 289 - (s / (pWork ? 25*60 : 5*60)) * 289; };
+
+window.setMode = m => { clearInterval(pTimer); pRun = false; pWork = m === 'work'; pDur = pWork ? 25*60 : 5*60; document.getElementById('timer-mode').textContent = pWork ? 'Làm việc' : 'Nghỉ ngơi'; tCirc.classList.toggle('stroke-primary', pWork); tCirc.classList.toggle('stroke-emerald-500', !pWork); pBtn.innerHTML = '<i class="ph-fill ph-play"></i> Bắt đầu'; pBtn.className = `flex-1 ${pWork?'bg-primary shadow-indigo-500/30 hover:bg-indigo-600':'bg-emerald-500 shadow-emerald-500/30 hover:bg-emerald-600'} text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition flex justify-center items-center gap-2`; updT(pDur); };
+
+pBtn.addEventListener('click', () => {
+    initTTS(); vibrate(30);
+    if(pRun){ clearInterval(pTimer); pRun = false; pDur = Math.round((expectedEnd - Date.now()) / 1000); pBtn.innerHTML = '<i class="ph-fill ph-play"></i> Tiếp tục'; speak('Đã tạm dừng thời gian làm việc.'); } 
     else {
-        if(pWork && !pinnedTaskId && todos.length>0) showToast('Mẹo: Nhấn nút Ghim ở công việc để tập trung!','ph-target');
-        expectedEnd=Date.now()+pDur*1000; pRun=true; pBtn.innerHTML=`Tạm dừng`;
-        speak(pWork ? "Bắt đầu tập trung làm việc." : "Đến giờ nghỉ giải lao.");
-        pTimer=setInterval(()=>{
-            let l=Math.round((expectedEnd-Date.now())/1000);
-            if(l<=0){ clearInterval(pTimer); pRun=false; playAlarm('success'); vibrate([400,200,400]); if(pWork){ confetti({particleCount:150,spread:80}); speak('Hoàn thành xuất sắc 1 chu kỳ! Hãy nghỉ ngơi 5 phút nhé.'); setMode('break'); } else { speak('Hết giờ nghỉ! Trở lại làm việc thôi.'); setMode('work'); } } else updT(l);
-        },1000);
+        if(pWork && !pinnedTaskId && todos.length > 0) showToast('Mẹo: Nhấn 🎯 để ghim công việc vào đây!','ph-target');
+        expectedEnd = Date.now() + pDur * 1000; pRun = true; pBtn.innerHTML = '<i class="ph-fill ph-pause"></i> Tạm dừng';
+        speak(pWork ? 'Đã bắt đầu bộ đếm Pomodoro. Bạn hãy tập trung làm việc nhé.' : 'Đến giờ nghỉ giải lao.');
+        
+        pTimer = setInterval(() => {
+            let l = Math.round((expectedEnd - Date.now()) / 1000);
+            if(l <= 0){
+                clearInterval(pTimer); pRun = false; vibrate([400,200,400]);
+                if(pWork){ confetti({particleCount:150,spread:80}); speak('Thời gian tập trung đã kết thúc. Bạn hãy nghỉ ngơi 5 phút nhé.'); setMode('break'); } 
+                else { speak('Đã hết 5 phút giải lao. Mời bạn quay trở lại làm việc.'); setMode('work'); }
+            } else updT(l);
+        }, 1000);
     }
 });
-document.getElementById('btn-timer-reset').addEventListener('click',()=>{vibrate(20);setMode(pWork?'work':'break');});
+document.getElementById('btn-timer-reset').addEventListener('click', () => { vibrate(20); setMode(pWork ? 'work' : 'break'); });
 
-// ===================== NAVIGATION & INIT =====================
+// ===================== 11. NAVIGATION & RESIZE =====================
 window.switchTab = (id, btn) => {
-    if(window.innerWidth>=1024) return;
-    document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(b=>{b.classList.remove('text-primary');b.classList.add('text-slate-400');});
-    btn.classList.add('text-primary'); btn.classList.remove('text-slate-400');
-    document.getElementById('sticky-input-mobile').style.transform = id==='view-tasks' ? 'translateY(0)' : 'translateY(200%)';
+    if(window.innerWidth >= 1024) return;
+    openActionId = null;
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-primary'); b.classList.add('text-slate-400'); }); btn.classList.add('text-primary'); btn.classList.remove('text-slate-400');
+    document.getElementById('mobile-input').style.transform = id === 'view-tasks' ? 'translateY(0)' : 'translateY(200%)';
 };
-const html=document.documentElement, themeIcon=document.getElementById('theme-icon');
-if(localStorage.theme==='dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)){ html.classList.add('dark'); themeIcon.className='ph-bold ph-sun text-lg text-yellow-400'; }
-document.getElementById('theme-toggle').addEventListener('click',()=>{ html.classList.toggle('dark'); const isD=html.classList.contains('dark'); localStorage.theme=isD?'dark':'light'; themeIcon.className=isD?'ph-bold ph-sun text-lg text-yellow-400':'ph-bold ph-moon text-lg text-slate-700'; });
 
+const html = document.documentElement, themeIcon = document.getElementById('theme-icon');
+if(localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)){ html.classList.add('dark'); themeIcon.className = 'ph-bold ph-sun text-lg text-yellow-400'; }
+document.getElementById('theme-toggle').addEventListener('click', () => { html.classList.toggle('dark'); const isD = html.classList.contains('dark'); localStorage.theme = isD ? 'dark' : 'light'; themeIcon.className = isD ? 'ph-bold ph-sun text-lg text-yellow-400' : 'ph-bold ph-moon text-lg text-slate-700'; });
+
+let lastWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+    const w = window.innerWidth;
+    if((lastWidth < 1024 && w >= 1024) || (lastWidth >= 1024 && w < 1024)){
+        openActionId = null;
+        if(w < 1024){
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); document.getElementById('view-tasks').classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach((b,i) => { b.classList.toggle('text-primary', i===0); b.classList.toggle('text-slate-400', i!==0); });
+        }
+    } lastWidth = w;
+});
+
+// ===================== 12. INIT =====================
 saveAndRender(); initSentinel();
-if(!localStorage.getItem('lifeos_v5_init')){ setTimeout(()=>{ initAudioContext(); speak('Hệ thống Life OS Ultimate đã sẵn sàng kích hoạt.'); localStorage.setItem('lifeos_v5_init','1'); },2000); }
+if(!localStorage.getItem('lifeos_v7_welcomed')){
+    setTimeout(() => { initTTS(); speak('Hệ thống Life OS siêu thông minh đã sẵn sàng hỗ trợ bạn.', 0.95, 1); localStorage.setItem('lifeos_v7_welcomed', '1'); }, 2000);
+}
 
 });
 </script>
