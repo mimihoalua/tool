@@ -9,23 +9,25 @@
     <meta name="application-name" content="LifeOS" />
     <title>LifeOS V8 - Family Edition</title>
     
-    <!-- PWA Manifest (Bỏ href cứng, sẽ được JS inject động) -->
+    <!-- PWA Manifest -->
     <link id="manifest-link" rel="manifest" href="#">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { primary: '#6366f1', secondary: '#ec4899', darkbg: '#0f172a', darkcard: '#1e293b' }, fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+            theme: { extend: { colors: { primary: '#6366f1', secondary: '#ec4899', darkbg: '#0f172a', darkcard: '#1e293b' }, fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- JS OTP for Vault -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsOTP/1.0.1/jsOTP.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
-        ::-webkit-scrollbar { width: 6px; display: none; }
+        ::-webkit-scrollbar { width: 6px; display: none; height: 6px; }
         @media (min-width: 1024px) { ::-webkit-scrollbar { display: block; } }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -85,25 +87,12 @@
             will-change: filter, transform;
         }
         @keyframes speakGlow { 
-            from { 
-                filter: drop-shadow(0 0 4px rgba(16,185,129,0.6)) drop-shadow(0 0 8px rgba(16,185,129,0.4)); 
-                color: #10b981; 
-                transform: scale(1);
-            } 
-            to { 
-                filter: drop-shadow(0 0 8px rgba(52,211,153,0.9)) drop-shadow(0 0 16px rgba(16,185,129,0.7)) drop-shadow(0 0 24px rgba(16,185,129,0.4)); 
-                color: #34d399; 
-                transform: scale(1.08);
-            } 
+            from { filter: drop-shadow(0 0 4px rgba(16,185,129,0.6)) drop-shadow(0 0 8px rgba(16,185,129,0.4)); color: #10b981; transform: scale(1); } 
+            to { filter: drop-shadow(0 0 8px rgba(52,211,153,0.9)) drop-shadow(0 0 16px rgba(16,185,129,0.7)) drop-shadow(0 0 24px rgba(16,185,129,0.4)); color: #34d399; transform: scale(1.08); } 
         }
 
         /* PWA Styles */
-        .install-fab {
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-            display: none; 
-            z-index: 9999;
-        }
+        .install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
         .install-fab:active { transform: scale(0.95); }
         .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; position: relative; }
@@ -117,6 +106,30 @@
         .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
         .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* Vault Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1);
+        }
+        .accordion-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .accordion-wrapper.is-open { grid-template-rows: 1fr; }
+        .accordion-inner { overflow: hidden; }
+        .totp-progress { transition: width 1s linear; }
+        .cat-filter-btn.active { background-color: #1f2937; color: white; border-color: #1f2937; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .dark .cat-filter-btn.active { background-color: #6366f1; border-color: #6366f1; }
+        
+        .vault-container-special {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            position: relative;
+        }
+        .dark .vault-container-special {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
@@ -180,8 +193,8 @@
 
     <main class="flex-grow w-full max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 pb-32 lg:pb-8 relative">
         
+        <!-- VIEW: NHIỆM VỤ -->
         <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
-            
             <div class="hidden lg:block bg-white dark:bg-darkcard p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 mb-6 relative z-10">
                 <form id="form-pc" class="flex gap-3">
                     <button type="button" class="btn-voice flex p-3.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center"><i class="ph-fill ph-microphone text-xl"></i></button>
@@ -218,6 +231,7 @@
             </div>
         </div>
 
+        <!-- VIEW: TẬP TRUNG -->
         <div class="lg:col-span-4 flex flex-col h-full view-section" id="view-focus">
             <div class="bg-white dark:bg-darkcard p-6 lg:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center lg:sticky lg:top-24">
                 <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 lg:mb-8 flex items-center gap-2"><i class="ph-fill ph-timer text-rose-500 text-lg"></i> Tập Trung Cao Độ</h2>
@@ -249,8 +263,65 @@
                 </div>
             </div>
         </div>
+
+        <!-- VIEW: VAULT (KHO LƯU TRỮ) -->
+        <div class="lg:col-span-12 flex flex-col h-full view-section" id="view-vault">
+            <div class="vault-container-special rounded-[2rem] p-4 md:p-6 lg:p-8 border-4 border-white/40 dark:border-slate-700/50 shadow-2xl flex-grow overflow-y-auto relative h-full">
+                
+                <!-- Vault Header & Controls -->
+                <div class="bg-white/40 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-slate-600 rounded-2xl px-4 py-3 mb-6 shadow-sm sticky top-0 z-30 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg"><i class="ph-bold ph-vault text-xl"></i></div>
+                        <h2 class="text-lg font-black text-slate-800 dark:text-white">Kho Lưu Trữ</h2>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                            <input type="text" id="vaultSearchInput" placeholder="Tìm kiếm dữ liệu..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 text-sm dark:text-white transition-all">
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button onclick="VaultApp.exportBackup()" class="flex-1 sm:flex-none bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 p-2.5 rounded-xl font-medium transition-colors shadow-sm border border-gray-200 dark:border-slate-600 flex items-center justify-center" title="Sao lưu">
+                                <i class="ph ph-download-simple text-lg"></i>
+                            </button>
+                            <label class="flex-1 sm:flex-none bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 p-2.5 rounded-xl font-medium transition-colors shadow-sm border border-gray-200 dark:border-slate-600 flex items-center justify-center cursor-pointer" title="Phục hồi">
+                                <i class="ph ph-upload-simple text-lg"></i>
+                                <input type="file" class="hidden" accept=".json" onchange="VaultApp.importBackup(event)">
+                            </label>
+                            <button onclick="VaultUI.openModal()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-indigo-500/30 flex items-center justify-center gap-2">
+                                <i class="ph ph-plus-bold text-lg"></i> Thêm mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-2 mb-6" id="vaultCategoryFilters">
+                    <button onclick="VaultApp.setCategoryFilter('all')" class="cat-filter-btn active px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">Tất cả</button>
+                    <button onclick="VaultApp.setCategoryFilter('account')" class="cat-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">🔑 Tài khoản</button>
+                    <button onclick="VaultApp.setCategoryFilter('crypto')" class="cat-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">💰 Tài chính</button>
+                    <button onclick="VaultApp.setCategoryFilter('note')" class="cat-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">📝 Ghi chú</button>
+                    <button onclick="VaultApp.setCategoryFilter('service')" class="cat-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">📞 Dịch vụ</button>
+                    <button onclick="VaultApp.setCategoryFilter('custom')" class="cat-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-white/60 dark:bg-slate-800/60 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600">✨ Khác</button>
+                </div>
+
+                <!-- Cards Container -->
+                <div id="vaultCardsContainer" class="columns-1 md:columns-2 lg:columns-3 gap-6">
+                    <!-- Render by JS -->
+                </div>
+
+                <div id="vaultEmptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+                    <div class="bg-white/50 dark:bg-slate-800/50 p-6 rounded-full mb-4 shadow-sm border border-white/60 dark:border-slate-700">
+                        <i class="ph-duotone ph-vault text-6xl text-indigo-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 dark:text-slate-200">Kho lưu trữ trống</h3>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-2">Dữ liệu cá nhân được bảo mật độc lập.</p>
+                </div>
+
+            </div>
+        </div>
     </main>
 
+    <!-- MOBILE INPUT (NHIỆM VỤ) -->
     <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-30 transition-transform duration-300">
         <form id="form-mobile" class="w-full flex items-center bg-white/95 dark:bg-darkcard/95 backdrop-blur-md rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-700">
             <button type="button" class="btn-voice p-3 text-slate-400 transition rounded-xl"><i class="ph-fill ph-microphone text-xl"></i></button>
@@ -265,16 +336,21 @@
         <span class="font-bold uppercase tracking-wide">Cài App</span>
     </button>
 
+    <!-- BOTTOM NAV -->
     <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white dark:bg-darkcard border-t border-slate-200 dark:border-slate-800 z-40 pb-[env(safe-area-inset-bottom)]">
         <div class="flex justify-around pt-2 pb-2">
             <button class="nav-btn active text-primary flex flex-col items-center w-full py-1 transition-colors" onclick="switchTab('view-tasks', this)"><i class="ph-fill ph-list-checks text-[26px] mb-1"></i><span class="text-[10px] font-bold">Nhiệm vụ</span></button>
             <button class="nav-btn text-slate-400 flex flex-col items-center w-full py-1 transition-colors" onclick="switchTab('view-focus', this)"><i class="ph-fill ph-timer text-[26px] mb-1"></i><span class="text-[10px] font-bold">Tập trung</span></button>
+            <!-- Thêm Tab mới cho Vault -->
+            <button class="nav-btn text-slate-400 flex flex-col items-center w-full py-1 transition-colors" onclick="switchTab('view-vault', this)"><i class="ph-fill ph-vault text-[26px] mb-1"></i><span class="text-[10px] font-bold">Kho lưu trữ</span></button>
         </div>
     </nav>
 
+    <!-- TOAST CONTAINTER (LIFEOS CORE) -->
     <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-max max-w-[90vw]"></div>
     <div id="modal-container"></div>
     
+    <!-- MODALS ... (Sentinel, PWA, Alarm) ... -->
     <div id="sentinel-panel" class="hidden modal-overlay" onclick="if(event.target===this)closeSentinelPanel()">
         <div class="modal-sheet !max-w-lg">
             <div class="lg:hidden w-10 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-5"></div>
@@ -325,6 +401,161 @@
         </div>
     </div>
 
+    <!-- VAULT FORM MODAL -->
+    <div id="vaultFormModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="VaultUI.closeModal()"></div>
+        <div class="absolute top-[5%] sm:top-1/2 left-1/2 transform -translate-x-1/2 sm:-translate-y-1/2 w-full max-w-md max-h-[90vh] overflow-y-auto p-2 sm:p-4 custom-scrollbar">
+            <div class="bg-white dark:bg-darkcard rounded-3xl shadow-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-700 relative">
+                <div class="flex justify-between items-center mb-5 sticky top-0 bg-white dark:bg-darkcard z-10 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <h2 id="vaultModalTitle" class="text-xl font-bold text-slate-800 dark:text-white">Thêm Mục Mới</h2>
+                    <button type="button" onclick="VaultUI.closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors">
+                        <i class="ph ph-x text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="vaultForm" onsubmit="VaultApp.saveEntry(event)">
+                    <input type="hidden" id="vaultEntryId">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
+                            <select id="vaultEntryCategory" onchange="VaultUI.toggleCustomCategory()" class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 transition-all cursor-pointer font-medium text-base sm:text-sm text-slate-800 dark:text-white">
+                                <option value="account">🔑 Tài khoản đăng nhập</option>
+                                <option value="crypto">💰 Tài chính / Crypto</option>
+                                <option value="note">📝 Ghi chú cá nhân</option>
+                                <option value="service">📞 Dịch vụ / Danh bạ</option>
+                                <option value="custom">✨ Tùy chỉnh (Nhập tay)...</option>
+                            </select>
+                            <input type="text" id="vaultEntryCustomCategory" placeholder="Nhập tên loại dữ liệu (VD: Server...)" 
+                                   class="hidden w-full mt-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-300 dark:border-indigo-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-base sm:text-sm text-slate-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tiêu đề <span class="text-rose-500">*</span></label>
+                            <input type="text" id="vaultEntryName" required placeholder="VD: Mật khẩu WiFi..." 
+                                   class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-bold text-base sm:text-sm text-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tài khoản <span class="text-xs text-slate-400 font-normal">(Tùy chọn)</span></label>
+                                <input type="text" id="vaultEntryUsername" placeholder="Email, Username..." 
+                                       class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-base sm:text-sm text-slate-800 dark:text-white">
+                            </div>
+
+                            <div class="col-span-2">
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Mật khẩu <span class="text-xs text-slate-400 font-normal">(Tùy chọn)</span></label>
+                                <div class="relative flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="password" id="vaultEntryPassword" placeholder="Nhập mật khẩu" 
+                                               class="w-full pl-4 pr-12 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-base sm:text-sm text-slate-800 dark:text-white">
+                                        <button type="button" onclick="VaultUI.toggleModalPassword()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white p-2">
+                                            <i id="vaultModalEyeIcon" class="ph ph-eye text-xl"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="document.getElementById('vaultEntryPassword').value = VaultUtils.generatePassword(); document.getElementById('vaultEntryPassword').type = 'text'; document.getElementById('vaultModalEyeIcon').classList.replace('ph-eye', 'ph-eye-slash'); window.speak('Đã tạo mật khẩu ngẫu nhiên an toàn.');" class="p-3 sm:p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors border border-indigo-100 dark:border-indigo-800" title="Tạo mật khẩu mạnh">
+                                        <i class="ph ph-magic-wand text-xl sm:text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trường Tùy Chỉnh -->
+                        <div class="bg-amber-50/50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-800/30">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-bold text-amber-800 dark:text-amber-500 flex items-center gap-1">
+                                    <i class="ph ph-list-plus text-lg"></i> Thuộc tính mở rộng
+                                </label>
+                                <button type="button" onclick="VaultUI.addCustomField()" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded hover:bg-amber-200 font-bold transition-colors">
+                                    + Thêm
+                                </button>
+                            </div>
+                            <div id="vaultCustomFieldsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- 2FA Secret Key -->
+                        <div class="bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                            <label class="block text-sm font-bold text-indigo-800 dark:text-indigo-400 mb-1 flex items-center gap-1">
+                                <i class="ph ph-key text-lg"></i> Khóa 2FA (TOTP Secret)
+                            </label>
+                            <input type="text" id="vaultEntryTwoFactorKey" placeholder="VD: JBSWY3DPEHPK3PXP..." 
+                                   class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-mono text-base sm:text-sm uppercase tracking-wider text-slate-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">URL <span class="text-xs text-slate-400 font-normal">(Tùy chọn)</span></label>
+                            <input type="url" id="vaultEntryUrl" placeholder="https://..." 
+                                   class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-base sm:text-sm text-slate-800 dark:text-white">
+                        </div>
+
+                        <!-- Backup Codes -->
+                        <div class="bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="ph ph-shield-check text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                                <input type="text" id="vaultEntryBackupTitle" placeholder="Tiêu đề (VD: Mã dự phòng)" 
+                                       class="flex-1 bg-transparent border-b border-indigo-200/60 dark:border-indigo-700 focus:border-indigo-500 focus:outline-none text-base sm:text-sm font-bold text-indigo-800 dark:text-indigo-300 placeholder-indigo-400 dark:placeholder-indigo-600 py-1 transition-colors">
+                            </div>
+                            <textarea id="vaultEntryBackupCodes" rows="2" placeholder="Dán nội dung..." 
+                                      class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-700 focus:outline-none focus:border-indigo-500 font-mono text-sm text-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <!-- QR Image -->
+                        <div class="bg-teal-50/50 dark:bg-teal-900/10 p-3 rounded-xl border border-teal-100 dark:border-teal-800/30">
+                            <label class="block text-sm font-bold text-teal-800 dark:text-teal-500 mb-2 flex items-center gap-1">
+                                <i class="ph ph-qr-code text-lg"></i> Mã QR (Hình ảnh)
+                            </label>
+                            <input type="hidden" id="vaultEntryQrBase64" value="">
+                            <div id="vaultQrUploadUI" class="flex items-center justify-center w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-20 border-2 border-teal-200 dark:border-teal-700 border-dashed rounded-xl cursor-pointer bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors">
+                                    <span class="text-sm text-teal-600 dark:text-teal-400 font-semibold">Tải ảnh QR lên</span>
+                                    <input type="file" id="vaultQrFileInput" class="hidden" accept="image/*" onchange="VaultUI.handleQrUpload(event)" />
+                                </label>
+                            </div>
+                            <div id="vaultQrPreviewUI" class="hidden relative inline-block mt-2 w-full text-center">
+                                <img id="vaultQrPreviewImg" src="" class="max-h-32 mx-auto rounded-lg border border-teal-200 dark:border-teal-700 bg-white" alt="QR">
+                                <button type="button" onclick="VaultUI.removeQrCode()" class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-rose-100 text-rose-600 hover:bg-rose-200 rounded-full p-2 shadow-md">
+                                    <i class="ph ph-x text-base"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Ghi chú chi tiết</label>
+                            <textarea id="vaultEntryNotes" rows="4" placeholder="Thông tin thêm..." 
+                                      class="w-full px-4 py-3 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all whitespace-pre-wrap text-base sm:text-sm text-slate-800 dark:text-white"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex gap-3 sticky bottom-0 bg-white dark:bg-darkcard pt-3 pb-1 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" onclick="VaultUI.closeModal()" class="flex-1 px-4 py-3.5 sm:py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-3.5 sm:py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/30 transition-colors">
+                            Lưu thông tin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VAULT IMAGE VIEWER MODAL -->
+    <div id="vaultImageViewerModal" class="fixed inset-0 z-[60] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="VaultUI.closeImageViewer()"></div>
+        <div class="relative z-10 max-w-[95vw] max-h-[90vh] flex flex-col items-center">
+            <div class="w-full flex justify-end mb-4">
+                <button onclick="VaultUI.closeImageViewer()" class="text-white hover:text-gray-300 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md shadow-lg"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <img id="vaultViewerImage" src="" class="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl border-4 border-white/10 bg-white" alt="Full size QR">
+            <div class="mt-6 flex gap-4 w-full justify-center">
+                <button id="vaultViewerDownloadBtn" class="px-6 py-4 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/40 flex items-center gap-2">
+                    <i class="ph ph-download-simple text-2xl"></i> Tải ảnh
+                </button>
+            </div>
+        </div>
+    </div>
+
 <script>
 // ===================== PWA ENGINE LOGIC =====================
 const logicCore = {
@@ -337,7 +568,6 @@ const logicCore = {
         isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
     },
     init: function() {
-        // 1. ALL-IN-ONE HACK: Sinh Manifest & Icon động bằng Data URI
         const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='#6366f1' rx='112'/><path fill='#fff' d='M256 128a64 64 0 100 128 64 64 0 000-128zm-96 224c0-53 43-96 96-96s96 43 96 96v32H160v-32z'/></svg>`;
         const iconBase64 = 'data:image/svg+xml;base64,' + btoa(iconSvg);
         const manifest = {
@@ -351,7 +581,6 @@ const logicCore = {
         };
         document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
 
-        // 2. ALL-IN-ONE HACK: Sinh Service Worker ảo bằng Blob để qua mặt Chrome
         if ('serviceWorker' in navigator) {
             const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{});`;
             const blob = new Blob([swCode], { type: 'application/javascript' });
@@ -638,7 +867,7 @@ if('speechSynthesis' in window) {
     setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
 }
 
-// ===================== 3. STATE & DATA LOADING =====================
+// ===================== 3. STATE & DATA LOADING (Tasks & Vault) =====================
 let todos = [];
 let stats = {streak:0,lastDate:null};
 let sentinelLogs = [];
@@ -647,7 +876,7 @@ let currentFilter='all'; let pinnedTaskId=null; let openActionId = null;
 function loadUserData() {
     const keySuffix = viewingUser || 'default';
     
-    // Fallback data migration from V7
+    // Load Tasks
     let loadedTodos = localStorage.getItem('lifeos_v8_data_' + keySuffix);
     if (!loadedTodos && keySuffix === 'thanh') loadedTodos = localStorage.getItem('lifeos_v7');
     todos = loadedTodos ? JSON.parse(loadedTodos) : [];
@@ -660,6 +889,9 @@ function loadUserData() {
     if (!loadedLogs && keySuffix === 'thanh') loadedLogs = localStorage.getItem('lifeos_v7_logs');
     sentinelLogs = loadedLogs ? JSON.parse(loadedLogs) : [];
 
+    // Load Vault
+    VaultStorageLayer.init(keySuffix);
+
     alarmedTasks.clear();
     activeAlarmTaskId = null;
     if(alarmLoop) clearInterval(alarmLoop);
@@ -671,6 +903,7 @@ function loadUserData() {
 
     checkStreak();
     saveAndRender();
+    VaultAppUI.renderCards(VaultState.data);
     initSentinel();
 }
 
@@ -864,7 +1097,7 @@ function parseSmartInput(text){
     return { text:cleanText.trim().replace(/\s+/g,' '), priority, category:category.charAt(0).toUpperCase()+category.slice(1), date:dateStr, alarmTime };
 }
 
-// ===================== 6. MODALS =====================
+// ===================== 6. MODALS (Tasks) =====================
 window.openEditModal = id => {
     const task = todos.find(t => t.id === id); if(!task) return;
     const mc = document.getElementById('modal-container');
@@ -993,7 +1226,7 @@ window.execDelete = id => {
 };
 window.closeModal = () => { document.getElementById('modal-container').innerHTML=''; };
 
-// ===================== 7. ACTIONS =====================
+// ===================== 7. ACTIONS (Tasks) =====================
 window.toggleTask = (id, forceComplete=false) => {
     initTTS();
     const task = todos.find(t=>t.id===id); if(!task) return;
@@ -1026,7 +1259,7 @@ window.toggleMobileActions = (id, e) => {
     else { openActionId = id; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); const item = document.querySelector(`[data-task-id="${id}"]`); if(item) item.classList.add('show-actions'); }
 };
 
-// ===================== 8. RENDER =====================
+// ===================== 8. RENDER (Tasks) =====================
 window.saveAndRender = function() {
     localStorage.setItem('lifeos_v8_data_' + viewingUser, JSON.stringify(todos));
     const list = document.getElementById('todo-list'); list.innerHTML = ''; const todayStr = getTodayStr();
@@ -1212,11 +1445,19 @@ document.getElementById('btn-timer-reset').addEventListener('click', () => { vib
 
 // ===================== 11. NAVIGATION & RESIZE =====================
 window.switchTab = (id, btn) => {
-    if(window.innerWidth >= 1024) return;
     openActionId = null;
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-primary'); b.classList.add('text-slate-400'); }); btn.classList.add('text-primary'); btn.classList.remove('text-slate-400');
-    document.getElementById('mobile-input').style.transform = id === 'view-tasks' ? 'translateY(0)' : 'translateY(200%)';
+    
+    // Trên mobile
+    if(window.innerWidth < 1024) {
+        document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-primary'); b.classList.add('text-slate-400'); }); btn.classList.add('text-primary'); btn.classList.remove('text-slate-400');
+        document.getElementById('mobile-input').style.transform = id === 'view-tasks' ? 'translateY(0)' : 'translateY(200%)';
+    }
+    
+    // Cập nhật Voice
+    if(id === 'view-tasks') window.speak('Mở tab Nhiệm vụ');
+    if(id === 'view-focus') window.speak('Mở tab Tập trung');
+    if(id === 'view-vault') window.speak('Mở Kho lưu trữ đa năng');
 };
 
 const html = document.documentElement, themeIcon = document.getElementById('theme-icon');
@@ -1235,12 +1476,579 @@ window.addEventListener('resize', () => {
     } lastWidth = w;
 });
 
-// ===================== 12. INIT (MULTI-USER) =====================
-if (!currentUser) {
-    showLoginGate();
-} else {
-    loadUserData();
-}
+// ===================== 13. VAULT LOGIC (KHO LƯU TRỮ) =====================
+const VaultUtils = {
+    validateAndHealEntry: (entry) => {
+        return {
+            id: String(entry.id || 'd' + Date.now()),
+            category: String(entry.category || 'account'),
+            name: String(entry.name || 'Mục không tên'),
+            url: String(entry.url || ''),
+            username: String(entry.username || ''),
+            password: String(entry.password || ''),
+            twoFactorKey: String(entry.twoFactorKey || ''),
+            customFields: Array.isArray(entry.customFields) ? entry.customFields : [],
+            backupTitle: String(entry.backupTitle || ''),
+            backupCodes: String(entry.backupCodes || ''),
+            qrCode: String(entry.qrCode || ''),
+            notes: String(entry.notes || ''),
+            createdAt: String(entry.createdAt || new Date().toISOString())
+        };
+    },
+    debounce: (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => { clearTimeout(timeout); func(...args); };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+    getDomainInfo: (name) => {
+        const colors = ['bg-slate-700', 'bg-rose-500', 'bg-orange-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-pink-500'];
+        let initial = name ? name.charAt(0).toUpperCase() : '?';
+        let colorIndex = 0;
+        for(let i=0; i < name.length; i++) colorIndex += name.charCodeAt(i);
+        return { initial, color: colors[colorIndex % colors.length] };
+    },
+    generatePassword: (length = 16) => {
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~|{}[]:;?><,./";
+        let retVal = "";
+        const array = new Uint32Array(length);
+        window.crypto.getRandomValues(array);
+        for (let i = 0; i < length; i++) retVal += charset[array[i] % charset.length];
+        return retVal;
+    },
+    totpObj: null,
+    getTOTPToken: (secret) => {
+        try {
+            if (typeof jsOTP === 'undefined') return "WAIT...";
+            if (!VaultUtils.totpObj) VaultUtils.totpObj = new jsOTP.totp();
+            const cleanSecret = secret.replace(/\s+/g, '').toUpperCase();
+            return VaultUtils.totpObj.getOtp(cleanSecret);
+        } catch(e) {
+            return "ERROR";
+        }
+    },
+    copyToClipboard: async (text) => {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed"; textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus(); textArea.select();
+                document.execCommand('copy');
+                textArea.remove();
+            }
+            window.showToast('Đã sao chép vào bộ nhớ!');
+            window.speak('Đã chép vào bộ nhớ.');
+        } catch (err) {
+            window.showToast('Lỗi sao chép!', true);
+        }
+    }
+};
+
+const VaultConfig = {
+    CATEGORIES: {
+        'account': { icon: 'ph-identification-card', color: 'text-blue-600', bg: 'bg-blue-100/80', border: 'border-blue-200', label: 'Tài khoản' },
+        'crypto': { icon: 'ph-currency-btc', color: 'text-amber-600', bg: 'bg-amber-100/80', border: 'border-amber-200', label: 'Tài chính' },
+        'note': { icon: 'ph-notebook', color: 'text-emerald-600', bg: 'bg-emerald-100/80', border: 'border-emerald-200', label: 'Ghi chú' },
+        'service': { icon: 'ph-address-book', color: 'text-purple-600', bg: 'bg-purple-100/80', border: 'border-purple-200', label: 'Danh bạ/Dịch vụ' }
+    }
+};
+
+const VaultState = { 
+    data: [], 
+    activeInterval: null,
+    activeCategory: 'all'
+};
+
+const VaultStorageLayer = {
+    init: (uid) => {
+        try {
+            const key = 'lifeos_v8_vault_' + uid;
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                const parsedData = JSON.parse(saved);
+                if (!Array.isArray(parsedData)) throw new Error("Data corruption");
+                VaultState.data = parsedData.map(item => VaultUtils.validateAndHealEntry(item));
+            } else {
+                VaultState.data = []; 
+            }
+        } catch (error) {
+            VaultState.data = []; window.showToast("Lỗi đọc dữ liệu Vault.", true);
+        }
+    },
+    save: () => {
+        try { 
+            const key = 'lifeos_v8_vault_' + viewingUser;
+            localStorage.setItem(key, JSON.stringify(VaultState.data)); 
+        } 
+        catch (error) { window.showToast("Lỗi bộ nhớ (Hết dung lượng)!", true); }
+    }
+};
+
+const VaultUI = {
+    toggleCustomCategory: () => {
+        const select = document.getElementById('vaultEntryCategory');
+        const customInput = document.getElementById('vaultEntryCustomCategory');
+        if (select.value === 'custom') {
+            customInput.classList.remove('hidden'); customInput.required = true; customInput.focus();
+        } else {
+            customInput.classList.add('hidden'); customInput.required = false; customInput.value = '';
+        }
+    },
+    addCustomField: (key = '', value = '') => {
+        const container = document.getElementById('vaultCustomFieldsContainer');
+        const fieldId = 'cf_' + Date.now();
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-start';
+        div.id = fieldId;
+        div.innerHTML = `
+            <input type="text" placeholder="Tên (VD: Biển số)" value="${escapeHTML(key)}" class="w-1/3 px-3 py-2 sm:py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700 focus:outline-none focus:border-amber-500 text-base sm:text-sm text-slate-800 dark:text-white">
+            <input type="text" placeholder="Giá trị" value="${escapeHTML(value)}" class="flex-1 px-3 py-2 sm:py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700 focus:outline-none focus:border-amber-500 text-base sm:text-sm font-mono text-slate-800 dark:text-white">
+            <button type="button" onclick="document.getElementById('${fieldId}').remove()" class="p-2 sm:p-1.5 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-colors mt-0.5">
+                <i class="ph ph-trash text-lg"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    },
+    getCustomFieldsData: () => {
+        const container = document.getElementById('vaultCustomFieldsContainer');
+        const fields = [];
+        Array.from(container.children).forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const key = inputs[0].value.trim(); const val = inputs[1].value.trim();
+            if (key || val) fields.push({ key, value: val });
+        });
+        return fields;
+    },
+    handleQrUpload: (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        if (file.size > 1024 * 1024) { window.showToast("Ảnh QR phải dưới 1MB!", true); e.target.value = ''; return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('vaultEntryQrBase64').value = ev.target.result;
+            document.getElementById('vaultQrPreviewImg').src = ev.target.result;
+            document.getElementById('vaultQrUploadUI').classList.add('hidden');
+            document.getElementById('vaultQrPreviewUI').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    },
+    removeQrCode: () => {
+        document.getElementById('vaultQrFileInput').value = ''; 
+        document.getElementById('vaultEntryQrBase64').value = '';
+        document.getElementById('vaultQrPreviewImg').src = '';
+        document.getElementById('vaultQrUploadUI').classList.remove('hidden'); 
+        document.getElementById('vaultQrPreviewUI').classList.add('hidden');
+    },
+    viewImageFullscreen: (src, fileName) => {
+        document.getElementById('vaultViewerImage').src = src;
+        document.getElementById('vaultImageViewerModal').classList.remove('hidden');
+        document.getElementById('vaultImageViewerModal').classList.add('flex');
+        document.getElementById('vaultViewerDownloadBtn').onclick = () => {
+            const a = document.createElement('a'); a.href = src; a.download = fileName || 'QR.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast('Đã tải ảnh!');
+            window.speak('Đã lưu ảnh mã vào máy.');
+        };
+    },
+    closeImageViewer: () => {
+        document.getElementById('vaultImageViewerModal').classList.add('hidden');
+        document.getElementById('vaultImageViewerModal').classList.remove('flex');
+        setTimeout(() => { document.getElementById('vaultViewerImage').src = ''; }, 300);
+    },
+    openModal: (id = null) => {
+        document.getElementById('vaultFormModal').classList.remove('hidden');
+        document.getElementById('vaultForm').reset();
+        document.getElementById('vaultEntryId').value = '';
+        document.getElementById('vaultModalTitle').textContent = 'Thêm Mục Mới';
+        document.getElementById('vaultCustomFieldsContainer').innerHTML = ''; 
+        document.getElementById('vaultEntryPassword').type = 'password';
+        document.getElementById('vaultModalEyeIcon').classList.replace('ph-eye-slash', 'ph-eye');
+        VaultUI.removeQrCode();
+
+        const customInput = document.getElementById('vaultEntryCustomCategory');
+        customInput.classList.add('hidden'); customInput.required = false; customInput.value = '';
+
+        if (id) {
+            const entry = VaultState.data.find(item => item.id === id);
+            if (entry) {
+                document.getElementById('vaultModalTitle').textContent = 'Sửa Thông Tin';
+                document.getElementById('vaultEntryId').value = entry.id;
+                
+                const standardCats = Object.keys(VaultConfig.CATEGORIES);
+                const entryCat = entry.category || 'account';
+                if (standardCats.includes(entryCat)) {
+                    document.getElementById('vaultEntryCategory').value = entryCat;
+                } else {
+                    document.getElementById('vaultEntryCategory').value = 'custom';
+                    customInput.value = entryCat; customInput.classList.remove('hidden'); customInput.required = true;
+                }
+
+                document.getElementById('vaultEntryName').value = entry.name;
+                document.getElementById('vaultEntryUrl').value = entry.url || '';
+                document.getElementById('vaultEntryUsername').value = entry.username || '';
+                document.getElementById('vaultEntryPassword').value = entry.password || '';
+                document.getElementById('vaultEntryTwoFactorKey').value = entry.twoFactorKey || '';
+                document.getElementById('vaultEntryBackupTitle').value = entry.backupTitle || '';
+                document.getElementById('vaultEntryBackupCodes').value = entry.backupCodes || '';
+                document.getElementById('vaultEntryNotes').value = entry.notes || '';
+
+                if (entry.customFields) entry.customFields.forEach(cf => VaultUI.addCustomField(cf.key, cf.value));
+                if (entry.qrCode) {
+                    document.getElementById('vaultEntryQrBase64').value = entry.qrCode;
+                    document.getElementById('vaultQrPreviewImg').src = entry.qrCode;
+                    document.getElementById('vaultQrUploadUI').classList.add('hidden');
+                    document.getElementById('vaultQrPreviewUI').classList.remove('hidden');
+                }
+            }
+        }
+        window.speak('Mở trình biên tập kho lưu trữ.');
+    },
+    closeModal: () => document.getElementById('vaultFormModal').classList.add('hidden'),
+    toggleModalPassword: () => {
+        const input = document.getElementById('vaultEntryPassword'); 
+        const icon = document.getElementById('vaultModalEyeIcon');
+        if (input.type === 'password') { input.type = 'text'; icon.classList.replace('ph-eye', 'ph-eye-slash'); } 
+        else { input.type = 'password'; icon.classList.replace('ph-eye-slash', 'ph-eye'); }
+    },
+    togglePasswordCard: (id) => {
+        const mask = document.getElementById(`pwd-mask-${id}`);
+        const text = document.getElementById(`pwd-text-${id}`);
+        const icon = document.getElementById(`eye-icon-${id}`);
+        if (text.classList.contains('hidden')) {
+            text.classList.remove('hidden'); mask.classList.add('hidden'); icon.classList.replace('ph-eye', 'ph-eye-slash');
+        } else {
+            text.classList.add('hidden'); mask.classList.remove('hidden'); icon.classList.replace('ph-eye-slash', 'ph-eye');
+        }
+    },
+    toggleCardDetail: (id) => {
+        document.getElementById(`wrapper-${id}`).classList.toggle('is-open');
+        document.getElementById(`chevron-${id}`).classList.toggle('rotate-180');
+    },
+
+    Templates: {
+        coreFields: (entry) => {
+            let html = '';
+            if (entry.username) {
+                html += `
+                    <div class="bg-white/70 dark:bg-slate-800/70 rounded-xl p-3 border border-gray-100 dark:border-slate-700 relative group/item">
+                        <span class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 font-bold block mb-0.5">Tài khoản/ID</span>
+                        <div class="font-medium text-gray-800 dark:text-slate-200 truncate pr-10 font-mono text-sm sm:text-base">${escapeHTML(entry.username)}</div>
+                        <button onclick="VaultUtils.copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100">
+                            <i class="ph ph-copy text-xl sm:text-lg"></i>
+                        </button>
+                    </div>`;
+            }
+            if (entry.password) {
+                html += `
+                    <div class="bg-white/70 dark:bg-slate-800/70 rounded-xl p-3 border border-gray-100 dark:border-slate-700 relative group/item">
+                        <span class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 font-bold block mb-0.5">Mật khẩu chính</span>
+                        <div class="font-medium text-gray-800 dark:text-slate-200 flex items-center pr-20">
+                            <span id="pwd-mask-${entry.id}" class="tracking-widest text-lg sm:text-base">••••••••</span>
+                            <span id="pwd-text-${entry.id}" class="hidden font-mono text-sm sm:text-base truncate">${escapeHTML(entry.password)}</span>
+                        </div>
+                        <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity bg-white/90 dark:bg-slate-700/90 rounded-lg shadow-sm border border-gray-100 dark:border-slate-600">
+                            <button onclick="VaultUI.togglePasswordCard('${entry.id}'); event.stopPropagation();" class="p-2 text-gray-500 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"><i id="eye-icon-${entry.id}" class="ph ph-eye text-xl sm:text-lg"></i></button>
+                            <button onclick="VaultUtils.copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-2 text-gray-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors border-l border-gray-200 dark:border-slate-600"><i class="ph ph-copy text-xl sm:text-lg"></i></button>
+                        </div>
+                    </div>`;
+            }
+            return html;
+        },
+        customFields: (fields) => {
+            if (!fields || fields.length === 0) return '';
+            const items = fields.map(cf => `
+                <div class="bg-amber-50/60 dark:bg-amber-900/10 rounded-xl p-3 border border-amber-100/60 dark:border-amber-800/30 relative group/item">
+                    <span class="text-[10px] uppercase tracking-wider text-amber-700/80 dark:text-amber-500/80 font-bold block mb-0.5">${escapeHTML(cf.key)}</span>
+                    <div class="font-medium text-gray-800 dark:text-slate-200 truncate pr-10 font-mono text-sm sm:text-base">${escapeHTML(cf.value)}</div>
+                    <button onclick="VaultUtils.copyToClipboard('${escapeHTML(cf.value)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-amber-600/50 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100">
+                        <i class="ph ph-copy text-xl sm:text-lg"></i>
+                    </button>
+                </div>
+            `).join('');
+            return `<div class="grid grid-cols-1 gap-2 mt-2">${items}</div>`;
+        },
+        totpBlock: (entry) => {
+            if (!entry.twoFactorKey) return '';
+            return `
+                <div class="bg-indigo-50/70 dark:bg-indigo-900/10 rounded-xl p-3 border border-indigo-100/80 dark:border-indigo-800/30 mt-3 relative">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[11px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1"><i class="ph ph-lock-key text-sm"></i> Mã 2FA (Live)</span>
+                        <div class="w-12 h-1.5 bg-indigo-200 dark:bg-indigo-900 rounded-full overflow-hidden">
+                            <div id="totp-bar-${entry.id}" class="totp-progress h-full bg-indigo-500 dark:bg-indigo-400 w-full"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center group/totp">
+                        <div id="totp-code-${entry.id}" class="font-mono text-3xl font-bold text-indigo-800 dark:text-indigo-300 tracking-[0.2em] totp-target" data-secret="${escapeHTML(entry.twoFactorKey)}">------</div>
+                        <button onclick="VaultUtils.copyToClipboard(document.getElementById('totp-code-${entry.id}').innerText); event.stopPropagation();" class="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg opacity-100 sm:opacity-0 sm:group-hover/totp:opacity-100 shadow-sm transition-colors"><i class="ph ph-copy text-xl"></i></button>
+                    </div>
+                </div>`;
+        },
+        backupBlock: (entry) => {
+            if (!entry.backupCodes) return '';
+            const title = entry.backupTitle ? escapeHTML(entry.backupTitle) : 'Mã dự phòng';
+            return `
+                <div class="bg-indigo-50/70 dark:bg-indigo-900/10 rounded-xl p-3 border border-indigo-100/80 dark:border-indigo-800/30 mt-3 relative group/item">
+                    <span class="text-[11px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block mb-1.5 flex items-center gap-1"><i class="ph ph-shield-check"></i> ${title}</span>
+                    <div id="backup-${entry.id}" class="font-mono text-[13px] sm:text-[11px] text-gray-700 dark:text-slate-300 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-10 leading-relaxed">${escapeHTML(entry.backupCodes)}</div>
+                    <button onclick="VaultUtils.copyToClipboard(document.getElementById('backup-${entry.id}').innerText); event.stopPropagation();" class="absolute right-2 top-2 p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-500 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 shadow-sm"><i class="ph ph-copy text-xl sm:text-lg"></i></button>
+                </div>`;
+        },
+        qrBlock: (entry, safeName) => {
+            if (!entry.qrCode) return '';
+            return `
+                <div class="bg-teal-50/70 dark:bg-teal-900/10 rounded-xl p-3 border border-teal-100/80 dark:border-teal-800/30 mt-3 relative">
+                    <span class="text-[11px] uppercase tracking-wider text-teal-600 dark:text-teal-400 font-bold block mb-2 flex items-center gap-1"><i class="ph ph-qr-code"></i> Mã QR</span>
+                    <div class="relative flex justify-center bg-white dark:bg-slate-800 p-3 rounded-xl border border-teal-100/50 dark:border-teal-800/50 group/qr cursor-pointer overflow-hidden" onclick="VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();">
+                        <img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-md bg-white">
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-xl flex items-center justify-center gap-4 backdrop-blur-[2px]">
+                            <button onclick="VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();" class="p-3 bg-white/90 rounded-full hover:scale-110 shadow-lg"><i class="ph ph-arrows-out text-xl text-slate-800"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+    },
+
+    renderCards: (dataToRender) => {
+        const container = document.getElementById('vaultCardsContainer');
+        const emptyState = document.getElementById('vaultEmptyState');
+        
+        container.innerHTML = '';
+        if (dataToRender.length === 0) {
+            emptyState.classList.remove('hidden'); emptyState.classList.add('flex'); return;
+        }
+        emptyState.classList.add('hidden'); emptyState.classList.remove('flex');
+        
+        const groupedData = {};
+        dataToRender.forEach(entry => {
+            const key = entry.name.trim().toLowerCase();
+            if (!groupedData[key]) groupedData[key] = [];
+            groupedData[key].push(entry);
+        });
+
+        const sortedGroups = Object.values(groupedData).sort((a, b) => 
+            Math.max(...b.map(i => new Date(i.createdAt || 0).getTime())) - Math.max(...a.map(i => new Date(i.createdAt || 0).getTime()))
+        );
+        
+        const fragment = document.createDocumentFragment();
+
+        sortedGroups.forEach(group => {
+            const firstEntry = group[0];
+            const rawCat = firstEntry.category || 'account';
+            const cat = VaultConfig.CATEGORIES[rawCat] || { icon: 'ph-folder-star', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-100/90 dark:bg-slate-800/90', border: 'border-slate-200 dark:border-slate-700', label: escapeHTML(rawCat) };
+            const domain = VaultUtils.getDomainInfo(firstEntry.name);
+            const groupId = firstEntry.id;
+
+            const card = document.createElement('div');
+            card.className = 'glass-card rounded-2xl mb-6 break-inside-avoid hover:shadow-xl transition-all duration-300 transform group relative overflow-hidden';
+            
+            const quickActionUI = group.length === 1 
+                ? `<span class="px-2 py-1 ${cat.bg} ${cat.color} ${cat.border} border text-[10px] font-bold rounded-md shadow-sm uppercase tracking-wider flex items-center gap-1"><i class="ph ${cat.icon}"></i> <span class="hidden sm:inline">${cat.label}</span></span>` 
+                : `<span class="px-2.5 py-1 bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 text-[11px] font-bold rounded-md shadow-sm border">${group.length} mục</span>`;
+
+            let accountsHTML = group.map((entry, index) => {
+                const isNotLast = index < group.length - 1;
+                const safeFileName = `QR_${firstEntry.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                const has2FA = entry.qrCode || entry.twoFactorKey || entry.backupCodes;
+                
+                return `
+                    <div class="${isNotLast ? 'border-b border-gray-200/60 dark:border-slate-700/60 pb-5 mb-5' : ''}">
+                        <div class="flex justify-between items-center mb-4 gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                ${has2FA ? `<div class="flex items-center gap-1 bg-indigo-50/90 dark:bg-indigo-900/30 pr-2 p-1 rounded-lg border border-indigo-100 dark:border-indigo-800 shadow-sm"><div class="w-6 h-6 bg-indigo-500 rounded flex items-center justify-center text-white font-bold"><i class="ph ph-shield-check text-xs"></i></div><span class="text-indigo-700 dark:text-indigo-400 font-bold text-[10px] tracking-wide">2 LỚP</span></div>` : ''}
+                                ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation(); window.speak('Đang mở liên kết.');" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2.5 py-1.5 rounded-lg transition-colors truncate inline-flex items-center gap-1 border border-blue-100/50 dark:border-blue-800/50"><i class="ph ph-link"></i> Mở Link</a>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="VaultUI.openModal('${entry.id}'); event.stopPropagation();" class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors border border-indigo-100 dark:border-indigo-800"><i class="ph ph-pencil-simple text-base"></i></button>
+                                <button onclick="VaultApp.deleteEntry('${entry.id}'); event.stopPropagation();" class="p-2 bg-rose-50 dark:bg-rose-900/30 text-rose-500 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors border border-rose-100 dark:border-rose-800"><i class="ph ph-trash text-base"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">${VaultUI.Templates.coreFields(entry)}</div>
+                        ${VaultUI.Templates.customFields(entry.customFields)}
+                        ${VaultUI.Templates.totpBlock(entry)}
+                        ${VaultUI.Templates.backupBlock(entry)}
+                        ${VaultUI.Templates.qrBlock(entry, safeFileName)}
+                        
+                        ${entry.notes ? `<div class="mt-4 bg-gray-50/80 dark:bg-slate-800/50 rounded-xl p-3 border border-gray-100 dark:border-slate-700"><span class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-400 font-bold block mb-1 flex items-center gap-1"><i class="ph ph-text-align-left"></i> Ghi chú</span><div class="text-[14px] sm:text-[13px] text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-mono custom-scrollbar overflow-x-auto">${escapeHTML(entry.notes)}</div></div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            card.innerHTML = `
+                <div onclick="VaultUI.toggleCardDetail('${groupId}')" class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors z-10 relative">
+                    <div class="flex items-center gap-3 overflow-hidden pr-2">
+                        <div class="w-12 h-12 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl ${domain.color} flex items-center justify-center text-white font-bold text-xl sm:text-lg shadow-sm">
+                            ${domain.initial}
+                        </div>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-lg sm:text-base truncate">${escapeHTML(firstEntry.name)}</h3>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        ${quickActionUI}
+                        <div class="p-1.5 sm:p-1 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 rounded-lg group-hover:bg-gray-100 dark:group-hover:bg-slate-700 group-hover:text-gray-600 dark:group-hover:text-white transition-colors">
+                            <i id="chevron-${groupId}" class="ph ph-caret-down text-lg transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="wrapper-${groupId}" class="accordion-wrapper px-4 sm:px-5 bg-white/30 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/50">
+                    <div class="accordion-inner"><div class="pb-5 pt-4">${accountsHTML}</div></div>
+                </div>
+            `;
+            fragment.appendChild(card);
+        });
+        
+        container.appendChild(fragment);
+        VaultApp.startTOTPLoop();
+    }
+};
+
+const VaultApp = {
+    setCategoryFilter: (category) => {
+        VaultState.activeCategory = category;
+        document.querySelectorAll('#vaultCategoryFilters .cat-filter-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600');
+            btn.classList.add('bg-white/60', 'dark:bg-slate-800/60', 'text-gray-700', 'dark:text-slate-300');
+        });
+        const activeBtn = document.querySelector(`#vaultCategoryFilters .cat-filter-btn[onclick="VaultApp.setCategoryFilter('${category}')"]`);
+        if (activeBtn) {
+            activeBtn.classList.remove('bg-white/60', 'dark:bg-slate-800/60', 'text-gray-700', 'dark:text-slate-300');
+            activeBtn.classList.add('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600');
+        }
+        VaultApp.filterData(document.getElementById('vaultSearchInput').value);
+        window.speak('Đã lọc kho lưu trữ theo yêu cầu.');
+    },
+
+    filterData: (query) => {
+        query = query.toLowerCase().trim();
+        const filtered = VaultState.data.filter(item => {
+            let matchCategory = true;
+            if (VaultState.activeCategory !== 'all') {
+                const isStandard = Object.keys(VaultConfig.CATEGORIES).includes(item.category);
+                if (VaultState.activeCategory === 'custom') {
+                    matchCategory = !isStandard;
+                } else {
+                    matchCategory = item.category === VaultState.activeCategory;
+                }
+            }
+            if (!matchCategory) return false;
+            if (!query) return true;
+            return (
+                item.name.toLowerCase().includes(query) || 
+                (item.category && item.category.toLowerCase().includes(query)) ||
+                (item.username && item.username.toLowerCase().includes(query)) ||
+                (item.notes && item.notes.toLowerCase().includes(query)) ||
+                (item.customFields && item.customFields.some(cf => cf.value && cf.value.toLowerCase().includes(query)))
+            );
+        });
+        VaultUI.renderCards(filtered);
+    },
+
+    saveEntry: (e) => {
+        e.preventDefault();
+        const id = document.getElementById('vaultEntryId').value;
+        const catSelect = document.getElementById('vaultEntryCategory').value;
+        const finalCategory = catSelect === 'custom' 
+            ? document.getElementById('vaultEntryCustomCategory').value.trim() 
+            : catSelect;
+
+        const newEntry = {
+            id: id ? id : 'v' + Date.now(),
+            category: finalCategory,
+            name: document.getElementById('vaultEntryName').value.trim(),
+            url: document.getElementById('vaultEntryUrl').value.trim(),
+            username: document.getElementById('vaultEntryUsername').value.trim(),
+            password: document.getElementById('vaultEntryPassword').value,
+            twoFactorKey: document.getElementById('vaultEntryTwoFactorKey').value.trim(),
+            customFields: VaultUI.getCustomFieldsData(),
+            backupTitle: document.getElementById('vaultEntryBackupTitle').value.trim(),
+            backupCodes: document.getElementById('vaultEntryBackupCodes').value.trim(),
+            qrCode: document.getElementById('vaultEntryQrBase64').value,
+            notes: document.getElementById('vaultEntryNotes').value,
+            createdAt: id ? VaultState.data.find(i=>i.id===id).createdAt : new Date().toISOString()
+        };
+
+        if (id) {
+            const idx = VaultState.data.findIndex(i => i.id === id);
+            if (idx !== -1) { VaultState.data[idx] = newEntry; window.showToast('Đã cập nhật dữ liệu!'); window.speak('Đã lưu chỉnh sửa thành công.'); }
+        } else {
+            VaultState.data.push(newEntry); window.showToast('Đã lưu vào Kho!'); window.speak('Đã thêm mới dữ liệu an toàn vào kho lưu trữ.');
+        }
+
+        VaultStorageLayer.save(); VaultUI.renderCards(VaultState.data); VaultUI.closeModal();
+        document.getElementById('vaultSearchInput').value = ''; 
+    },
+
+    deleteEntry: (id) => {
+        if (window.confirm('Xác nhận xóa dữ liệu này? Hành động không thể hoàn tác.')) {
+            VaultState.data = VaultState.data.filter(item => item.id !== id);
+            VaultStorageLayer.save(); VaultApp.filterData(document.getElementById('vaultSearchInput').value); 
+            window.showToast('Đã xóa thành công!', 'ph-trash');
+            window.speak('Dữ liệu đã bị xóa khỏi hệ thống.', 1.0, 0.9);
+        }
+    },
+
+    exportBackup: () => {
+        try {
+            if (VaultState.data.length === 0) { window.showToast("Kho đang trống!", true); window.speak('Không có dữ liệu để xuất.'); return; }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(VaultState.data, null, 2));
+            const node = document.createElement('a');
+            node.setAttribute("href", dataStr); node.setAttribute("download", `LifeOS_Vault_${viewingUser}_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(node); node.click(); node.remove();
+            window.showToast("Tải sao lưu thành công!"); window.speak('Đã tải xuống file sao lưu kho lưu trữ.');
+        } catch (error) { window.showToast("Lỗi tạo sao lưu!", true); }
+    },
+
+    importBackup: (event) => {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!Array.isArray(imported)) throw new Error("Invalid Format");
+                if (window.confirm(`Tìm thấy ${imported.length} mục. Xác nhận ghi đè kho lưu trữ hiện tại?`)) {
+                    VaultState.data = imported.map(item => VaultUtils.validateAndHealEntry(item)); 
+                    VaultStorageLayer.save(); 
+                    VaultApp.filterData(document.getElementById('vaultSearchInput').value);
+                    window.showToast("Phục hồi thành công!");
+                    window.speak('Đã phục hồi dữ liệu từ file thành công.', 1.0, 1.1);
+                }
+            } catch (error) { 
+                window.showToast("File không hợp lệ hoặc bị hỏng!", true); 
+                window.speak('Lỗi, file không đúng định dạng.', 1.0, 0.9);
+            } 
+            finally { event.target.value = ''; }
+        };
+        reader.readAsText(file);
+    },
+
+    startTOTPLoop: () => {
+        if(VaultState.activeInterval) clearInterval(VaultState.activeInterval);
+        const updateTOTP = () => {
+            const epoch = Math.round(new Date().getTime() / 1000.0);
+            const countDown = 30 - (epoch % 30);
+            const percentage = (countDown / 30) * 100;
+            
+            document.querySelectorAll('.totp-target').forEach(el => {
+                const secret = el.getAttribute('data-secret');
+                if(secret) el.innerText = VaultUtils.getTOTPToken(secret);
+            });
+            document.querySelectorAll('.totp-progress').forEach(el => {
+                el.style.width = percentage + '%';
+                el.style.backgroundColor = countDown < 5 ? '#ef4444' : '#6366f1';
+            });
+        };
+        updateTOTP(); VaultState.activeInterval = setInterval(updateTOTP, 1000);
+    }
+};
+
+// Initialize Vault Search Debounce on load
+document.addEventListener('DOMContentLoaded', () => {
+    const debouncedSearch = VaultUtils.debounce((e) => VaultApp.filterData(e.target.value), 300);
+    document.getElementById('vaultSearchInput')?.addEventListener('input', debouncedSearch);
+});
 
 });
 </script>
