@@ -73,9 +73,23 @@
             opacity: 1; pointer-events: auto; transform: translateX(0);
         }
         
-        /* Hiệu ứng loa khi Chị Google đang nói */
-        .speaking-glow { animation: speakGlow 1s infinite alternate; }
-        @keyframes speakGlow { from { text-shadow: 0 0 5px #10b981; color: #10b981; } to { text-shadow: 0 0 15px #10b981; color: #34d399; } }
+        /* Hiệu ứng loa Đa lớp (Bloom effect) khi Chị Google đang nói */
+        .speaking-glow { 
+            animation: speakGlow 0.8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); 
+            will-change: filter, transform;
+        }
+        @keyframes speakGlow { 
+            from { 
+                filter: drop-shadow(0 0 4px rgba(16,185,129,0.6)) drop-shadow(0 0 8px rgba(16,185,129,0.4)); 
+                color: #10b981; 
+                transform: scale(1);
+            } 
+            to { 
+                filter: drop-shadow(0 0 8px rgba(52,211,153,0.9)) drop-shadow(0 0 16px rgba(16,185,129,0.7)) drop-shadow(0 0 24px rgba(16,185,129,0.4)); 
+                color: #34d399; 
+                transform: scale(1.08);
+            } 
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
@@ -206,7 +220,7 @@
             </div>
             <div id="sentinel-log" class="space-y-2 mb-6 max-h-[40vh] overflow-y-auto pr-1"></div>
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="speak('Báo động khẩn cấp! Đây là giọng nói thử nghiệm từ hệ thống Sentinel.', 1.15, 1.1); showToast('Đang phát cảnh báo...', 'ph-warning-circle')" class="py-3.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 font-bold text-sm active:scale-95 transition border border-rose-200 dark:border-rose-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-warning-circle"></i> Thử Cảnh Báo</button>
+                <button onclick="speak('Báo động khẩn cấp! Đây là giọng nói thử nghiệm từ hệ thống Sentinel.', 1.15, 1.2); showToast('Đang phát cảnh báo...', 'ph-warning-circle')" class="py-3.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 font-bold text-sm active:scale-95 transition border border-rose-200 dark:border-rose-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-warning-circle"></i> Thử Cảnh Báo</button>
                 <button onclick="speak('Xin chào! Hệ thống Giọng nói AI hoạt động xuất sắc.', 1.05, 1); showToast('Đang phát giọng nói...', 'ph-speaker-high')" class="py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 font-bold text-sm active:scale-95 transition border border-indigo-200 dark:border-indigo-800/50 flex justify-center items-center gap-2"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
             </div>
             <button onclick="closeSentinelPanel()" class="w-full mt-4 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition lg:hidden">Đóng bảng điều khiển</button>
@@ -231,6 +245,8 @@ const escapeHTML = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':
 const vibrate = p => { try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} };
 const getTodayStr = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().split('T')[0]; };
 const nowHHMM = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+// Helper: formatTimeVN 14:30 -> 14 giờ 30 phút
+const formatTimeVN = (tStr) => tStr ? tStr.replace(':', ' giờ ') + ' phút' : '';
 
 document.getElementById('current-date').textContent = new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
 
@@ -246,7 +262,6 @@ window.showToast = (msg, icon='ph-check-circle') => {
 // ===================== 2. PURE GOOGLE TTS ENGINE =====================
 let ttsUnlocked = false;
 
-// Đánh thức Speech API trên trình duyệt di động bằng 1 đoạn âm thanh rỗng
 window.initTTS = () => { 
     if(!ttsUnlocked && 'speechSynthesis' in window){ 
         let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.speechSynthesis.speak(u);
@@ -259,9 +274,9 @@ document.body.addEventListener('click', initTTS, {once:true});
 document.body.addEventListener('touchstart', initTTS, {once:true});
 
 let ttsQueue = [], ttsSpeaking = false;
-window.speak = (text, rate=1.05, pitch=1) => {
+window.speak = (text, rate=1.0, pitch=1.0) => {
     if(!('speechSynthesis' in window)) return;
-    initTTS(); // Đảm bảo API đã được đánh thức
+    initTTS(); 
     ttsQueue.push({text, rate, pitch}); 
     if(!ttsSpeaking) processTTSQueue();
 };
@@ -277,10 +292,13 @@ function processTTSQueue(){
     const {text, rate, pitch} = ttsQueue.shift();
     
     const bot = document.getElementById('bot-icon');
-    if(bot) bot.classList.add('speaking-glow'); // Hiệu ứng chớp sáng khi nói
+    if(bot) bot.classList.add('speaking-glow'); 
     
+    // Nâng cấp logic tìm giọng nói chuẩn (Chị Google Premium)
     const voices = window.speechSynthesis.getVoices();
-    let voice = voices.find(v => v.lang==='vi-VN' && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('vi'));
+    let voice = voices.find(v => v.lang === 'vi-VN' && v.name.includes('Google')) 
+             || voices.find(v => v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt'))
+             || voices.find(v => v.lang.startsWith('vi'));
     
     const utt = new SpeechSynthesisUtterance(text);
     if(voice) utt.voice = voice; 
@@ -293,7 +311,6 @@ function processTTSQueue(){
     window.speechSynthesis.speak(utt);
 }
 
-// Anti-pause Chrome bug
 if('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
@@ -323,7 +340,8 @@ function checkDeadlines(){
                 alarmedTasks.add('overdue_'+task.id); hasWarning = true;
                 addLog(task, 'QUÁ HẠN');
                 vibrate([300,100,300]);
-                speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn. Hãy xử lý ngay!`, 0.95);
+                // Intonation: Urgent/Warning
+                speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn. Hãy xử lý ngay!`, 1.1, 1.2);
                 showToast(`Quá hạn: ${task.text}`, 'ph-warning-circle');
             }
             return;
@@ -342,7 +360,8 @@ function checkDeadlines(){
             alarmedTasks.add('warn5_'+task.id);
             addLog(task, 'CÒN 5 PHÚT');
             vibrate([100,50,100]);
-            speak(`Nhắc nhở nhẹ. Còn 5 phút nữa là đến giờ làm nhiệm vụ: ${task.text}`);
+            // Intonation: Gentle reminder
+            speak(`Nhắc nhở nhẹ. Còn 5 phút nữa là đến giờ làm nhiệm vụ: ${task.text}`, 1.0, 1.0);
             showToast(`Sắp đến giờ: ${task.text}`, 'ph-clock');
         }
     });
@@ -373,6 +392,7 @@ function triggerFullAlarm(task){
     if(activeAlarmTaskId) return;
     activeAlarmTaskId = task.id;
     vibrate([500,200,500,200,500]);
+    // Intonation: High alert
     speak(`Báo động khẩn cấp! Đã đến giờ thực hiện nhiệm vụ: ${task.text}. Yêu cầu xác nhận!`, 1.15, 1.2);
     
     document.getElementById('alarm-message').textContent = `"${task.text}"`;
@@ -383,8 +403,8 @@ function triggerFullAlarm(task){
     if(alarmLoop) clearInterval(alarmLoop);
     alarmLoop = setInterval(()=>{
         vibrate([500,200,500]);
-        speak(`Tôi nhắc lại. Yêu cầu hoàn thành nhiệm vụ: ${task.text}`, 1.1, 1.1);
-    }, 12000); // Lặp lại bằng giọng nói mỗi 12 giây thay vì tiếng chuông
+        speak(`Tôi nhắc lại. Yêu cầu hoàn thành nhiệm vụ: ${task.text}`, 1.1, 1.2);
+    }, 12000); 
 }
 
 function closeFullAlarm(){
@@ -405,7 +425,7 @@ document.getElementById('btn-alarm-complete').onclick = () => {
 };
 document.getElementById('btn-alarm-dismiss').onclick = () => {
     closeFullAlarm();
-    speak('Đã tắt cảnh báo giọng nói. Bạn nhớ tự giác làm việc nhé.');
+    speak('Đã tắt cảnh báo giọng nói.', 1.0, 1.0);
     saveAndRender();
 };
 
@@ -483,7 +503,7 @@ function checkStreak(){
         const diff=Math.floor((new Date(today)-new Date(stats.lastDate))/(1000*60*60*24));
         if(diff>1 && stats.streak>0){ 
             stats.streak=0; 
-            speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!'); 
+            speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!', 1.0, 0.9); 
         }
     }
     document.getElementById('streak-count').textContent=stats.streak;
@@ -552,23 +572,41 @@ window.saveEdit = id => {
     const newText = document.getElementById('edit-text').value.trim();
     if(!newText){ showToast('Vui lòng nhập tên!','ph-warning'); return; }
     
-    const wasCompleted = task.completed; const newAlarm = document.getElementById('edit-alarm').value;
-    task.text = newText; task.priority = document.getElementById('edit-priority').value;
+    // FIX BUG: Lưu trạng thái cũ TRƯỚC KHI ghi đè
+    const wasCompleted = task.completed; 
+    const oldAlarm = task.alarmTime;
+    const oldDate = task.date;
+
+    const newAlarm = document.getElementById('edit-alarm').value;
+    const newDate = document.getElementById('edit-date').value;
+
+    task.text = newText; 
+    task.priority = document.getElementById('edit-priority').value;
     task.category = document.getElementById('edit-category').value.trim() || 'Chung';
-    task.date = document.getElementById('edit-date').value; task.alarmTime = newAlarm;
+    task.date = newDate; 
+    task.alarmTime = newAlarm;
     task.completed = document.getElementById('edit-completed').checked;
     
-    if(newAlarm !== task.alarmTime || task.date !== document.getElementById('edit-date').value){
-        alarmedTasks.delete(task.id); alarmedTasks.delete('warn5_'+task.id); alarmedTasks.delete('overdue_'+task.id);
+    // So sánh chuẩn xác với oldAlarm/oldDate
+    if(newAlarm !== oldAlarm || newDate !== oldDate){
+        alarmedTasks.delete(task.id); 
+        alarmedTasks.delete('warn5_'+task.id); 
+        alarmedTasks.delete('overdue_'+task.id);
     }
+
     if(task.completed && !wasCompleted){
         vibrate([30,50]); confetti({particleCount:80,spread:60,origin:{y:0.7},colors:['#6366f1','#10b981']});
-        speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`);
+        speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`, 1.05, 1.1); // Intonation: Happy
         if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
         if(stats.lastDate!==today){stats.streak+=1;stats.lastDate=today;checkStreak();}
     }
-    if(!task.completed && wasCompleted){ alarmedTasks.delete(task.id); alarmedTasks.delete('overdue_'+task.id); }
-    if(newAlarm && !wasCompleted && newAlarm !== task.alarmTime) speak(`Đã cập nhật, Chị Google sẽ nhắc bạn lúc ${newAlarm.replace(':',' giờ ')} phút.`);
+    if(!task.completed && wasCompleted){ 
+        alarmedTasks.delete(task.id); alarmedTasks.delete('overdue_'+task.id); 
+    }
+    
+    if(newAlarm && !wasCompleted && newAlarm !== oldAlarm) {
+        speak(`Đã cập nhật, hệ thống sẽ nhắc bạn lúc ${formatTimeVN(newAlarm)}.`);
+    }
     
     closeModal(); saveAndRender(); showToast('Đã lưu chỉnh sửa!', 'ph-check-circle');
 };
@@ -610,7 +648,7 @@ window.toggleTask = (id, forceComplete=false) => {
     task.completed = forceComplete ? true : !task.completed;
     if(task.completed){
         vibrate([30,50]); confetti({particleCount:100,spread:70,origin:{y:0.6},colors:['#6366f1','#10b981','#f59e0b']});
-        speak(`Làm tốt lắm! Bạn đã xử lý xong: ${task.text}`);
+        speak(`Làm tốt lắm! Đã xử lý xong: ${task.text}`, 1.05, 1.1); // Intonation: Happy
         if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
         if(stats.lastDate!==today){ stats.streak+=1; stats.lastDate=today; checkStreak(); showToast(`Chuỗi ${stats.streak} ngày liên tiếp!`,'ph-fire'); }
         else { showToast('Hoàn thành!','ph-check-circle'); } openActionId = null;
@@ -745,7 +783,12 @@ const handleAdd = (e, inputSelector) => {
     todos.unshift({ id: Date.now(), text: data.text.charAt(0).toUpperCase() + data.text.slice(1), priority: data.priority, category: data.category, date: data.date, alarmTime: data.alarmTime, completed: false });
     
     inputEl.value = ''; inputEl.blur(); vibrate([20]);
-    if(data.alarmTime){ showToast(`Đã hẹn giọng AI lúc ${data.alarmTime}`, 'ph-speaker-high'); speak(`Đã ghi nhận, chuông báo giọng nói lúc ${data.alarmTime.replace(':',' giờ ')} phút.`); } else { showToast('Đã lên kế hoạch!', 'ph-check-circle'); }
+    if(data.alarmTime){ 
+        showToast(`Đã hẹn giọng AI lúc ${data.alarmTime}`, 'ph-speaker-high'); 
+        speak(`Đã ghi nhận, chuông báo giọng nói lúc ${formatTimeVN(data.alarmTime)}.`); 
+    } else { 
+        showToast('Đã lên kế hoạch!', 'ph-check-circle'); 
+    }
     saveAndRender();
 };
 
@@ -770,7 +813,7 @@ if(SpeechRecognition){
 window.cleanupTasks = () => {
     const c = todos.filter(t=>t.completed).length; if(c === 0) return showToast('Không có mục nào để dọn!','ph-broom');
     todos = todos.filter(t=>!t.completed); saveAndRender(); vibrate(30);
-    speak(`Đã dọn dẹp sạch sẽ ${c} nhiệm vụ trong thùng rác.`); showToast(`Đã dọn ${c} mục!`, 'ph-broom');
+    speak(`Đã dọn dẹp sạch sẽ ${c} nhiệm vụ.`, 1.0, 1.0); showToast(`Đã dọn ${c} mục!`, 'ph-broom');
 };
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -794,14 +837,14 @@ pBtn.addEventListener('click', () => {
     else {
         if(pWork && !pinnedTaskId && todos.length > 0) showToast('Mẹo: Nhấn 🎯 để ghim công việc vào đây!','ph-target');
         expectedEnd = Date.now() + pDur * 1000; pRun = true; pBtn.innerHTML = '<i class="ph-fill ph-pause"></i> Tạm dừng';
-        speak(pWork ? 'Đã bắt đầu bộ đếm Pomodoro. Bạn hãy tập trung làm việc nhé.' : 'Đến giờ nghỉ giải lao.');
+        speak(pWork ? 'Đã bắt đầu bộ đếm Pomodoro. Bạn hãy tập trung nhé.' : 'Đến giờ nghỉ giải lao.', 1.0, 1.0);
         
         pTimer = setInterval(() => {
             let l = Math.round((expectedEnd - Date.now()) / 1000);
             if(l <= 0){
                 clearInterval(pTimer); pRun = false; vibrate([400,200,400]);
-                if(pWork){ confetti({particleCount:150,spread:80}); speak('Thời gian tập trung đã kết thúc. Bạn hãy nghỉ ngơi 5 phút nhé.'); setMode('break'); } 
-                else { speak('Đã hết 5 phút giải lao. Mời bạn quay trở lại làm việc.'); setMode('work'); }
+                if(pWork){ confetti({particleCount:150,spread:80}); speak('Thời gian tập trung đã kết thúc. Bạn hãy nghỉ ngơi 5 phút nhé.', 1.05, 1.1); setMode('break'); } 
+                else { speak('Đã hết 5 phút giải lao. Mời bạn quay trở lại làm việc.', 1.0, 1.0); setMode('work'); }
             } else updT(l);
         }, 1000);
     }
@@ -836,7 +879,7 @@ window.addEventListener('resize', () => {
 // ===================== 12. INIT =====================
 saveAndRender(); initSentinel();
 if(!localStorage.getItem('lifeos_v7_welcomed')){
-    setTimeout(() => { initTTS(); speak('Hệ thống Life OS siêu thông minh đã sẵn sàng hỗ trợ bạn.', 0.95, 1); localStorage.setItem('lifeos_v7_welcomed', '1'); }, 2000);
+    setTimeout(() => { initTTS(); speak('Chào bạn, trợ lý hệ thống đã sẵn sàng.', 1.0, 1.0); localStorage.setItem('lifeos_v7_welcomed', '1'); }, 2000);
 }
 
 });
