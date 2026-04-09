@@ -7,10 +7,10 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V7 - Pure Voice AI</title>
+    <title>LifeOS V8 - Family Edition</title>
     
-    <!-- PWA Manifest -->
-    <link id="manifest-link" rel="manifest" href="./manifest.json">
+    <!-- PWA Manifest (Bỏ href cứng, sẽ được JS inject động) -->
+    <link id="manifest-link" rel="manifest" href="#">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -80,7 +80,6 @@
             opacity: 1; pointer-events: auto; transform: translateX(0);
         }
         
-        /* Hiệu ứng loa Đa lớp (Bloom effect) khi Chị Google đang nói */
         .speaking-glow { 
             animation: speakGlow 0.8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); 
             will-change: filter, transform;
@@ -98,7 +97,7 @@
             } 
         }
 
-        /* --- PWA ENGINE V29 STYLES --- */
+        /* PWA Styles */
         .install-fab {
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
@@ -107,19 +106,12 @@
         }
         .install-fab:active { transform: scale(0.95); }
         .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
-        
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; position: relative; }
         .status-dot::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.7; }
         @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
-        @keyframes attention-pulse { 
-            0% {transform: scale(1);} 
-            50% {transform: scale(1.05); box-shadow: 0 0 15px rgba(99,102,241,0.7);} 
-            100% {transform: scale(1);} 
-        }
         .dot-red { background-color: #ef4444; } .dot-red::after { background-color: #ef4444; }
         .dot-green { background-color: #22c55e; } .dot-green::after { background-color: #22c55e; }
         .dot-yellow { background-color: #eab308; } .dot-yellow::after { background-color: #eab308; }
-
         .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
         .step-num { background: var(--primary, #6366f1); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
         .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -128,6 +120,28 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
+
+    <!-- LOGIN GATE (MULTI-USER) -->
+    <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-6 hidden">
+        <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight">LifeOS Family</h1>
+        <p class="text-slate-500 mb-10 text-sm font-semibold text-center">Chọn hồ sơ của bạn để tiếp tục</p>
+        <div id="login-profiles" class="grid grid-cols-2 sm:grid-cols-3 gap-5 md:gap-8 max-w-2xl w-full">
+            <!-- Rendered via JS -->
+        </div>
+    </div>
+
+    <!-- PASSWORD MODAL -->
+    <div id="password-modal" class="hidden fixed inset-0 z-[1000000] bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-3xl w-full max-w-sm shadow-2xl animate-slide-up border border-slate-200 dark:border-slate-800">
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center mb-4 text-3xl" id="pwd-icon">🔒</div>
+            <h3 id="pwd-title" class="text-xl font-black text-center mb-6 text-slate-800 dark:text-white"></h3>
+            <input type="password" id="pwd-input" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-4 rounded-xl mb-6 text-center text-xl font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Nhập mật khẩu">
+            <div class="flex gap-3">
+                <button onclick="closePasswordModal()" class="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-slate-600 dark:text-slate-300 active:scale-95 transition hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
+                <button onclick="submitPassword()" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg hover:bg-indigo-600 flex justify-center items-center gap-2"><i class="ph-bold ph-sign-in"></i> Vào</button>
+            </div>
+        </div>
+    </div>
 
     <header class="flex justify-between items-center px-4 md:px-8 py-3 lg:py-4 bg-white/90 dark:bg-darkcard/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div class="flex items-center gap-3">
@@ -144,8 +158,19 @@
                 </div>
             </div>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center relative">
             <span id="pwaStatusDot" class="status-dot mt-0.5 hidden sm:inline-block" title="Trạng thái PWA"></span>
+            
+            <!-- PROFILE SELECTOR -->
+            <div id="profile-selector" class="relative ml-1">
+                <button id="profile-btn" onclick="toggleProfileMenu()" class="text-[12px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 border border-indigo-100 dark:border-indigo-800/50 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95">
+                    <span id="profile-name-badge">N/A</span> <i class="ph-bold ph-caret-down text-[10px]"></i>
+                </button>
+                <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-darkcard rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-fadeIn origin-top-right">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
             <span class="text-[11px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-900/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm ml-1"><i class="ph-fill ph-fire text-sm"></i> <span id="streak-count">0</span></span>
             <button id="theme-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 active:scale-95 transition hover:bg-slate-200 ml-1">
                 <i id="theme-icon" class="ph-bold ph-moon text-lg text-slate-700 dark:text-yellow-400"></i>
@@ -304,7 +329,6 @@
 // ===================== PWA ENGINE LOGIC =====================
 const logicCore = {
     deferredPrompt: null,
-    repoPath: '.', 
     state: {
         isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
         isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
@@ -313,11 +337,30 @@ const logicCore = {
         isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
     },
     init: function() {
+        // 1. ALL-IN-ONE HACK: Sinh Manifest & Icon động bằng Data URI
+        const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='#6366f1' rx='112'/><path fill='#fff' d='M256 128a64 64 0 100 128 64 64 0 000-128zm-96 224c0-53 43-96 96-96s96 43 96 96v32H160v-32z'/></svg>`;
+        const iconBase64 = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+        const manifest = {
+            name: "LifeOS Family V8",
+            short_name: "LifeOS",
+            start_url: location.pathname || "/",
+            display: "standalone",
+            background_color: "#0f172a",
+            theme_color: "#0f172a",
+            icons: [{ src: iconBase64, sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }]
+        };
+        document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+
+        // 2. ALL-IN-ONE HACK: Sinh Service Worker ảo bằng Blob để qua mặt Chrome
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(`${this.repoPath}/sw.js?v=${Date.now()}`)
-                .then(() => console.log("✅ PWA Engine: SW Registered"))
-                .catch(err => console.warn("❌ PWA Engine: SW Fail (Có thể do chưa có file sw.js)"));
+            const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{});`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl)
+                .then(() => console.log("✅ PWA Engine: Virtual SW Registered (All-in-one mode)"))
+                .catch(err => console.warn("❌ PWA Engine: Virtual SW Fail", err));
         }
+
         this.updateUI('init');
         if (this.state.isStandalone) {
             this.updateUI('installed');
@@ -399,7 +442,6 @@ const escapeHTML = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':
 const vibrate = p => { try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} };
 const getTodayStr = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().split('T')[0]; };
 const nowHHMM = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-// Helper: formatTimeVN 14:30 -> 14 giờ 30 phút
 const formatTimeVN = (tStr) => tStr ? tStr.replace(':', ' giờ ') + ' phút' : '';
 
 document.getElementById('current-date').textContent = new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -411,6 +453,125 @@ window.showToast = (msg, icon='ph-check-circle') => {
     t.innerHTML=`<i class="ph-fill ${icon} text-xl text-primary"></i><span>${escapeHTML(msg)}</span>`;
     document.getElementById('toast-container').appendChild(t);
     setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+};
+
+// ===================== MULTI-USER PROFILES & AUTH =====================
+const PROFILES = {
+    'thanh': { name: 'Thành', pass: 'a', icon: '👨' },
+    'tham': { name: 'Thắm', pass: 'a', icon: '👩' },
+    'xiem': { name: 'Xiêm', pass: 'a', icon: '👵' },
+    'my': { name: 'My', pass: 'a', icon: '👧' },
+    'phuc': { name: 'Phúc', pass: 'a', icon: '👦' },
+    'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
+};
+
+let currentUser = localStorage.getItem('lifeos_v8_session');
+let viewingUser = localStorage.getItem('lifeos_v8_viewing') || currentUser;
+let pendingLoginUid = null;
+
+window.showLoginGate = () => {
+    document.getElementById('login-gate').style.display = 'flex';
+    const grid = document.getElementById('login-profiles');
+    grid.innerHTML = Object.entries(PROFILES).map(([uid, p]) => `
+        <button onclick="promptPassword('${uid}')" class="flex flex-col items-center justify-center p-5 bg-white dark:bg-darkcard rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all hover:shadow-lg">
+            <span class="text-4xl md:text-5xl mb-3 drop-shadow-md">${p.icon}</span>
+            <span class="font-bold text-slate-800 dark:text-white text-sm md:text-base">${p.name}</span>
+        </button>
+    `).join('');
+};
+
+window.promptPassword = (uid) => {
+    pendingLoginUid = uid;
+    document.getElementById('pwd-icon').textContent = PROFILES[uid].icon;
+    document.getElementById('pwd-title').textContent = `Mật khẩu của ${PROFILES[uid].name}`;
+    const input = document.getElementById('pwd-input');
+    input.value = '';
+    document.getElementById('password-modal').style.display = 'flex';
+    setTimeout(() => input.focus(), 100);
+};
+
+window.closePasswordModal = () => {
+    document.getElementById('password-modal').style.display = 'none';
+    pendingLoginUid = null;
+};
+
+window.submitPassword = () => {
+    const pwd = document.getElementById('pwd-input').value;
+    if (pwd === PROFILES[pendingLoginUid].pass) {
+        currentUser = pendingLoginUid;
+        viewingUser = pendingLoginUid;
+        localStorage.setItem('lifeos_v8_session', currentUser);
+        localStorage.setItem('lifeos_v8_viewing', viewingUser);
+        closePasswordModal();
+        document.getElementById('login-gate').style.display = 'none';
+        loadUserData();
+        showToast(`Chào mừng ${PROFILES[currentUser].name}!`, 'ph-hand-waving');
+        if(!localStorage.getItem('lifeos_v8_welcomed_'+currentUser)){
+            setTimeout(() => { initTTS(); speak(`Xin chào ${PROFILES[currentUser].name}, hệ thống đã sẵn sàng.`, 1.0, 1.0); localStorage.setItem('lifeos_v8_welcomed_'+currentUser, '1'); }, 2000);
+        }
+    } else {
+        showToast('Sai mật khẩu!', 'ph-warning-circle');
+        vibrate([50, 50, 50]);
+    }
+};
+
+document.getElementById('pwd-input').addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') submitPassword();
+});
+
+window.toggleProfileMenu = () => {
+    const menu = document.getElementById('profile-menu');
+    menu.classList.toggle('hidden');
+    if (!menu.classList.contains('hidden')) {
+        renderProfileMenu();
+    }
+};
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#profile-selector')) {
+        document.getElementById('profile-menu')?.classList.add('hidden');
+    }
+});
+
+function renderProfileMenu() {
+    const menu = document.getElementById('profile-menu');
+    let html = '';
+    if (currentUser === 'admin') {
+        html += `<div class="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50">XEM DỮ LIỆU CỦA:</div>`;
+        Object.entries(PROFILES).forEach(([uid, p]) => {
+            const isActive = uid === viewingUser;
+            html += `<button onclick="switchView('${uid}')" class="w-full text-left px-4 py-3 text-sm font-bold flex items-center gap-2 transition hover:bg-slate-50 dark:hover:bg-slate-800 ${isActive ? 'text-primary bg-indigo-50 dark:bg-indigo-900/20' : 'text-slate-600 dark:text-slate-300'}">
+                <span class="text-base">${p.icon}</span> ${p.name} ${isActive ? '<i class="ph-bold ph-check ml-auto text-primary"></i>' : ''}
+            </button>`;
+        });
+        html += `<div class="border-t border-slate-200 dark:border-slate-700"></div>`;
+    }
+    html += `<button onclick="logout()" class="w-full text-left px-4 py-3.5 text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition">
+        <i class="ph-bold ph-sign-out text-lg"></i> Đăng xuất
+    </button>`;
+    menu.innerHTML = html;
+}
+
+window.switchView = (uid) => {
+    viewingUser = uid;
+    localStorage.setItem('lifeos_v8_viewing', viewingUser);
+    document.getElementById('profile-menu').classList.add('hidden');
+    loadUserData();
+    showToast(`Đang xem dữ liệu của ${PROFILES[uid].name}`, 'ph-eye');
+};
+
+window.logout = () => {
+    currentUser = null;
+    viewingUser = null;
+    localStorage.removeItem('lifeos_v8_session');
+    localStorage.removeItem('lifeos_v8_viewing');
+    document.getElementById('profile-menu').classList.add('hidden');
+    
+    clearInterval(pTimer);
+    closeFullAlarm();
+    if(sentinelInterval) clearInterval(sentinelInterval);
+    
+    showLoginGate();
 };
 
 // ===================== 2. PURE GOOGLE TTS ENGINE =====================
@@ -428,31 +589,14 @@ window.initTTS = () => {
 document.body.addEventListener('click', initTTS, {once:true});
 document.body.addEventListener('touchstart', initTTS, {once:true});
 
-// Voice Hunter - 4 Tiers Priority
 function getBestVoice() {
     if (cachedBestVoice) return cachedBestVoice;
-    
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
-
-    // Tier 1: Ưu tiên tuyệt đối Google Premium (Chrome/Android)
     let voice = voices.find(v => v.lang === 'vi-VN' && v.name.includes('Google'));
-    
-    // Tier 2: Giọng Tiếng Việt + Network (!localService) - Thường là cloud voice chất lượng cao của Apple/Edge
-    if (!voice) {
-        voice = voices.find(v => v.lang.startsWith('vi') && !v.localService);
-    }
-    
-    // Tier 3: Giọng Tiếng Việt local nhưng có tên nhận diện rõ ràng (Vietnamese, Tiếng Việt, Siri...) tránh system default mỏng
-    if (!voice) {
-        voice = voices.find(v => v.lang.startsWith('vi') && (v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt') || v.name.includes('Linh') || v.name.includes('Siri')));
-    }
-    
-    // Tier 4: Fallback bất kỳ giọng Tiếng Việt nào tìm thấy
-    if (!voice) {
-        voice = voices.find(v => v.lang.startsWith('vi'));
-    }
-
+    if (!voice) voice = voices.find(v => v.lang.startsWith('vi') && !v.localService);
+    if (!voice) voice = voices.find(v => v.lang.startsWith('vi') && (v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt') || v.name.includes('Linh') || v.name.includes('Siri')));
+    if (!voice) voice = voices.find(v => v.lang.startsWith('vi'));
     if (voice) cachedBestVoice = voice;
     return voice;
 }
@@ -474,35 +618,76 @@ function processTTSQueue(){
     }
     ttsSpeaking=true; 
     const {text, rate, pitch} = ttsQueue.shift();
-    
     const bot = document.getElementById('bot-icon');
     if(bot) bot.classList.add('speaking-glow'); 
     
     const utt = new SpeechSynthesisUtterance(text);
-    
-    // Sử dụng cached Voice Hunter
     let voice = getBestVoice();
     if(voice) utt.voice = voice; 
-    
     utt.lang = 'vi-VN'; utt.rate = rate; utt.pitch = pitch;
     
     utt.onend = () => processTTSQueue(); 
     utt.onerror = () => processTTSQueue();
-    
     window.speechSynthesis.cancel(); 
     window.speechSynthesis.speak(utt);
 }
 
 if('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = () => {
-        cachedBestVoice = null; // Reset cache khi danh sách voice thay đổi (vd: thiết bị cắm tai nghe, tải xong voice từ network)
-        getBestVoice();
-    };
+    window.speechSynthesis.onvoiceschanged = () => { cachedBestVoice = null; getBestVoice(); };
     setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
 }
 
-// ===================== 3. SENTINEL VOICE GUARD =====================
-let sentinelInterval = null, alarmedTasks = new Set(), sentinelLogs = JSON.parse(localStorage.getItem('lifeos_v7_logs'))||[];
+// ===================== 3. STATE & DATA LOADING =====================
+let todos = [];
+let stats = {streak:0,lastDate:null};
+let sentinelLogs = [];
+let currentFilter='all'; let pinnedTaskId=null; let openActionId = null;
+
+function loadUserData() {
+    const keySuffix = viewingUser || 'default';
+    
+    // Fallback data migration from V7
+    let loadedTodos = localStorage.getItem('lifeos_v8_data_' + keySuffix);
+    if (!loadedTodos && keySuffix === 'thanh') loadedTodos = localStorage.getItem('lifeos_v7');
+    todos = loadedTodos ? JSON.parse(loadedTodos) : [];
+    
+    let loadedStats = localStorage.getItem('lifeos_stats_v8_' + keySuffix);
+    if (!loadedStats && keySuffix === 'thanh') loadedStats = localStorage.getItem('lifeos_stats_v7');
+    stats = loadedStats ? JSON.parse(loadedStats) : {streak:0,lastDate:null};
+    
+    let loadedLogs = localStorage.getItem('lifeos_v8_logs_' + keySuffix);
+    if (!loadedLogs && keySuffix === 'thanh') loadedLogs = localStorage.getItem('lifeos_v7_logs');
+    sentinelLogs = loadedLogs ? JSON.parse(loadedLogs) : [];
+
+    alarmedTasks.clear();
+    activeAlarmTaskId = null;
+    if(alarmLoop) clearInterval(alarmLoop);
+
+    document.getElementById('profile-name-badge').innerHTML = `${PROFILES[viewingUser].icon} <span class="hidden sm:inline">${PROFILES[viewingUser].name}</span>`;
+    if(currentUser === 'admin' && viewingUser !== 'admin') {
+        document.getElementById('profile-name-badge').innerHTML += ` <span class="text-rose-500 font-black px-1 rounded bg-rose-100 dark:bg-rose-900/50 uppercase ml-0.5" style="font-size:8px;">View</span>`;
+    }
+
+    checkStreak();
+    saveAndRender();
+    initSentinel();
+}
+
+function checkStreak(){
+    const today=getTodayStr();
+    if(stats.lastDate && stats.lastDate!==today){
+        const diff=Math.floor((new Date(today)-new Date(stats.lastDate))/(1000*60*60*24));
+        if(diff>1 && stats.streak>0){ 
+            stats.streak=0; 
+            speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!', 1.0, 0.9); 
+        }
+    }
+    document.getElementById('streak-count').textContent=stats.streak;
+    localStorage.setItem('lifeos_stats_v8_' + viewingUser, JSON.stringify(stats));
+}
+
+// ===================== 4. SENTINEL VOICE GUARD =====================
+let sentinelInterval = null, alarmedTasks = new Set();
 let activeAlarmTaskId = null, alarmLoop = null;
 
 function initSentinel(){
@@ -525,7 +710,6 @@ function checkDeadlines(){
                 alarmedTasks.add('overdue_'+task.id); hasWarning = true;
                 addLog(task, 'QUÁ HẠN');
                 vibrate([300,100,300]);
-                // Intonation: Urgent/Warning
                 speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn. Hãy xử lý ngay!`, 1.1, 1.2);
                 showToast(`Quá hạn: ${task.text}`, 'ph-warning-circle');
             }
@@ -545,7 +729,6 @@ function checkDeadlines(){
             alarmedTasks.add('warn5_'+task.id);
             addLog(task, 'CÒN 5 PHÚT');
             vibrate([100,50,100]);
-            // Intonation: Gentle reminder
             speak(`Nhắc nhở nhẹ. Còn 5 phút nữa là đến giờ làm nhiệm vụ: ${task.text}`, 1.0, 1.0);
             showToast(`Sắp đến giờ: ${task.text}`, 'ph-clock');
         }
@@ -570,14 +753,13 @@ function updateSentinelBadge(hasWarning){
 function addLog(task, type){
     sentinelLogs.unshift({ text: task.text, type, time: nowHHMM() });
     if(sentinelLogs.length > 30) sentinelLogs.pop();
-    localStorage.setItem('lifeos_v7_logs', JSON.stringify(sentinelLogs));
+    localStorage.setItem('lifeos_v8_logs_' + viewingUser, JSON.stringify(sentinelLogs));
 }
 
 function triggerFullAlarm(task){
     if(activeAlarmTaskId) return;
     activeAlarmTaskId = task.id;
     vibrate([500,200,500,200,500]);
-    // Intonation: High alert
     speak(`Báo động khẩn cấp! Đã đến giờ thực hiện nhiệm vụ: ${task.text}. Yêu cầu xác nhận!`, 1.15, 1.2);
     
     document.getElementById('alarm-message').textContent = `"${task.text}"`;
@@ -592,7 +774,7 @@ function triggerFullAlarm(task){
     }, 12000); 
 }
 
-function closeFullAlarm(){
+window.closeFullAlarm = () => {
     const overlay = document.getElementById('alarm-overlay');
     overlay.classList.add('hidden');
     overlay.style.display = '';
@@ -616,8 +798,6 @@ document.getElementById('btn-alarm-dismiss').onclick = () => {
 
 window.showSentinelPanel = () => {
     document.getElementById('sentinel-panel').classList.remove('hidden');
-    
-    // Update Voice Info Badge
     const voiceBadge = document.getElementById('voice-info-badge');
     if (cachedBestVoice) {
         const isPremium = cachedBestVoice.name.includes('Google') || !cachedBestVoice.localService;
@@ -655,17 +835,14 @@ window.showSentinelPanel = () => {
 };
 window.closeSentinelPanel = () => document.getElementById('sentinel-panel').classList.add('hidden');
 
-// ===================== 4. NLP PARSER =====================
+// ===================== 5. NLP PARSER =====================
 function parseSmartInput(text){
     let priority='medium', category='Mục tiêu', dateStr='', alarmTime='';
     let cleanText=text; const today=new Date();
-    
     if(cleanText.match(/!gấp|!khẩn|!urgent/i)){priority='high';cleanText=cleanText.replace(/!gấp|!khẩn|!urgent/ig,'');}
     else if(cleanText.match(/!thấp|!chill/i)){priority='low';cleanText=cleanText.replace(/!thấp|!chill/ig,'');}
-    
     const catMatch=cleanText.match(/#([\p{L}0-9_]+)/u);
     if(catMatch){category=catMatch[1];cleanText=cleanText.replace(catMatch[0],'');}
-    
     const timeMatch=cleanText.match(/@(\d{1,2})[h:](\d{2})?(p)?/i) || cleanText.match(/@(\d{1,2})h(\d{2})?/i);
     if(timeMatch){
         let hh=parseInt(timeMatch[1]), mm=parseInt(timeMatch[2]||'0');
@@ -674,7 +851,6 @@ function parseSmartInput(text){
         alarmTime=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
         cleanText=cleanText.replace(timeMatch[0],'');
     }
-    
     if(cleanText.match(/\b(ngày mai|mai)\b/i)){
         const tmr=new Date(today); tmr.setDate(tmr.getDate()+1);
         dateStr=tmr.toISOString().split('T')[0];
@@ -683,30 +859,9 @@ function parseSmartInput(text){
         dateStr=getTodayStr();
         cleanText=cleanText.replace(/\b(hôm nay|nay)\b/ig,'');
     }
-    
     if(alarmTime && !dateStr) dateStr=getTodayStr();
-    
     return { text:cleanText.trim().replace(/\s+/g,' '), priority, category:category.charAt(0).toUpperCase()+category.slice(1), date:dateStr, alarmTime };
 }
-
-// ===================== 5. STATE =====================
-let todos = JSON.parse(localStorage.getItem('lifeos_v7'))||[];
-let stats = JSON.parse(localStorage.getItem('lifeos_stats_v7'))||{streak:0,lastDate:null};
-let currentFilter='all'; let pinnedTaskId=null; let openActionId = null; 
-
-function checkStreak(){
-    const today=getTodayStr();
-    if(stats.lastDate && stats.lastDate!==today){
-        const diff=Math.floor((new Date(today)-new Date(stats.lastDate))/(1000*60*60*24));
-        if(diff>1 && stats.streak>0){ 
-            stats.streak=0; 
-            speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!', 1.0, 0.9); 
-        }
-    }
-    document.getElementById('streak-count').textContent=stats.streak;
-    localStorage.setItem('lifeos_stats_v7',JSON.stringify(stats));
-}
-checkStreak();
 
 // ===================== 6. MODALS =====================
 window.openEditModal = id => {
@@ -769,7 +924,6 @@ window.saveEdit = id => {
     const newText = document.getElementById('edit-text').value.trim();
     if(!newText){ showToast('Vui lòng nhập tên!','ph-warning'); return; }
     
-    // FIX BUG: Lưu trạng thái cũ TRƯỚC KHI ghi đè
     const wasCompleted = task.completed; 
     const oldAlarm = task.alarmTime;
     const oldDate = task.date;
@@ -784,7 +938,6 @@ window.saveEdit = id => {
     task.alarmTime = newAlarm;
     task.completed = document.getElementById('edit-completed').checked;
     
-    // So sánh chuẩn xác với oldAlarm/oldDate
     if(newAlarm !== oldAlarm || newDate !== oldDate){
         alarmedTasks.delete(task.id); 
         alarmedTasks.delete('warn5_'+task.id); 
@@ -793,7 +946,7 @@ window.saveEdit = id => {
 
     if(task.completed && !wasCompleted){
         vibrate([30,50]); confetti({particleCount:80,spread:60,origin:{y:0.7},colors:['#6366f1','#10b981']});
-        speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`, 1.05, 1.1); // Intonation: Happy
+        speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`, 1.05, 1.1); 
         if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
         if(stats.lastDate!==today){stats.streak+=1;stats.lastDate=today;checkStreak();}
     }
@@ -845,7 +998,7 @@ window.toggleTask = (id, forceComplete=false) => {
     task.completed = forceComplete ? true : !task.completed;
     if(task.completed){
         vibrate([30,50]); confetti({particleCount:100,spread:70,origin:{y:0.6},colors:['#6366f1','#10b981','#f59e0b']});
-        speak(`Làm tốt lắm! Đã xử lý xong: ${task.text}`, 1.05, 1.1); // Intonation: Happy
+        speak(`Làm tốt lắm! Đã xử lý xong: ${task.text}`, 1.05, 1.1);
         if(pinnedTaskId===id) unpinTask(); const today=getTodayStr();
         if(stats.lastDate!==today){ stats.streak+=1; stats.lastDate=today; checkStreak(); showToast(`Chuỗi ${stats.streak} ngày liên tiếp!`,'ph-fire'); }
         else { showToast('Hoàn thành!','ph-check-circle'); } openActionId = null;
@@ -872,8 +1025,8 @@ window.toggleMobileActions = (id, e) => {
 };
 
 // ===================== 8. RENDER =====================
-function saveAndRender(){
-    localStorage.setItem('lifeos_v7', JSON.stringify(todos));
+window.saveAndRender = function() {
+    localStorage.setItem('lifeos_v8_data_' + viewingUser, JSON.stringify(todos));
     const list = document.getElementById('todo-list'); list.innerHTML = ''; const todayStr = getTodayStr();
     
     let filtered = todos.filter(t => { if(currentFilter==='active') return !t.completed; if(currentFilter==='overdue') return !t.completed && t.date && t.date < todayStr; return true; });
@@ -1073,10 +1226,11 @@ window.addEventListener('resize', () => {
     } lastWidth = w;
 });
 
-// ===================== 12. INIT =====================
-saveAndRender(); initSentinel();
-if(!localStorage.getItem('lifeos_v7_welcomed')){
-    setTimeout(() => { initTTS(); speak('Chào bạn, trợ lý hệ thống đã sẵn sàng.', 1.0, 1.0); localStorage.setItem('lifeos_v7_welcomed', '1'); }, 2000);
+// ===================== 12. INIT (MULTI-USER) =====================
+if (!currentUser) {
+    showLoginGate();
+} else {
+    loadUserData();
 }
 
 });
