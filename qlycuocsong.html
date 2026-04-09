@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="LifeOS" />
     <title>LifeOS V7 - Pure Voice AI</title>
     
+    <!-- PWA Manifest -->
+    <link id="manifest-link" rel="manifest" href="./manifest.json">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -90,6 +97,34 @@
                 transform: scale(1.08);
             } 
         }
+
+        /* --- PWA ENGINE V29 STYLES --- */
+        .install-fab {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            display: none; 
+            z-index: 9999;
+        }
+        .install-fab:active { transform: scale(0.95); }
+        .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
+        
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; position: relative; }
+        .status-dot::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.7; }
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        @keyframes attention-pulse { 
+            0% {transform: scale(1);} 
+            50% {transform: scale(1.05); box-shadow: 0 0 15px rgba(99,102,241,0.7);} 
+            100% {transform: scale(1);} 
+        }
+        .dot-red { background-color: #ef4444; } .dot-red::after { background-color: #ef4444; }
+        .dot-green { background-color: #22c55e; } .dot-green::after { background-color: #22c55e; }
+        .dot-yellow { background-color: #eab308; } .dot-yellow::after { background-color: #eab308; }
+
+        .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
+        .step-num { background: var(--primary, #6366f1); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+        .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
@@ -110,7 +145,8 @@
             </div>
         </div>
         <div class="flex gap-2 items-center">
-            <span class="text-[11px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-900/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm"><i class="ph-fill ph-fire text-sm"></i> <span id="streak-count">0</span></span>
+            <span id="pwaStatusDot" class="status-dot mt-0.5 hidden sm:inline-block" title="Trạng thái PWA"></span>
+            <span class="text-[11px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-900/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm ml-1"><i class="ph-fill ph-fire text-sm"></i> <span id="streak-count">0</span></span>
             <button id="theme-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 active:scale-95 transition hover:bg-slate-200 ml-1">
                 <i id="theme-icon" class="ph-bold ph-moon text-lg text-slate-700 dark:text-yellow-400"></i>
             </button>
@@ -198,6 +234,12 @@
         </form>
     </div>
 
+    <!-- PWA Install Button -->
+    <button id="btnInstall" class="install-fab fixed bottom-[140px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-4 border-white dark:border-slate-800 shadow-xl flex items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40">
+        <i class="ph-bold ph-download-simple text-xl"></i>
+        <span class="font-bold uppercase tracking-wide">Cài App</span>
+    </button>
+
     <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white dark:bg-darkcard border-t border-slate-200 dark:border-slate-800 z-40 pb-[env(safe-area-inset-bottom)]">
         <div class="flex justify-around pt-2 pb-2">
             <button class="nav-btn active text-primary flex flex-col items-center w-full py-1 transition-colors" onclick="switchTab('view-tasks', this)"><i class="ph-fill ph-list-checks text-[26px] mb-1"></i><span class="text-[10px] font-bold">Nhiệm vụ</span></button>
@@ -214,7 +256,13 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"><i class="ph-fill ph-shield-check text-2xl text-emerald-600"></i></div>
-                    <div><h2 class="text-xl font-black text-slate-800 dark:text-white">Voice Guard AI</h2><p class="text-xs text-slate-500 font-medium">Giám sát qua Giọng nói Trợ lý 24/7</p></div>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-white">Voice Guard AI</h2>
+                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            <p class="text-xs text-slate-500 font-medium">Giám sát qua Giọng nói</p>
+                            <span id="voice-info-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 max-w-[150px] truncate" title="Giọng nói đang sử dụng">Đang tải giọng...</span>
+                        </div>
+                    </div>
                 </div>
                 <button onclick="closeSentinelPanel()" class="hidden lg:block p-2 text-slate-400 hover:bg-slate-100 dark:bg-slate-800 rounded-full transition"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
@@ -225,6 +273,21 @@
             </div>
             <button onclick="closeSentinelPanel()" class="w-full mt-4 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition lg:hidden">Đóng bảng điều khiển</button>
         </div>
+    </div>
+
+    <!-- PWA Install Modal -->
+    <div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 dark:text-slate-200 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary">
+            <div class="bg-primary p-5 text-white text-center">
+                <div class="font-bold text-xl mb-1 uppercase">Cài đặt Ứng dụng</div>
+                <div class="text-xs opacity-90 font-medium">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
+            </div>
+            <div id="smartGuideContent" class="p-6"></div>
+            <div class="p-4 bg-slate-50 dark:bg-slate-900 text-center border-t border-slate-200 dark:border-slate-700">
+                <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-slate-800 dark:hover:text-white transition">Đóng lại</button>
+            </div>
+        </div>
+        <div id="iosArrow" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 animate-bounce text-6xl text-white drop-shadow-lg z-[100001]" style="text-shadow: 0 2px 5px rgba(0,0,0,0.5);">⬇️</div>
     </div>
 
     <div id="alarm-overlay" class="hidden fixed inset-0 z-[300] flex-col items-center justify-center alarm-flash backdrop-blur-md px-6">
@@ -238,7 +301,98 @@
     </div>
 
 <script>
+// ===================== PWA ENGINE LOGIC =====================
+const logicCore = {
+    deferredPrompt: null,
+    repoPath: '.', 
+    state: {
+        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
+        isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
+        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
+        isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+    },
+    init: function() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(`${this.repoPath}/sw.js?v=${Date.now()}`)
+                .then(() => console.log("✅ PWA Engine: SW Registered"))
+                .catch(err => console.warn("❌ PWA Engine: SW Fail (Có thể do chưa có file sw.js)"));
+        }
+        this.updateUI('init');
+        if (this.state.isStandalone) {
+            this.updateUI('installed');
+        } else {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                this.deferredPrompt = e;
+                this.showSmartFAB();
+                this.updateUI('ready');
+            });
+        }
+        window.pwaEngine = this;
+    },
+    updateUI: function(status) {
+        const dot = document.getElementById('pwaStatusDot');
+        if (dot) {
+            dot.className = "status-dot mt-0.5 hidden sm:inline-block"; 
+            if (status === 'init') dot.classList.add('dot-yellow');
+            else if (status === 'ready') dot.classList.add('dot-red');
+            else if (status === 'installed') dot.classList.add('dot-green');
+        }
+    },
+    showSmartFAB: function() {
+        if (this.state.isStandalone) return;
+        const fab = document.getElementById('btnInstall');
+        if(fab) {
+            fab.style.display = 'flex';
+            fab.onclick = () => this.handleInstallClick();
+        }
+    },
+    handleInstallClick: async function() {
+        const modal = document.getElementById('pwaHealthModal');
+        const content = document.getElementById('smartGuideContent');
+        const arrow = document.getElementById('iosArrow');
+        if(!modal || !content) return;
+        modal.classList.remove('hidden');
+        if(arrow) arrow.classList.add('hidden');
+
+        if (this.state.isStandalone) {
+            content.innerHTML = `<div class="text-center"><div class="text-green-500 text-5xl mb-3">🎉</div><h3 class="text-xl font-bold mb-2">Đã cài đặt thành công!</h3><p class="text-slate-500 dark:text-slate-400">Bạn đang sử dụng phiên bản Ứng dụng.<br>Chúc bạn làm việc hiệu quả.</p></div>`;
+            return;
+        }
+        if (this.deferredPrompt) {
+            modal.classList.add('hidden');
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                this.deferredPrompt = null;
+                const fab = document.getElementById('btnInstall');
+                if(fab) fab.style.display = 'none';
+            }
+            return;
+        }
+        if (this.state.isInApp) {
+            content.innerHTML = `<div class="text-center text-rose-500 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 dark:text-slate-300">Bạn đang mở bằng Zalo/Facebook nên không cài được.</p><div class="guide-step bg-amber-50 dark:bg-amber-900/30 p-2 rounded border border-amber-200 dark:border-amber-800 text-left"><div class="step-num">1</div><div>Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 dark:bg-amber-900/30 p-2 rounded border border-amber-200 dark:border-amber-800 text-left"><div class="step-num">2</div><div>Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
+            return;
+        }
+        if (this.state.isIOS) {
+            content.innerHTML = `<div class="text-center font-bold mb-2 text-blue-500">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div>Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl">⎋</i> ở dưới cùng.</div></div><div class="guide-step"><div class="step-num">2</div><div>Kéo lên chọn <b>Thêm vào MH chính</b>.</div></div><div class="guide-step"><div class="step-num">3</div><div>Bấm nút <b>Thêm</b> ở góc trên cùng.</div></div>`;
+            if(arrow) arrow.classList.remove('hidden');
+            return;
+        }
+        if (this.state.isAndroid) {
+            content.innerHTML = `<div class="text-center font-bold mb-2 text-emerald-500">Dành cho Android</div><div class="guide-step"><div class="step-num">1</div><div>Bấm dấu <b>3 chấm</b> <span class="text-xl">⋮</span> ở góc trên bên phải.</div></div><div class="guide-step"><div class="step-num">2</div><div>Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
+            return;
+        }
+        if (this.state.isPC) {
+              content.innerHTML = `<div class="text-center"><p class="mb-3 font-bold text-lg">Cài đặt trên Máy tính</p><div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-800 inline-block mb-3 text-left"><div class="flex items-center gap-3 mb-2"><span class="text-2xl text-blue-500">⊕</span> <span>Bấm biểu tượng <b>Cài đặt</b> ở cuối thanh địa chỉ (trên cùng bên phải).</span></div><div class="text-sm text-slate-500 dark:text-slate-400 italic ml-8">Hoặc bấm menu 3 chấm > "Cài đặt LifeOS..."</div></div></div>`;
+            return;
+        }
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+logicCore.init();
 
 // ===================== 1. CORE UTILITIES =====================
 const escapeHTML = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
@@ -261,6 +415,7 @@ window.showToast = (msg, icon='ph-check-circle') => {
 
 // ===================== 2. PURE GOOGLE TTS ENGINE =====================
 let ttsUnlocked = false;
+let cachedBestVoice = null;
 
 window.initTTS = () => { 
     if(!ttsUnlocked && 'speechSynthesis' in window){ 
@@ -272,6 +427,35 @@ window.initTTS = () => {
 };
 document.body.addEventListener('click', initTTS, {once:true});
 document.body.addEventListener('touchstart', initTTS, {once:true});
+
+// Voice Hunter - 4 Tiers Priority
+function getBestVoice() {
+    if (cachedBestVoice) return cachedBestVoice;
+    
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    // Tier 1: Ưu tiên tuyệt đối Google Premium (Chrome/Android)
+    let voice = voices.find(v => v.lang === 'vi-VN' && v.name.includes('Google'));
+    
+    // Tier 2: Giọng Tiếng Việt + Network (!localService) - Thường là cloud voice chất lượng cao của Apple/Edge
+    if (!voice) {
+        voice = voices.find(v => v.lang.startsWith('vi') && !v.localService);
+    }
+    
+    // Tier 3: Giọng Tiếng Việt local nhưng có tên nhận diện rõ ràng (Vietnamese, Tiếng Việt, Siri...) tránh system default mỏng
+    if (!voice) {
+        voice = voices.find(v => v.lang.startsWith('vi') && (v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt') || v.name.includes('Linh') || v.name.includes('Siri')));
+    }
+    
+    // Tier 4: Fallback bất kỳ giọng Tiếng Việt nào tìm thấy
+    if (!voice) {
+        voice = voices.find(v => v.lang.startsWith('vi'));
+    }
+
+    if (voice) cachedBestVoice = voice;
+    return voice;
+}
 
 let ttsQueue = [], ttsSpeaking = false;
 window.speak = (text, rate=1.0, pitch=1.0) => {
@@ -294,14 +478,12 @@ function processTTSQueue(){
     const bot = document.getElementById('bot-icon');
     if(bot) bot.classList.add('speaking-glow'); 
     
-    // Nâng cấp logic tìm giọng nói chuẩn (Chị Google Premium)
-    const voices = window.speechSynthesis.getVoices();
-    let voice = voices.find(v => v.lang === 'vi-VN' && v.name.includes('Google')) 
-             || voices.find(v => v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt'))
-             || voices.find(v => v.lang.startsWith('vi'));
-    
     const utt = new SpeechSynthesisUtterance(text);
+    
+    // Sử dụng cached Voice Hunter
+    let voice = getBestVoice();
     if(voice) utt.voice = voice; 
+    
     utt.lang = 'vi-VN'; utt.rate = rate; utt.pitch = pitch;
     
     utt.onend = () => processTTSQueue(); 
@@ -312,7 +494,10 @@ function processTTSQueue(){
 }
 
 if('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+        cachedBestVoice = null; // Reset cache khi danh sách voice thay đổi (vd: thiết bị cắm tai nghe, tải xong voice từ network)
+        getBestVoice();
+    };
     setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
 }
 
@@ -431,6 +616,18 @@ document.getElementById('btn-alarm-dismiss').onclick = () => {
 
 window.showSentinelPanel = () => {
     document.getElementById('sentinel-panel').classList.remove('hidden');
+    
+    // Update Voice Info Badge
+    const voiceBadge = document.getElementById('voice-info-badge');
+    if (cachedBestVoice) {
+        const isPremium = cachedBestVoice.name.includes('Google') || !cachedBestVoice.localService;
+        voiceBadge.textContent = cachedBestVoice.name;
+        voiceBadge.className = `text-[9px] font-bold px-1.5 py-0.5 rounded border max-w-[150px] truncate ${isPremium ? 'border-emerald-200 bg-emerald-100 text-emerald-600 dark:border-emerald-800/50 dark:bg-emerald-900/40' : 'border-amber-200 bg-amber-100 text-amber-600 dark:border-amber-800/50 dark:bg-amber-900/40'}`;
+    } else {
+        voiceBadge.textContent = 'Chưa có giọng vi-VN';
+        voiceBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded border border-rose-200 bg-rose-100 text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/40 max-w-[150px] truncate';
+    }
+
     const logEl = document.getElementById('sentinel-log');
     const alarmCount = todos.filter(t=>!t.completed&&t.alarmTime).length;
     
