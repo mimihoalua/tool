@@ -260,7 +260,7 @@
     </div>
 
     <!-- PWA Install Button -->
-    <button id="btnInstall" class="install-fab fixed bottom-[140px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-4 border-white dark:border-slate-800 shadow-xl flex items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40">
+    <button id="btnInstall" class="install-fab fixed bottom-[140px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-4 border-white dark:border-slate-800 shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40" style="display: none;">
         <i class="ph-bold ph-download-simple text-xl"></i>
         <span class="font-bold uppercase tracking-wide">Cài App</span>
     </button>
@@ -558,6 +558,7 @@ window.switchView = (uid) => {
     document.getElementById('profile-menu').classList.add('hidden');
     loadUserData();
     showToast(`Đang xem dữ liệu của ${PROFILES[uid].name}`, 'ph-eye');
+    speak(`Đã chuyển không gian làm việc sang ${PROFILES[uid].name}`, 1.0, 1.0);
 };
 
 window.logout = () => {
@@ -986,6 +987,7 @@ window.execDelete = id => {
         todos = todos.filter(t => t.id !== id); if(pinnedTaskId===id) unpinTask();
         alarmedTasks.delete(id); alarmedTasks.delete('overdue_'+id); alarmedTasks.delete('warn5_'+id);
         openActionId = null; closeModal(); saveAndRender(); showToast('Đã xóa bỏ!', 'ph-trash');
+        speak('Đã xóa bỏ nhiệm vụ.', 1.05, 0.95);
     };
     if(li){ li.classList.add('slide-out'); setTimeout(doDelete, 300); } else doDelete();
 };
@@ -1008,8 +1010,8 @@ window.toggleTask = (id, forceComplete=false) => {
     saveAndRender();
 };
 
-window.pinTask = (id, text) => { pinnedTaskId=id; document.getElementById('focus-task-name').textContent=text; document.getElementById('focus-task-card').classList.remove('hidden'); if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[1].click(); showToast('Đã ghim! Tập trung hoàn thành nó.','ph-target'); saveAndRender(); };
-window.unpinTask = () => { pinnedTaskId=null; document.getElementById('focus-task-card').classList.add('hidden'); saveAndRender(); };
+window.pinTask = (id, text) => { pinnedTaskId=id; document.getElementById('focus-task-name').textContent=text; document.getElementById('focus-task-card').classList.remove('hidden'); if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[1].click(); showToast('Đã ghim! Tập trung hoàn thành nó.','ph-target'); saveAndRender(); speak('Đã ghim mục tiêu. Chúc bạn tập trung hiệu quả.', 1.0, 1.05); };
+window.unpinTask = () => { pinnedTaskId=null; document.getElementById('focus-task-card').classList.add('hidden'); saveAndRender(); speak('Đã bỏ ghim mục tiêu.', 1.0, 1.0); };
 
 document.addEventListener('click', (e) => {
     if(openActionId !== null && window.innerWidth < 1024){
@@ -1099,6 +1101,7 @@ window.saveAndRender = function() {
             const front = li.querySelector('.swipe-front'), bgLeft = li.querySelector('.swipe-bg-left'), bgRight = li.querySelector('.swipe-bg-right');
             let startX=0, currentX=0, isDragging=false; const threshold = 75;
             front.addEventListener('touchstart', e => {
+                if(e.target.closest('.action-btn-mobile') || e.target.closest('[data-more-btn]')) return;
                 if(openActionId !== null){ openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); }
                 startX = e.touches[0].clientX; isDragging = true; front.style.transition = 'none';
             }, {passive:true});
@@ -1138,6 +1141,7 @@ const handleAdd = (e, inputSelector) => {
         speak(`Đã ghi nhận, chuông báo giọng nói lúc ${formatTimeVN(data.alarmTime)}.`); 
     } else { 
         showToast('Đã lên kế hoạch!', 'ph-check-circle'); 
+        speak('Đã lưu mục tiêu mới.');
     }
     saveAndRender();
 };
@@ -1155,13 +1159,17 @@ if(SpeechRecognition){
         else { document.getElementById('input-mobile').value = val; document.getElementById('form-mobile').dispatchEvent(new Event('submit')); }
     };
     rec.onend = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); };
-    rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); showToast('Không nghe được, thử lại nhé','ph-microphone-slash'); };
+    rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); showToast('Không nghe được, thử lại nhé','ph-microphone-slash'); speak('Xin lỗi, tôi chưa nghe rõ.', 1.0, 0.9); };
     
     document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { initTTS(); try{rec.start();}catch(e){showToast('Đang nghe...','ph-microphone');} }); });
 } else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
 
 window.cleanupTasks = () => {
-    const c = todos.filter(t=>t.completed).length; if(c === 0) return showToast('Không có mục nào để dọn!','ph-broom');
+    const c = todos.filter(t=>t.completed).length; 
+    if(c === 0) {
+        speak('Không có mục nào cần dọn dẹp.');
+        return showToast('Không có mục nào để dọn!','ph-broom');
+    }
     todos = todos.filter(t=>!t.completed); saveAndRender(); vibrate(30);
     speak(`Đã dọn dẹp sạch sẽ ${c} nhiệm vụ.`, 1.0, 1.0); showToast(`Đã dọn ${c} mục!`, 'ph-broom');
 };
@@ -1171,6 +1179,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 transition whitespace-nowrap');
         e.target.className = 'filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-600 text-primary shadow-sm transition whitespace-nowrap';
         currentFilter = e.target.dataset.filter; openActionId = null; saveAndRender();
+        speak(`Đang hiển thị ${e.target.innerText}`, 1.05, 1.0);
     });
 });
 
@@ -1199,7 +1208,7 @@ pBtn.addEventListener('click', () => {
         }, 1000);
     }
 });
-document.getElementById('btn-timer-reset').addEventListener('click', () => { vibrate(20); setMode(pWork ? 'work' : 'break'); });
+document.getElementById('btn-timer-reset').addEventListener('click', () => { vibrate(20); setMode(pWork ? 'work' : 'break'); speak('Đã đặt lại đồng hồ.', 1.0, 1.0); });
 
 // ===================== 11. NAVIGATION & RESIZE =====================
 window.switchTab = (id, btn) => {
@@ -1212,7 +1221,7 @@ window.switchTab = (id, btn) => {
 
 const html = document.documentElement, themeIcon = document.getElementById('theme-icon');
 if(localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)){ html.classList.add('dark'); themeIcon.className = 'ph-bold ph-sun text-lg text-yellow-400'; }
-document.getElementById('theme-toggle').addEventListener('click', () => { html.classList.toggle('dark'); const isD = html.classList.contains('dark'); localStorage.theme = isD ? 'dark' : 'light'; themeIcon.className = isD ? 'ph-bold ph-sun text-lg text-yellow-400' : 'ph-bold ph-moon text-lg text-slate-700'; });
+document.getElementById('theme-toggle').addEventListener('click', () => { html.classList.toggle('dark'); const isD = html.classList.contains('dark'); localStorage.theme = isD ? 'dark' : 'light'; themeIcon.className = isD ? 'ph-bold ph-sun text-lg text-yellow-400' : 'ph-bold ph-moon text-lg text-slate-700'; speak(isD ? 'Đã bật giao diện tối.' : 'Đã bật giao diện sáng.'); });
 
 let lastWidth = window.innerWidth;
 window.addEventListener('resize', () => {
