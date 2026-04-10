@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.8 - Master Release</title>
+    <title>LifeOS V8.9 - Enterprise Core</title>
     
     <link id="manifest-link" rel="manifest" href="#">
 
@@ -101,12 +101,7 @@
         .dot-red { background-color: #ef4444; } .dot-red::after { background-color: #ef4444; }
         .dot-green { background-color: #22c55e; } .dot-green::after { background-color: #22c55e; }
         .dot-yellow { background-color: #eab308; } .dot-yellow::after { background-color: #eab308; }
-        .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
-        .step-num { background: var(--primary, #6366f1); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
-        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
-        .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
+        
         .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 24px -4px rgba(31, 38, 135, 0.05); }
         .dark .glass-card { background: rgba(30, 41, 59, 0.75); border-color: rgba(255, 255, 255, 0.08); box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3); }
         .accordion-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -135,30 +130,6 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
-
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            console.error("Global Error Caught:", message, "at", source, lineno);
-            const msg = `Lỗi hệ thống: ${message} (Dòng ${lineno})`;
-            if(window.showToast) window.showToast(msg, 'ph-warning');
-        };
-
-        // GẮN CHẶT PROFILES LÊN ĐẦU FILE ĐỂ KHÔNG BAO GIỜ BỊ UNDEFINED
-        window.PROFILES = {
-            'thanh': { name: 'Thành', pass: 'a', icon: '👨' },
-            'tham': { name: 'Thắm', pass: 'a', icon: '👩' },
-            'xiem': { name: 'Xiêm', pass: 'a', icon: '👵' },
-            'my': { name: 'My', pass: 'a', icon: '👧' },
-            'phuc': { name: 'Phúc', pass: 'a', icon: '👦' },
-            'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
-        };
-
-        window.currentUser = null;
-        window.viewingUser = null;
-        window.todos = [];
-        window.stats = {streak:0,lastDate:null};
-        window.sentinelLogs = [];
-    </script>
 
     <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-6 hidden">
         <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in">LifeOS Family</h1>
