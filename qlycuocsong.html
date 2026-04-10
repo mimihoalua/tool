@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.7 - Ultimate Vault & Sync</title>
+    <title>LifeOS V8.8 - Master Release</title>
     
     <link id="manifest-link" rel="manifest" href="#">
 
@@ -142,6 +142,22 @@
             const msg = `Lỗi hệ thống: ${message} (Dòng ${lineno})`;
             if(window.showToast) window.showToast(msg, 'ph-warning');
         };
+
+        // GẮN CHẶT PROFILES LÊN ĐẦU FILE ĐỂ KHÔNG BAO GIỜ BỊ UNDEFINED
+        window.PROFILES = {
+            'thanh': { name: 'Thành', pass: 'a', icon: '👨' },
+            'tham': { name: 'Thắm', pass: 'a', icon: '👩' },
+            'xiem': { name: 'Xiêm', pass: 'a', icon: '👵' },
+            'my': { name: 'My', pass: 'a', icon: '👧' },
+            'phuc': { name: 'Phúc', pass: 'a', icon: '👦' },
+            'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
+        };
+
+        window.currentUser = null;
+        window.viewingUser = null;
+        window.todos = [];
+        window.stats = {streak:0,lastDate:null};
+        window.sentinelLogs = [];
     </script>
 
     <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-6 hidden">
@@ -526,7 +542,6 @@
 
 <script>
 // ===================== KẾT NỐI TOÀN VẸN =====================
-// KHÔI PHỤC TOÀN BỘ LÕI ENGINE CHO KHO LƯU TRỮ
 const VaultUtils = {
     validateAndHealEntry: (entry) => ({ id: String(entry.id || 'd' + Date.now()), category: String(entry.category || 'account'), name: String(entry.name || 'Mục không tên'), url: String(entry.url || ''), username: String(entry.username || ''), password: String(entry.password || ''), twoFactorKey: String(entry.twoFactorKey || ''), customFields: Array.isArray(entry.customFields) ? entry.customFields : [], backupTitle: String(entry.backupTitle || ''), backupCodes: String(entry.backupCodes || ''), qrCode: String(entry.qrCode || ''), notes: String(entry.notes || ''), createdAt: String(entry.createdAt || new Date().toISOString()) }),
     debounce: (func, wait) => { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; },
@@ -1071,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentUser = savedSession.toLowerCase();
             window.viewingUser = savedView.toLowerCase();
             
-            if (!PROFILES[window.currentUser]) {
+            if (!window.PROFILES[window.currentUser]) {
                 console.warn("Invalid Session, logging out.");
                 window.showLoginGate();
                 return;
