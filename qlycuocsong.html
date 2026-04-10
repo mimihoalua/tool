@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.6.1 - Stable Sync</title>
+    <title>LifeOS V8.6.2 - Ultimate Sync</title>
     
     <link id="manifest-link" rel="manifest" href="#">
 
@@ -532,7 +532,9 @@ let db = null;
 let auth = null;
 
 try {
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     db = firebase.firestore();
     auth = firebase.auth();
 } catch(e) {
@@ -753,8 +755,8 @@ const PROFILES = {
     'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
 };
 
-window.currentUser = localStorage.getItem('lifeos_v8_session');
-window.viewingUser = localStorage.getItem('lifeos_v8_viewing') || window.currentUser;
+window.currentUser = null;
+window.viewingUser = null;
 let pendingLoginUid = null;
 
 window.showLoginGate = () => {
@@ -941,16 +943,34 @@ window.sentinelLogs = [];
 let currentFilter='all'; let pinnedTaskId=null; let openActionId = null;
 
 window.loadUserData = () => {
-    const keySuffix = window.viewingUser || 'default';
+    let safeUser = window.viewingUser;
+    if (safeUser) safeUser = safeUser.toLowerCase();
     
-    let loadedTodos = localStorage.getItem('lifeos_v8_data_' + keySuffix);
-    window.todos = loadedTodos ? JSON.parse(loadedTodos) : [];
+    // AN TOÀN TUYỆT ĐỐI CHỐNG SẬP: Nếu user lấy từ localStorage không có trong PROFILES -> Fallback về admin
+    if (!PROFILES[safeUser]) {
+        safeUser = 'admin';
+        window.viewingUser = safeUser;
+    }
     
-    let loadedStats = localStorage.getItem('lifeos_stats_v8_' + keySuffix);
-    window.stats = loadedStats ? JSON.parse(loadedStats) : {streak:0,lastDate:null};
+    const keySuffix = safeUser;
     
-    let loadedLogs = localStorage.getItem('lifeos_v8_logs_' + keySuffix);
-    window.sentinelLogs = loadedLogs ? JSON.parse(loadedLogs) : [];
+    // Bắt lỗi JSON.parse nếu data cũ bị lỗi
+    try {
+        let loadedTodos = localStorage.getItem('lifeos_v8_data_' + keySuffix);
+        window.todos = loadedTodos ? JSON.parse(loadedTodos) : [];
+        if (!Array.isArray(window.todos)) window.todos = [];
+    } catch(e) { window.todos = []; }
+    
+    try {
+        let loadedStats = localStorage.getItem('lifeos_stats_v8_' + keySuffix);
+        window.stats = loadedStats ? JSON.parse(loadedStats) : {streak:0,lastDate:null};
+    } catch(e) { window.stats = {streak:0,lastDate:null}; }
+    
+    try {
+        let loadedLogs = localStorage.getItem('lifeos_v8_logs_' + keySuffix);
+        window.sentinelLogs = loadedLogs ? JSON.parse(loadedLogs) : [];
+        if (!Array.isArray(window.sentinelLogs)) window.sentinelLogs = [];
+    } catch(e) { window.sentinelLogs = []; }
 
     window.VaultStorageLayer.init(keySuffix);
 
@@ -958,8 +978,8 @@ window.loadUserData = () => {
     window.activeAlarmTaskId = null;
     if(window.alarmLoop) clearInterval(window.alarmLoop);
 
-    document.getElementById('profile-name-badge').innerHTML = `${PROFILES[window.viewingUser].icon} <span class="hidden sm:inline">${PROFILES[window.viewingUser].name}</span>`;
-    if(window.currentUser === 'admin' && window.viewingUser !== 'admin') {
+    document.getElementById('profile-name-badge').innerHTML = `${PROFILES[safeUser].icon} <span class="hidden sm:inline">${PROFILES[safeUser].name}</span>`;
+    if(window.currentUser === 'admin' && safeUser !== 'admin') {
         document.getElementById('profile-name-badge').innerHTML += ` <span class="text-rose-500 font-black px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 uppercase ml-1" style="font-size:9px;">View</span>`;
     }
 
@@ -1683,7 +1703,11 @@ window.highlightError = (elementId) => {
 
 // ===================== EVENT LISTENERS & DELEGATION =====================
 document.addEventListener('DOMContentLoaded', () => {
-    window.pwaLogicCore.init();
+    
+    // AN TOÀN TUYỆT ĐỐI - Khởi tạo môi trường
+    try {
+        window.pwaLogicCore.init();
+    } catch(e) {}
     
     document.getElementById('theme-toggle')?.addEventListener('click', window.toggleThemeLogic);
     
@@ -1778,13 +1802,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if(localStorage.getItem('lifeos_v8_session')){
-        window.currentUser = localStorage.getItem('lifeos_v8_session');
-        window.viewingUser = localStorage.getItem('lifeos_v8_viewing') || window.currentUser;
-        document.getElementById('login-gate').style.display = 'none';
-        window.loadUserData();
-    } else {
-        window.showLoginGate();
+    // AN TOÀN TUYỆT ĐỐI - Luồng Đăng nhập (Chống Crash)
+    try {
+        if(localStorage.getItem('lifeos_v8_session')){
+            let savedSession = localStorage.getItem('lifeos_v8_session');
+            let savedView = localStorage.getItem('lifeos_v8_viewing') || savedSession;
+            
+            window.currentUser = savedSession.toLowerCase();
+            window.viewingUser = savedView.toLowerCase();
+            
+            if (!PROFILES[window.currentUser]) {
+                console.warn("Invalid Session, logging out.");
+                window.showLoginGate();
+                return;
+            }
+            
+            document.getElementById('login-gate').style.display = 'none';
+            window.loadUserData();
+        } else {
+            window.showLoginGate();
+        }
+    } catch (err) {
+        console.error("Boot error, showing login gate:", err);
+        document.getElementById('login-gate').style.display = 'flex';
     }
 });
 </script>
