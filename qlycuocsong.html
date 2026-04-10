@@ -7,9 +7,9 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.9 - Enterprise Core</title>
+    <title>LifeOS V9.0 - Enterprise Core</title>
     
-    <link id="manifest-link" rel="manifest" href="#">
+    <link id="manifest-link" rel="manifest" href="">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -130,6 +130,47 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
+
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Error Caught:", message, "at", source, lineno);
+            const msg = `Lỗi hệ thống: ${message} (Dòng ${lineno})`;
+            if(window.showToast) window.showToast(msg, 'ph-warning');
+        };
+
+        // Biến toàn cục bắt buộc
+        window.PROFILES = {
+            'thanh': { name: 'Thành', pass: 'a', icon: '👨' },
+            'tham': { name: 'Thắm', pass: 'a', icon: '👩' },
+            'xiem': { name: 'Xiêm', pass: 'a', icon: '👵' },
+            'my': { name: 'My', pass: 'a', icon: '👧' },
+            'phuc': { name: 'Phúc', pass: 'a', icon: '👦' },
+            'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
+        };
+
+        window.currentUser = null;
+        window.viewingUser = null;
+        window.pendingLoginUid = null;
+        
+        window.todos = [];
+        window.stats = {streak:0, lastDate:null};
+        window.sentinelLogs = [];
+        
+        window.currentFilter = 'all'; 
+        window.pinnedTaskId = null; 
+        window.openActionId = null;
+
+        // Xử lý báo lỗi Manifest ảo trên Chrome
+        try {
+            const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='#6366f1' rx='112'/><path fill='#fff' d='M256 128a64 64 0 100 128 64 64 0 000-128zm-96 224c0-53 43-96 96-96s96 43 96 96v32H160v-32z'/></svg>`;
+            const manifest = {
+                name: "LifeOS Family V9", short_name: "LifeOS", start_url: location.pathname || "/", display: "standalone", background_color: "#0f172a", theme_color: "#0f172a",
+                icons: [{ src: 'data:image/svg+xml;base64,' + btoa(iconSvg), sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+        } catch(e) {}
+    </script>
 
     <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-6 hidden">
         <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in">LifeOS Family</h1>
@@ -513,39 +554,34 @@
 
 <script>
 // ===================== KẾT NỐI TOÀN VẸN =====================
-const VaultUtils = {
-    validateAndHealEntry: (entry) => ({ id: String(entry.id || 'd' + Date.now()), category: String(entry.category || 'account'), name: String(entry.name || 'Mục không tên'), url: String(entry.url || ''), username: String(entry.username || ''), password: String(entry.password || ''), twoFactorKey: String(entry.twoFactorKey || ''), customFields: Array.isArray(entry.customFields) ? entry.customFields : [], backupTitle: String(entry.backupTitle || ''), backupCodes: String(entry.backupCodes || ''), qrCode: String(entry.qrCode || ''), notes: String(entry.notes || ''), createdAt: String(entry.createdAt || new Date().toISOString()) }),
-    debounce: (func, wait) => { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; },
-    getDomainInfo: (name) => { const colors = ['bg-slate-700', 'bg-rose-500', 'bg-orange-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-pink-500']; let initial = name ? name.charAt(0).toUpperCase() : '?'; let colorIndex = 0; for(let i=0; i < name.length; i++) colorIndex += name.charCodeAt(i); return { initial, color: colors[colorIndex % colors.length] }; },
+window.VaultUtils = {
+    validateAndHealEntry: function(entry) { return { id: String(entry.id || 'd' + Date.now()), category: String(entry.category || 'account'), name: String(entry.name || 'Mục không tên'), url: String(entry.url || ''), username: String(entry.username || ''), password: String(entry.password || ''), twoFactorKey: String(entry.twoFactorKey || ''), customFields: Array.isArray(entry.customFields) ? entry.customFields : [], backupTitle: String(entry.backupTitle || ''), backupCodes: String(entry.backupCodes || ''), qrCode: String(entry.qrCode || ''), notes: String(entry.notes || ''), createdAt: String(entry.createdAt || new Date().toISOString()) } },
+    debounce: function(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; },
+    getDomainInfo: function(name) { const colors = ['bg-slate-700', 'bg-rose-500', 'bg-orange-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-pink-500']; let initial = name ? name.charAt(0).toUpperCase() : '?'; let colorIndex = 0; for(let i=0; i < name.length; i++) colorIndex += name.charCodeAt(i); return { initial, color: colors[colorIndex % colors.length] }; },
     totpObj: null,
-    getTOTPToken: (secret) => { try { if (typeof jsOTP === 'undefined') return "WAIT..."; if (!window.VaultUtils.totpObj) window.VaultUtils.totpObj = new jsOTP.totp(); return window.VaultUtils.totpObj.getOtp(secret.replace(/\s+/g, '').toUpperCase()); } catch(e) { return "ERROR"; } },
-    generatePassword: (length = 16) => { const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~|{}[]:;?><,./"; let retVal = ""; const array = new Uint32Array(length); window.crypto.getRandomValues(array); for (let i = 0; i < length; i++) retVal += charset[array[i] % charset.length]; return retVal; },
-    copyToClipboard: async (text) => {
+    getTOTPToken: function(secret) { try { if (typeof jsOTP === 'undefined') return "WAIT..."; if (!window.VaultUtils.totpObj) window.VaultUtils.totpObj = new jsOTP.totp(); return window.VaultUtils.totpObj.getOtp(secret.replace(/\s+/g, '').toUpperCase()); } catch(e) { return "ERROR"; } },
+    generatePassword: function(length = 16) { const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~|{}[]:;?><,./"; let retVal = ""; const array = new Uint32Array(length); window.crypto.getRandomValues(array); for (let i = 0; i < length; i++) retVal += charset[array[i] % charset.length]; return retVal; },
+    copyToClipboard: async function(text) {
         try {
             if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
             else { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-999999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); document.execCommand('copy'); textArea.remove(); }
-            vibrate([20]); window.showToast('Đã sao chép vào bộ nhớ!'); window.speak('Đã chép vào bộ nhớ.', 1.05, 1.0);
-        } catch (err) { vibrate([50, 50]); window.showToast('Lỗi sao chép!', 'ph-warning-circle'); }
+            window.vibrate([20]); window.showToast('Đã sao chép vào bộ nhớ!'); window.speak('Đã chép vào bộ nhớ.', 1.05, 1.0);
+        } catch (err) { window.vibrate([50, 50]); window.showToast('Lỗi sao chép!', 'ph-warning-circle'); }
     }
 };
-window.VaultUtils = VaultUtils;
 
-const VaultConfig = { CATEGORIES: { 'account': { icon: 'ph-identification-card', color: 'text-blue-600', bg: 'bg-blue-100/80', border: 'border-blue-200', label: 'Tài khoản' }, 'crypto': { icon: 'ph-currency-btc', color: 'text-amber-600', bg: 'bg-amber-100/80', border: 'border-amber-200', label: 'Tài chính' }, 'note': { icon: 'ph-notebook', color: 'text-emerald-600', bg: 'bg-emerald-100/80', border: 'border-emerald-200', label: 'Ghi chú' }, 'service': { icon: 'ph-address-book', color: 'text-purple-600', bg: 'bg-purple-100/80', border: 'border-purple-200', label: 'Danh bạ/Dịch vụ' } } };
-window.VaultConfig = VaultConfig;
+window.VaultConfig = { CATEGORIES: { 'account': { icon: 'ph-identification-card', color: 'text-blue-600', bg: 'bg-blue-100/80', border: 'border-blue-200', label: 'Tài khoản' }, 'crypto': { icon: 'ph-currency-btc', color: 'text-amber-600', bg: 'bg-amber-100/80', border: 'border-amber-200', label: 'Tài chính' }, 'note': { icon: 'ph-notebook', color: 'text-emerald-600', bg: 'bg-emerald-100/80', border: 'border-emerald-200', label: 'Ghi chú' }, 'service': { icon: 'ph-address-book', color: 'text-purple-600', bg: 'bg-purple-100/80', border: 'border-purple-200', label: 'Danh bạ/Dịch vụ' } } };
+window.VaultState = { data: [], activeInterval: null, activeCategory: 'all' };
 
-const VaultState = { data: [], activeInterval: null, activeCategory: 'all' };
-window.VaultState = VaultState;
-
-const VaultStorageLayer = {
-    init: (uid) => { try { const saved = localStorage.getItem('lifeos_v8_vault_' + uid); if (saved) { const parsed = JSON.parse(saved); if (!Array.isArray(parsed)) throw new Error("Data corruption"); window.VaultState.data = parsed.map(item => window.VaultUtils.validateAndHealEntry(item)); } else { window.VaultState.data = []; } } catch (e) { window.VaultState.data = []; window.showToast("Lỗi đọc dữ liệu Vault.", 'ph-warning-circle'); } },
-    saveLocalOnly: () => { const key = 'lifeos_v8_vault_' + window.viewingUser; localStorage.setItem(key, JSON.stringify(window.VaultState.data)); },
-    save: () => { window.VaultStorageLayer.saveLocalOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }
+window.VaultStorageLayer = {
+    init: function(uid) { try { const saved = localStorage.getItem('lifeos_v8_vault_' + uid); if (saved) { const parsed = JSON.parse(saved); if (!Array.isArray(parsed)) throw new Error("Data corruption"); window.VaultState.data = parsed.map(item => window.VaultUtils.validateAndHealEntry(item)); } else { window.VaultState.data = []; } } catch (e) { window.VaultState.data = []; window.showToast("Lỗi đọc dữ liệu Vault.", 'ph-warning-circle'); } },
+    saveLocalOnly: function() { const key = 'lifeos_v8_vault_' + window.viewingUser; localStorage.setItem(key, JSON.stringify(window.VaultState.data)); },
+    save: function() { window.VaultStorageLayer.saveLocalOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }
 };
-window.VaultStorageLayer = VaultStorageLayer;
 
-const VaultUI = {
-    toggleCustomCategory: () => { 
-        vibrate(10); 
+window.VaultUI = {
+    toggleCustomCategory: function() { 
+        window.vibrate(10); 
         const select = document.getElementById('vaultEntryCategory'); 
         const wrapper = document.getElementById('vaultCustomCatWrapper');
         const customInput = document.getElementById('vaultEntryCustomCategory'); 
@@ -555,10 +591,10 @@ const VaultUI = {
             wrapper.classList.add('hidden'); customInput.required = false; customInput.value = ''; 
         } 
     },
-    viewImageFullscreen: (src, fileName) => { vibrate(20); document.getElementById('vaultViewerImage').src = src; document.getElementById('vaultImageViewerModal').classList.remove('hidden'); document.getElementById('vaultImageViewerModal').classList.add('flex'); document.getElementById('vaultViewerDownloadBtn').onclick = () => { vibrate([15, 30]); const a = document.createElement('a'); a.href = src; a.download = fileName || 'QR.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast('Đã tải ảnh!'); window.speak('Đã lưu ảnh mã vào máy.'); }; },
-    closeImageViewer: () => { vibrate(10); document.getElementById('vaultImageViewerModal').classList.add('hidden'); document.getElementById('vaultImageViewerModal').classList.remove('flex'); setTimeout(() => { document.getElementById('vaultViewerImage').src = ''; }, 300); },
-    openModal: (id = null) => {
-        vibrate(20); document.getElementById('vaultFormModal').classList.remove('hidden'); document.getElementById('vaultForm').reset(); document.getElementById('vaultEntryId').value = ''; document.getElementById('vaultModalTitle').textContent = 'Thêm Mục Mới';
+    viewImageFullscreen: function(src, fileName) { window.vibrate(20); document.getElementById('vaultViewerImage').src = src; document.getElementById('vaultImageViewerModal').classList.remove('hidden'); document.getElementById('vaultImageViewerModal').classList.add('flex'); document.getElementById('vaultViewerDownloadBtn').onclick = () => { window.vibrate([15, 30]); const a = document.createElement('a'); a.href = src; a.download = fileName || 'QR.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast('Đã tải ảnh!'); window.speak('Đã lưu ảnh mã vào máy.'); }; },
+    closeImageViewer: function() { window.vibrate(10); document.getElementById('vaultImageViewerModal').classList.add('hidden'); document.getElementById('vaultImageViewerModal').classList.remove('flex'); setTimeout(() => { document.getElementById('vaultViewerImage').src = ''; }, 300); },
+    openModal: function(id = null) {
+        window.vibrate(20); document.getElementById('vaultFormModal').classList.remove('hidden'); document.getElementById('vaultForm').reset(); document.getElementById('vaultEntryId').value = ''; document.getElementById('vaultModalTitle').textContent = 'Thêm Mục Mới';
         const customInput = document.getElementById('vaultEntryCustomCategory'); const wrapper = document.getElementById('vaultCustomCatWrapper'); wrapper.classList.add('hidden'); customInput.required = false; customInput.value = '';
         document.getElementById('vaultEntryContent').value = '';
 
@@ -589,24 +625,24 @@ const VaultUI = {
         }
         window.speak('Mở trình biên tập kho lưu trữ.', 1.1, 1.0);
     },
-    closeModal: () => { vibrate(10); document.getElementById('vaultFormModal').classList.add('hidden'); },
-    togglePasswordCard: (id) => { vibrate(15); const mask = document.getElementById(`pwd-mask-${id}`); const text = document.getElementById(`pwd-text-${id}`); const icon = document.getElementById(`eye-icon-${id}`); if (text.classList.contains('hidden')) { text.classList.remove('hidden'); mask.classList.add('hidden'); icon.classList.replace('ph-eye', 'ph-eye-slash'); text.classList.add('animate-pulse'); setTimeout(()=>text.classList.remove('animate-pulse'), 300); } else { text.classList.add('hidden'); mask.classList.remove('hidden'); icon.classList.replace('ph-eye-slash', 'ph-eye'); } },
-    toggleCardDetail: (id) => { vibrate(15); document.getElementById(`wrapper-${id}`).classList.toggle('is-open'); document.getElementById(`chevron-${id}`).classList.toggle('rotate-180'); },
+    closeModal: function() { window.vibrate(10); document.getElementById('vaultFormModal').classList.add('hidden'); },
+    togglePasswordCard: function(id) { window.vibrate(15); const mask = document.getElementById(`pwd-mask-${id}`); const text = document.getElementById(`pwd-text-${id}`); const icon = document.getElementById(`eye-icon-${id}`); if (text.classList.contains('hidden')) { text.classList.remove('hidden'); mask.classList.add('hidden'); icon.classList.replace('ph-eye', 'ph-eye-slash'); text.classList.add('animate-pulse'); setTimeout(()=>text.classList.remove('animate-pulse'), 300); } else { text.classList.add('hidden'); mask.classList.remove('hidden'); icon.classList.replace('ph-eye-slash', 'ph-eye'); } },
+    toggleCardDetail: function(id) { window.vibrate(15); document.getElementById(`wrapper-${id}`).classList.toggle('is-open'); document.getElementById(`chevron-${id}`).classList.toggle('rotate-180'); },
 
     Templates: {
-        coreFields: (entry) => {
+        coreFields: function(entry) {
             let html = '';
-            if (entry.username) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Tài khoản/ID</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${escapeHTML(entry.username)}</div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; }
-            if (entry.password) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm mt-2"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Mật khẩu</span><div class="font-bold text-gray-800 dark:text-slate-200 flex items-center pr-24"><span id="pwd-mask-${entry.id}" class="tracking-widest text-lg sm:text-base mt-0.5">••••••••</span><span id="pwd-text-${entry.id}" class="hidden font-mono text-sm sm:text-base truncate">${escapeHTML(entry.password)}</span></div><div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity bg-white/95 dark:bg-slate-700/95 backdrop-blur-sm rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-slate-600 overflow-hidden"><button onclick="window.VaultUI.togglePasswordCard('${entry.id}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors active:scale-95"><i id="eye-icon-${entry.id}" class="ph-bold ph-eye text-xl sm:text-lg"></i></button><div class="w-px bg-gray-200 dark:bg-slate-600"></div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors active:scale-95"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div></div>`; }
+            if (entry.username) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Tài khoản/ID</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${window.escapeHTML(entry.username)}</div><button onclick="window.VaultUtils.copyToClipboard('${window.escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; }
+            if (entry.password) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm mt-2"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Mật khẩu</span><div class="font-bold text-gray-800 dark:text-slate-200 flex items-center pr-24"><span id="pwd-mask-${entry.id}" class="tracking-widest text-lg sm:text-base mt-0.5">••••••••</span><span id="pwd-text-${entry.id}" class="hidden font-mono text-sm sm:text-base truncate">${window.escapeHTML(entry.password)}</span></div><div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity bg-white/95 dark:bg-slate-700/95 backdrop-blur-sm rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-slate-600 overflow-hidden"><button onclick="window.VaultUI.togglePasswordCard('${entry.id}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors active:scale-95"><i id="eye-icon-${entry.id}" class="ph-bold ph-eye text-xl sm:text-lg"></i></button><div class="w-px bg-gray-200 dark:bg-slate-600"></div><button onclick="window.VaultUtils.copyToClipboard('${window.escapeHTML(entry.password)}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors active:scale-95"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div></div>`; }
             return html;
         },
-        customFields: (fields) => { if (!fields || fields.length === 0) return ''; const items = fields.map(cf => `<div class="bg-amber-50/80 dark:bg-amber-900/10 rounded-2xl p-3 border border-amber-100/80 dark:border-amber-800/30 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-amber-700/80 dark:text-amber-500/80 font-bold block mb-1">${escapeHTML(cf.key)}</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${escapeHTML(cf.value)}</div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(cf.value)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-amber-600/50 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`).join(''); return `<div class="grid grid-cols-1 gap-2 mt-2">${items}</div>`; },
-        totpBlock: (entry) => { if (!entry.twoFactorKey) return ''; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1"><i class="ph-bold ph-lock-key text-sm"></i> Mã 2FA (Live)</span><div class="w-16 h-2 bg-indigo-200/50 dark:bg-indigo-900/50 rounded-full overflow-hidden shadow-inner"><div id="totp-bar-${entry.id}" class="totp-progress h-full bg-indigo-500 dark:bg-indigo-400 w-full rounded-full"></div></div></div><div class="flex justify-between items-center group/totp"><div id="totp-code-${entry.id}" class="font-mono text-3xl sm:text-4xl font-black text-indigo-800 dark:text-indigo-300 tracking-[0.15em] totp-target drop-shadow-sm" data-secret="${escapeHTML(entry.twoFactorKey)}">------</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('totp-code-${entry.id}').innerText); event.stopPropagation();" class="p-3 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/totp:opacity-100 shadow-sm transition-all active:scale-90"><i class="ph-bold ph-copy text-xl"></i></button></div></div>`; },
-        backupBlock: (entry) => { if (!entry.backupCodes) return ''; const title = entry.backupTitle ? escapeHTML(entry.backupTitle) : 'Mã dự phòng'; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative group/item shadow-sm"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-shield-check"></i> ${title}</span><div id="backup-${entry.id}" class="font-mono text-[13px] sm:text-[11px] text-gray-700 dark:text-slate-300 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-12 leading-relaxed">${escapeHTML(entry.backupCodes)}</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('backup-${entry.id}').innerText); event.stopPropagation();" class="absolute right-2 top-2 p-2.5 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 shadow-sm active:scale-90 transition-all"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; },
-        qrBlock: (entry, safeName) => { if (!entry.qrCode) return ''; return `<div class="bg-teal-50/80 dark:bg-teal-900/20 rounded-2xl p-3.5 border border-teal-100/80 dark:border-teal-800/40 mt-3 relative shadow-sm"><span class="text-[11px] uppercase tracking-widest text-teal-600 dark:text-teal-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-qr-code"></i> Mã QR</span><div class="relative flex justify-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-teal-100/50 dark:border-teal-800/50 group/qr cursor-pointer overflow-hidden shadow-inner" onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();"><img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-lg bg-white shadow-sm transition-transform duration-300 group-hover/qr:scale-105"><div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-xl flex items-center justify-center gap-4 backdrop-blur-[2px]"><button onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();" class="p-4 bg-white/95 rounded-full hover:scale-110 shadow-xl transition-transform"><i class="ph-bold ph-arrows-out text-2xl text-slate-800"></i></button></div></div></div>`; }
+        customFields: function(fields) { if (!fields || fields.length === 0) return ''; const items = fields.map(cf => `<div class="bg-amber-50/80 dark:bg-amber-900/10 rounded-2xl p-3 border border-amber-100/80 dark:border-amber-800/30 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-amber-700/80 dark:text-amber-500/80 font-bold block mb-1">${window.escapeHTML(cf.key)}</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${window.escapeHTML(cf.value)}</div><button onclick="window.VaultUtils.copyToClipboard('${window.escapeHTML(cf.value)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-amber-600/50 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`).join(''); return `<div class="grid grid-cols-1 gap-2 mt-2">${items}</div>`; },
+        totpBlock: function(entry) { if (!entry.twoFactorKey) return ''; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1"><i class="ph-bold ph-lock-key text-sm"></i> Mã 2FA (Live)</span><div class="w-16 h-2 bg-indigo-200/50 dark:bg-indigo-900/50 rounded-full overflow-hidden shadow-inner"><div id="totp-bar-${entry.id}" class="totp-progress h-full bg-indigo-500 dark:bg-indigo-400 w-full rounded-full"></div></div></div><div class="flex justify-between items-center group/totp"><div id="totp-code-${entry.id}" class="font-mono text-3xl sm:text-4xl font-black text-indigo-800 dark:text-indigo-300 tracking-[0.15em] totp-target drop-shadow-sm" data-secret="${window.escapeHTML(entry.twoFactorKey)}">------</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('totp-code-${entry.id}').innerText); event.stopPropagation();" class="p-3 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/totp:opacity-100 shadow-sm transition-all active:scale-90"><i class="ph-bold ph-copy text-xl"></i></button></div></div>`; },
+        backupBlock: function(entry) { if (!entry.backupCodes) return ''; const title = entry.backupTitle ? window.escapeHTML(entry.backupTitle) : 'Mã dự phòng'; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative group/item shadow-sm"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-shield-check"></i> ${title}</span><div id="backup-${entry.id}" class="font-mono text-[13px] sm:text-[11px] text-gray-700 dark:text-slate-300 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-12 leading-relaxed">${window.escapeHTML(entry.backupCodes)}</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('backup-${entry.id}').innerText); event.stopPropagation();" class="absolute right-2 top-2 p-2.5 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 shadow-sm active:scale-90 transition-all"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; },
+        qrBlock: function(entry, safeName) { if (!entry.qrCode) return ''; return `<div class="bg-teal-50/80 dark:bg-teal-900/20 rounded-2xl p-3.5 border border-teal-100/80 dark:border-teal-800/40 mt-3 relative shadow-sm"><span class="text-[11px] uppercase tracking-widest text-teal-600 dark:text-teal-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-qr-code"></i> Mã QR</span><div class="relative flex justify-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-teal-100/50 dark:border-teal-800/50 group/qr cursor-pointer overflow-hidden shadow-inner" onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();"><img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-lg bg-white shadow-sm transition-transform duration-300 group-hover/qr:scale-105"><div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-xl flex items-center justify-center gap-4 backdrop-blur-[2px]"><button onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();" class="p-4 bg-white/95 rounded-full hover:scale-110 shadow-xl transition-transform"><i class="ph-bold ph-arrows-out text-2xl text-slate-800"></i></button></div></div></div>`; }
     },
 
-    renderCards: (dataToRender) => {
+    renderCards: function(dataToRender) {
         const container = document.getElementById('vaultCardsContainer');
         const emptyState = document.getElementById('vaultEmptyState');
         
@@ -623,7 +659,7 @@ const VaultUI = {
         sortedGroups.forEach(group => {
             const firstEntry = group[0];
             const rawCat = firstEntry.category || 'account';
-            const cat = window.VaultConfig.CATEGORIES[rawCat] || { icon: 'ph-folder-star', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-100/90 dark:bg-slate-800/90', border: 'border-slate-200 dark:border-slate-700', label: escapeHTML(rawCat) };
+            const cat = window.VaultConfig.CATEGORIES[rawCat] || { icon: 'ph-folder-star', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-100/90 dark:bg-slate-800/90', border: 'border-slate-200 dark:border-slate-700', label: window.escapeHTML(rawCat) };
             const domain = window.VaultUtils.getDomainInfo(firstEntry.name);
             const groupId = firstEntry.id;
 
@@ -644,7 +680,7 @@ const VaultUI = {
                         <div class="flex justify-between items-center mb-4 gap-2">
                             <div class="flex flex-wrap items-center gap-2">
                                 ${has2FA ? `<div class="flex items-center gap-1.5 bg-indigo-50/90 dark:bg-indigo-900/40 pr-2.5 p-1 rounded-lg border border-indigo-100 dark:border-indigo-800/50 shadow-sm"><div class="w-6 h-6 bg-indigo-500 dark:bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold"><i class="ph-bold ph-shield-check text-[10px]"></i></div><span class="text-indigo-700 dark:text-indigo-300 font-bold text-[10px] tracking-widest">2FA</span></div>` : ''}
-                                ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation(); window.speak('Đang mở liên kết.'); vibrate(15);" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition-colors truncate inline-flex items-center gap-1.5 border border-blue-100/50 dark:border-blue-800/50 shadow-sm bg-white/50 dark:bg-slate-800/50"><i class="ph-bold ph-link"></i> Mở Link</a>` : ''}
+                                ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation(); window.speak('Đang mở liên kết.'); window.vibrate(15);" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition-colors truncate inline-flex items-center gap-1.5 border border-blue-100/50 dark:border-blue-800/50 shadow-sm bg-white/50 dark:bg-slate-800/50"><i class="ph-bold ph-link"></i> Mở Link</a>` : ''}
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="window.VaultUI.openModal('${entry.id}'); event.stopPropagation();" class="p-2.5 bg-white/80 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors border border-indigo-100/50 dark:border-indigo-800/50 shadow-sm active:scale-90"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
@@ -658,7 +694,7 @@ const VaultUI = {
                         ${window.VaultUI.Templates.backupBlock(entry)}
                         ${window.VaultUI.Templates.qrBlock(entry, safeFileName)}
                         
-                        ${entry.notes ? `<div class="mt-4 bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm"><span class="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold block mb-1.5 flex items-center gap-1.5"><i class="ph-bold ph-text-align-left"></i> Ghi chú</span><div class="text-[14px] sm:text-[13px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-mono custom-scrollbar overflow-x-auto">${escapeHTML(entry.notes)}</div></div>` : ''}
+                        ${entry.notes ? `<div class="mt-4 bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm"><span class="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold block mb-1.5 flex items-center gap-1.5"><i class="ph-bold ph-text-align-left"></i> Ghi chú</span><div class="text-[14px] sm:text-[13px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-mono custom-scrollbar overflow-x-auto">${window.escapeHTML(entry.notes)}</div></div>` : ''}
                     </div>`;
             }).join('');
 
@@ -666,7 +702,7 @@ const VaultUI = {
                 <div onclick="window.VaultUI.toggleCardDetail('${groupId}')" class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors z-10 relative">
                     <div class="flex items-center gap-3.5 overflow-hidden pr-2">
                         <div class="w-12 h-12 flex-shrink-0 rounded-[14px] ${domain.color} flex items-center justify-center text-white font-black text-xl shadow-md border border-white/20">${domain.initial}</div>
-                        <h3 class="font-black text-slate-800 dark:text-white text-lg sm:text-base truncate tracking-tight">${escapeHTML(firstEntry.name)}</h3>
+                        <h3 class="font-black text-slate-800 dark:text-white text-lg sm:text-base truncate tracking-tight">${window.escapeHTML(firstEntry.name)}</h3>
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
                         ${quickActionUI}
@@ -683,17 +719,16 @@ const VaultUI = {
         container.appendChild(fragment); window.VaultApp.startTOTPLoop();
     }
 };
-window.VaultUI = VaultUI;
 
-const VaultApp = {
-    setCategoryFilter: (category) => {
-        vibrate(15); window.VaultState.activeCategory = category;
+window.VaultApp = {
+    setCategoryFilter: function(category) {
+        window.vibrate(15); window.VaultState.activeCategory = category;
         document.querySelectorAll('#vaultCategoryFilters .cat-filter-btn').forEach(btn => { btn.classList.remove('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600', 'shadow-md'); btn.classList.add('bg-white/50', 'dark:bg-slate-800/50', 'text-gray-700', 'dark:text-slate-300', 'border-transparent'); });
         const activeBtn = document.querySelector(`#vaultCategoryFilters .cat-filter-btn[onclick="window.VaultApp.setCategoryFilter('${category}')"]`);
         if (activeBtn) { activeBtn.classList.remove('bg-white/50', 'dark:bg-slate-800/50', 'text-gray-700', 'dark:text-slate-300', 'border-transparent'); activeBtn.classList.add('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600', 'shadow-md'); }
         window.VaultApp.filterData(document.getElementById('vaultSearchInput').value); window.speak('Đã lọc kho lưu trữ.', 1.1, 1.0);
     },
-    filterData: (query) => {
+    filterData: function(query) {
         query = query.toLowerCase().trim();
         const filtered = window.VaultState.data.filter(item => {
             let matchCat = true;
@@ -703,7 +738,7 @@ const VaultApp = {
         });
         window.VaultUI.renderCards(filtered);
     },
-    saveEntry: (e) => {
+    saveEntry: function(e) {
         e.preventDefault();
         
         const nameInput = document.getElementById('vaultEntryName').value.trim();
@@ -712,15 +747,15 @@ const VaultApp = {
         const rawContent = document.getElementById('vaultEntryContent').value.trim();
 
         if (!catSelect) {
-            vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa chọn Loại dữ liệu.', 'ph-warning-circle');
+            window.vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa chọn Loại dữ liệu.', 'ph-warning-circle');
             window.highlightError('vaultEntryCategory'); return;
         }
         if (catSelect === 'custom' && !customCatInput) {
-            vibrate([50, 50]); window.showToast('Lỗi: Tên phân loại không được để trống.', 'ph-warning-circle');
+            window.vibrate([50, 50]); window.showToast('Lỗi: Tên phân loại không được để trống.', 'ph-warning-circle');
             window.highlightError('vaultEntryCustomCategory'); return;
         }
         if (!nameInput) {
-            vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa nhập Tiêu đề.', 'ph-warning-circle');
+            window.vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa nhập Tiêu đề.', 'ph-warning-circle');
             window.highlightError('vaultEntryName'); return;
         }
 
@@ -728,7 +763,6 @@ const VaultApp = {
         const finalCategory = catSelect === 'custom' ? customCatInput : catSelect;
         const existingEntry = id ? window.VaultState.data.find(i=>i.id===id) : null;
 
-        // --- SMART PARSER ENGINE ---
         let extUsername = '', extPassword = '', ext2FA = '', extUrl = '';
         const lines = rawContent.split('\n');
         const remainingLines = [];
@@ -775,10 +809,10 @@ const VaultApp = {
             window.VaultStorageLayer.save(); 
             
             if(isNew) {
-                vibrate([20, 30]); window.showToast('Đã lưu dữ liệu an toàn!', 'ph-check-circle'); 
+                window.vibrate([20, 30]); window.showToast('Đã lưu dữ liệu an toàn!', 'ph-check-circle'); 
                 window.speak('Đã thêm mới dữ liệu an toàn vào kho lưu trữ.', 1.05, 1.0);
             } else {
-                vibrate([20]); window.showToast('Đã cập nhật dữ liệu!', 'ph-check-circle'); 
+                window.vibrate([20]); window.showToast('Đã cập nhật dữ liệu!', 'ph-check-circle'); 
                 window.speak('Đã cập nhật thay đổi thành công.', 1.05, 1.0); 
             }
             
@@ -787,29 +821,25 @@ const VaultApp = {
             document.getElementById('vaultSearchInput').value = ''; 
         } catch (error) {
             window.VaultState.data = originalData;
-            console.error(error); vibrate([50, 50, 50]);
-            
+            console.error(error); window.vibrate([50, 50, 50]);
             let errorMsg = 'Có lỗi không xác định xảy ra khi lưu.';
             let voiceMsg = 'Xin lỗi, hệ thống gặp lỗi khi lưu dữ liệu.';
-            
             if (error.name === 'QuotaExceededError' || error.message.includes('Quota')) {
                 errorMsg = 'Lỗi: Bộ nhớ thiết bị đã đầy! Không thể lưu thêm.';
                 voiceMsg = 'Bộ nhớ thiết bị đã đầy. Vui lòng dọn dẹp dung lượng và thử lại.';
             }
-
-            window.showToast(errorMsg, 'ph-warning-circle');
-            window.speak(voiceMsg, 1.0, 0.9);
+            window.showToast(errorMsg, 'ph-warning-circle'); window.speak(voiceMsg, 1.0, 0.9);
         }
     },
-    deleteEntry: (id) => {
-        vibrate(20);
+    deleteEntry: function(id) {
+        window.vibrate(20);
         if (window.confirm('Xác nhận xóa dữ liệu này? Hành động không thể hoàn tác.')) {
             window.VaultState.data = window.VaultState.data.filter(item => item.id !== id); window.VaultStorageLayer.save(); window.VaultApp.filterData(document.getElementById('vaultSearchInput').value); 
-            vibrate([30, 50]); window.showToast('Đã xóa thành công!', 'ph-trash'); window.speak('Dữ liệu đã bị xóa khỏi hệ thống.', 1.0, 0.9);
+            window.vibrate([30, 50]); window.showToast('Đã xóa thành công!', 'ph-trash'); window.speak('Dữ liệu đã bị xóa khỏi hệ thống.', 1.0, 0.9);
         }
     },
-    exportBackup: () => {
-        vibrate(20);
+    exportBackup: function() {
+        window.vibrate(20);
         try {
             if (window.VaultState.data.length === 0) { window.showToast("Kho đang trống!", 'ph-warning-circle'); window.speak('Không có dữ liệu để xuất.'); return; }
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.VaultState.data, null, 2));
@@ -817,7 +847,7 @@ const VaultApp = {
             window.showToast("Tải sao lưu thành công!", 'ph-check-circle'); window.speak('Đã tải xuống file sao lưu kho lưu trữ.');
         } catch (error) { window.showToast("Lỗi tạo sao lưu!", 'ph-warning-circle'); }
     },
-    importBackup: (event) => {
+    importBackup: function(event) {
         const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -826,13 +856,13 @@ const VaultApp = {
                 if (!Array.isArray(imported)) throw new Error("Invalid Format");
                 if (window.confirm(`Tìm thấy ${imported.length} mục. Xác nhận ghi đè kho lưu trữ hiện tại?`)) {
                     window.VaultState.data = imported.map(item => window.VaultUtils.validateAndHealEntry(item)); window.VaultStorageLayer.save(); window.VaultApp.filterData(document.getElementById('vaultSearchInput').value);
-                    vibrate([30, 50]); window.showToast("Phục hồi thành công!", 'ph-check-circle'); window.speak('Đã phục hồi dữ liệu từ file thành công.', 1.0, 1.1);
+                    window.vibrate([30, 50]); window.showToast("Phục hồi thành công!", 'ph-check-circle'); window.speak('Đã phục hồi dữ liệu từ file thành công.', 1.0, 1.1);
                 }
             } catch (error) { window.showToast("File không hợp lệ hoặc bị hỏng!", 'ph-warning-circle'); window.speak('Lỗi, file không đúng định dạng.', 1.0, 0.9); } 
             finally { event.target.value = ''; }
         }; reader.readAsText(file);
     },
-    startTOTPLoop: () => {
+    startTOTPLoop: function() {
         if(window.VaultState.activeInterval) clearInterval(window.VaultState.activeInterval);
         const updateTOTP = () => {
             const epoch = Math.round(new Date().getTime() / 1000.0); const countDown = 30 - (epoch % 30); const percentage = (countDown / 30) * 100;
@@ -842,9 +872,10 @@ const VaultApp = {
         updateTOTP(); window.VaultState.activeInterval = setInterval(updateTOTP, 1000);
     }
 };
-window.VaultApp = VaultApp;
 
-// ===================== FIREBASE CONFIG & INIT =====================
+// ===================== FIREBASE INIT =====================
+window.db = null;
+window.auth = null;
 const firebaseConfig = {
   apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
   authDomain: "tool-mimishop.firebaseapp.com",
@@ -855,28 +886,21 @@ const firebaseConfig = {
   measurementId: "G-R39R19WWRE"
 };
 
-let db = null;
-let auth = null;
-
 try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    db = firebase.firestore();
-    auth = firebase.auth();
-} catch(e) {
-    console.error("Lỗi khởi tạo Firebase:", e);
-}
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    window.db = firebase.firestore();
+    window.auth = firebase.auth();
+} catch(e) { console.error("Firebase init failed:", e); }
 
 window.FirebaseSync = {
     unsub: null,
-    init: async (profileId) => {
-        if(!db || !auth) return;
+    init: async function(profileId) {
+        if(!window.db || !window.auth) return;
         try {
-            await auth.signInAnonymously();
+            await window.auth.signInAnonymously();
             if(window.FirebaseSync.unsub) window.FirebaseSync.unsub();
             
-            const docRef = db.collection("LifeOS_Profiles").doc(profileId);
+            const docRef = window.db.collection("LifeOS_Profiles").doc(profileId);
             window.FirebaseSync.unsub = docRef.onSnapshot((docSnap) => {
                 if (docSnap.metadata.hasPendingWrites) return;
                 
@@ -910,7 +934,6 @@ window.FirebaseSync = {
                     if (needsRender && document.getElementById('view-tasks').classList.contains('active')) {
                         window.renderTasksOnly();
                     }
-                    
                     const dot = document.getElementById('pwaStatusDot');
                     if (dot) dot.classList.replace('dot-yellow', 'dot-green');
                     
@@ -918,16 +941,14 @@ window.FirebaseSync = {
                     window.FirebaseSync.pushAll();
                 }
             }, (error) => {
-                console.error("Lỗi đồng bộ (Có thể do Rule):", error);
+                console.error("Lỗi đồng bộ:", error);
                 window.showToast("Lỗi đồng bộ Cloud", "ph-warning-circle");
             });
-        } catch(e) {
-            console.error("Lỗi Auth Firebase:", e);
-        }
+        } catch(e) { console.error("Lỗi Auth Firebase:", e); }
     },
-    pushAll: () => {
-        if(!window.viewingUser || !db) return;
-        db.collection("LifeOS_Profiles").doc(window.viewingUser).set({
+    pushAll: function() {
+        if(!window.viewingUser || !window.db) return;
+        window.db.collection("LifeOS_Profiles").doc(window.viewingUser).set({
             todos: window.todos || [],
             stats: window.stats || {streak:0,lastDate:null},
             logs: window.sentinelLogs || [],
@@ -935,26 +956,23 @@ window.FirebaseSync = {
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true }).catch(e => console.error("Lỗi Push:", e));
     },
-    forcePushLocal: () => {
+    forcePushLocal: function() {
         if(!window.viewingUser) return;
         const keySuffix = window.viewingUser;
         const localVault = JSON.parse(localStorage.getItem('lifeos_v8_vault_' + keySuffix) || "[]");
-        if(localVault.length > 0) {
-            window.VaultState.data = localVault;
-        }
+        if(localVault.length > 0) { window.VaultState.data = localVault; }
         window.FirebaseSync.pushAll();
-        vibrate([20, 30]);
+        window.vibrate([20, 30]);
         window.showToast("Đã ép đồng bộ lên Cloud", "ph-cloud-arrow-up");
         window.VaultUI.renderCards(window.VaultState.data);
     }
 };
 
-// ===================== EVENT LISTENERS & DELEGATION =====================
+// ===================== EVENT LISTENERS & BOOT =====================
 document.addEventListener('DOMContentLoaded', () => {
     
-    try {
-        window.pwaLogicCore.init();
-    } catch(e) {}
+    // An toàn PWA
+    try { window.pwaLogicCore.init(); } catch(e) {}
     
     document.getElementById('theme-toggle')?.addEventListener('click', window.toggleThemeLogic);
     
@@ -1049,6 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // BOOT SEQUENCE AN TOÀN TUYỆT ĐỐI
     try {
         if(localStorage.getItem('lifeos_v8_session')){
             let savedSession = localStorage.getItem('lifeos_v8_session');
@@ -1057,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentUser = savedSession.toLowerCase();
             window.viewingUser = savedView.toLowerCase();
             
-            if (!window.PROFILES[window.currentUser]) {
+            if (!window.PROFILES || !window.PROFILES[window.currentUser]) {
                 console.warn("Invalid Session, logging out.");
                 window.showLoginGate();
                 return;
