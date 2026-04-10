@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ Kiến trúc Hệ thống — LifeOS V8.8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        'serif-display': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .animate-marquee { animation: marquee 25s linear infinite; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up { animation: fadeInUp 0.7s ease-out forwards; opacity: 0; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
+
+        html { scroll-behavior: smooth; }
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+        }
+        .code-block .key { color: #7DD3FC; }
+        .code-block .val { color: #FDE68A; }
+        .code-block .comment { color: #64748B; }
+
+        .toc-link {
+            transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toc-link:hover {
+            color: #0F172A;
+            padding-left: 0.5rem;
+        }
+        .toc-link.active {
+            color: #0F172A;
+            font-weight: 600;
+            border-left-color: #0F172A;
+        }
+
+        .layer-card {
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .layer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .flow-arrow {
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 2rem;
+            background: repeating-linear-gradient(to bottom, #CBD5E1 0px, #CBD5E1 4px, transparent 4px, transparent 8px);
+        }
+
+        .syntax-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+    </style>
+</head>
+<body class="font-sans bg-white text-slate-700">
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 h-20 flex items-center">
+        <div class="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+                    <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-semibold text-slate-900 tracking-tight">LifeOS</span>
+                    <span class="text-xs text-slate-400 ml-1.5">V8.8</span>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#core-stack" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Core Stack</a>
+                <a href="#storage" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Storage</a>
+                <a href="#sync" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Smart Sync</a>
+                <a href="#manual" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">User Manual</a>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-700"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 z-[60] bg-white hidden flex-col pt-24 px-6">
+        <button id="mobileMenuClose" class="absolute top-6 right-6 p-2 rounded-lg hover:bg-slate-100">
+            <i data-lucide="x" class="w-5 h-5 text-slate-700"></i>
+        </button>
+        <a href="#core-stack" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Core Stack</a>
+        <a href="#storage" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Storage Flow</a>
+        <a href="#sync" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Smart Sync</a>
+        <a href="#manual" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">User Manual</a>
+    </div>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="relative min-h-[85vh] flex items-center pt-20 overflow-hidden">
+        <!-- Decorative blurs -->
+        <div class="absolute top-20 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-60"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-slate-50 rounded-full blur-3xl opacity-30"></div>
+
+        <div class="max-w-7xl mx-auto px-6 w-full">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-in-up">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full mb-8">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-widest">Technical Document</span>
+                    </div>
+                    <h1 class="font-serif-display text-5xl md:text-7xl font-semibold text-slate-900 tracking-tight leading-[1.1] mb-6">
+                        Hồ sơ<br>
+                        <span class="text-slate-400">Kiến trúc</span><br>
+                        Hệ thống
+                    </h1>
+                    <p class="text-lg text-slate-500 leading-relaxed max-w-lg mb-10">
+                        Tài liệu kỹ thuật dành cho bạn để <strong class="text-slate-700">quản lý, bảo trì và phát triển</strong> dự án trên mọi nền tảng mà không sợ sai lệch.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#core-stack" class="inline-flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
+                            Khám phá ngay
+                            <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#manual" class="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-700 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
+                            Hướng dẫn sử dụng
+                        </a>
+                    </div>
+                </div>
+                <div class="fade-in-up delay-300 relative hidden lg:block">
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
+                        <img src="https://picsum.photos/seed/architecture-blueprint/800/600.jpg" alt="Architecture" class="w-full h-[500px] object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <i data-lucide="cpu" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <span class="text-white text-sm font-medium">Architecture Profile</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                                    <div class="text-white text-lg font-semibold">2</div>
+                                    <div class="text-white/60 text-xs">Layers</div>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                                    <div class="text-white text-lg font-semibold">4</div>
+                                    <div class="text-white/60 text-xs">Keys</div>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                                    <div class="text-white text-lg font-semibold">0ms</div>
+                                    <div class="text-white/60 text-xs">Latency</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Floating card -->
+                    <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-slate-100 p-4 fade-in-up delay-500">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                            <span class="text-xs font-semibold text-slate-900">Offline First</span>
+                        </div>
+                        <span class="text-xs text-slate-400">0ms response time</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MARQUEE ==================== -->
+    <div class="bg-slate-900 py-4 overflow-hidden">
+        <div class="animate-marquee whitespace-nowrap flex items-center gap-8">
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-blue-400"></i> HTML5</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> Vanilla JS ES6+</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-amber-400"></i> localStorage</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Firestore</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="shield-check" class="w-3 h-3 text-green-400"></i> Firebase Auth</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="smartphone" class="w-3 h-3 text-purple-400"></i> SPA Architecture</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3 text-rose-400"></i> Real-time Sync</span>
+            <!-- Duplicate for seamless loop -->
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-blue-400"></i> HTML5</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> Vanilla JS ES6+</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-amber-400"></i> localStorage</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Firestore</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="shield-check" class="w-3 h-3 text-green-400"></i> Firebase Auth</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="smartphone" class="w-3 h-3 text-purple-400"></i> SPA Architecture</span>
+            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3 text-rose-400"></i> Real-time Sync</span>
+        </div>
+    </div>
+
+    <!-- ==================== TABLE OF CONTENTS (Sticky Sidebar on large screens) ==================== -->
+    <div class="max-w-7xl mx-auto px-6 py-24">
+        <div class="lg:grid lg:grid-cols-[240px_1fr] lg:gap-16">
+
+            <!-- Sidebar TOC -->
+            <aside class="hidden lg:block">
+                <div class="sticky top-28">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Mục lục</p>
+                    <nav class="flex flex-col gap-1 border-l border-slate-200 pl-4" id="tocNav">
+                        <a href="#core-stack" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Core Stack</a>
+                        <a href="#storage" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Storage Flow</a>
+                        <a href="#sync" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Smart Sync</a>
+                        <a href="#manual" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Hướng dẫn sử dụng</a>
+                        <a href="#profile" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Quản lý Profile</a>
+                        <a href="#vault" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Kho lưu trữ</a>
+                        <a href="#sentinel" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Todo & Sentinel AI</a>
+                        <a href="#cross-device" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Cross-device Sync</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- ==================== MAIN CONTENT ==================== -->
+            <main class="min-w-0">
+
+                <!-- ===== SECTION 1: CORE STACK ===== -->
+                <section id="core-stack" class="mb-24 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 1</span>
+                        <div class="h-px flex-1 bg-slate-200"></div>
+                    </div>
+                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Thông tin cốt lõi</h2>
+                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Bốn trụ cột kiến trúc định hình toàn bộ hệ thống LifeOS V8.8.</p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Card 1: UI -->
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
+                                <i data-lucide="layout" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Giao diện & Cấu trúc</h3>
+                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Ứng dụng chạy theo chuẩn <strong class="text-slate-700">SPA</strong> (Single Page Application) — không reload trang, chuyển đổi mượt mà.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="syntax-tag bg-orange-50 text-orange-700">HTML5</span>
+                                <span class="syntax-tag bg-cyan-50 text-cyan-700">TailwindCSS (CDN)</span>
+                                <span class="syntax-tag bg-slate-100 text-slate-600">Phosphor Icons</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Logic -->
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
+                            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-5">
+                                <i data-lucide="brain" class="w-6 h-6 text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Logic — Não bộ</h3>
+                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Vanilla JavaScript ES6+ với cấu trúc <strong class="text-slate-700">Object Literals</strong> giúp module hóa dễ dàng.</p>
+                            <div class="code-block p-4 text-xs">
+                                <span class="comment">// 3 module chính</span><br>
+                                <span class="key">VaultUI</span> <span class="comment">// Giao diện</span><br>
+                                <span class="key">VaultApp</span> <span class="comment">// Xử lý logic</span><br>
+                                <span class="key">FirebaseSync</span> <span class="comment">// Đồng bộ Cloud</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Database -->
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
+                            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-5">
+                                <i data-lucide="database" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Cơ sở dữ liệu</h3>
+                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Kiến trúc 2 lớp đảm bảo tốc độ và độ tin cậy.</p>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <span class="text-[10px] font-bold text-green-700">L1</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-900">Offline First — localStorage</p>
+                                        <p class="text-xs text-slate-400">Tốc độ truy xuất 0ms, hoạt động không cần mạng</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <span class="text-[10px] font-bold text-blue-700">L2</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-900">Cloud Sync — Firebase Firestore</p>
+                                        <p class="text-xs text-slate-400">Dùng firebase-compat, tránh Crash Module</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Security -->
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
+                            <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-5">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-rose-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Bảo mật</h3>
+                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Xác thực Firebase Anonymous — ẩn danh dựa trên Device/Trình duyệt.</p>
+                            <div class="flex items-center gap-2 p-3 bg-rose-50 rounded-lg border border-rose-100">
+                                <i data-lucide="fingerprint" class="w-4 h-4 text-rose-500 flex-shrink-0"></i>
+                                <p class="text-xs text-rose-700">Mỗi thiết bị tự động có ID riêng, không cần đăng ký tài khoản</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== SECTION 2: STORAGE FLOW ===== -->
+                <section id="storage" class="mb-24 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 2</span>
+                        <div class="h-px flex-1 bg-slate-200"></div>
+                    </div>
+                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Cấu trúc lưu trữ dữ liệu</h2>
+                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Mỗi người dùng (Profile) sở hữu 4 key độc lập trong LocalStorage, tương ứng 4 mảng trên Firestore.</p>
+
+                    <!-- Storage Keys -->
+                    <div class="space-y-4 mb-10">
+                        <!-- Key 1 -->
+                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="check-square" class="w-5 h-5 text-blue-600"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_data_<span class="text-blue-500">[tên]</span></p>
+                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">todos</code> — Nhiệm vụ</p>
+                                    </div>
+                                </div>
+                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                                    <span>localStorage</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+                                    <span>Firestore Array</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key 2 -->
+                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_stats_v8_<span class="text-emerald-500">[tên]</span></p>
+                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">stats</code> — Chuỗi ngày & kỷ luật</p>
+                                    </div>
+                                </div>
+                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                                    <span>localStorage</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+                                    <span>Firestore Array</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key 3 -->
+                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="file-text" class="w-5 h-5 text-amber-600"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_logs_<span class="text-amber-500">[tên]</span></p>
+                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">sentinelLogs</code> — Nhật ký cảnh báo</p>
+                                    </div>
+                                </div>
+                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                                    <span>localStorage</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+                                    <span>Firestore Array</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key 4 -->
+                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="lock" class="w-5 h-5 text-purple-600"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_vault_<span class="text-purple-500">[tên]</span></p>
+                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">VaultState.data</code> — Kho lưu trữ</p>
+                                    </div>
+                                </div>
+                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                                    <span>localStorage</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+                                    <span>Firestore Array</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                            <span class="text-sm font-semibold text-slate-900">Ví dụ</span>
+                        </div>
+                        <p class="text-sm text-slate-500">Dữ liệu của anh <strong class="text-slate-700">Xiêm</strong> sẽ lưu tại Cloud path:</p>
+                        <div class="code-block p-4 mt-3 text-xs">
+                            <span class="key">LifeOS_Profiles/xiem</span><br>
+                            <span class="comment">├── data</span> <span class="comment">// todos</span><br>
+                            <span class="comment">├── stats</span> <span class="comment">// kỷ luật</span><br>
+                            <span class="comment">├── sentinelLogs</span> <span class="comment">// nhật ký</span><br>
+                            <span class="comment">└── vaultData</span> <span class="comment">// kho lưu trữ</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== SECTION 3: SMART SYNC ===== -->
+                <section id="sync" class="mb-24 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 3</span>
+                        <div class="h-px flex-1 bg-slate-200"></div>
+                    </div>
+                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Cơ chế đồng bộ thông minh</h2>
+                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Smart Sync Mechanism — hai luồng hoạt động song song, đảm bảo dữ liệu luôn nhất quán.</p>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Flow 1: Online Write -->
+                        <div class="relative">
+                            <div class="bg-white border border-slate-200 rounded-2xl p-8 h-full">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="wifi" class="w-5 h-5 text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-semibold text-slate-900">Khi có mạng (Online)</h3>
+                                        <p class="text-xs text-slate-400">Thêm / Sửa / Xóa</p>
+                                    </div>
+                                </div>
+
+                                <!-- Flow steps -->
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <span class="text-[10px] font-bold text-white">1</span>
+                                            </div>
+                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
+                                        </div>
+                                        <div class="pt-0.5">
+                                            <p class="text-sm font-medium text-slate-900">Ghi Local ngay lập tức</p>
+                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">saveLocalOnly()</code>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <span class="text-[10px] font-bold text-white">2</span>
+                                            </div>
+                                        </div>
+                                        <div class="pt-0.5">
+                                            <p class="text-sm font-medium text-slate-900">Push lên Cloud</p>
+                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">FirebaseSync.pushAll()</code>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-3 bg-green-50 rounded-lg border border-green-100">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-green-600"></i>
+                                        <p class="text-xs text-green-700 font-medium">UI cập nhật tức thì từ Local — không chờ Cloud</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flow 2: Cross-device -->
+                        <div class="relative">
+                            <div class="bg-white border border-slate-200 rounded-2xl p-8 h-full">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="monitor-smartphone" class="w-5 h-5 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-semibold text-slate-900">Đồng bộ chéo thiết bị</h3>
+                                        <p class="text-xs text-slate-400">Thiết bị khác đẩy dữ liệu</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <span class="text-[10px] font-bold text-white">1</span>
+                                            </div>
+                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
+                                        </div>
+                                        <div class="pt-0.5">
+                                            <p class="text-sm font-medium text-slate-900">Firebase lắng nghe thay đổi</p>
+                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">onSnapshot()</code>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <span class="text-[10px] font-bold text-white">2</span>
+                                            </div>
+                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
+                                        </div>
+                                        <div class="pt-0.5">
+                                            <p class="text-sm font-medium text-slate-900">Kéo về → Ghi đè LocalStorage</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <span class="text-[10px] font-bold text-white">3</span>
+                                            </div>
+                                        </div>
+                                        <div class="pt-0.5">
+                                            <p class="text-sm font-medium text-slate-900">Cập nhật UI không reload</p>
+                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">renderTasksOnly()</code>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-600"></i>
+                                        <p class="text-xs text-blue-700 font-medium">Real-time — không cần F5, không reload trang</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== SECTION 4: USER MANUAL ===== -->
+                <section id="manual" class="mb-16 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 4</span>
+                        <div class="h-px flex-1 bg-slate-200"></div>
+                    </div>
+                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Hướng dẫn sử dụng</h2>
+                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">User Manual — cách vận hành toàn bộ tính năng của LifeOS V8.8.</p>
+
+                    <!-- ===== 4.1 Profile Management ===== -->
+                    <div id="profile" class="mb-16 scroll-mt-28">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.1</span>
+                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Quản lý Profile</h3>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                            <div class="p-8">
+                                <div class="space-y-6">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-slate-700 leading-relaxed">Khi vào App, bạn <strong>chọn tên của mình</strong> từ danh sách Profile.</p>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-slate-100 pt-6">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <i data-lucide="crown" class="w-4 h-4 text-amber-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-slate-700 leading-relaxed mb-3"><strong>Quản trị viên (Admin)</strong> có quyền truy cập danh sách ở góc phải trên cùng → Cho phép xem/sửa chéo dữ liệu của các thành viên khác (<span class="text-slate-500">Thành, Thắm, Phúc...</span>) ngay lập tức.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Password table -->
+                            <div class="bg-slate-50 border-t border-slate-200 p-6">
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Mật khẩu mặc định</p>
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-4 border border-slate-200">
+                                        <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="shield" class="w-4 h-4 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Admin</p>
+                                            <code class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">admin</code>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-4 border border-slate-200">
+                                        <div class="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Thành viên</p>
+                                            <code class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">a</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
+                                    <i data-lucide="info" class="w-3 h-3"></i>
+                                    Có thể sửa trong biến <code class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-600">window.PROFILES</code> ở đầu file JS.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== 4.2 Vault & Smart Input ===== -->
+                    <div id="vault" class="mb-16 scroll-mt-28">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.2</span>
+                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Kho lưu trữ Đa năng & Smart Input</h3>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-blue-50/50 to-purple-50/50 border border-blue-100 rounded-2xl p-8 mb-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-blue-600"></i>
+                                <span class="text-sm font-semibold text-blue-700">Tính năng mạnh nhất của V8.8</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">Hỗ trợ 2 chế độ nhập liệu: nhập thô và nhập thông minh (Auto Parse).</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Nhập thô -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-6">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-600"></i>
+                                    </div>
+                                    <h4 class="text-sm font-semibold text-slate-900">Nhập thô</h4>
+                                </div>
+                                <p class="text-sm text-slate-500 leading-relaxed">Gõ bất cứ đoạn văn bản, ghi chú nào vào khung <strong class="text-slate-700">"Nội dung dữ liệu"</strong> và bấm Lưu.</p>
+                            </div>
+
+                            <!-- Nhập thông minh -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-6">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="wand-2" class="w-3.5 h-3.5 text-blue-600"></i>
+                                    </div>
+                                    <h4 class="text-sm font-semibold text-slate-900">Nhập thông minh (Auto Parse)</h4>
+                                </div>
+                                <p class="text-sm text-slate-500 leading-relaxed mb-4">Gõ theo cú pháp ở <strong class="text-slate-700">đầu các dòng</strong> để hệ thống tự nhận diện:</p>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="syntax-tag bg-cyan-50 text-cyan-700">Tài khoản:</span>
+                                        <span class="text-xs text-slate-400">→ Hiển thị nút copy</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="syntax-tag bg-rose-50 text-rose-700">Mật khẩu:</span>
+                                        <span class="text-xs text-slate-400">→ Ẩn/hiện + nút copy</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="syntax-tag bg-amber-50 text-amber-700">2FA:</span>
+                                        <span class="text-xs text-slate-400">→ Mã OTP Live (30s)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="syntax-tag bg-green-50 text-green-700">Link:</span>
+                                        <span class="text-xs text-slate-400">→ Click mở trực tiếp</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Code example -->
+                        <div class="mt-6">
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Ví dụ nhập thông minh</p>
+                            <div class="code-block p-5 text-xs">
+                                <span class="key">Tài khoản:</span> <span class="val">admin@gmail.com</span><br>
+                                <span class="key">Mật khẩu:</span> <span class="val">123456</span><br>
+                                <span class="key">2FA:</span> <span class="val">JBSWY3DPEHPK3PXP</span> <span class="comment">// → Tự tạo mã OTP Live chạy 30s</span><br>
+                                <span class="key">Link:</span> <span class="val">https://facebook.com</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== 4.3 Todo & Sentinel AI ===== -->
+                    <div id="sentinel" class="mb-16 scroll-mt-28">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.3</span>
+                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Hệ thống Todo & Báo thức AI (Sentinel)</h3>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Shortcut syntax -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-6">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i data-lucide="terminal" class="w-5 h-5 text-slate-600"></i>
+                                    <h4 class="text-sm font-semibold text-slate-900">Cú pháp tắt</h4>
+                                </div>
+                                <div class="code-block p-5 text-xs mb-4">
+                                    <span class="key">@14h</span> <span class="key">!gấp</span> <span class="key">#hoc_tap</span> <span class="val">Đọc sách</span>
+                                </div>
+                                <div class="grid sm:grid-cols-3 gap-3">
+                                    <div class="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                        <span class="syntax-tag bg-blue-100 text-blue-700">@14h</span>
+                                        <span class="text-xs text-blue-700">Giờ báo thức (14:00)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-3 bg-rose-50 rounded-lg border border-rose-100">
+                                        <span class="syntax-tag bg-rose-100 text-rose-700">!gấp</span>
+                                        <span class="text-xs text-rose-700">Mức độ Khẩn cấp</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <span class="syntax-tag bg-emerald-100 text-emerald-700">#hoc_tap</span>
+                                        <span class="text-xs text-emerald-700">Tag phân loại</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Voice Guard -->
+                            <div class="bg-slate-900 rounded-xl p-6 text-white">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-semibold mb-2">Voice Guard — Lá chắn giọng nói</h4>
+                                        <p class="text-sm text-slate-300 leading-relaxed">Đảm bảo bạn không tắt tiếng điện thoại. Hệ thống sẽ <strong class="text-white">đọc lệnh AI bằng tiếng Việt</strong> khi đến giờ báo thức.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== 4.4 Cross-device Sync ===== -->
+                    <div id="cross-device" class="scroll-mt-28">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.4</span>
+                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Dịch chuyển thiết bị</h3>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Scenario 1: New device -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-6 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                <div class="relative">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <i data-lucide="smartphone" class="w-5 h-5 text-blue-600"></i>
+                                        <h4 class="text-sm font-semibold text-slate-900">Thiết bị mới</h4>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">1</div>
+                                            <p class="text-sm text-slate-600">Mở trang web</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">2</div>
+                                            <p class="text-sm text-slate-600">Chọn tên Profile</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">3</div>
+                                            <p class="text-sm text-slate-600">Dữ liệu từ Cloud tự tải về</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-2">
+                                        <i data-lucide="timer" class="w-4 h-4 text-blue-600"></i>
+                                        <span class="text-xs text-blue-700 font-medium">Thời gian: ~2 giây</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Scenario 2: JSON import -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-6 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                <div class="relative">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <i data-lucide="file-up" class="w-5 h-5 text-amber-600"></i>
+                                        <h4 class="text-sm font-semibold text-slate-900">Tệp JSON cũ</h4>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">1</div>
+                                            <p class="text-sm text-slate-600">Vào "Kho lưu trữ"</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">2</div>
+                                            <p class="text-sm text-slate-600">Bấm nút Tải lên <i data-lucide="upload" class="w-3 h-3 inline text-slate-400"></i></p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">3</div>
+                                            <p class="text-sm text-slate-600">Chèn file <code class="bg-slate-100 px-1 rounded text-slate-600">.json</code></p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">4</div>
+                                            <p class="text-sm text-slate-600">Bấm "Đồng bộ dữ liệu cũ lên Cloud ngay"</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-center gap-2">
+                                        <i data-lucide="cloud-upload" class="w-4 h-4 text-amber-600"></i>
+                                        <span class="text-xs text-amber-700 font-medium">Dữ liệu được đẩy lên Firebase</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid md:grid-cols-3 gap-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <span class="text-sm font-semibold">LifeOS</span>
+                            <span class="text-xs text-slate-500 ml-1">V8.8</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">Hồ sơ kiến trúc hệ thống — Tài liệu kỹ thuật nội bộ dành cho quản trị và phát triển.</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Kiến trúc</p>
+                    <ul class="space-y-2">
+                        <li><a href="#core-stack" class="text-sm text-slate-400 hover:text-white transition-colors">Core Stack</a></li>
+                        <li><a href="#storage" class="text-sm text-slate-400 hover:text-white transition-colors">Storage Flow</a></li>
+                        <li><a href="#sync" class="text-sm text-slate-400 hover:text-white transition-colors">Smart Sync</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Hướng dẫn</p>
+                    <ul class="space-y-2">
+                        <li><a href="#profile" class="text-sm text-slate-400 hover:text-white transition-colors">Quản lý Profile</a></li>
+                        <li><a href="#vault" class="text-sm text-slate-400 hover:text-white transition-colors">Kho lưu trữ</a></li>
+                        <li><a href="#sentinel" class="text-sm text-slate-400 hover:text-white transition-colors">Todo & Sentinel</a></li>
+                        <li><a href="#cross-device" class="text-sm text-slate-400 hover:text-white transition-colors">Cross-device Sync</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-slate-500">LifeOS V8.8 — Architecture Profile Document</p>
+                <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    System Operational
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== BACK TO TOP ==================== -->
+    <button id="backToTop" class="fixed bottom-6 right-6 z-40 w-11 h-11 bg-slate-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-slate-800 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <i data-lucide="arrow-up" class="w-4 h-4"></i>
+    </button>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.add('flex');
+        });
+
+        mobileMenuClose.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            mobileMenu.classList.remove('flex');
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            });
+        });
+
+        // Back to top button
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 600) {
+                backToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                backToTop.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                backToTop.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                backToTop.classList.remove('opacity-100', 'translate-y-0');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // TOC active state tracking
+        const tocLinks = document.querySelectorAll('#tocNav .toc-link');
+        const sections = [];
+
+        tocLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            const section = document.querySelector(href);
+            if (section) sections.push({ el: section, link: link });
+        });
+
+        function updateTOC() {
+            let current = sections[0];
+            const scrollPos = window.scrollY + 160;
+
+            for (const item of sections) {
+                if (item.el.offsetTop <= scrollPos) {
+                    current = item;
+                }
+            }
+
+            tocLinks.forEach(l => l.classList.remove('active'));
+            if (current) current.link.classList.add('active');
+        }
+
+        window.addEventListener('scroll', updateTOC);
+        updateTOC();
+
+        // Intersection Observer for fade-in animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.layer-card, .code-block').forEach(el => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
