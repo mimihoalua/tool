@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.6.2 - Ultimate Sync</title>
+    <title>LifeOS V8.7 - Ultimate Vault & Sync</title>
     
     <link id="manifest-link" rel="manifest" href="#">
 
@@ -135,6 +135,14 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
+
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Error Caught:", message, "at", source, lineno);
+            const msg = `Lỗi hệ thống: ${message} (Dòng ${lineno})`;
+            if(window.showToast) window.showToast(msg, 'ph-warning');
+        };
+    </script>
 
     <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-6 hidden">
         <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in">LifeOS Family</h1>
@@ -517,6 +525,339 @@
     </div>
 
 <script>
+// ===================== KẾT NỐI TOÀN VẸN =====================
+// KHÔI PHỤC TOÀN BỘ LÕI ENGINE CHO KHO LƯU TRỮ
+const VaultUtils = {
+    validateAndHealEntry: (entry) => ({ id: String(entry.id || 'd' + Date.now()), category: String(entry.category || 'account'), name: String(entry.name || 'Mục không tên'), url: String(entry.url || ''), username: String(entry.username || ''), password: String(entry.password || ''), twoFactorKey: String(entry.twoFactorKey || ''), customFields: Array.isArray(entry.customFields) ? entry.customFields : [], backupTitle: String(entry.backupTitle || ''), backupCodes: String(entry.backupCodes || ''), qrCode: String(entry.qrCode || ''), notes: String(entry.notes || ''), createdAt: String(entry.createdAt || new Date().toISOString()) }),
+    debounce: (func, wait) => { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; },
+    getDomainInfo: (name) => { const colors = ['bg-slate-700', 'bg-rose-500', 'bg-orange-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-pink-500']; let initial = name ? name.charAt(0).toUpperCase() : '?'; let colorIndex = 0; for(let i=0; i < name.length; i++) colorIndex += name.charCodeAt(i); return { initial, color: colors[colorIndex % colors.length] }; },
+    totpObj: null,
+    getTOTPToken: (secret) => { try { if (typeof jsOTP === 'undefined') return "WAIT..."; if (!window.VaultUtils.totpObj) window.VaultUtils.totpObj = new jsOTP.totp(); return window.VaultUtils.totpObj.getOtp(secret.replace(/\s+/g, '').toUpperCase()); } catch(e) { return "ERROR"; } },
+    generatePassword: (length = 16) => { const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~|{}[]:;?><,./"; let retVal = ""; const array = new Uint32Array(length); window.crypto.getRandomValues(array); for (let i = 0; i < length; i++) retVal += charset[array[i] % charset.length]; return retVal; },
+    copyToClipboard: async (text) => {
+        try {
+            if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+            else { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-999999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); document.execCommand('copy'); textArea.remove(); }
+            vibrate([20]); window.showToast('Đã sao chép vào bộ nhớ!'); window.speak('Đã chép vào bộ nhớ.', 1.05, 1.0);
+        } catch (err) { vibrate([50, 50]); window.showToast('Lỗi sao chép!', 'ph-warning-circle'); }
+    }
+};
+window.VaultUtils = VaultUtils;
+
+const VaultConfig = { CATEGORIES: { 'account': { icon: 'ph-identification-card', color: 'text-blue-600', bg: 'bg-blue-100/80', border: 'border-blue-200', label: 'Tài khoản' }, 'crypto': { icon: 'ph-currency-btc', color: 'text-amber-600', bg: 'bg-amber-100/80', border: 'border-amber-200', label: 'Tài chính' }, 'note': { icon: 'ph-notebook', color: 'text-emerald-600', bg: 'bg-emerald-100/80', border: 'border-emerald-200', label: 'Ghi chú' }, 'service': { icon: 'ph-address-book', color: 'text-purple-600', bg: 'bg-purple-100/80', border: 'border-purple-200', label: 'Danh bạ/Dịch vụ' } } };
+window.VaultConfig = VaultConfig;
+
+const VaultState = { data: [], activeInterval: null, activeCategory: 'all' };
+window.VaultState = VaultState;
+
+const VaultStorageLayer = {
+    init: (uid) => { try { const saved = localStorage.getItem('lifeos_v8_vault_' + uid); if (saved) { const parsed = JSON.parse(saved); if (!Array.isArray(parsed)) throw new Error("Data corruption"); window.VaultState.data = parsed.map(item => window.VaultUtils.validateAndHealEntry(item)); } else { window.VaultState.data = []; } } catch (e) { window.VaultState.data = []; window.showToast("Lỗi đọc dữ liệu Vault.", 'ph-warning-circle'); } },
+    saveLocalOnly: () => { const key = 'lifeos_v8_vault_' + window.viewingUser; localStorage.setItem(key, JSON.stringify(window.VaultState.data)); },
+    save: () => { window.VaultStorageLayer.saveLocalOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }
+};
+window.VaultStorageLayer = VaultStorageLayer;
+
+const VaultUI = {
+    toggleCustomCategory: () => { 
+        vibrate(10); 
+        const select = document.getElementById('vaultEntryCategory'); 
+        const wrapper = document.getElementById('vaultCustomCatWrapper');
+        const customInput = document.getElementById('vaultEntryCustomCategory'); 
+        if (select.value === 'custom') { 
+            wrapper.classList.remove('hidden'); customInput.required = true; customInput.focus(); 
+        } else { 
+            wrapper.classList.add('hidden'); customInput.required = false; customInput.value = ''; 
+        } 
+    },
+    viewImageFullscreen: (src, fileName) => { vibrate(20); document.getElementById('vaultViewerImage').src = src; document.getElementById('vaultImageViewerModal').classList.remove('hidden'); document.getElementById('vaultImageViewerModal').classList.add('flex'); document.getElementById('vaultViewerDownloadBtn').onclick = () => { vibrate([15, 30]); const a = document.createElement('a'); a.href = src; a.download = fileName || 'QR.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast('Đã tải ảnh!'); window.speak('Đã lưu ảnh mã vào máy.'); }; },
+    closeImageViewer: () => { vibrate(10); document.getElementById('vaultImageViewerModal').classList.add('hidden'); document.getElementById('vaultImageViewerModal').classList.remove('flex'); setTimeout(() => { document.getElementById('vaultViewerImage').src = ''; }, 300); },
+    openModal: (id = null) => {
+        vibrate(20); document.getElementById('vaultFormModal').classList.remove('hidden'); document.getElementById('vaultForm').reset(); document.getElementById('vaultEntryId').value = ''; document.getElementById('vaultModalTitle').textContent = 'Thêm Mục Mới';
+        const customInput = document.getElementById('vaultEntryCustomCategory'); const wrapper = document.getElementById('vaultCustomCatWrapper'); wrapper.classList.add('hidden'); customInput.required = false; customInput.value = '';
+        document.getElementById('vaultEntryContent').value = '';
+
+        if (id) {
+            const entry = window.VaultState.data.find(item => item.id === id);
+            if (entry) {
+                document.getElementById('vaultModalTitle').textContent = 'Sửa Thông Tin'; document.getElementById('vaultEntryId').value = entry.id;
+                const standardCats = Object.keys(window.VaultConfig.CATEGORIES); const entryCat = entry.category || 'account';
+                if (standardCats.includes(entryCat)) { document.getElementById('vaultEntryCategory').value = entryCat; } else { document.getElementById('vaultEntryCategory').value = 'custom'; customInput.value = entryCat; wrapper.classList.remove('hidden'); customInput.required = true; }
+                document.getElementById('vaultEntryName').value = entry.name;
+                
+                let injected = [];
+                if(entry.username) injected.push(`Tài khoản: ${entry.username}`);
+                if(entry.password) injected.push(`Mật khẩu: ${entry.password}`);
+                if(entry.twoFactorKey) injected.push(`2FA: ${entry.twoFactorKey}`);
+                if(entry.url) injected.push(`Link: ${entry.url}`);
+                if(entry.backupCodes) injected.push(`Mã dự phòng:\n${entry.backupCodes}`);
+                if(entry.customFields && entry.customFields.length > 0) {
+                    entry.customFields.forEach(cf => injected.push(`${cf.key}: ${cf.value}`));
+                }
+                
+                let content = entry.notes || '';
+                if(injected.length > 0) {
+                    content = injected.join('\n') + (content ? '\n\n' + content : '');
+                }
+                document.getElementById('vaultEntryContent').value = content;
+            }
+        }
+        window.speak('Mở trình biên tập kho lưu trữ.', 1.1, 1.0);
+    },
+    closeModal: () => { vibrate(10); document.getElementById('vaultFormModal').classList.add('hidden'); },
+    togglePasswordCard: (id) => { vibrate(15); const mask = document.getElementById(`pwd-mask-${id}`); const text = document.getElementById(`pwd-text-${id}`); const icon = document.getElementById(`eye-icon-${id}`); if (text.classList.contains('hidden')) { text.classList.remove('hidden'); mask.classList.add('hidden'); icon.classList.replace('ph-eye', 'ph-eye-slash'); text.classList.add('animate-pulse'); setTimeout(()=>text.classList.remove('animate-pulse'), 300); } else { text.classList.add('hidden'); mask.classList.remove('hidden'); icon.classList.replace('ph-eye-slash', 'ph-eye'); } },
+    toggleCardDetail: (id) => { vibrate(15); document.getElementById(`wrapper-${id}`).classList.toggle('is-open'); document.getElementById(`chevron-${id}`).classList.toggle('rotate-180'); },
+
+    Templates: {
+        coreFields: (entry) => {
+            let html = '';
+            if (entry.username) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Tài khoản/ID</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${escapeHTML(entry.username)}</div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(entry.username)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; }
+            if (entry.password) { html += `<div class="bg-white/70 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-gray-100 dark:border-slate-700/50 relative group/item shadow-sm mt-2"><span class="text-[10px] uppercase tracking-widest text-gray-500 dark:text-slate-400 font-bold block mb-1">Mật khẩu</span><div class="font-bold text-gray-800 dark:text-slate-200 flex items-center pr-24"><span id="pwd-mask-${entry.id}" class="tracking-widest text-lg sm:text-base mt-0.5">••••••••</span><span id="pwd-text-${entry.id}" class="hidden font-mono text-sm sm:text-base truncate">${escapeHTML(entry.password)}</span></div><div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity bg-white/95 dark:bg-slate-700/95 backdrop-blur-sm rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-slate-600 overflow-hidden"><button onclick="window.VaultUI.togglePasswordCard('${entry.id}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors active:scale-95"><i id="eye-icon-${entry.id}" class="ph-bold ph-eye text-xl sm:text-lg"></i></button><div class="w-px bg-gray-200 dark:bg-slate-600"></div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(entry.password)}'); event.stopPropagation();" class="p-2.5 text-gray-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors active:scale-95"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div></div>`; }
+            return html;
+        },
+        customFields: (fields) => { if (!fields || fields.length === 0) return ''; const items = fields.map(cf => `<div class="bg-amber-50/80 dark:bg-amber-900/10 rounded-2xl p-3 border border-amber-100/80 dark:border-amber-800/30 relative group/item shadow-sm"><span class="text-[10px] uppercase tracking-widest text-amber-700/80 dark:text-amber-500/80 font-bold block mb-1">${escapeHTML(cf.key)}</span><div class="font-bold text-gray-800 dark:text-slate-200 truncate pr-12 font-mono text-sm sm:text-base">${escapeHTML(cf.value)}</div><button onclick="window.VaultUtils.copyToClipboard('${escapeHTML(cf.value)}'); event.stopPropagation();" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 text-amber-600/50 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl transition-colors opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 active:scale-90"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`).join(''); return `<div class="grid grid-cols-1 gap-2 mt-2">${items}</div>`; },
+        totpBlock: (entry) => { if (!entry.twoFactorKey) return ''; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1"><i class="ph-bold ph-lock-key text-sm"></i> Mã 2FA (Live)</span><div class="w-16 h-2 bg-indigo-200/50 dark:bg-indigo-900/50 rounded-full overflow-hidden shadow-inner"><div id="totp-bar-${entry.id}" class="totp-progress h-full bg-indigo-500 dark:bg-indigo-400 w-full rounded-full"></div></div></div><div class="flex justify-between items-center group/totp"><div id="totp-code-${entry.id}" class="font-mono text-3xl sm:text-4xl font-black text-indigo-800 dark:text-indigo-300 tracking-[0.15em] totp-target drop-shadow-sm" data-secret="${escapeHTML(entry.twoFactorKey)}">------</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('totp-code-${entry.id}').innerText); event.stopPropagation();" class="p-3 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/totp:opacity-100 shadow-sm transition-all active:scale-90"><i class="ph-bold ph-copy text-xl"></i></button></div></div>`; },
+        backupBlock: (entry) => { if (!entry.backupCodes) return ''; const title = entry.backupTitle ? escapeHTML(entry.backupTitle) : 'Mã dự phòng'; return `<div class="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-2xl p-3.5 border border-indigo-100/80 dark:border-indigo-800/40 mt-3 relative group/item shadow-sm"><span class="text-[11px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-shield-check"></i> ${title}</span><div id="backup-${entry.id}" class="font-mono text-[13px] sm:text-[11px] text-gray-700 dark:text-slate-300 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar pr-12 leading-relaxed">${escapeHTML(entry.backupCodes)}</div><button onclick="window.VaultUtils.copyToClipboard(document.getElementById('backup-${entry.id}').innerText); event.stopPropagation();" class="absolute right-2 top-2 p-2.5 bg-white/80 dark:bg-indigo-900/40 text-indigo-500 hover:bg-white dark:hover:bg-indigo-800 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 shadow-sm active:scale-90 transition-all"><i class="ph-bold ph-copy text-xl sm:text-lg"></i></button></div>`; },
+        qrBlock: (entry, safeName) => { if (!entry.qrCode) return ''; return `<div class="bg-teal-50/80 dark:bg-teal-900/20 rounded-2xl p-3.5 border border-teal-100/80 dark:border-teal-800/40 mt-3 relative shadow-sm"><span class="text-[11px] uppercase tracking-widest text-teal-600 dark:text-teal-400 font-bold block mb-2 flex items-center gap-1"><i class="ph-bold ph-qr-code"></i> Mã QR</span><div class="relative flex justify-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-teal-100/50 dark:border-teal-800/50 group/qr cursor-pointer overflow-hidden shadow-inner" onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();"><img src="${entry.qrCode}" class="max-w-full h-auto max-h-48 rounded-lg bg-white shadow-sm transition-transform duration-300 group-hover/qr:scale-105"><div class="absolute inset-0 bg-black/60 opacity-0 group-hover/qr:opacity-100 transition-all duration-300 rounded-xl flex items-center justify-center gap-4 backdrop-blur-[2px]"><button onclick="window.VaultUI.viewImageFullscreen('${entry.qrCode}', '${safeName}'); event.stopPropagation();" class="p-4 bg-white/95 rounded-full hover:scale-110 shadow-xl transition-transform"><i class="ph-bold ph-arrows-out text-2xl text-slate-800"></i></button></div></div></div>`; }
+    },
+
+    renderCards: (dataToRender) => {
+        const container = document.getElementById('vaultCardsContainer');
+        const emptyState = document.getElementById('vaultEmptyState');
+        
+        container.innerHTML = '';
+        if (dataToRender.length === 0) { emptyState.classList.remove('hidden'); emptyState.classList.add('flex'); return; }
+        emptyState.classList.add('hidden'); emptyState.classList.remove('flex');
+        
+        const groupedData = {};
+        dataToRender.forEach(entry => { const key = entry.name.trim().toLowerCase(); if (!groupedData[key]) groupedData[key] = []; groupedData[key].push(entry); });
+        const sortedGroups = Object.values(groupedData).sort((a, b) => Math.max(...b.map(i => new Date(i.createdAt || 0).getTime())) - Math.max(...a.map(i => new Date(i.createdAt || 0).getTime())));
+        
+        const fragment = document.createDocumentFragment();
+
+        sortedGroups.forEach(group => {
+            const firstEntry = group[0];
+            const rawCat = firstEntry.category || 'account';
+            const cat = window.VaultConfig.CATEGORIES[rawCat] || { icon: 'ph-folder-star', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-100/90 dark:bg-slate-800/90', border: 'border-slate-200 dark:border-slate-700', label: escapeHTML(rawCat) };
+            const domain = window.VaultUtils.getDomainInfo(firstEntry.name);
+            const groupId = firstEntry.id;
+
+            const card = document.createElement('div');
+            card.className = 'glass-card rounded-[1.5rem] mb-6 break-inside-avoid hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 transform group relative overflow-hidden border border-white/60 dark:border-slate-600/50';
+            
+            const quickActionUI = group.length === 1 
+                ? `<span class="px-2.5 py-1 ${cat.bg} ${cat.color} ${cat.border} border text-[10px] font-bold rounded-lg shadow-sm uppercase tracking-wider flex items-center gap-1"><i class="ph-bold ${cat.icon}"></i> <span class="hidden sm:inline">${cat.label}</span></span>` 
+                : `<span class="px-3 py-1 bg-indigo-100/90 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/50 text-[11px] font-bold rounded-lg shadow-sm border">${group.length} mục</span>`;
+
+            let accountsHTML = group.map((entry, index) => {
+                const isNotLast = index < group.length - 1;
+                const safeFileName = `QR_${firstEntry.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                const has2FA = entry.qrCode || entry.twoFactorKey || entry.backupCodes;
+                
+                return `
+                    <div class="${isNotLast ? 'border-b-2 border-slate-100/80 dark:border-slate-700/60 pb-6 mb-6' : ''}">
+                        <div class="flex justify-between items-center mb-4 gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                ${has2FA ? `<div class="flex items-center gap-1.5 bg-indigo-50/90 dark:bg-indigo-900/40 pr-2.5 p-1 rounded-lg border border-indigo-100 dark:border-indigo-800/50 shadow-sm"><div class="w-6 h-6 bg-indigo-500 dark:bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold"><i class="ph-bold ph-shield-check text-[10px]"></i></div><span class="text-indigo-700 dark:text-indigo-300 font-bold text-[10px] tracking-widest">2FA</span></div>` : ''}
+                                ${entry.url ? `<a href="${entry.url}" target="_blank" onclick="event.stopPropagation(); window.speak('Đang mở liên kết.'); vibrate(15);" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition-colors truncate inline-flex items-center gap-1.5 border border-blue-100/50 dark:border-blue-800/50 shadow-sm bg-white/50 dark:bg-slate-800/50"><i class="ph-bold ph-link"></i> Mở Link</a>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="window.VaultUI.openModal('${entry.id}'); event.stopPropagation();" class="p-2.5 bg-white/80 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors border border-indigo-100/50 dark:border-indigo-800/50 shadow-sm active:scale-90"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                                <button onclick="window.VaultApp.deleteEntry('${entry.id}'); event.stopPropagation();" class="p-2.5 bg-white/80 dark:bg-slate-800/80 text-rose-500 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/50 transition-colors border border-rose-100/50 dark:border-rose-800/50 shadow-sm active:scale-90"><i class="ph-bold ph-trash text-lg"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">${window.VaultUI.Templates.coreFields(entry)}</div>
+                        ${window.VaultUI.Templates.customFields(entry.customFields)}
+                        ${window.VaultUI.Templates.totpBlock(entry)}
+                        ${window.VaultUI.Templates.backupBlock(entry)}
+                        ${window.VaultUI.Templates.qrBlock(entry, safeFileName)}
+                        
+                        ${entry.notes ? `<div class="mt-4 bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm"><span class="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold block mb-1.5 flex items-center gap-1.5"><i class="ph-bold ph-text-align-left"></i> Ghi chú</span><div class="text-[14px] sm:text-[13px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-mono custom-scrollbar overflow-x-auto">${escapeHTML(entry.notes)}</div></div>` : ''}
+                    </div>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div onclick="window.VaultUI.toggleCardDetail('${groupId}')" class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors z-10 relative">
+                    <div class="flex items-center gap-3.5 overflow-hidden pr-2">
+                        <div class="w-12 h-12 flex-shrink-0 rounded-[14px] ${domain.color} flex items-center justify-center text-white font-black text-xl shadow-md border border-white/20">${domain.initial}</div>
+                        <h3 class="font-black text-slate-800 dark:text-white text-lg sm:text-base truncate tracking-tight">${escapeHTML(firstEntry.name)}</h3>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        ${quickActionUI}
+                        <div class="p-1.5 sm:p-1.5 text-slate-400 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 rounded-xl group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:text-slate-600 dark:group-hover:text-white transition-colors shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+                            <i id="chevron-${groupId}" class="ph-bold ph-caret-down text-lg transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="wrapper-${groupId}" class="accordion-wrapper px-4 sm:px-5 bg-white/40 dark:bg-slate-800/40 border-t border-white/30 dark:border-slate-700/50 backdrop-blur-md">
+                    <div class="accordion-inner"><div class="pb-6 pt-5">${accountsHTML}</div></div>
+                </div>`;
+            fragment.appendChild(card);
+        });
+        container.appendChild(fragment); window.VaultApp.startTOTPLoop();
+    }
+};
+window.VaultUI = VaultUI;
+
+const VaultApp = {
+    setCategoryFilter: (category) => {
+        vibrate(15); window.VaultState.activeCategory = category;
+        document.querySelectorAll('#vaultCategoryFilters .cat-filter-btn').forEach(btn => { btn.classList.remove('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600', 'shadow-md'); btn.classList.add('bg-white/50', 'dark:bg-slate-800/50', 'text-gray-700', 'dark:text-slate-300', 'border-transparent'); });
+        const activeBtn = document.querySelector(`#vaultCategoryFilters .cat-filter-btn[onclick="window.VaultApp.setCategoryFilter('${category}')"]`);
+        if (activeBtn) { activeBtn.classList.remove('bg-white/50', 'dark:bg-slate-800/50', 'text-gray-700', 'dark:text-slate-300', 'border-transparent'); activeBtn.classList.add('active', 'bg-slate-800', 'dark:bg-indigo-600', 'text-white', 'border-slate-800', 'dark:border-indigo-600', 'shadow-md'); }
+        window.VaultApp.filterData(document.getElementById('vaultSearchInput').value); window.speak('Đã lọc kho lưu trữ.', 1.1, 1.0);
+    },
+    filterData: (query) => {
+        query = query.toLowerCase().trim();
+        const filtered = window.VaultState.data.filter(item => {
+            let matchCat = true;
+            if (window.VaultState.activeCategory !== 'all') { const isStd = Object.keys(window.VaultConfig.CATEGORIES).includes(item.category); matchCat = window.VaultState.activeCategory === 'custom' ? !isStd : item.category === window.VaultState.activeCategory; }
+            if (!matchCat) return false; if (!query) return true;
+            return (item.name.toLowerCase().includes(query) || (item.category && item.category.toLowerCase().includes(query)) || (item.username && item.username.toLowerCase().includes(query)) || (item.notes && item.notes.toLowerCase().includes(query)) || (item.customFields && item.customFields.some(cf => cf.value && cf.value.toLowerCase().includes(query))));
+        });
+        window.VaultUI.renderCards(filtered);
+    },
+    saveEntry: (e) => {
+        e.preventDefault();
+        
+        const nameInput = document.getElementById('vaultEntryName').value.trim();
+        const catSelect = document.getElementById('vaultEntryCategory').value;
+        const customCatInput = document.getElementById('vaultEntryCustomCategory').value.trim();
+        const rawContent = document.getElementById('vaultEntryContent').value.trim();
+
+        if (!catSelect) {
+            vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa chọn Loại dữ liệu.', 'ph-warning-circle');
+            window.highlightError('vaultEntryCategory'); return;
+        }
+        if (catSelect === 'custom' && !customCatInput) {
+            vibrate([50, 50]); window.showToast('Lỗi: Tên phân loại không được để trống.', 'ph-warning-circle');
+            window.highlightError('vaultEntryCustomCategory'); return;
+        }
+        if (!nameInput) {
+            vibrate([50, 50]); window.showToast('Lỗi: Bạn chưa nhập Tiêu đề.', 'ph-warning-circle');
+            window.highlightError('vaultEntryName'); return;
+        }
+
+        const id = document.getElementById('vaultEntryId').value;
+        const finalCategory = catSelect === 'custom' ? customCatInput : catSelect;
+        const existingEntry = id ? window.VaultState.data.find(i=>i.id===id) : null;
+
+        // --- SMART PARSER ENGINE ---
+        let extUsername = '', extPassword = '', ext2FA = '', extUrl = '';
+        const lines = rawContent.split('\n');
+        const remainingLines = [];
+
+        lines.forEach(line => {
+            const uMatch = line.match(/^(?:Tài khoản|User|Email|ID):\s*(.+)$/i);
+            const pMatch = line.match(/^(?:Mật khẩu|Pass|Password|PW):\s*(.+)$/i);
+            const tMatch = line.match(/^(?:2FA|TOTP|Mã 2FA):\s*([a-zA-Z0-9\s]+)$/i);
+            const lMatch = line.match(/^(?:Link|URL|Web):\s*(https?:\/\/[^\s]+)$/i);
+
+            if (uMatch && !extUsername) { extUsername = uMatch[1].trim(); }
+            else if (pMatch && !extPassword) { extPassword = pMatch[1].trim(); }
+            else if (tMatch && !ext2FA) { ext2FA = tMatch[1].replace(/\s+/g, ''); }
+            else if (lMatch && !extUrl) { extUrl = lMatch[1].trim(); }
+            else { remainingLines.push(line); }
+        });
+
+        const finalNotes = remainingLines.join('\n').replace(/^\s*[\r\n]/gm, '').trim();
+
+        const newEntry = {
+            id: id ? id : 'v' + Date.now() + Math.floor(Math.random()*1000),
+            category: finalCategory,
+            name: nameInput,
+            url: extUrl,
+            username: extUsername,
+            password: extPassword,
+            twoFactorKey: ext2FA,
+            notes: finalNotes,
+            customFields: [], 
+            backupTitle: '', backupCodes: '', qrCode: existingEntry ? existingEntry.qrCode : '',
+            createdAt: existingEntry ? existingEntry.createdAt : new Date().toISOString()
+        };
+
+        const isNew = !id;
+        let originalData = [...window.VaultState.data]; 
+        if (id) { 
+            const idx = window.VaultState.data.findIndex(i => i.id === id); 
+            if (idx !== -1) window.VaultState.data[idx] = newEntry; 
+        } else { 
+            window.VaultState.data.push(newEntry); 
+        }
+
+        try {
+            window.VaultStorageLayer.save(); 
+            
+            if(isNew) {
+                vibrate([20, 30]); window.showToast('Đã lưu dữ liệu an toàn!', 'ph-check-circle'); 
+                window.speak('Đã thêm mới dữ liệu an toàn vào kho lưu trữ.', 1.05, 1.0);
+            } else {
+                vibrate([20]); window.showToast('Đã cập nhật dữ liệu!', 'ph-check-circle'); 
+                window.speak('Đã cập nhật thay đổi thành công.', 1.05, 1.0); 
+            }
+            
+            window.VaultUI.renderCards(window.VaultState.data); 
+            window.VaultUI.closeModal(); 
+            document.getElementById('vaultSearchInput').value = ''; 
+        } catch (error) {
+            window.VaultState.data = originalData;
+            console.error(error); vibrate([50, 50, 50]);
+            
+            let errorMsg = 'Có lỗi không xác định xảy ra khi lưu.';
+            let voiceMsg = 'Xin lỗi, hệ thống gặp lỗi khi lưu dữ liệu.';
+            
+            if (error.name === 'QuotaExceededError' || error.message.includes('Quota')) {
+                errorMsg = 'Lỗi: Bộ nhớ thiết bị đã đầy! Không thể lưu thêm.';
+                voiceMsg = 'Bộ nhớ thiết bị đã đầy. Vui lòng dọn dẹp dung lượng và thử lại.';
+            }
+
+            window.showToast(errorMsg, 'ph-warning-circle');
+            window.speak(voiceMsg, 1.0, 0.9);
+        }
+    },
+    deleteEntry: (id) => {
+        vibrate(20);
+        if (window.confirm('Xác nhận xóa dữ liệu này? Hành động không thể hoàn tác.')) {
+            window.VaultState.data = window.VaultState.data.filter(item => item.id !== id); window.VaultStorageLayer.save(); window.VaultApp.filterData(document.getElementById('vaultSearchInput').value); 
+            vibrate([30, 50]); window.showToast('Đã xóa thành công!', 'ph-trash'); window.speak('Dữ liệu đã bị xóa khỏi hệ thống.', 1.0, 0.9);
+        }
+    },
+    exportBackup: () => {
+        vibrate(20);
+        try {
+            if (window.VaultState.data.length === 0) { window.showToast("Kho đang trống!", 'ph-warning-circle'); window.speak('Không có dữ liệu để xuất.'); return; }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.VaultState.data, null, 2));
+            const node = document.createElement('a'); node.setAttribute("href", dataStr); node.setAttribute("download", `LifeOS_Vault_${window.viewingUser}_${new Date().toISOString().split('T')[0]}.json`); document.body.appendChild(node); node.click(); node.remove();
+            window.showToast("Tải sao lưu thành công!", 'ph-check-circle'); window.speak('Đã tải xuống file sao lưu kho lưu trữ.');
+        } catch (error) { window.showToast("Lỗi tạo sao lưu!", 'ph-warning-circle'); }
+    },
+    importBackup: (event) => {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!Array.isArray(imported)) throw new Error("Invalid Format");
+                if (window.confirm(`Tìm thấy ${imported.length} mục. Xác nhận ghi đè kho lưu trữ hiện tại?`)) {
+                    window.VaultState.data = imported.map(item => window.VaultUtils.validateAndHealEntry(item)); window.VaultStorageLayer.save(); window.VaultApp.filterData(document.getElementById('vaultSearchInput').value);
+                    vibrate([30, 50]); window.showToast("Phục hồi thành công!", 'ph-check-circle'); window.speak('Đã phục hồi dữ liệu từ file thành công.', 1.0, 1.1);
+                }
+            } catch (error) { window.showToast("File không hợp lệ hoặc bị hỏng!", 'ph-warning-circle'); window.speak('Lỗi, file không đúng định dạng.', 1.0, 0.9); } 
+            finally { event.target.value = ''; }
+        }; reader.readAsText(file);
+    },
+    startTOTPLoop: () => {
+        if(window.VaultState.activeInterval) clearInterval(window.VaultState.activeInterval);
+        const updateTOTP = () => {
+            const epoch = Math.round(new Date().getTime() / 1000.0); const countDown = 30 - (epoch % 30); const percentage = (countDown / 30) * 100;
+            document.querySelectorAll('.totp-target').forEach(el => { const secret = el.getAttribute('data-secret'); if(secret) el.innerText = window.VaultUtils.getTOTPToken(secret); });
+            document.querySelectorAll('.totp-progress').forEach(el => { el.style.width = percentage + '%'; el.style.backgroundColor = countDown < 5 ? '#ef4444' : '#6366f1'; });
+        };
+        updateTOTP(); window.VaultState.activeInterval = setInterval(updateTOTP, 1000);
+    }
+};
+window.VaultApp = VaultApp;
+
 // ===================== FIREBASE CONFIG & INIT =====================
 const firebaseConfig = {
   apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
@@ -622,1089 +963,9 @@ window.FirebaseSync = {
     }
 };
 
-// ===================== CORE LOGIC CORE (PWA) =====================
-const logicCore = {
-    deferredPrompt: null,
-    swUrl: null,
-    state: {
-        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
-        isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
-        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
-        isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
-        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
-    },
-    init: function() {
-        const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='#6366f1' rx='112'/><path fill='#fff' d='M256 128a64 64 0 100 128 64 64 0 000-128zm-96 224c0-53 43-96 96-96s96 43 96 96v32H160v-32z'/></svg>`;
-        const iconBase64 = 'data:image/svg+xml;base64,' + btoa(iconSvg);
-        const manifest = {
-            name: "LifeOS Family V8",
-            short_name: "LifeOS",
-            start_url: location.pathname || "/",
-            display: "standalone",
-            background_color: "#0f172a",
-            theme_color: "#0f172a",
-            icons: [{ src: iconBase64, sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }]
-        };
-        document.getElementById('manifest-link').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-
-        if ('serviceWorker' in navigator) {
-            const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{});`;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            this.swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(this.swUrl)
-                .then(() => console.log("✅ PWA Engine: Virtual SW Registered (All-in-one mode)"))
-                .catch(err => console.warn("❌ PWA Engine: Virtual SW Fail", err));
-        }
-
-        this.updateUI('init');
-        if (this.state.isStandalone) {
-            this.updateUI('installed');
-        } else {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                this.deferredPrompt = e;
-                this.showSmartFAB();
-                this.updateUI('ready');
-            });
-        }
-    },
-    updateUI: function(status) {
-        const dot = document.getElementById('pwaStatusDot');
-        if (dot) {
-            dot.className = "status-dot mt-0.5 hidden sm:inline-block"; 
-            if (status === 'init') dot.classList.add('dot-yellow');
-            else if (status === 'ready') dot.classList.add('dot-red');
-            else if (status === 'installed') dot.classList.add('dot-green');
-        }
-    },
-    showSmartFAB: function() {
-        if (this.state.isStandalone) return;
-        const fab = document.getElementById('btnInstall');
-        if(fab) {
-            fab.style.display = 'flex';
-        }
-    },
-    handleInstallClick: async function() {
-        vibrate(20);
-        const modal = document.getElementById('pwaHealthModal');
-        const content = document.getElementById('smartGuideContent');
-        const arrow = document.getElementById('iosArrow');
-        if(!modal || !content) return;
-        modal.classList.remove('hidden');
-        if(arrow) arrow.classList.add('hidden');
-
-        if (this.state.isStandalone) {
-            content.innerHTML = `<div class="text-center"><div class="text-emerald-500 text-5xl mb-4 animate-bounce">🎉</div><h3 class="text-xl font-black mb-2">Đã cài đặt thành công!</h3><p class="text-slate-500 dark:text-slate-400 font-medium">Bạn đang sử dụng phiên bản Ứng dụng.<br>Chúc bạn làm việc hiệu quả.</p></div>`;
-            return;
-        }
-        if (this.deferredPrompt) {
-            modal.classList.add('hidden');
-            this.deferredPrompt.prompt();
-            const { outcome } = await this.deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                this.deferredPrompt = null;
-                const fab = document.getElementById('btnInstall');
-                if(fab) fab.style.display = 'none';
-            }
-            return;
-        }
-        if (this.state.isInApp) {
-            content.innerHTML = `<div class="text-center text-rose-500 font-black mb-3 text-lg">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-4 text-sm text-slate-600 dark:text-slate-300 font-medium">Bạn đang mở bằng Zalo/Facebook nên không thể cài đặt.</p><div class="guide-step bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 text-left"><div class="step-num shadow-sm">1</div><div class="font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl inline-block -translate-y-1">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 text-left"><div class="step-num shadow-sm">2</div><div class="font-medium">Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
-            return;
-        }
-        if (this.state.isIOS) {
-            content.innerHTML = `<div class="text-center font-black mb-4 text-blue-500 text-lg uppercase tracking-wide">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num shadow-sm">1</div><div class="font-medium">Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl inline-block translate-y-1 font-bold">⎋</i> ở thanh dưới cùng.</div></div><div class="guide-step"><div class="step-num shadow-sm">2</div><div class="font-medium">Kéo menu lên và chọn <b>Thêm vào MH chính</b>.</div></div><div class="guide-step"><div class="step-num shadow-sm">3</div><div class="font-medium">Bấm nút <b>Thêm</b> ở góc trên bên phải.</div></div>`;
-            if(arrow) arrow.classList.remove('hidden');
-            return;
-        }
-        if (this.state.isAndroid) {
-            content.innerHTML = `<div class="text-center font-black mb-4 text-emerald-500 text-lg uppercase tracking-wide">Dành cho Android</div><div class="guide-step"><div class="step-num shadow-sm">1</div><div class="font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl inline-block -translate-y-0.5 font-bold">⋮</span> ở góc trên bên phải.</div></div><div class="guide-step"><div class="step-num shadow-sm">2</div><div class="font-medium">Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
-            return;
-        }
-        if (this.state.isPC) {
-              content.innerHTML = `<div class="text-center"><p class="mb-4 font-black text-lg text-blue-600 uppercase tracking-wide">Cài đặt trên Máy tính</p><div class="bg-blue-50 dark:bg-blue-900/30 p-5 rounded-2xl border border-blue-200 dark:border-blue-800/50 inline-block text-left shadow-sm"><div class="flex items-center gap-3 mb-3"><span class="text-2xl text-blue-500 font-bold">⊕</span> <span class="font-medium">Bấm biểu tượng <b>Cài đặt (Install)</b> ở góc phải thanh địa chỉ.</span></div><div class="text-sm text-slate-500 dark:text-slate-400 italic ml-9">Hoặc bấm menu 3 chấm > "Cài đặt LifeOS..."</div></div></div>`;
-            return;
-        }
-    }
-};
-
-window.pwaLogicCore = logicCore;
-
-// ===================== CORE UTILITIES =====================
-const escapeHTML = s => s ? s.toString().replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t)) : '';
-const vibrate = p => { try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} };
-const getTodayStr = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().split('T')[0]; };
-const nowHHMM = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-const formatTimeVN = (tStr) => tStr ? tStr.replace(':', ' giờ ') + ' phút' : '';
-
-window.showToast = (msg, icon='ph-check-circle') => {
-    const t=document.createElement('div');
-    t.className='toast flex items-center gap-3 px-5 py-3.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 rounded-2xl shadow-2xl font-bold text-sm pointer-events-auto border border-slate-700 dark:border-slate-200 backdrop-blur-md transition-all duration-300';
-    t.innerHTML=`<i class="ph-fill ${icon} text-xl text-primary"></i><span>${escapeHTML(msg)}</span>`;
-    document.getElementById('toast-container').appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-10px) scale(0.9)'; setTimeout(()=>t.remove(),300); }, 3000);
-};
-
-// ===================== MULTI-USER PROFILES & AUTH =====================
-const PROFILES = {
-    'thanh': { name: 'Thành', pass: 'a', icon: '👨' },
-    'tham': { name: 'Thắm', pass: 'a', icon: '👩' },
-    'xiem': { name: 'Xiêm', pass: 'a', icon: '👵' },
-    'my': { name: 'My', pass: 'a', icon: '👧' },
-    'phuc': { name: 'Phúc', pass: 'a', icon: '👦' },
-    'admin': { name: 'Quản trị viên', pass: 'admin', icon: '👑' }
-};
-
-window.currentUser = null;
-window.viewingUser = null;
-let pendingLoginUid = null;
-
-window.showLoginGate = () => {
-    document.getElementById('login-gate').style.display = 'flex';
-    const grid = document.getElementById('login-profiles');
-    grid.innerHTML = Object.entries(PROFILES).map(([uid, p], idx) => `
-        <button onclick="window.promptPassword('${uid}')" class="flex flex-col items-center justify-center p-5 bg-white dark:bg-darkcard rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all hover:shadow-xl hover:-translate-y-1" style="animation: scaleIn 0.3s ease forwards; animation-delay: ${idx * 0.05}s; opacity: 0;">
-            <span class="text-4xl md:text-5xl mb-3 drop-shadow-md transition-transform group-hover:scale-110">${p.icon}</span>
-            <span class="font-bold text-slate-800 dark:text-white text-sm md:text-base">${p.name}</span>
-        </button>
-    `).join('');
-};
-
-window.promptPassword = (uid) => {
-    vibrate(20);
-    pendingLoginUid = uid;
-    document.getElementById('pwd-icon').textContent = PROFILES[uid].icon;
-    document.getElementById('pwd-title').textContent = `Mật khẩu của ${PROFILES[uid].name}`;
-    const input = document.getElementById('pwd-input');
-    input.value = '';
-    document.getElementById('password-modal').style.display = 'flex';
-    if(window.innerWidth >= 1024) setTimeout(() => input.focus(), 100);
-};
-
-window.closePasswordModal = () => {
-    vibrate(10);
-    document.getElementById('password-modal').style.display = 'none';
-    pendingLoginUid = null;
-};
-
-window.submitPassword = () => {
-    vibrate(20);
-    const pwd = document.getElementById('pwd-input').value;
-    if (pwd === PROFILES[pendingLoginUid].pass) {
-        window.currentUser = pendingLoginUid;
-        window.viewingUser = pendingLoginUid;
-        localStorage.setItem('lifeos_v8_session', window.currentUser);
-        localStorage.setItem('lifeos_v8_viewing', window.viewingUser);
-        window.closePasswordModal();
-        document.getElementById('login-gate').style.display = 'none';
-        window.loadUserData();
-        window.showToast(`Chào mừng ${PROFILES[window.currentUser].name}!`, 'ph-hand-waving');
-        if(!localStorage.getItem('lifeos_v8_welcomed_'+window.currentUser)){
-            setTimeout(() => { window.initTTS(); window.speak(`Xin chào ${PROFILES[window.currentUser].name}, hệ thống đã sẵn sàng.`, 1.0, 1.0); localStorage.setItem('lifeos_v8_welcomed_'+window.currentUser, '1'); }, 1500);
-        }
-    } else {
-        window.showToast('Sai mật khẩu!', 'ph-warning-circle');
-        vibrate([50, 50, 50]);
-    }
-};
-
-document.getElementById('pwd-input').addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') window.submitPassword();
-});
-
-window.toggleProfileMenu = () => {
-    vibrate(10);
-    const menu = document.getElementById('profile-menu');
-    menu.classList.toggle('hidden');
-    if (!menu.classList.contains('hidden')) {
-        renderProfileMenu();
-    }
-};
-
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('#profile-selector')) {
-        document.getElementById('profile-menu')?.classList.add('hidden');
-    }
-});
-
-function renderProfileMenu() {
-    const menu = document.getElementById('profile-menu');
-    let html = '';
-    if (window.currentUser === 'admin') {
-        html += `<div class="px-4 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">XEM DỮ LIỆU CỦA:</div>`;
-        Object.entries(PROFILES).forEach(([uid, p]) => {
-            const isActive = uid === window.viewingUser;
-            html += `<button onclick="window.switchView('${uid}')" class="w-full text-left px-4 py-3.5 text-sm font-bold flex items-center gap-2 transition-colors active:scale-95 ${isActive ? 'text-primary bg-indigo-50/50 dark:bg-indigo-900/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                <span class="text-base">${p.icon}</span> ${p.name} ${isActive ? '<i class="ph-bold ph-check ml-auto text-primary"></i>' : ''}
-            </button>`;
-        });
-        html += `<div class="border-t border-slate-100 dark:border-slate-800"></div>`;
-    }
-    html += `<button onclick="window.logout()" class="w-full text-left px-4 py-4 text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors active:scale-95 rounded-b-2xl">
-        <i class="ph-bold ph-sign-out text-lg"></i> Đăng xuất
-    </button>`;
-    menu.innerHTML = html;
-}
-
-window.switchView = (uid) => {
-    vibrate(20);
-    window.viewingUser = uid;
-    localStorage.setItem('lifeos_v8_viewing', window.viewingUser);
-    document.getElementById('profile-menu').classList.add('hidden');
-    window.loadUserData();
-    window.showToast(`Đang xem dữ liệu của ${PROFILES[uid].name}`, 'ph-eye');
-    window.speak(`Đã chuyển không gian làm việc sang ${PROFILES[uid].name}`, 1.0, 1.0);
-};
-
-window.logout = () => {
-    vibrate([20, 30]);
-    window.currentUser = null;
-    window.viewingUser = null;
-    localStorage.removeItem('lifeos_v8_session');
-    localStorage.removeItem('lifeos_v8_viewing');
-    document.getElementById('profile-menu').classList.add('hidden');
-    
-    clearInterval(window.pTimer);
-    window.closeFullAlarm();
-    if(window.sentinelInterval) clearInterval(window.sentinelInterval);
-    if(window.FirebaseSync && window.FirebaseSync.unsub) window.FirebaseSync.unsub();
-    
-    window.showLoginGate();
-};
-
-// ===================== PURE GOOGLE TTS ENGINE =====================
-let ttsUnlocked = false;
-let cachedBestVoice = null;
-window._ttsKeepAlive = []; 
-
-window.initTTS = () => { 
-    if(!ttsUnlocked && 'speechSynthesis' in window){ 
-        let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.speechSynthesis.speak(u);
-        ttsUnlocked = true; 
-        const bot = document.getElementById('bot-icon');
-        if(bot) bot.classList.add('text-emerald-300');
-    } 
-};
-
-function getBestVoice() {
-    if (cachedBestVoice) return cachedBestVoice;
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices || voices.length === 0) return null;
-    let voice = voices.find(v => v.lang === 'vi-VN' && v.name.includes('Google'));
-    if (!voice) voice = voices.find(v => v.lang.startsWith('vi') && !v.localService);
-    if (!voice) voice = voices.find(v => v.lang.startsWith('vi') && (v.name.includes('Vietnamese') || v.name.includes('Tiếng Việt') || v.name.includes('Linh') || v.name.includes('Siri')));
-    if (!voice) voice = voices.find(v => v.lang.startsWith('vi'));
-    if (voice) cachedBestVoice = voice;
-    return voice;
-}
-
-let ttsQueue = [], ttsSpeaking = false;
-window.speak = (text, rate=1.0, pitch=1.0) => {
-    if(!('speechSynthesis' in window)) return;
-    window.initTTS(); 
-    ttsQueue.push({text, rate, pitch}); 
-    if(!ttsSpeaking) processTTSQueue();
-};
-
-function processTTSQueue(){
-    if(ttsQueue.length===0){ 
-        ttsSpeaking=false; 
-        const bot = document.getElementById('bot-icon');
-        if(bot) bot.classList.remove('speaking-glow');
-        return; 
-    }
-    ttsSpeaking=true; 
-    const {text, rate, pitch} = ttsQueue.shift();
-    const bot = document.getElementById('bot-icon');
-    if(bot) bot.classList.add('speaking-glow'); 
-    
-    const utt = new SpeechSynthesisUtterance(text);
-    window._ttsKeepAlive.push(utt);
-
-    let voice = getBestVoice();
-    if(voice) utt.voice = voice; 
-    utt.lang = 'vi-VN'; utt.rate = rate; utt.pitch = pitch;
-    
-    utt.onend = () => { window._ttsKeepAlive = window._ttsKeepAlive.filter(u => u !== utt); processTTSQueue(); }; 
-    utt.onerror = () => { window._ttsKeepAlive = window._ttsKeepAlive.filter(u => u !== utt); processTTSQueue(); };
-    window.speechSynthesis.cancel(); 
-    window.speechSynthesis.speak(utt);
-}
-
-if('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = () => { cachedBestVoice = null; getBestVoice(); };
-    setInterval(()=>{ if(window.speechSynthesis.paused && ttsSpeaking) window.speechSynthesis.resume(); }, 5000);
-}
-
-// ===================== STATE & DATA LOADING =====================
-window.todos = [];
-window.stats = {streak:0,lastDate:null};
-window.sentinelLogs = [];
-let currentFilter='all'; let pinnedTaskId=null; let openActionId = null;
-
-window.loadUserData = () => {
-    let safeUser = window.viewingUser;
-    if (safeUser) safeUser = safeUser.toLowerCase();
-    
-    // AN TOÀN TUYỆT ĐỐI CHỐNG SẬP: Nếu user lấy từ localStorage không có trong PROFILES -> Fallback về admin
-    if (!PROFILES[safeUser]) {
-        safeUser = 'admin';
-        window.viewingUser = safeUser;
-    }
-    
-    const keySuffix = safeUser;
-    
-    // Bắt lỗi JSON.parse nếu data cũ bị lỗi
-    try {
-        let loadedTodos = localStorage.getItem('lifeos_v8_data_' + keySuffix);
-        window.todos = loadedTodos ? JSON.parse(loadedTodos) : [];
-        if (!Array.isArray(window.todos)) window.todos = [];
-    } catch(e) { window.todos = []; }
-    
-    try {
-        let loadedStats = localStorage.getItem('lifeos_stats_v8_' + keySuffix);
-        window.stats = loadedStats ? JSON.parse(loadedStats) : {streak:0,lastDate:null};
-    } catch(e) { window.stats = {streak:0,lastDate:null}; }
-    
-    try {
-        let loadedLogs = localStorage.getItem('lifeos_v8_logs_' + keySuffix);
-        window.sentinelLogs = loadedLogs ? JSON.parse(loadedLogs) : [];
-        if (!Array.isArray(window.sentinelLogs)) window.sentinelLogs = [];
-    } catch(e) { window.sentinelLogs = []; }
-
-    window.VaultStorageLayer.init(keySuffix);
-
-    window.alarmedTasks.clear();
-    window.activeAlarmTaskId = null;
-    if(window.alarmLoop) clearInterval(window.alarmLoop);
-
-    document.getElementById('profile-name-badge').innerHTML = `${PROFILES[safeUser].icon} <span class="hidden sm:inline">${PROFILES[safeUser].name}</span>`;
-    if(window.currentUser === 'admin' && safeUser !== 'admin') {
-        document.getElementById('profile-name-badge').innerHTML += ` <span class="text-rose-500 font-black px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 uppercase ml-1" style="font-size:9px;">View</span>`;
-    }
-
-    window.checkStreak();
-    window.saveAndRender();
-    window.VaultApp.filterData(''); 
-    window.initSentinel();
-
-    // Init Firebase Cloud Sync
-    if(window.FirebaseSync) window.FirebaseSync.init(keySuffix);
-};
-
-window.checkStreak = () => {
-    const today=getTodayStr();
-    if(window.stats.lastDate && window.stats.lastDate!==today){
-        const diff=Math.floor((new Date(today)-new Date(window.stats.lastDate))/(1000*60*60*24));
-        if(diff>1 && window.stats.streak>0){ 
-            window.stats.streak=0; 
-            window.speak('Rất tiếc, chuỗi kỷ luật làm việc đã đứt!', 1.0, 0.9); 
-        }
-    }
-    document.getElementById('streak-count').textContent=window.stats.streak;
-    localStorage.setItem('lifeos_stats_v8_' + window.viewingUser, JSON.stringify(window.stats));
-    if(window.FirebaseSync) window.FirebaseSync.pushAll();
-};
-
-// ===================== SENTINEL VOICE GUARD =====================
-window.sentinelInterval = null; window.alarmedTasks = new Set();
-window.activeAlarmTaskId = null; window.alarmLoop = null;
-
-window.initSentinel = () => {
-    if(window.sentinelInterval) clearInterval(window.sentinelInterval);
-    window.sentinelInterval = setInterval(window.checkDeadlines, 10000);
-    setTimeout(window.checkDeadlines, 1500);
-};
-
-window.checkDeadlines = () => {
-    const now = nowHHMM(), todayStr = getTodayStr();
-    let hasWarning = false;
-    
-    window.todos.forEach(task => {
-        if(task.completed || !task.alarmTime) return;
-        const taskDate = task.date || todayStr;
-        if(taskDate > todayStr) return;
-        
-        if(taskDate < todayStr){
-            if(!window.alarmedTasks.has('overdue_'+task.id)){
-                window.alarmedTasks.add('overdue_'+task.id); hasWarning = true;
-                window.addLog(task, 'QUÁ HẠN');
-                vibrate([300,100,300]);
-                window.speak(`Cảnh báo! Nhiệm vụ "${task.text}" đã quá hạn. Hãy xử lý ngay!`, 1.1, 1.2);
-                window.showToast(`Quá hạn: ${task.text}`, 'ph-warning-circle');
-            }
-            return;
-        }
-        
-        if(task.alarmTime <= now && !window.alarmedTasks.has(task.id)){
-            window.alarmedTasks.add(task.id); hasWarning = true;
-            window.addLog(task, 'BÁO ĐỘNG');
-            window.triggerFullAlarm(task);
-        }
-        
-        const [h,m] = task.alarmTime.split(':').map(Number);
-        let tMin = h*60 + m - 5; if(tMin < 0) tMin = 0;
-        const warnTime = `${String(Math.floor(tMin/60)).padStart(2,'0')}:${String(tMin%60).padStart(2,'0')}`;
-        if(warnTime <= now && now < task.alarmTime && !window.alarmedTasks.has('warn5_'+task.id)){
-            window.alarmedTasks.add('warn5_'+task.id);
-            window.addLog(task, 'CÒN 5 PHÚT');
-            vibrate([100,50,100]);
-            window.speak(`Nhắc nhở nhẹ. Còn 5 phút nữa là đến giờ làm nhiệm vụ: ${task.text}`, 1.0, 1.0);
-            window.showToast(`Sắp đến giờ: ${task.text}`, 'ph-clock');
-        }
-    });
-    window.updateSentinelBadge(hasWarning);
-};
-
-window.updateSentinelBadge = (hasWarning) => {
-    const badge = document.getElementById('sentinel-badge');
-    if(hasWarning){
-        badge.className='text-[10px] sm:text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/40 px-2 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-md shadow-rose-500/20';
-        badge.innerHTML='<i class="ph-fill ph-warning-circle text-lg"></i> <span class="hidden sm:inline">Cảnh báo Đỏ</span>';
-        badge.style.animation='pulseRed 1s infinite';
-    } else {
-        badge.className='text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-2 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-colors';
-        badge.innerHTML='<i class="ph-fill ph-shield-check text-lg"></i> <span class="hidden sm:inline">An toàn</span>';
-        badge.style.animation='sentinelPulse 2s infinite';
-    }
-};
-
-window.addLog = (task, type) => {
-    window.sentinelLogs.unshift({ text: task.text, type, time: nowHHMM() });
-    if(window.sentinelLogs.length > 30) window.sentinelLogs.pop();
-    localStorage.setItem('lifeos_v8_logs_' + window.viewingUser, JSON.stringify(window.sentinelLogs));
-    if(window.FirebaseSync) window.FirebaseSync.pushAll();
-};
-
-window.triggerFullAlarm = (task) => {
-    if(window.activeAlarmTaskId) return;
-    window.activeAlarmTaskId = task.id;
-    vibrate([500,200,500,200,500]);
-    window.speak(`Báo động khẩn cấp! Đã đến giờ thực hiện nhiệm vụ: ${task.text}. Yêu cầu xác nhận!`, 1.15, 1.2);
-    document.getElementById('alarm-message').textContent = `"${task.text}"`;
-    const overlay = document.getElementById('alarm-overlay');
-    overlay.classList.remove('hidden'); overlay.style.display = 'flex';
-    
-    if(window.alarmLoop) clearInterval(window.alarmLoop);
-    window.alarmLoop = setInterval(()=>{
-        vibrate([500,200,500]);
-        window.speak(`Tôi nhắc lại. Yêu cầu hoàn thành nhiệm vụ: ${task.text}`, 1.1, 1.2);
-    }, 12000); 
-};
-
-window.closeFullAlarm = () => {
-    vibrate(20);
-    const overlay = document.getElementById('alarm-overlay');
-    overlay.classList.add('hidden'); overlay.style.display = '';
-    clearInterval(window.alarmLoop);
-    if('speechSynthesis' in window) window.speechSynthesis.cancel();
-    window.activeAlarmTaskId = null;
-};
-
-document.getElementById('btn-alarm-complete').onclick = () => {
-    if(window.activeAlarmTaskId){
-        window.toggleTask(window.activeAlarmTaskId, true);
-        if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[0].click();
-    }
-    window.closeFullAlarm();
-};
-
-document.getElementById('btn-alarm-dismiss').onclick = () => {
-    window.closeFullAlarm();
-    window.speak('Đã tắt cảnh báo giọng nói.', 1.0, 1.0);
-    window.saveAndRender();
-};
-
-window.showSentinelPanel = () => {
-    vibrate(15);
-    document.getElementById('sentinel-panel').classList.remove('hidden');
-    const voiceBadge = document.getElementById('voice-info-badge');
-    if (cachedBestVoice) {
-        const isPremium = cachedBestVoice.name.includes('Google') || !cachedBestVoice.localService;
-        voiceBadge.textContent = cachedBestVoice.name;
-        voiceBadge.className = `text-[9px] font-bold px-2 py-0.5 rounded-md border max-w-[150px] sm:max-w-[200px] truncate shadow-sm ${isPremium ? 'border-emerald-200 bg-emerald-100 text-emerald-600 dark:border-emerald-800/50 dark:bg-emerald-900/40' : 'border-amber-200 bg-amber-100 text-amber-600 dark:border-amber-800/50 dark:bg-amber-900/40'}`;
-    } else {
-        voiceBadge.textContent = 'Chưa có giọng vi-VN';
-        voiceBadge.className = 'text-[9px] font-bold px-2 py-0.5 rounded-md border border-rose-200 bg-rose-100 text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/40 max-w-[150px] truncate shadow-sm';
-    }
-
-    const logEl = document.getElementById('sentinel-log');
-    const alarmCount = window.todos.filter(t=>!t.completed&&t.alarmTime).length;
-    
-    if(window.sentinelLogs.length === 0){
-        logEl.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="ph-duotone ph-shield-check text-6xl mb-4 text-emerald-400 animate-pulse"></i><p class="font-bold text-lg text-slate-600 dark:text-slate-300">Hệ thống Bình An!</p><p class="text-sm mt-1 font-medium">Đang bảo vệ ${alarmCount} báo thức bằng Giọng nói AI.</p></div>`;
-    } else {
-        logEl.innerHTML = window.sentinelLogs.map(log => {
-            const isRed = log.type.includes('QUÁ') || log.type.includes('BÁO ĐỘNG');
-            return `<div class="flex items-center gap-3.5 p-4 rounded-xl mb-3 shadow-sm ${isRed?'bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50':'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700'}"><i class="ph-fill ${isRed?'ph-warning-circle text-rose-500':'ph-clock text-amber-500'} text-3xl flex-shrink-0"></i><div class="flex-grow min-w-0"><p class="text-[15px] font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHTML(log.text)}</p><div class="flex items-center gap-2 mt-1.5"><span class="text-[9px] font-black ${isRed?'text-rose-600 bg-rose-100 dark:bg-rose-900/50':'text-amber-600 bg-amber-100 dark:bg-amber-900/50'} px-1.5 py-0.5 rounded border ${isRed?'border-rose-200 dark:border-rose-800':'border-amber-200 dark:border-amber-800'} uppercase">${log.type}</span><span class="text-[11px] font-bold text-slate-400">${log.time}</span></div></div></div>`;
-        }).join('');
-    }
-};
-
-window.closeSentinelPanel = () => {
-    vibrate(10);
-    document.getElementById('sentinel-panel').classList.add('hidden');
-};
-
-// ===================== NLP PARSER =====================
-function parseSmartInput(text){
-    let priority='medium', category='Mục tiêu', dateStr='', alarmTime='';
-    let cleanText=text; const today=new Date();
-    if(cleanText.match(/!gấp|!khẩn|!urgent/i)){priority='high';cleanText=cleanText.replace(/!gấp|!khẩn|!urgent/ig,'');}
-    else if(cleanText.match(/!thấp|!chill/i)){priority='low';cleanText=cleanText.replace(/!thấp|!chill/ig,'');}
-    const catMatch=cleanText.match(/#([\p{L}0-9_]+)/u);
-    if(catMatch){category=catMatch[1];cleanText=cleanText.replace(catMatch[0],'');}
-    const timeMatch=cleanText.match(/@(\d{1,2})[h:](\d{2})?(p)?/i) || cleanText.match(/@(\d{1,2})h(\d{2})?/i);
-    if(timeMatch){
-        let hh=parseInt(timeMatch[1]), mm=parseInt(timeMatch[2]||'0');
-        if(timeMatch[3]||hh<6) hh+=12;
-        if(hh>=24) hh=24;
-        alarmTime=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
-        cleanText=cleanText.replace(timeMatch[0],'');
-    }
-    if(cleanText.match(/\b(ngày mai|mai)\b/i)){
-        const tmr=new Date(today); tmr.setDate(tmr.getDate()+1);
-        dateStr=tmr.toISOString().split('T')[0];
-        cleanText=cleanText.replace(/\b(ngày mai|mai)\b/ig,'');
-    } else if(cleanText.match(/\b(hôm nay|nay)\b/i)){
-        dateStr=getTodayStr();
-        cleanText=cleanText.replace(/\b(hôm nay|nay)\b/ig,'');
-    }
-    if(alarmTime && !dateStr) dateStr=getTodayStr();
-    return { text:cleanText.trim().replace(/\s+/g,' '), priority, category:category.charAt(0).toUpperCase()+category.slice(1), date:dateStr, alarmTime };
-}
-
-// ===================== MODALS & ACTIONS =====================
-window.openEditModal = id => {
-    vibrate(15);
-    const task = window.todos.find(t => t.id === id); if(!task) return;
-    const mc = document.getElementById('modal-container');
-    mc.innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)window.closeModal()">
-        <div class="modal-sheet shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 lg:hidden"></div>
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2"><i class="ph-fill ph-pencil-simple text-primary"></i> Sửa chi tiết</h2>
-                <button onclick="window.closeModal()" class="hidden lg:flex p-2 text-slate-400 hover:text-slate-600 bg-slate-100 dark:bg-slate-800 rounded-xl transition active:scale-90"><i class="ph-bold ph-x text-lg"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 block tracking-widest px-1">Tên nhiệm vụ</label>
-                    <input id="edit-text" type="text" value="${escapeHTML(task.text)}" class="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-4 sm:py-3.5 text-base font-semibold text-slate-800 dark:text-white outline-none border border-slate-200 dark:border-slate-700 focus:border-primary shadow-inner transition">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 block tracking-widest px-1">Mức độ</label>
-                        <select id="edit-priority" class="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-4 sm:py-3.5 text-sm font-bold text-slate-800 dark:text-white outline-none border border-slate-200 dark:border-slate-700 focus:border-primary shadow-inner transition appearance-none cursor-pointer">
-                            <option value="low" ${task.priority==='low'?'selected':''}>🟢 Thong thả</option>
-                            <option value="medium" ${task.priority==='medium'?'selected':''}>🟡 Quan trọng</option>
-                            <option value="high" ${task.priority==='high'?'selected':''}>🔴 Khẩn cấp</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 block tracking-widest px-1">Danh mục</label>
-                        <input id="edit-category" type="text" value="${escapeHTML(task.category)}" class="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-4 sm:py-3.5 text-sm font-semibold text-slate-800 dark:text-white outline-none border border-slate-200 dark:border-slate-700 focus:border-primary shadow-inner transition">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 block tracking-widest px-1">Ngày</label>
-                        <input id="edit-date" type="date" value="${task.date||''}" class="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-4 sm:py-3.5 text-sm font-semibold text-slate-800 dark:text-white outline-none border border-slate-200 dark:border-slate-700 focus:border-primary shadow-inner transition">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1.5 flex items-center gap-1 tracking-widest px-1"><i class="ph-fill ph-speaker-high text-amber-500"></i> Báo thức AI</label>
-                        <input id="edit-alarm" type="time" value="${task.alarmTime||''}" class="w-full bg-amber-50 dark:bg-amber-900/10 rounded-xl px-4 py-4 sm:py-3.5 text-sm font-bold text-amber-700 dark:text-amber-400 outline-none border border-amber-200 dark:border-amber-800/50 focus:border-amber-500 shadow-inner transition">
-                    </div>
-                </div>
-                <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer active:scale-[0.98] transition-transform">
-                    <input id="edit-completed" type="checkbox" ${task.completed?'checked':''} class="w-6 h-6 rounded-md accent-emerald-500 cursor-pointer">
-                    <span class="text-sm font-bold text-slate-700 dark:text-slate-300 select-none">Đánh dấu đã hoàn thành</span>
-                </label>
-            </div>
-            <div class="flex gap-3 mt-8 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-                <button onclick="window.closeModal()" class="px-6 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition lg:hidden">Đóng</button>
-                <button onclick="window.deleteFromEdit(${task.id})" class="px-5 py-4 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-500 font-bold active:scale-95 transition border border-rose-200 dark:border-rose-800/50 flex items-center gap-2 hover:bg-rose-100 dark:hover:bg-rose-900/40"><i class="ph-bold ph-trash text-lg"></i></button>
-                <button onclick="window.saveEdit(${task.id})" class="flex-1 py-4 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg shadow-indigo-500/30 flex justify-center items-center gap-2 hover:bg-indigo-600"><i class="ph-bold ph-floppy-disk text-lg"></i> Lưu Thay Đổi</button>
-            </div>
-        </div>
-    </div>`;
-    if(window.innerWidth >= 1024) setTimeout(()=>{ const el = document.getElementById('edit-text'); if(el) el.focus(); }, 100);
-};
-
-window.saveEdit = id => {
-    vibrate(20);
-    const task = window.todos.find(t => t.id === id); if(!task) return;
-    const newText = document.getElementById('edit-text').value.trim();
-    if(!newText){ window.showToast('Vui lòng nhập tên!','ph-warning-circle'); return; }
-    
-    const wasCompleted = task.completed; 
-    const oldAlarm = task.alarmTime;
-    const oldDate = task.date;
-
-    const newAlarm = document.getElementById('edit-alarm').value;
-    const newDate = document.getElementById('edit-date').value;
-
-    task.text = newText; 
-    task.priority = document.getElementById('edit-priority').value;
-    task.category = document.getElementById('edit-category').value.trim() || 'Chung';
-    task.date = newDate; 
-    task.alarmTime = newAlarm;
-    task.completed = document.getElementById('edit-completed').checked;
-    
-    if(newAlarm !== oldAlarm || newDate !== oldDate){
-        window.alarmedTasks.delete(task.id); 
-        window.alarmedTasks.delete('warn5_'+task.id); 
-        window.alarmedTasks.delete('overdue_'+task.id);
-    }
-
-    if(task.completed && !wasCompleted){
-        vibrate([30,50]); confetti({particleCount:150,spread:100,origin:{y:0.6},colors:['#6366f1','#10b981','#f59e0b','#ec4899','#8b5cf6']});
-        window.speak(`Tuyệt vời! Bạn đã hoàn thành nhiệm vụ: ${task.text}`, 1.05, 1.1); 
-        if(pinnedTaskId===id) window.unpinTask(); const today=getTodayStr();
-        if(window.stats.lastDate!==today){window.stats.streak+=1;window.stats.lastDate=today;window.checkStreak();}
-    }
-    if(!task.completed && wasCompleted){ 
-        window.alarmedTasks.delete(task.id); window.alarmedTasks.delete('overdue_'+task.id); 
-    }
-    
-    if(newAlarm && !wasCompleted && newAlarm !== oldAlarm) {
-        window.speak(`Đã cập nhật, hệ thống sẽ nhắc bạn lúc ${formatTimeVN(newAlarm)}.`);
-    }
-    
-    window.closeModal(); window.saveAndRender(); window.showToast('Đã lưu chỉnh sửa!', 'ph-check-circle');
-};
-
-window.deleteFromEdit = id => { vibrate(15); window.closeModal(); setTimeout(()=> window.confirmDelete(id), 200); };
-
-window.confirmDelete = id => {
-    vibrate(20);
-    const task = window.todos.find(t => t.id === id); if(!task) return;
-    document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)window.closeModal()">
-        <div class="modal-sheet !max-w-sm text-center">
-            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 lg:hidden"></div>
-            <div class="w-24 h-24 rounded-3xl bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-6 border border-rose-100 dark:border-rose-800/50 shadow-inner"><i class="ph-fill ph-trash text-5xl text-rose-500"></i></div>
-            <h2 class="text-2xl font-black mb-3 text-slate-800 dark:text-white tracking-tight">Xóa Vĩnh Viễn?</h2>
-            <p class="text-sm text-slate-500 mb-8 font-medium leading-relaxed px-2">Bạn có chắc muốn xóa<br>"<span class="font-bold text-slate-700 dark:text-slate-300">${escapeHTML(task.text)}</span>"?</p>
-            <div class="flex gap-3">
-                <button onclick="window.closeModal()" class="flex-1 py-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold active:scale-95 transition hover:bg-slate-200 text-slate-600 dark:text-slate-300">Giữ lại</button>
-                <button onclick="window.execDelete(${id})" class="flex-1 py-4 rounded-xl bg-rose-500 text-white font-bold active:scale-95 transition shadow-lg shadow-rose-500/30 hover:bg-rose-600">Xóa Ngay</button>
-            </div>
-        </div>
-    </div>`;
-};
-
-window.execDelete = id => {
-    vibrate([30, 50]);
-    const li = document.querySelector(`[data-task-id="${id}"]`);
-    const doDelete = () => {
-        window.todos = window.todos.filter(t => t.id !== id); if(pinnedTaskId===id) window.unpinTask();
-        window.alarmedTasks.delete(id); window.alarmedTasks.delete('overdue_'+id); window.alarmedTasks.delete('warn5_'+id);
-        openActionId = null; window.closeModal(); window.saveAndRender(); window.showToast('Đã xóa bỏ!', 'ph-trash');
-        window.speak('Đã xóa bỏ nhiệm vụ.', 1.05, 0.95);
-    };
-    if(li){ li.classList.add('slide-out'); setTimeout(doDelete, 350); } else doDelete();
-};
-
-window.closeModal = () => { vibrate(10); document.getElementById('modal-container').innerHTML=''; };
-
-window.toggleTask = (id, forceComplete=false) => {
-    window.initTTS();
-    const task = window.todos.find(t=>t.id===id); if(!task) return;
-    task.completed = forceComplete ? true : !task.completed;
-    if(task.completed){
-        vibrate([30,50]); confetti({particleCount:150,spread:100,origin:{y:0.6},colors:['#6366f1','#10b981','#f59e0b','#ec4899','#8b5cf6']});
-        window.speak(`Làm tốt lắm! Đã xử lý xong: ${task.text}`, 1.05, 1.1);
-        if(pinnedTaskId===id) window.unpinTask(); const today=getTodayStr();
-        if(window.stats.lastDate!==today){ window.stats.streak+=1; window.stats.lastDate=today; window.checkStreak(); window.showToast(`Chuỗi ${window.stats.streak} ngày liên tiếp!`,'ph-fire'); }
-        else { window.showToast('Hoàn thành!','ph-check-circle'); } openActionId = null;
-    } else {
-        window.alarmedTasks.delete(id); window.alarmedTasks.delete('overdue_'+id); vibrate(20);
-    }
-    window.saveAndRender();
-};
-
-window.pinTask = (id, text) => { vibrate(20); pinnedTaskId=id; document.getElementById('focus-task-name').textContent=text; document.getElementById('focus-task-card').classList.remove('hidden'); if(window.innerWidth < 1024) document.querySelectorAll('.nav-btn')[1].click(); window.showToast('Đã ghim! Tập trung hoàn thành nó.','ph-target'); window.saveAndRender(); window.speak('Đã ghim mục tiêu. Chúc bạn tập trung hiệu quả.', 1.0, 1.05); };
-window.unpinTask = () => { vibrate(15); pinnedTaskId=null; document.getElementById('focus-task-card').classList.add('hidden'); window.saveAndRender(); window.speak('Đã bỏ ghim mục tiêu.', 1.0, 1.0); };
-
-document.addEventListener('click', (e) => {
-    if(openActionId !== null && window.innerWidth < 1024){
-        if(!e.target.closest('.action-btn-mobile') && !e.target.closest('[data-more-btn]')){
-            openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions'));
-        }
-    }
-});
-
-window.toggleMobileActions = (id, e) => {
-    e.stopPropagation(); vibrate(10);
-    if(openActionId === id){ openActionId = null; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); } 
-    else { openActionId = id; document.querySelectorAll('.swipe-item.show-actions').forEach(el=>el.classList.remove('show-actions')); const item = document.querySelector(`[data-task-id="${id}"]`); if(item) item.classList.add('show-actions'); }
-};
-
-window.renderTasksOnly = function() {
-    const list = document.getElementById('todo-list'); list.innerHTML = ''; const todayStr = getTodayStr();
-    
-    let filtered = window.todos.filter(t => { if(currentFilter==='active') return !t.completed; if(currentFilter==='overdue') return !t.completed && t.date && t.date < todayStr; return true; });
-
-    filtered.sort((a,b) => {
-        if(a.completed !== b.completed) return a.completed ? 1 : -1;
-        const aO = (!a.completed && a.date && a.date < todayStr) ? 1 : 0, bO = (!b.completed && b.date && b.date < todayStr) ? 1 : 0;
-        if(aO !== bO) return bO - aO;
-        if(a.alarmTime && !b.alarmTime) return -1; if(!a.alarmTime && b.alarmTime) return 1;
-        if(a.alarmTime && b.alarmTime) return a.alarmTime.localeCompare(b.alarmTime);
-        const w = {high:3, medium:2, low:1}; if(w[b.priority] !== w[a.priority]) return w[b.priority] - w[a.priority]; return b.id - a.id;
-    });
-
-    document.getElementById('empty-state').style.display = filtered.length === 0 ? 'flex' : 'none';
-
-    filtered.forEach(t => {
-        const isOverdue = !t.completed && t.date && t.date < todayStr, isToday = t.date === todayStr, isPinned = pinnedTaskId === t.id, isAlarmed = !t.completed && (window.alarmedTasks.has(t.id) || (isOverdue && window.alarmedTasks.has('overdue_'+t.id))), isShowingActions = openActionId === t.id;
-        
-        let metaHtml = `<span class="bg-slate-100 dark:bg-slate-800 font-bold px-2 py-0.5 rounded-lg text-slate-500 shadow-sm">#${escapeHTML(t.category)}</span>`;
-        if(t.date) metaHtml += `<span class="${isOverdue?'text-rose-600 bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800':(isToday?'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50':'text-slate-500 bg-slate-100 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50')} px-2 py-0.5 rounded-lg font-bold shadow-sm">${isOverdue?'Quá hạn':(isToday?'Hôm nay':new Date(t.date).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'}))}</span>`;
-        if(t.alarmTime && !t.completed) metaHtml += `<span class="${isAlarmed?'text-rose-600 bg-rose-100 dark:bg-rose-900/40 border border-rose-200 dark:border-rose-800 animate-pulse':'text-amber-600 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800/50'} px-2 py-0.5 rounded-lg font-bold flex items-center gap-1 shadow-sm"><i class="ph-fill ph-speaker-high text-[10px]"></i>${t.alarmTime}</span>`;
-
-        const pColor = t.priority==='high'?'bg-rose-500':(t.priority==='low'?'bg-emerald-500':'bg-amber-500');
-        const safeText = escapeHTML(t.text).replace(/'/g, "\\'");
-        
-        const li = document.createElement('li');
-        li.className = `swipe-item ${isShowingActions?'show-actions':''} group bg-white dark:bg-darkcard border ${isAlarmed?'border-rose-400 dark:border-rose-600 alarm-flash':'border-slate-200 dark:border-slate-800'} rounded-2xl shadow-sm mb-3 transition-all ${isPinned?'ring-2 ring-indigo-500/50':''} hover:shadow-md cursor-pointer active:scale-[0.99]`;
-        li.setAttribute('data-task-id', t.id);
-
-        li.innerHTML = `
-            <div class="swipe-bg-left"><i class="ph-bold ph-check text-3xl"></i></div>
-            <div class="swipe-bg-right"><i class="ph-bold ph-trash text-3xl"></i></div>
-            <div class="swipe-front flex flex-col sm:flex-row sm:items-center w-full p-4 gap-3 transition-transform ${t.completed?'opacity-50 grayscale-[30%]':''}">
-                <div class="priority-bar ${pColor} hidden sm:block"></div>
-                <div class="flex items-start sm:items-center gap-3.5 flex-grow min-w-0 pl-1" onclick="window.toggleTask(${t.id})">
-                    <div class="flex-shrink-0 w-6 h-6 mt-0.5 sm:mt-0 rounded-md border-2 flex items-center justify-center transition-all ${t.completed?'border-emerald-500 bg-emerald-500 shadow-md':'border-slate-300 dark:border-slate-500 group-hover:border-primary'} pointer-events-none sm:pointer-events-auto">
-                        ${t.completed?'<i class="ph-bold ph-check text-white text-[12px]"></i>':''}
-                    </div>
-                    <div class="flex-grow min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <h3 class="text-[16px] font-bold truncate ${t.completed?'line-through text-slate-400':(isOverdue?'text-rose-600':'text-slate-800 dark:text-slate-100')}">${escapeHTML(t.text)}</h3>
-                            ${t.priority==='high'&&!t.completed?'<span class="text-[9px] font-black bg-rose-100 dark:bg-rose-900/40 text-rose-600 px-1.5 py-0.5 rounded uppercase border border-rose-200 dark:border-rose-800 flex-shrink-0 shadow-sm">Khẩn</span>':''}
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wide">${metaHtml}</div>
-                    </div>
-                </div>
-                
-                <div class="hidden lg:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    ${!t.completed?`<button onclick="event.stopPropagation();window.pinTask(${t.id},'${safeText}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition active:scale-90" title="Ghim vào Timer"><i class="ph-bold ph-target text-xl"></i></button>`:''}
-                    <button onclick="event.stopPropagation();window.openEditModal(${t.id})" class="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-xl"></i></button>
-                    <button onclick="event.stopPropagation();window.confirmDelete(${t.id})" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-xl"></i></button>
-                </div>
-
-                <div class="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 flex-shrink-0">
-                    <button data-more-btn onclick="window.toggleMobileActions(${t.id}, event)" class="p-3 text-slate-400 active:bg-slate-100 dark:active:bg-slate-800 rounded-full transition active:scale-90">
-                        <i class="ph-bold ph-dots-three-vertical text-2xl"></i>
-                    </button>
-                </div>
-                
-                <div class="action-btn-mobile lg:hidden absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white/95 dark:bg-darkcard/95 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-1.5">
-                    ${!t.completed?`<button onclick="event.stopPropagation();window.pinTask(${t.id},'${safeText}')" class="p-3 text-slate-500 hover:text-indigo-600 active:bg-indigo-50 dark:active:bg-indigo-900/30 rounded-xl transition active:scale-90" title="Ghim"><i class="ph-bold ph-target text-xl"></i></button>`:''}
-                    <button onclick="event.stopPropagation();window.openEditModal(${t.id})" class="p-3 text-slate-500 hover:text-blue-500 active:bg-blue-50 dark:active:bg-blue-900/30 rounded-xl transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-xl"></i></button>
-                    <button onclick="event.stopPropagation();window.confirmDelete(${t.id})" class="p-3 text-slate-500 hover:text-rose-600 active:bg-rose-50 dark:active:bg-rose-900/30 rounded-xl transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-xl"></i></button>
-                </div>
-            </div>
-        `;
-        list.appendChild(li);
-    });
-    
-    const total = window.todos.length, done = window.todos.filter(x=>x.completed).length, percent = total === 0 ? 0 : Math.round((done/total)*100);
-    document.getElementById('progress-text').textContent = `${percent}%`;
-    const ring = document.getElementById('progress-ring'); if(ring) ring.style.strokeDashoffset = 113 - (percent/100)*113;
-    window.checkDeadlines();
-};
-
-window.saveAndRender = function() {
-    localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
-    if(window.FirebaseSync) window.FirebaseSync.pushAll();
-    window.renderTasksOnly();
-};
-
-window.handleAdd = (e, inputSelector) => {
-    e.preventDefault(); const inputEl = document.querySelector(inputSelector);
-    if(!inputEl || !inputEl.value.trim()) return; window.initTTS();
-    
-    const data = parseSmartInput(inputEl.value);
-    
-    const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
-    
-    window.todos.unshift({ id: uniqueId, text: data.text.charAt(0).toUpperCase() + data.text.slice(1), priority: data.priority, category: data.category, date: data.date, alarmTime: data.alarmTime, completed: false });
-    
-    inputEl.value = ''; inputEl.blur(); vibrate([30]);
-    if(data.alarmTime){ 
-        window.showToast(`Đã hẹn giọng AI lúc ${data.alarmTime}`, 'ph-speaker-high'); 
-        window.speak(`Đã ghi nhận, chuông báo giọng nói lúc ${formatTimeVN(data.alarmTime)}.`); 
-    } else { 
-        window.showToast('Đã lên kế hoạch!', 'ph-check-circle'); 
-        window.speak('Đã lưu mục tiêu mới.');
-    }
-    window.saveAndRender();
-};
-
-document.getElementById('form-pc').addEventListener('submit', e => window.handleAdd(e, '#input-pc'));
-document.getElementById('form-mobile').addEventListener('submit', e => window.handleAdd(e, '#input-mobile'));
-
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(SpeechRecognition){
-    const rec = new SpeechRecognition(); rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false;
-    rec.onstart = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.add('text-rose-500','animate-pulse')); vibrate(30); };
-    rec.onresult = e => {
-        const val = e.results[0][0].transcript;
-        if(window.innerWidth >= 1024){ document.getElementById('input-pc').value = val; document.getElementById('form-pc').dispatchEvent(new Event('submit')); } 
-        else { document.getElementById('input-mobile').value = val; document.getElementById('form-mobile').dispatchEvent(new Event('submit')); }
-    };
-    rec.onend = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); };
-    rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); window.showToast('Không nghe được, thử lại nhé','ph-warning-circle'); window.speak('Xin lỗi, tôi chưa nghe rõ.', 1.0, 0.9); };
-    
-    document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { window.initTTS(); try{rec.start();}catch(e){window.showToast('Đang nghe...','ph-microphone');} }); });
-} else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
-
-window.cleanupTasks = () => {
-    vibrate(20);
-    const c = window.todos.filter(t=>t.completed).length; 
-    if(c === 0) {
-        window.speak('Không có mục nào cần dọn dẹp.');
-        return window.showToast('Không có mục nào để dọn!','ph-warning-circle');
-    }
-    window.todos = window.todos.filter(t=>!t.completed); window.saveAndRender(); vibrate([30, 50]);
-    window.speak(`Đã dọn dẹp sạch sẽ ${c} nhiệm vụ.`, 1.0, 1.0); window.showToast(`Đã dọn ${c} mục!`, 'ph-broom');
-};
-
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        vibrate(15);
-        document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-200/50 dark:hover:bg-slate-700/50 active:scale-95 whitespace-nowrap');
-        e.target.className = 'filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-600 text-primary shadow-sm transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap';
-        currentFilter = e.target.dataset.filter; openActionId = null; window.renderTasksOnly();
-        window.speak(`Đang hiển thị ${e.target.innerText}`, 1.05, 1.0);
-    });
-});
-
-// ===================== 11. ADVANCED TIMER ENGINE =====================
-let audioCtxTimer = null;
-let timerSoundEnabled = true;
-
-window.initAudioTimer = () => {
-    if (!audioCtxTimer) { audioCtxTimer = new (window.AudioContext || window.webkitAudioContext)(); }
-    if (audioCtxTimer.state === 'suspended') audioCtxTimer.resume();
-};
-
-window.toggleTimerSound = () => {
-    vibrate(10); timerSoundEnabled = !timerSoundEnabled;
-    const btn = document.getElementById('timer-sound-btn');
-    if (timerSoundEnabled) {
-        btn.innerHTML = `<i class="ph-bold ph-speaker-high text-lg"></i>`;
-        btn.classList.add('text-indigo-500'); btn.classList.remove('text-slate-400');
-        window.speak('Đã bật âm thanh đồng hồ.');
-    } else {
-        btn.innerHTML = `<i class="ph-bold ph-speaker-slash text-lg"></i>`;
-        btn.classList.remove('text-indigo-500'); btn.classList.add('text-slate-400');
-        window.speak('Đã tắt âm thanh đồng hồ.');
-    }
-};
-
-const TimerSoundFX = {
-    tick: () => {
-        if (!timerSoundEnabled || !audioCtxTimer || audioCtxTimer.state === 'suspended') return;
-        const osc = audioCtxTimer.createOscillator(); const gain = audioCtxTimer.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(1000, audioCtxTimer.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(200, audioCtxTimer.currentTime + 0.02);
-        gain.gain.setValueAtTime(0.015, audioCtxTimer.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtxTimer.currentTime + 0.02);
-        osc.connect(gain); gain.connect(audioCtxTimer.destination);
-        osc.start(); osc.stop(audioCtxTimer.currentTime + 0.02);
-    },
-    alarm: () => {
-        if (!timerSoundEnabled || !audioCtxTimer || audioCtxTimer.state === 'suspended') return;
-        const now = audioCtxTimer.currentTime;
-        for(let i=0; i<4; i++) {
-            const osc = audioCtxTimer.createOscillator(); const gain = audioCtxTimer.createGain();
-            const startTime = now + i*0.25;
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, startTime); osc.frequency.linearRampToValueAtTime(1000, startTime + 0.1);
-            gain.gain.setValueAtTime(0, startTime); gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05); gain.gain.linearRampToValueAtTime(0, startTime + 0.2);
-            osc.connect(gain); gain.connect(audioCtxTimer.destination);
-            osc.start(startTime); osc.stop(startTime + 0.2);
-        }
-    }
-};
-
-window.switchTimerMode = (mode) => {
-    vibrate(10);
-    const cdUI = document.getElementById('mode-countdown-ui'); const swUI = document.getElementById('mode-stopwatch-ui');
-    const tabCd = document.getElementById('tab-countdown'); const tabSw = document.getElementById('tab-stopwatch');
-    const activeTabClasses = ['bg-white', 'dark:bg-slate-700', 'text-indigo-600', 'dark:text-indigo-400', 'shadow-sm'];
-    const inactiveTabClasses = ['text-slate-500', 'hover:text-slate-700', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800'];
-
-    if (mode === 'countdown') {
-        cdUI.classList.remove('hidden'); swUI.classList.add('hidden');
-        tabCd.classList.add(...activeTabClasses); tabCd.classList.remove(...inactiveTabClasses);
-        tabSw.classList.remove(...activeTabClasses); tabSw.classList.add(...inactiveTabClasses);
-    } else {
-        swUI.classList.remove('hidden'); cdUI.classList.add('hidden');
-        tabSw.classList.add(...activeTabClasses); tabSw.classList.remove(...inactiveTabClasses);
-        tabCd.classList.remove(...activeTabClasses); tabCd.classList.add(...inactiveTabClasses);
-    }
-};
-
-const padTimer = (num, size = 2) => num.toString().padStart(size, '0');
-
-let wakeLockTimer = null;
-async function reqWakeLock() { try { if ('wakeLock' in navigator) wakeLockTimer = await navigator.wakeLock.request('screen'); } catch (err) {} }
-function relWakeLock() { if (wakeLockTimer !== null) { wakeLockTimer.release(); wakeLockTimer = null; } }
-
-const CD = { targetTime: 0, interval: null, isRunning: false, isPaused: false, remainingWhenPaused: 0, lastTick: -1 };
-window.validateTimerInput = (el, max) => {
-    if (el.value.length > 2) el.value = el.value.slice(0, 2);
-    if (parseInt(el.value) > max) el.value = max;
-    if (parseInt(el.value) < 0) el.value = 0;
-};
-window.applyTimerPreset = (mins) => {
-    vibrate(15);
-    document.getElementById('in-hr').value = ''; document.getElementById('in-sec').value = ''; document.getElementById('in-min').value = mins;
-    document.querySelectorAll('#cd-setup-area button').forEach(b => {
-        b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-200', 'dark:border-indigo-800');
-        b.classList.add('text-slate-600', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
-    });
-    event.target.classList.add('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-200', 'dark:border-indigo-800');
-    event.target.classList.remove('text-slate-600', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
-};
-
-function updateCDDisplay() {
-    const remainingMs = CD.targetTime - Date.now();
-    if (remainingMs <= 0) { window.finishCountdown(); return; }
-    
-    const remainingSecs = Math.ceil(remainingMs / 1000);
-    const h = Math.floor(remainingSecs / 3600), m = Math.floor((remainingSecs % 3600) / 60), s = remainingSecs % 60;
-    
-    document.getElementById('cd-hr').textContent = padTimer(h) + ':';
-    document.getElementById('cd-hr').style.display = h > 0 ? 'inline' : 'none';
-    document.getElementById('cd-min').textContent = padTimer(m);
-    document.getElementById('cd-sec').textContent = padTimer(s);
-
-    if (s !== CD.lastTick) { CD.lastTick = s; TimerSoundFX.tick(); }
-}
-
-window.finishCountdown = () => {
-    clearInterval(CD.interval); CD.isRunning = false;
-    document.getElementById('cd-hr').textContent = '00:'; document.getElementById('cd-min').textContent = '00'; document.getElementById('cd-sec').textContent = '00';
-    document.getElementById('cd-toggle-btn').innerHTML = `<i class="ph-fill ph-play"></i> Bắt đầu`;
-    document.getElementById('cd-display-area').classList.remove('running');
-    vibrate([500, 200, 500]); TimerSoundFX.alarm(); confetti({particleCount: 150, spread: 80});
-    window.showToast("Hết giờ!", "ph-bell-ringing"); window.speak("Thời gian đếm ngược đã kết thúc. Hoàn thành xuất sắc.", 1.05, 1.1);
-    setTimeout(() => { document.getElementById('cd-setup-area').classList.remove('hidden'); document.getElementById('cd-display-area').classList.add('hidden'); CD.isPaused = false; }, 3000);
-    relWakeLock();
-};
-
-window.toggleCountdown = () => {
-    window.initTTS(); window.initAudioTimer(); vibrate(20);
-    const btn = document.getElementById('cd-toggle-btn');
-    if (!CD.isRunning && !CD.isPaused) {
-        const h = parseInt(document.getElementById('in-hr').value) || 0; const m = parseInt(document.getElementById('in-min').value) || 0; const s = parseInt(document.getElementById('in-sec').value) || 0;
-        if (h === 0 && m === 0 && s === 0) { window.showToast("Vui lòng nhập thời gian!", "ph-warning-circle"); return; }
-        
-        const durationMs = (h * 3600 + m * 60 + s) * 1000;
-        CD.targetTime = Date.now() + durationMs;
-        
-        document.getElementById('cd-setup-area').classList.add('hidden'); document.getElementById('cd-display-area').classList.remove('hidden'); document.getElementById('cd-display-area').classList.add('running');
-        
-        updateCDDisplay();
-        CD.interval = setInterval(updateCDDisplay, 200); 
-        CD.isRunning = true;
-        btn.innerHTML = `<i class="ph-fill ph-pause"></i> Tạm dừng`; btn.classList.replace('bg-indigo-600', 'bg-amber-500'); btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
-        reqWakeLock(); if(pinnedTaskId) window.speak("Bắt đầu tập trung đếm ngược.");
-    } else if (CD.isRunning) {
-        clearInterval(CD.interval); CD.isRunning = false; CD.isPaused = true;
-        CD.remainingWhenPaused = CD.targetTime - Date.now();
-        document.getElementById('cd-display-area').classList.remove('running'); 
-        btn.innerHTML = `<i class="ph-fill ph-play"></i> Tiếp tục`; btn.classList.replace('bg-amber-500', 'bg-indigo-600'); btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
-        relWakeLock(); window.speak("Tạm dừng bộ đếm.");
-    } else if (CD.isPaused) {
-        CD.targetTime = Date.now() + CD.remainingWhenPaused;
-        CD.interval = setInterval(updateCDDisplay, 200); CD.isRunning = true; CD.isPaused = false;
-        document.getElementById('cd-display-area').classList.add('running'); 
-        btn.innerHTML = `<i class="ph-fill ph-pause"></i> Tạm dừng`; btn.classList.replace('bg-indigo-600', 'bg-amber-500'); btn.classList.replace('hover:bg-indigo-700', 'hover:bg-amber-600');
-        reqWakeLock();
-    }
-};
-
-window.resetCountdown = () => {
-    vibrate(20); clearInterval(CD.interval); CD.isRunning = false; CD.isPaused = false;
-    document.getElementById('cd-setup-area').classList.remove('hidden'); document.getElementById('cd-display-area').classList.add('hidden'); document.getElementById('cd-display-area').classList.remove('running');
-    const btn = document.getElementById('cd-toggle-btn');
-    btn.innerHTML = `<i class="ph-fill ph-play"></i> Bắt đầu`; btn.classList.replace('bg-amber-500', 'bg-indigo-600'); btn.classList.replace('hover:bg-amber-600', 'hover:bg-indigo-700');
-    relWakeLock();
-};
-
-const SW = { startTs: 0, elapsed: 0, interval: null, isRunning: false, lastTick: -1 };
-function updateSWDisplay() {
-    const time = Date.now() - SW.startTs + SW.elapsed;
-    const m = Math.floor(time / 60000), s = Math.floor((time % 60000) / 1000), ms = Math.floor((time % 1000) / 10);
-    document.getElementById('sw-min').textContent = padTimer(m); document.getElementById('sw-sec').textContent = padTimer(s); document.getElementById('sw-ms').textContent = '.' + padTimer(ms);
-    if (s !== SW.lastTick) { SW.lastTick = s; if (SW.isRunning) TimerSoundFX.tick(); }
-}
-
-window.toggleStopwatch = () => {
-    window.initTTS(); window.initAudioTimer(); vibrate(20);
-    const btn = document.getElementById('sw-toggle-btn');
-    if (!SW.isRunning) {
-        SW.startTs = Date.now(); SW.interval = setInterval(updateSWDisplay, 10);
-        btn.innerHTML = `<i class="ph-fill ph-pause"></i> Tạm dừng`; btn.classList.replace('bg-emerald-500', 'bg-amber-500'); btn.classList.replace('hover:bg-emerald-600', 'hover:bg-amber-600');
-        document.getElementById('sw-display-container').classList.add('running'); SW.isRunning = true; reqWakeLock(); window.speak("Bắt đầu bấm giờ.");
-    } else {
-        SW.elapsed += Date.now() - SW.startTs; clearInterval(SW.interval);
-        btn.innerHTML = `<i class="ph-fill ph-play"></i> Tiếp tục`; btn.classList.replace('bg-amber-500', 'bg-emerald-500'); btn.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-600');
-        document.getElementById('sw-display-container').classList.remove('running'); SW.isRunning = false; relWakeLock(); window.speak("Tạm dừng bấm giờ.");
-    }
-};
-
-window.resetStopwatch = () => {
-    vibrate(20); clearInterval(SW.interval); SW.isRunning = false; SW.elapsed = 0; SW.lastTick = -1;
-    document.getElementById('sw-min').textContent = "00"; document.getElementById('sw-sec').textContent = "00"; document.getElementById('sw-ms').textContent = ".00";
-    const btn = document.getElementById('sw-toggle-btn'); btn.innerHTML = `<i class="ph-fill ph-play"></i> Bắt đầu`; btn.classList.remove('bg-amber-500', 'hover:bg-amber-600'); btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-    document.getElementById('sw-display-container').classList.remove('running'); relWakeLock();
-};
-
-// ===================== 12. NAVIGATION & RESIZE =====================
-window.switchTab = (id, btn) => {
-    vibrate(10); openActionId = null;
-    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active');
-    if(window.innerWidth < 1024) {
-        document.querySelectorAll('.nav-btn').forEach(b => { 
-            b.classList.remove('text-primary', 'nav-bounce'); 
-            b.classList.add('text-slate-400');
-        }); 
-        btn.classList.add('text-primary', 'nav-bounce'); btn.classList.remove('text-slate-400');
-        document.getElementById('mobile-input').style.transform = id === 'view-tasks' ? 'translateY(0)' : 'translateY(200%)';
-    }
-    if(id === 'view-tasks') window.speak('Mở tab Nhiệm vụ');
-    if(id === 'view-focus') window.speak('Mở tab Tập trung');
-    if(id === 'view-vault') window.speak('Mở Kho lưu trữ đa năng');
-};
-
-window.toggleThemeLogic = () => {
-    vibrate(15); const html = document.documentElement; html.classList.toggle('dark'); const isD = html.classList.contains('dark'); localStorage.theme = isD ? 'dark' : 'light';
-    const themeIcon = document.getElementById('theme-icon'); themeIcon.className = isD ? 'ph-bold ph-sun text-lg text-yellow-400 transition-transform rotate-90' : 'ph-bold ph-moon text-lg text-slate-700 transition-transform -rotate-90';
-    setTimeout(()=>themeIcon.classList.remove('rotate-90', '-rotate-90'), 300); window.speak(isD ? 'Đã bật giao diện tối.' : 'Đã bật giao diện sáng.');
-};
-
-window.highlightError = (elementId) => {
-    const el = document.getElementById(elementId);
-    if (el) {
-        el.classList.add('input-error-glow');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.focus();
-        setTimeout(() => el.classList.remove('input-error-glow'), 3000);
-    }
-};
-
 // ===================== EVENT LISTENERS & DELEGATION =====================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // AN TOÀN TUYỆT ĐỐI - Khởi tạo môi trường
     try {
         window.pwaLogicCore.init();
     } catch(e) {}
@@ -1802,7 +1063,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // AN TOÀN TUYỆT ĐỐI - Luồng Đăng nhập (Chống Crash)
     try {
         if(localStorage.getItem('lifeos_v8_session')){
             let savedSession = localStorage.getItem('lifeos_v8_session');
