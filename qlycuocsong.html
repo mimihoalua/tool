@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="LifeOS" />
-    <title>LifeOS V8.6 - Cloud Native</title>
+    <title>LifeOS V8.6.1 - Stable Sync</title>
     
     <link id="manifest-link" rel="manifest" href="#">
 
@@ -1778,8 +1778,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if(localStorage.getItem('lifeos_v8_session')){ window.showLoginGate(); window.submitPassword(); } 
-    else { window.showLoginGate(); }
+    if(localStorage.getItem('lifeos_v8_session')){
+        window.currentUser = localStorage.getItem('lifeos_v8_session');
+        window.viewingUser = localStorage.getItem('lifeos_v8_viewing') || window.currentUser;
+        document.getElementById('login-gate').style.display = 'none';
+        window.loadUserData();
+    } else {
+        window.showLoginGate();
+    }
 });
 </script>
 </body>
