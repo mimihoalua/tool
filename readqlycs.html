@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ Kiến trúc Hệ thống — LifeOS V8.8</title>
+    <title>Hồ sơ Kiến trúc Hệ thống — LifeOS V12 Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -14,892 +14,448 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         'serif-display': ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
                     }
                 }
             }
         }
     </script>
     <style>
-        @keyframes marquee {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .animate-marquee { animation: marquee 25s linear infinite; }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 30s linear infinite; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { animation: fadeInUp 0.7s ease-out forwards; opacity: 0; }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        .delay-500 { animation-delay: 0.5s; }
-        .delay-600 { animation-delay: 0.6s; }
-        .delay-700 { animation-delay: 0.7s; }
+        .delay-100 { animation-delay: 0.1s; } .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; } .delay-500 { animation-delay: 0.5s; }
 
         html { scroll-behavior: smooth; }
+        
         .code-block {
-            background: #1E293B;
-            color: #E2E8F0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            line-height: 1.7;
-            border-radius: 0.75rem;
-            overflow-x: auto;
+            background: #0f172a; color: #e2e8f0; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem; line-height: 1.7; border-radius: 1rem; overflow-x: auto;
+            border: 1px solid #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
-        .code-block .key { color: #7DD3FC; }
-        .code-block .val { color: #FDE68A; }
-        .code-block .comment { color: #64748B; }
+        .code-block .keyword { color: #c678dd; } /* Tím */
+        .code-block .function { color: #61afef; } /* Xanh dương */
+        .code-block .string { color: #98c379; } /* Xanh lá */
+        .code-block .comment { color: #5c6370; font-style: italic; }
 
-        .toc-link {
-            transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .toc-link:hover {
-            color: #0F172A;
-            padding-left: 0.5rem;
-        }
-        .toc-link.active {
-            color: #0F172A;
-            font-weight: 600;
-            border-left-color: #0F172A;
-        }
+        .toc-link { transition: all 200ms ease; }
+        .toc-link:hover { color: #0ea5e9; padding-left: 0.5rem; }
+        .toc-link.active { color: #0ea5e9; font-weight: 700; border-left-color: #0ea5e9; background: linear-gradient(90deg, #f0f9ff 0%, transparent 100%); }
 
-        .layer-card {
-            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .layer-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
+        .layer-card { transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+        .layer-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); border-color: #e2e8f0; }
 
-        .flow-arrow {
-            position: relative;
-        }
-        .flow-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: -2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 2rem;
-            background: repeating-linear-gradient(to bottom, #CBD5E1 0px, #CBD5E1 4px, transparent 4px, transparent 8px);
-        }
-
-        .syntax-tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            font-family: 'Courier New', monospace;
-        }
+        .syntax-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        
+        .golden-rule { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #f59e0b; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #F1F5F9; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans bg-white text-slate-700">
+<body class="font-sans bg-slate-50 text-slate-700 selection:bg-brand-500 selection:text-white">
 
-    <!-- ==================== NAVIGATION ==================== -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 h-20 flex items-center">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 h-20 flex items-center transition-all">
         <div class="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
                     <i data-lucide="layers" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
-                    <span class="text-sm font-semibold text-slate-900 tracking-tight">LifeOS</span>
-                    <span class="text-xs text-slate-400 ml-1.5">V8.8</span>
+                    <span class="text-lg font-black text-slate-900 tracking-tight">LifeOS</span>
+                    <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full ml-1.5">V12 Master</span>
                 </div>
             </div>
-            <div class="hidden md:flex items-center gap-8">
-                <a href="#core-stack" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Core Stack</a>
-                <a href="#storage" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Storage</a>
-                <a href="#sync" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Smart Sync</a>
-                <a href="#manual" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">User Manual</a>
+            <div class="hidden md:flex items-center gap-8 font-medium">
+                <a href="#golden-rules" class="text-sm text-amber-600 hover:text-amber-700 flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Quy tắc Vàng</a>
+                <a href="#core-stack" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Kiến trúc</a>
+                <a href="#storage" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Dữ liệu</a>
+                <a href="#manual" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Cẩm nang</a>
             </div>
-            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
-                <i data-lucide="menu" class="w-5 h-5 text-slate-700"></i>
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-600">
+                <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
         </div>
     </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="fixed inset-0 z-[60] bg-white hidden flex-col pt-24 px-6">
-        <button id="mobileMenuClose" class="absolute top-6 right-6 p-2 rounded-lg hover:bg-slate-100">
-            <i data-lucide="x" class="w-5 h-5 text-slate-700"></i>
+    <div id="mobileMenu" class="fixed inset-0 z-[60] bg-white/95 backdrop-blur-xl hidden flex-col pt-24 px-6 animate-fadeIn">
+        <button id="mobileMenuClose" class="absolute top-6 right-6 p-2 rounded-xl bg-slate-100 hover:bg-slate-200">
+            <i data-lucide="x" class="w-6 h-6 text-slate-700"></i>
         </button>
-        <a href="#core-stack" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Core Stack</a>
-        <a href="#storage" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Storage Flow</a>
-        <a href="#sync" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">Smart Sync</a>
-        <a href="#manual" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-700 font-medium">User Manual</a>
+        <a href="#golden-rules" class="mobile-link py-4 border-b border-slate-100 text-lg text-amber-600 font-bold flex items-center gap-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Quy tắc Vàng</a>
+        <a href="#core-stack" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Kiến trúc Hệ thống</a>
+        <a href="#storage" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Luồng Dữ liệu</a>
+        <a href="#manual" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Cẩm nang Vận hành</a>
     </div>
 
-    <!-- ==================== HERO ==================== -->
-    <section class="relative min-h-[85vh] flex items-center pt-20 overflow-hidden">
-        <!-- Decorative blurs -->
-        <div class="absolute top-20 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-60"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-slate-50 rounded-full blur-3xl opacity-30"></div>
+    <section class="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-white">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-50 rounded-full blur-[100px] opacity-60 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-50 rounded-full blur-[80px] opacity-40 pointer-events-none"></div>
 
-        <div class="max-w-7xl mx-auto px-6 w-full">
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="fade-in-up">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full mb-8">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-widest">Technical Document</span>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-full mb-8 shadow-sm">
+                        <span class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest">Enterprise Architecture Profile</span>
                     </div>
-                    <h1 class="font-serif-display text-5xl md:text-7xl font-semibold text-slate-900 tracking-tight leading-[1.1] mb-6">
+                    <h1 class="font-serif-display text-5xl md:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
                         Hồ sơ<br>
-                        <span class="text-slate-400">Kiến trúc</span><br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">Kiến trúc</span><br>
                         Hệ thống
                     </h1>
-                    <p class="text-lg text-slate-500 leading-relaxed max-w-lg mb-10">
-                        Tài liệu kỹ thuật dành cho bạn để <strong class="text-slate-700">quản lý, bảo trì và phát triển</strong> dự án trên mọi nền tảng mà không sợ sai lệch.
+                    <p class="text-lg text-slate-600 leading-relaxed max-w-lg mb-10 font-medium">
+                        Tài liệu kỹ thuật nội bộ. Định hình các nguyên tắc cốt lõi giúp ứng dụng <strong>hoạt động mượt mà 100%, chống Crash, chống đơ</strong> trên mọi nền tảng.
                     </p>
                     <div class="flex flex-wrap gap-4">
-                        <a href="#core-stack" class="inline-flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
-                            Khám phá ngay
+                        <a href="#golden-rules" class="inline-flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5">
+                            Quy tắc bắt buộc
                             <i data-lucide="arrow-down" class="w-4 h-4"></i>
                         </a>
-                        <a href="#manual" class="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-700 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
-                            Hướng dẫn sử dụng
+                        <a href="#manual" class="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-700 text-sm font-bold rounded-xl border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
+                            Xem HDSD
                         </a>
                     </div>
                 </div>
+
                 <div class="fade-in-up delay-300 relative hidden lg:block">
-                    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
-                        <img src="https://picsum.photos/seed/architecture-blueprint/800/600.jpg" alt="Architecture" class="w-full h-[500px] object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
-                        <div class="absolute bottom-6 left-6 right-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                    <i data-lucide="cpu" class="w-4 h-4 text-white"></i>
+                    <div class="relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
+                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=1000" alt="Architecture" class="w-full h-[550px] object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+                        <div class="absolute bottom-8 left-8 right-8">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg">
+                                    <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
                                 </div>
-                                <span class="text-white text-sm font-medium">Architecture Profile</span>
+                                <div>
+                                    <h3 class="text-white font-bold text-lg leading-tight">Master Branch</h3>
+                                    <p class="text-brand-200 text-xs">Phiên bản ổn định tuyệt đối</p>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                                    <div class="text-white text-lg font-semibold">2</div>
-                                    <div class="text-white/60 text-xs">Layers</div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                                    <div class="text-white text-xl font-black">100%</div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Responsive</div>
                                 </div>
-                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                                    <div class="text-white text-lg font-semibold">4</div>
-                                    <div class="text-white/60 text-xs">Keys</div>
+                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                                    <div class="text-white text-xl font-black">0<span class="text-sm">ms</span></div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Độ trễ Local</div>
                                 </div>
-                                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                                    <div class="text-white text-lg font-semibold">0ms</div>
-                                    <div class="text-white/60 text-xs">Latency</div>
+                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                                    <div class="text-brand-400 text-xl font-black flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-1"></i> Safe</div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">DOM Guard</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Floating card -->
-                    <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-slate-100 p-4 fade-in-up delay-500">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
-                            <span class="text-xs font-semibold text-slate-900">Offline First</span>
-                        </div>
-                        <span class="text-xs text-slate-400">0ms response time</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ==================== MARQUEE ==================== -->
-    <div class="bg-slate-900 py-4 overflow-hidden">
-        <div class="animate-marquee whitespace-nowrap flex items-center gap-8">
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-blue-400"></i> HTML5</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> Vanilla JS ES6+</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-amber-400"></i> localStorage</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Firestore</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="shield-check" class="w-3 h-3 text-green-400"></i> Firebase Auth</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="smartphone" class="w-3 h-3 text-purple-400"></i> SPA Architecture</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3 text-rose-400"></i> Real-time Sync</span>
-            <!-- Duplicate for seamless loop -->
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-blue-400"></i> HTML5</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> Vanilla JS ES6+</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-amber-400"></i> localStorage</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Firestore</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="shield-check" class="w-3 h-3 text-green-400"></i> Firebase Auth</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="smartphone" class="w-3 h-3 text-purple-400"></i> SPA Architecture</span>
-            <span class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3 text-rose-400"></i> Real-time Sync</span>
+    <div class="bg-slate-900 py-3 overflow-hidden border-y border-slate-800">
+        <div class="animate-marquee whitespace-nowrap flex items-center gap-10">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-brand-400"></i> Lập trình phòng ngự</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> ES6+ Vanilla</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Safe DOM</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> String Casting</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Auth</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-brand-400"></i> Lập trình phòng ngự</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="paintbrush" class="w-3 h-3 text-cyan-400"></i> TailwindCSS</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> ES6+ Vanilla</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Safe DOM</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> String Casting</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="cloud" class="w-3 h-3 text-blue-400"></i> Firebase Auth</span>
         </div>
     </div>
 
-    <!-- ==================== TABLE OF CONTENTS (Sticky Sidebar on large screens) ==================== -->
-    <div class="max-w-7xl mx-auto px-6 py-24">
+    <div class="max-w-7xl mx-auto px-6 py-16">
         <div class="lg:grid lg:grid-cols-[240px_1fr] lg:gap-16">
 
-            <!-- Sidebar TOC -->
             <aside class="hidden lg:block">
                 <div class="sticky top-28">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Mục lục</p>
-                    <nav class="flex flex-col gap-1 border-l border-slate-200 pl-4" id="tocNav">
-                        <a href="#core-stack" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Core Stack</a>
-                        <a href="#storage" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Storage Flow</a>
-                        <a href="#sync" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Smart Sync</a>
-                        <a href="#manual" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5">Hướng dẫn sử dụng</a>
-                        <a href="#profile" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Quản lý Profile</a>
-                        <a href="#vault" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Kho lưu trữ</a>
-                        <a href="#sentinel" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Todo & Sentinel AI</a>
-                        <a href="#cross-device" class="toc-link text-sm text-slate-400 border-l-2 border-transparent pl-3 py-1.5 ml-3">Cross-device Sync</a>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4"></i> MỤC LỤC</p>
+                    <nav class="flex flex-col gap-1 border-l-2 border-slate-100 pl-4" id="tocNav">
+                        <a href="#golden-rules" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">Quy tắc Vàng (Cấm kỵ)</a>
+                        <a href="#core-stack" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">1. Kiến trúc Cốt lõi</a>
+                        <a href="#storage" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">2. Cấu trúc Lưu trữ</a>
+                        <a href="#sync" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">3. Đồng bộ Thông minh</a>
+                        <div class="h-4"></div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-2">CẨM NANG VẬN HÀNH</p>
+                        <a href="#profile" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.1. Quản lý Hồ sơ</a>
+                        <a href="#vault" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.2. Kho lưu trữ</a>
+                        <a href="#sentinel" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.3. Todo & Sentinel AI</a>
+                        <a href="#cross-device" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.4. Chuyển thiết bị</a>
                     </nav>
                 </div>
             </aside>
 
-            <!-- ==================== MAIN CONTENT ==================== -->
             <main class="min-w-0">
 
-                <!-- ===== SECTION 1: CORE STACK ===== -->
+                <section id="golden-rules" class="mb-24 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><i data-lucide="shield-alert" class="w-5 h-5 text-amber-600"></i></div>
+                        <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight">Quy tắc Vàng (Không thể vi phạm)</h2>
+                    </div>
+                    <p class="text-slate-600 mb-6 font-medium">Bất kỳ AI hay lập trình viên nào chỉnh sửa mã nguồn V12 đều phải tuân thủ tuyệt đối 3 nguyên tắc Lập trình phòng ngự (Defensive Programming) sau đây để hệ thống không bao giờ bị Crash hay Đơ màn hình:</p>
+                    
+                    <div class="space-y-4">
+                        <div class="golden-rule p-5 rounded-2xl shadow-sm">
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Luôn ép kiểu ID thành Chuỗi (String Casting)</h4>
+                            <p class="text-sm text-amber-800/80 mb-3">Lỗi đơ nút Sửa/Xóa sinh ra do JS nhầm lẫn giữa kiểu <code>Number</code> và <code>String</code> từ Firebase trả về. Khi viết hàm tìm kiếm, Sửa hoặc Xóa, <strong>BẮT BUỘC</strong> phải bọc <code>String()</code> cho ID.</p>
+                            <div class="code-block p-3 text-xs bg-slate-900/90 border-amber-900/20">
+                                <span class="comment">// ❌ SAI (Gây đơ Web vì sai kiểu dữ liệu):</span><br>
+                                <span class="keyword">const</span> item = data.find(x => x.id === id);<br><br>
+                                <span class="comment">// ✅ ĐÚNG VÀ BẮT BUỘC:</span><br>
+                                <span class="keyword">const</span> item = data.find(x => <span class="function">String</span>(x.id) === <span class="function">String</span>(id));
+                            </div>
+                        </div>
+
+                        <div class="golden-rule p-5 rounded-2xl shadow-sm">
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Bọc thép tương tác DOM (Safe DOM Helpers)</h4>
+                            <p class="text-sm text-amber-800/80 mb-3">Không gọi trực tiếp <code>document.getElementById(id).value</code> vì nếu DOM chưa tải kịp sẽ báo lỗi <strong>Null</strong> làm sập toàn bộ JavaScript. Phải dùng hàm Helper có sẵn.</p>
+                            <div class="code-block p-3 text-xs bg-slate-900/90 border-amber-900/20">
+                                <span class="comment">// Helper bọc thép đã định nghĩa ở đầu File:</span><br>
+                                <span class="keyword">const</span> <span class="function">setTxt</span> = (id, text) => { <span class="keyword">const</span> e = document.getElementById(id); <span class="keyword">if</span>(e) e.textContent = text; };<br>
+                                <span class="keyword">const</span> <span class="function">getVal</span> = (id) => { <span class="keyword">const</span> e = document.getElementById(id); <span class="keyword">return</span> e ? e.value : <span class="string">''</span>; };<br>
+                                <span class="keyword">const</span> <span class="function">showFlex</span> = (id) => { <span class="keyword">const</span> e = document.getElementById(id); <span class="keyword">if</span>(e) { e.classList.remove(<span class="string">'hidden'</span>); e.style.display=<span class="string">'flex'</span>; } };
+                            </div>
+                        </div>
+
+                        <div class="golden-rule p-5 rounded-2xl shadow-sm">
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> Cấu trúc Modal an toàn (No Absolute Layout)</h4>
+                            <p class="text-sm text-amber-800/80 mb-3">Không bao giờ dùng thuộc tính CSS <code>position: absolute</code> cho các form Modal. Nếu dùng, khi bàn phím điện thoại nảy lên, form sẽ bị văng khỏi màn hình che mất nút "Lưu". Phải dùng Flexbox chuẩn của Tailwind:</p>
+                            <div class="code-block p-3 text-xs bg-slate-900/90 border-amber-900/20">
+                                <span class="comment">&lt;!-- Cấu trúc chuẩn chống vỡ Layout --&gt;</span><br>
+                                class="fixed inset-0 flex items-center justify-center"<br>
+                                class="max-h-[90vh] overflow-y-auto"
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="border-slate-200 mb-16">
+
                 <section id="core-stack" class="mb-24 scroll-mt-28">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 1</span>
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded">Chương 1</span>
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
-                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Thông tin cốt lõi</h2>
-                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Bốn trụ cột kiến trúc định hình toàn bộ hệ thống LifeOS V8.8.</p>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Card 1: UI -->
-                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
-                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
-                                <i data-lucide="layout" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Giao diện & Cấu trúc</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Ứng dụng chạy theo chuẩn <strong class="text-slate-700">SPA</strong> (Single Page Application) — không reload trang, chuyển đổi mượt mà.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="syntax-tag bg-orange-50 text-orange-700">HTML5</span>
-                                <span class="syntax-tag bg-cyan-50 text-cyan-700">TailwindCSS (CDN)</span>
-                                <span class="syntax-tag bg-slate-100 text-slate-600">Phosphor Icons</span>
-                            </div>
+                    <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">Kiến trúc Cốt lõi</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
+                            <div class="w-10 h-10 bg-brand-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="layout-template" class="w-5 h-5 text-brand-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Giao diện (UI) SPA</h3>
+                            <p class="text-sm text-slate-600 mb-3">Thiết kế chuẩn <strong>SPA</strong> (Single Page Application) bằng HTML5, TailwindCSS. Hoạt động mượt mà, chuyển tab tức thời mà không cần reload trang.</p>
                         </div>
-
-                        <!-- Card 2: Logic -->
-                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
-                            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-5">
-                                <i data-lucide="brain" class="w-6 h-6 text-emerald-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Logic — Não bộ</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Vanilla JavaScript ES6+ với cấu trúc <strong class="text-slate-700">Object Literals</strong> giúp module hóa dễ dàng.</p>
-                            <div class="code-block p-4 text-xs">
-                                <span class="comment">// 3 module chính</span><br>
-                                <span class="key">VaultUI</span> <span class="comment">// Giao diện</span><br>
-                                <span class="key">VaultApp</span> <span class="comment">// Xử lý logic</span><br>
-                                <span class="key">FirebaseSync</span> <span class="comment">// Đồng bộ Cloud</span>
-                            </div>
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
+                            <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="brain" class="w-5 h-5 text-emerald-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Logic (Não bộ)</h3>
+                            <p class="text-sm text-slate-600 mb-3">Sử dụng Vanilla JavaScript ES6+. Cấu trúc module (<code>VaultUI</code>, <code>VaultApp</code>, <code>FirebaseSync</code>) được gắn thẳng vào biến toàn cục <code>window</code> để chống thất thoát hàm.</p>
                         </div>
-
-                        <!-- Card 3: Database -->
-                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
-                            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-5">
-                                <i data-lucide="database" class="w-6 h-6 text-amber-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Cơ sở dữ liệu</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Kiến trúc 2 lớp đảm bảo tốc độ và độ tin cậy.</p>
-                            <div class="space-y-3">
-                                <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                                    <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <span class="text-[10px] font-bold text-green-700">L1</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-900">Offline First — localStorage</p>
-                                        <p class="text-xs text-slate-400">Tốc độ truy xuất 0ms, hoạt động không cần mạng</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <span class="text-[10px] font-bold text-blue-700">L2</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-900">Cloud Sync — Firebase Firestore</p>
-                                        <p class="text-xs text-slate-400">Dùng firebase-compat, tránh Crash Module</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
+                            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="database" class="w-5 h-5 text-indigo-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Cơ sở dữ liệu (2 Lớp)</h3>
+                            <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-4">
+                                <li><strong>Lớp 1 (Offline):</strong> <code>localStorage</code> - Lưu tại máy, tốc độ 0ms.</li>
+                                <li><strong>Lớp 2 (Cloud):</strong> Thư viện <code>firebase-compat</code> đồng bộ Real-time.</li>
+                            </ul>
                         </div>
-
-                        <!-- Card 4: Security -->
-                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-8">
-                            <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-5">
-                                <i data-lucide="shield-check" class="w-6 h-6 text-rose-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-slate-900 mb-2">Bảo mật</h3>
-                            <p class="text-sm text-slate-500 leading-relaxed mb-4">Xác thực Firebase Anonymous — ẩn danh dựa trên Device/Trình duyệt.</p>
-                            <div class="flex items-center gap-2 p-3 bg-rose-50 rounded-lg border border-rose-100">
-                                <i data-lucide="fingerprint" class="w-4 h-4 text-rose-500 flex-shrink-0"></i>
-                                <p class="text-xs text-rose-700">Mỗi thiết bị tự động có ID riêng, không cần đăng ký tài khoản</p>
-                            </div>
+                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
+                            <div class="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="activity" class="w-5 h-5 text-rose-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Cơ chế Auto-Heal (Tự chữa lành)</h3>
+                            <p class="text-sm text-slate-600 mb-3">Nếu Cache lưu phiên đăng nhập cũ không còn hợp lệ, App tự nhận diện lỗi, xóa sạch rác và <strong class="text-slate-800">buộc quay về màn hình đăng nhập</strong> thay vì sập trắng trang.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- ===== SECTION 2: STORAGE FLOW ===== -->
                 <section id="storage" class="mb-24 scroll-mt-28">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 2</span>
-                        <div class="h-px flex-1 bg-slate-200"></div>
-                    </div>
-                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Cấu trúc lưu trữ dữ liệu</h2>
-                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Mỗi người dùng (Profile) sở hữu 4 key độc lập trong LocalStorage, tương ứng 4 mảng trên Firestore.</p>
-
-                    <!-- Storage Keys -->
-                    <div class="space-y-4 mb-10">
-                        <!-- Key 1 -->
-                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
-                            <div class="flex flex-col md:flex-row md:items-center gap-4">
-                                <div class="flex items-center gap-3 flex-1 min-w-0">
-                                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="check-square" class="w-5 h-5 text-blue-600"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_data_<span class="text-blue-500">[tên]</span></p>
-                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">todos</code> — Nhiệm vụ</p>
-                                    </div>
-                                </div>
-                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-                                    <span>localStorage</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-                                    <span>Firestore Array</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Key 2 -->
-                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
-                            <div class="flex flex-col md:flex-row md:items-center gap-4">
-                                <div class="flex items-center gap-3 flex-1 min-w-0">
-                                    <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_stats_v8_<span class="text-emerald-500">[tên]</span></p>
-                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">stats</code> — Chuỗi ngày & kỷ luật</p>
-                                    </div>
-                                </div>
-                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-                                    <span>localStorage</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-                                    <span>Firestore Array</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Key 3 -->
-                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
-                            <div class="flex flex-col md:flex-row md:items-center gap-4">
-                                <div class="flex items-center gap-3 flex-1 min-w-0">
-                                    <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="file-text" class="w-5 h-5 text-amber-600"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_logs_<span class="text-amber-500">[tên]</span></p>
-                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">sentinelLogs</code> — Nhật ký cảnh báo</p>
-                                    </div>
-                                </div>
-                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-                                    <span>localStorage</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-                                    <span>Firestore Array</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Key 4 -->
-                        <div class="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
-                            <div class="flex flex-col md:flex-row md:items-center gap-4">
-                                <div class="flex items-center gap-3 flex-1 min-w-0">
-                                    <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="lock" class="w-5 h-5 text-purple-600"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-slate-900 truncate">lifeos_v8_vault_<span class="text-purple-500">[tên]</span></p>
-                                        <p class="text-xs text-slate-400">Lưu mảng <code class="bg-slate-100 px-1 rounded text-slate-600">VaultState.data</code> — Kho lưu trữ</p>
-                                    </div>
-                                </div>
-                                <div class="hidden md:block w-px h-8 bg-slate-200"></div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-                                    <span>localStorage</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
-                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-                                    <span>Firestore Array</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Example -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
-                            <span class="text-sm font-semibold text-slate-900">Ví dụ</span>
-                        </div>
-                        <p class="text-sm text-slate-500">Dữ liệu của anh <strong class="text-slate-700">Xiêm</strong> sẽ lưu tại Cloud path:</p>
-                        <div class="code-block p-4 mt-3 text-xs">
-                            <span class="key">LifeOS_Profiles/xiem</span><br>
-                            <span class="comment">├── data</span> <span class="comment">// todos</span><br>
-                            <span class="comment">├── stats</span> <span class="comment">// kỷ luật</span><br>
-                            <span class="comment">├── sentinelLogs</span> <span class="comment">// nhật ký</span><br>
-                            <span class="comment">└── vaultData</span> <span class="comment">// kho lưu trữ</span>
-                        </div>
+                    <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">2. Cấu trúc Lưu trữ (Storage Flow)</h2>
+                    <p class="text-slate-600 mb-6 text-sm">Mỗi hồ sơ (Profile) sở hữu 4 Key độc lập trong bộ nhớ. Dữ liệu trên Cloud sẽ được tổ chức theo đường dẫn <code>LifeOS_Profiles/[tên-đăng-nhập]</code>.</p>
+                    
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 font-bold text-slate-700">Tên Key (LocalStorage / Field)</th>
+                                    <th class="p-4 font-bold text-slate-700">Nội dung lưu trữ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr>
+                                    <td class="p-4 font-mono text-xs text-blue-600 font-bold">lifeos_v8_data_[tên]</td>
+                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">todos</code> (Nhiệm vụ, Checkbox).</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono text-xs text-emerald-600 font-bold">lifeos_stats_v8_[tên]</td>
+                                    <td class="p-4 text-slate-600">Object <code class="bg-slate-100 px-1 rounded font-bold">stats</code> (Đếm chuỗi ngày kỷ luật).</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono text-xs text-amber-600 font-bold">lifeos_v8_logs_[tên]</td>
+                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">sentinelLogs</code> (Nhật ký cảnh báo AI).</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-mono text-xs text-purple-600 font-bold">lifeos_v8_vault_[tên]</td>
+                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">VaultState.data</code> (Kho lưu trữ / Password).</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- ===== SECTION 3: SMART SYNC ===== -->
                 <section id="sync" class="mb-24 scroll-mt-28">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 3</span>
-                        <div class="h-px flex-1 bg-slate-200"></div>
-                    </div>
-                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Cơ chế đồng bộ thông minh</h2>
-                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">Smart Sync Mechanism — hai luồng hoạt động song song, đảm bảo dữ liệu luôn nhất quán.</p>
-
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <!-- Flow 1: Online Write -->
-                        <div class="relative">
-                            <div class="bg-white border border-slate-200 rounded-2xl p-8 h-full">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="wifi" class="w-5 h-5 text-green-600"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-base font-semibold text-slate-900">Khi có mạng (Online)</h3>
-                                        <p class="text-xs text-slate-400">Thêm / Sửa / Xóa</p>
-                                    </div>
-                                </div>
-
-                                <!-- Flow steps -->
-                                <div class="space-y-4">
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex flex-col items-center">
-                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
-                                                <span class="text-[10px] font-bold text-white">1</span>
-                                            </div>
-                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
-                                        </div>
-                                        <div class="pt-0.5">
-                                            <p class="text-sm font-medium text-slate-900">Ghi Local ngay lập tức</p>
-                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">saveLocalOnly()</code>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex flex-col items-center">
-                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
-                                                <span class="text-[10px] font-bold text-white">2</span>
-                                            </div>
-                                        </div>
-                                        <div class="pt-0.5">
-                                            <p class="text-sm font-medium text-slate-900">Push lên Cloud</p>
-                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">FirebaseSync.pushAll()</code>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 p-3 bg-green-50 rounded-lg border border-green-100">
-                                    <div class="flex items-center gap-2">
-                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-green-600"></i>
-                                        <p class="text-xs text-green-700 font-medium">UI cập nhật tức thì từ Local — không chờ Cloud</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">3. Đồng bộ Thông minh (Smart Sync)</h2>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex-1 bg-white border border-slate-200 rounded-2xl p-6 relative shadow-sm">
+                            <div class="absolute top-4 right-4 text-slate-200"><i data-lucide="upload-cloud" class="w-12 h-12"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-4 relative z-10 text-indigo-600">Luồng Đẩy (Online Push)</h3>
+                            <ul class="space-y-3 text-sm text-slate-600 relative z-10">
+                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold">1</span> Người dùng bấm Lưu/Xóa.</li>
+                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">2</span> <div><code>saveLocalOnly()</code> ghi vào máy ngay lập tức (0.01s). Giao diện đổi ngay lập tức.</div></li>
+                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">3</span> <div>Gọi ngầm <code>FirebaseSync.pushAll()</code> đẩy JSON lên Firestore. (Nếu lỗi mạng, tự động thử lại sau).</div></li>
+                            </ul>
                         </div>
-
-                        <!-- Flow 2: Cross-device -->
-                        <div class="relative">
-                            <div class="bg-white border border-slate-200 rounded-2xl p-8 h-full">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="monitor-smartphone" class="w-5 h-5 text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-base font-semibold text-slate-900">Đồng bộ chéo thiết bị</h3>
-                                        <p class="text-xs text-slate-400">Thiết bị khác đẩy dữ liệu</p>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex flex-col items-center">
-                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
-                                                <span class="text-[10px] font-bold text-white">1</span>
-                                            </div>
-                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
-                                        </div>
-                                        <div class="pt-0.5">
-                                            <p class="text-sm font-medium text-slate-900">Firebase lắng nghe thay đổi</p>
-                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">onSnapshot()</code>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex flex-col items-center">
-                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
-                                                <span class="text-[10px] font-bold text-white">2</span>
-                                            </div>
-                                            <div class="w-0.5 h-8 bg-slate-200 mt-1"></div>
-                                        </div>
-                                        <div class="pt-0.5">
-                                            <p class="text-sm font-medium text-slate-900">Kéo về → Ghi đè LocalStorage</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex flex-col items-center">
-                                            <div class="w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
-                                                <span class="text-[10px] font-bold text-white">3</span>
-                                            </div>
-                                        </div>
-                                        <div class="pt-0.5">
-                                            <p class="text-sm font-medium text-slate-900">Cập nhật UI không reload</p>
-                                            <code class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded block mt-1">renderTasksOnly()</code>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                    <div class="flex items-center gap-2">
-                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-600"></i>
-                                        <p class="text-xs text-blue-700 font-medium">Real-time — không cần F5, không reload trang</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="flex-1 bg-white border border-slate-200 rounded-2xl p-6 relative shadow-sm">
+                            <div class="absolute top-4 right-4 text-slate-200"><i data-lucide="download-cloud" class="w-12 h-12"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-4 relative z-10 text-emerald-600">Luồng Kéo (Realtime Pull)</h3>
+                            <ul class="space-y-3 text-sm text-slate-600 relative z-10">
+                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold">1</span> Firebase dùng <code>onSnapshot()</code> nằm vùng.</li>
+                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold">2</span> Thiết bị khác đẩy dữ liệu lên Cloud.</li>
+                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">3</span> <div>Kích hoạt tải dữ liệu mới về, đè vào LocalStorage và chạy <code>renderTasksOnly()</code> cập nhật UI không cần F5.</div></li>
+                            </ul>
                         </div>
                     </div>
                 </section>
 
-                <!-- ===== SECTION 4: USER MANUAL ===== -->
-                <section id="manual" class="mb-16 scroll-mt-28">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Phần 4</span>
-                        <div class="h-px flex-1 bg-slate-200"></div>
-                    </div>
-                    <h2 class="font-serif-display text-4xl md:text-5xl text-slate-900 tracking-tight mb-4">Hướng dẫn sử dụng</h2>
-                    <p class="text-lg text-slate-500 leading-relaxed mb-12 max-w-2xl">User Manual — cách vận hành toàn bộ tính năng của LifeOS V8.8.</p>
+                <div class="mt-16 mb-10 flex items-center justify-center gap-4">
+                    <div class="h-px bg-slate-300 flex-grow"></div>
+                    <h2 class="text-lg font-black text-slate-400 tracking-widest uppercase px-4">Cẩm Nang Vận Hành</h2>
+                    <div class="h-px bg-slate-300 flex-grow"></div>
+                </div>
 
-                    <!-- ===== 4.1 Profile Management ===== -->
-                    <div id="profile" class="mb-16 scroll-mt-28">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.1</span>
-                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Quản lý Profile</h3>
+                <div class="space-y-8">
+                    <div id="profile" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600"><i data-lucide="users" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">4.1 Quản lý Hồ sơ (Profile)</h3>
                         </div>
-
-                        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                            <div class="p-8">
-                                <div class="space-y-6">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-slate-700 leading-relaxed">Khi vào App, bạn <strong>chọn tên của mình</strong> từ danh sách Profile.</p>
-                                        </div>
-                                    </div>
-                                    <div class="border-t border-slate-100 pt-6">
-                                        <div class="flex items-start gap-4">
-                                            <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <i data-lucide="crown" class="w-4 h-4 text-amber-600"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm text-slate-700 leading-relaxed mb-3"><strong>Quản trị viên (Admin)</strong> có quyền truy cập danh sách ở góc phải trên cùng → Cho phép xem/sửa chéo dữ liệu của các thành viên khác (<span class="text-slate-500">Thành, Thắm, Phúc...</span>) ngay lập tức.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
+                            <div>
+                                <p class="mb-3">Danh sách 5 thành viên được định nghĩa cứng trong file HTML tại biến <code>window.PROFILES</code>:</p>
+                                <ul class="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium">
+                                    <li class="flex justify-between items-center"><strong>Admin</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded text-rose-600 font-bold shadow-sm">admin</code></li>
+                                    <li class="flex justify-between items-center"><strong>Xiêm</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
+                                    <li class="flex justify-between items-center"><strong>Thành</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
+                                    <li class="flex justify-between items-center"><strong>Thắm</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
+                                    <li class="flex justify-between items-center"><strong>Phúc</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
+                                </ul>
                             </div>
-                            <!-- Password table -->
-                            <div class="bg-slate-50 border-t border-slate-200 p-6">
-                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Mật khẩu mặc định</p>
-                                <div class="grid sm:grid-cols-2 gap-4">
-                                    <div class="flex items-center gap-3 bg-white rounded-lg p-4 border border-slate-200">
-                                        <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="shield" class="w-4 h-4 text-white"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-slate-900">Admin</p>
-                                            <code class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">admin</code>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-3 bg-white rounded-lg p-4 border border-slate-200">
-                                        <div class="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="user" class="w-4 h-4 text-slate-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-slate-900">Thành viên</p>
-                                            <code class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">a</code>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
-                                    <i data-lucide="info" class="w-3 h-3"></i>
-                                    Có thể sửa trong biến <code class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-600">window.PROFILES</code> ở đầu file JS.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ===== 4.2 Vault & Smart Input ===== -->
-                    <div id="vault" class="mb-16 scroll-mt-28">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.2</span>
-                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Kho lưu trữ Đa năng & Smart Input</h3>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-blue-50/50 to-purple-50/50 border border-blue-100 rounded-2xl p-8 mb-6">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i data-lucide="sparkles" class="w-5 h-5 text-blue-600"></i>
-                                <span class="text-sm font-semibold text-blue-700">Tính năng mạnh nhất của V8.8</span>
-                            </div>
-                            <p class="text-sm text-slate-600 leading-relaxed">Hỗ trợ 2 chế độ nhập liệu: nhập thô và nhập thông minh (Auto Parse).</p>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Nhập thô -->
-                            <div class="bg-white border border-slate-200 rounded-xl p-6">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <div class="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
-                                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-600"></i>
-                                    </div>
-                                    <h4 class="text-sm font-semibold text-slate-900">Nhập thô</h4>
-                                </div>
-                                <p class="text-sm text-slate-500 leading-relaxed">Gõ bất cứ đoạn văn bản, ghi chú nào vào khung <strong class="text-slate-700">"Nội dung dữ liệu"</strong> và bấm Lưu.</p>
-                            </div>
-
-                            <!-- Nhập thông minh -->
-                            <div class="bg-white border border-slate-200 rounded-xl p-6">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <i data-lucide="wand-2" class="w-3.5 h-3.5 text-blue-600"></i>
-                                    </div>
-                                    <h4 class="text-sm font-semibold text-slate-900">Nhập thông minh (Auto Parse)</h4>
-                                </div>
-                                <p class="text-sm text-slate-500 leading-relaxed mb-4">Gõ theo cú pháp ở <strong class="text-slate-700">đầu các dòng</strong> để hệ thống tự nhận diện:</p>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="syntax-tag bg-cyan-50 text-cyan-700">Tài khoản:</span>
-                                        <span class="text-xs text-slate-400">→ Hiển thị nút copy</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="syntax-tag bg-rose-50 text-rose-700">Mật khẩu:</span>
-                                        <span class="text-xs text-slate-400">→ Ẩn/hiện + nút copy</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="syntax-tag bg-amber-50 text-amber-700">2FA:</span>
-                                        <span class="text-xs text-slate-400">→ Mã OTP Live (30s)</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="syntax-tag bg-green-50 text-green-700">Link:</span>
-                                        <span class="text-xs text-slate-400">→ Click mở trực tiếp</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Code example -->
-                        <div class="mt-6">
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Ví dụ nhập thông minh</p>
-                            <div class="code-block p-5 text-xs">
-                                <span class="key">Tài khoản:</span> <span class="val">admin@gmail.com</span><br>
-                                <span class="key">Mật khẩu:</span> <span class="val">123456</span><br>
-                                <span class="key">2FA:</span> <span class="val">JBSWY3DPEHPK3PXP</span> <span class="comment">// → Tự tạo mã OTP Live chạy 30s</span><br>
-                                <span class="key">Link:</span> <span class="val">https://facebook.com</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ===== 4.3 Todo & Sentinel AI ===== -->
-                    <div id="sentinel" class="mb-16 scroll-mt-28">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.3</span>
-                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Hệ thống Todo & Báo thức AI (Sentinel)</h3>
-                        </div>
-
-                        <div class="space-y-6">
-                            <!-- Shortcut syntax -->
-                            <div class="bg-white border border-slate-200 rounded-xl p-6">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <i data-lucide="terminal" class="w-5 h-5 text-slate-600"></i>
-                                    <h4 class="text-sm font-semibold text-slate-900">Cú pháp tắt</h4>
-                                </div>
-                                <div class="code-block p-5 text-xs mb-4">
-                                    <span class="key">@14h</span> <span class="key">!gấp</span> <span class="key">#hoc_tap</span> <span class="val">Đọc sách</span>
-                                </div>
-                                <div class="grid sm:grid-cols-3 gap-3">
-                                    <div class="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                        <span class="syntax-tag bg-blue-100 text-blue-700">@14h</span>
-                                        <span class="text-xs text-blue-700">Giờ báo thức (14:00)</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 p-3 bg-rose-50 rounded-lg border border-rose-100">
-                                        <span class="syntax-tag bg-rose-100 text-rose-700">!gấp</span>
-                                        <span class="text-xs text-rose-700">Mức độ Khẩn cấp</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                                        <span class="syntax-tag bg-emerald-100 text-emerald-700">#hoc_tap</span>
-                                        <span class="text-xs text-emerald-700">Tag phân loại</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Voice Guard -->
-                            <div class="bg-slate-900 rounded-xl p-6 text-white">
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="mic" class="w-6 h-6 text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-base font-semibold mb-2">Voice Guard — Lá chắn giọng nói</h4>
-                                        <p class="text-sm text-slate-300 leading-relaxed">Đảm bảo bạn không tắt tiếng điện thoại. Hệ thống sẽ <strong class="text-white">đọc lệnh AI bằng tiếng Việt</strong> khi đến giờ báo thức.</p>
-                                    </div>
+                            <div>
+                                <p class="mb-2 font-bold text-indigo-700 flex items-center gap-2"><i data-lucide="crown" class="w-4 h-4"></i> Đặc quyền Quản trị:</p>
+                                <p class="mb-3 leading-relaxed">Chỉ khi đăng nhập tài khoản <strong>Admin</strong>, bấm vào Menu Góc Phải, bạn mới thấy danh sách xổ xuống của những người khác để xem/sửa chéo dữ liệu.</p>
+                                <div class="bg-amber-50 text-amber-800 p-3 rounded-xl text-xs border border-amber-200 mt-4 font-medium flex items-start gap-2">
+                                    <i data-lucide="key" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                                    <span>Mật khẩu vạn năng (Master PIN) là <strong>9999</strong> dùng được cho mọi tài khoản để phá khóa trong trường hợp quên.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ===== 4.4 Cross-device Sync ===== -->
-                    <div id="cross-device" class="scroll-mt-28">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-xs font-bold text-white">4.4</span>
-                            <h3 class="text-2xl font-semibold text-slate-900 tracking-tight">Dịch chuyển thiết bị</h3>
+                    <div id="vault" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600"><i data-lucide="vault" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">4.2 Kho lưu trữ Đa năng (Vault)</h3>
                         </div>
+                        <p class="text-sm text-slate-600 mb-4">Hệ thống hỗ trợ tự động bóc tách (Auto-Parse). Để kích hoạt, bạn gõ chính xác các cú pháp sau ở phần <strong>đầu dòng</strong> của ô "Nội dung dữ liệu":</p>
+                        
+                        <div class="bg-[#0f172a] rounded-xl p-5 font-mono text-sm leading-loose text-slate-300 shadow-inner border border-slate-800 mb-4 overflow-x-auto relative">
+                            <span class="text-cyan-400 font-bold">Tài khoản:</span> admin@gmail.com <span class="text-slate-500 italic text-xs ml-2">→ Hiện icon user + nút Copy</span><br>
+                            <span class="text-rose-400 font-bold">Mật khẩu:</span> 123456 <span class="text-slate-500 italic text-xs ml-2">→ Tự ẩn dạng dấu chấm ••• + nút Mắt + Copy</span><br>
+                            <span class="text-amber-400 font-bold">2FA:</span> JBSWY3DPEHPK3PXP <span class="text-slate-500 italic text-xs ml-2">→ Tự tạo Đồng hồ OTP chạy 30 giây</span><br>
+                            <span class="text-emerald-400 font-bold">Link:</span> https://facebook.com <span class="text-slate-500 italic text-xs ml-2">→ Chữ màu xanh, click vào mở URL</span><br>
+                            <br>
+                            <span class="text-slate-400 italic">Dòng chữ bình thường dưới cùng sẽ tự động gom thành ghi chú...</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-bold text-brand-700 bg-brand-50 px-3 py-2.5 rounded-lg w-fit border border-brand-100 shadow-sm">
+                            <i data-lucide="wand-2" class="w-4 h-4"></i>
+                            Mẹo: Nút "Tạo MK an toàn" trong bảng nhập tự sinh chuỗi ngẫu nhiên kèm rung Haptic.
+                        </div>
+                    </div>
 
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Scenario 1: New device -->
-                            <div class="bg-white border border-slate-200 rounded-xl p-6 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                                <div class="relative">
-                                    <div class="flex items-center gap-2 mb-4">
-                                        <i data-lucide="smartphone" class="w-5 h-5 text-blue-600"></i>
-                                        <h4 class="text-sm font-semibold text-slate-900">Thiết bị mới</h4>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">1</div>
-                                            <p class="text-sm text-slate-600">Mở trang web</p>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">2</div>
-                                            <p class="text-sm text-slate-600">Chọn tên Profile</p>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">3</div>
-                                            <p class="text-sm text-slate-600">Dữ liệu từ Cloud tự tải về</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-2">
-                                        <i data-lucide="timer" class="w-4 h-4 text-blue-600"></i>
-                                        <span class="text-xs text-blue-700 font-medium">Thời gian: ~2 giây</span>
-                                    </div>
-                                </div>
+                    <div id="sentinel" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600"><i data-lucide="bot" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">4.3 Todo & Sentinel AI (Báo thức)</h3>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
+                            <div>
+                                <p class="mb-2 font-bold text-slate-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Thêm nhanh (Quick Add):</p>
+                                <p class="mb-3">Thay vì click chọn rườm rà, bạn chỉ cần gõ vào thanh nhập liệu (Smart Input):</p>
+                                <code class="block bg-slate-50 p-3 rounded-xl font-mono text-slate-800 mb-3 border border-slate-200 shadow-sm text-xs">@14h !gấp #hoc_tap Đọc chương 1</code>
+                                <p>Hệ thống tự bóc tách ra: Giờ (14:00), Mức độ (Khẩn cấp), Tag (#hoc_tap).</p>
                             </div>
-
-                            <!-- Scenario 2: JSON import -->
-                            <div class="bg-white border border-slate-200 rounded-xl p-6 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                                <div class="relative">
-                                    <div class="flex items-center gap-2 mb-4">
-                                        <i data-lucide="file-up" class="w-5 h-5 text-amber-600"></i>
-                                        <h4 class="text-sm font-semibold text-slate-900">Tệp JSON cũ</h4>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">1</div>
-                                            <p class="text-sm text-slate-600">Vào "Kho lưu trữ"</p>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">2</div>
-                                            <p class="text-sm text-slate-600">Bấm nút Tải lên <i data-lucide="upload" class="w-3 h-3 inline text-slate-400"></i></p>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">3</div>
-                                            <p class="text-sm text-slate-600">Chèn file <code class="bg-slate-100 px-1 rounded text-slate-600">.json</code></p>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 bg-amber-50 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">4</div>
-                                            <p class="text-sm text-slate-600">Bấm "Đồng bộ dữ liệu cũ lên Cloud ngay"</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-center gap-2">
-                                        <i data-lucide="cloud-upload" class="w-4 h-4 text-amber-600"></i>
-                                        <span class="text-xs text-amber-700 font-medium">Dữ liệu được đẩy lên Firebase</span>
-                                    </div>
-                                </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="mic" class="w-4 h-4 text-brand-500"></i> Haptic & Voice Guard</h4>
+                                <ul class="space-y-3 text-slate-600 text-xs leading-relaxed">
+                                    <li class="flex gap-2"><i data-lucide="vibrate" class="w-4 h-4 shrink-0 text-slate-400"></i> <strong>Cảm biến rung (Haptic):</strong> Thao tác Thêm, Sửa, Xóa, Bấm giờ, Vuốt đều kích hoạt Rung vật lý tạo cảm giác chân thực.</li>
+                                    <li class="flex gap-2"><i data-lucide="volume-2" class="w-4 h-4 shrink-0 text-slate-400"></i> <strong>Voice Guard:</strong> Trợ lý AI sẽ đọc to tiếng Việt "Tuyệt vời", "Đã lưu", hoặc cảnh báo khi hết giờ (Đảm bảo điện thoại không tắt tiếng).</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
 
-                </section>
+                    <div id="cross-device" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600"><i data-lucide="smartphone-nfc" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">4.4 Chuyển thiết bị & Cứu dữ liệu JSON</h3>
+                        </div>
+                        <ul class="space-y-5 text-sm text-slate-600">
+                            <li class="flex gap-4">
+                                <div class="mt-0.5 bg-blue-50 p-2 rounded-lg text-blue-600"><i data-lucide="smartphone" class="w-5 h-5"></i></div>
+                                <div>
+                                    <strong class="text-slate-900 text-base">Đăng nhập máy mới (Tự động):</strong>
+                                    <p class="mt-1 leading-relaxed">Vào link trang web trên thiết bị mới, chọn tên Profile, nhập mã PIN. Dữ liệu từ Firebase Cloud sẽ tự động tải xuống LocalStorage và hiển thị trong <strong>2 giây</strong>.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <div class="mt-0.5 bg-amber-50 p-2 rounded-lg text-amber-600"><i data-lucide="file-json" class="w-5 h-5"></i></div>
+                                <div>
+                                    <strong class="text-slate-900 text-base">Cứu dữ liệu bằng file JSON (Thủ công):</strong>
+                                    <p class="mt-1 leading-relaxed">Vào <b>Kho lưu trữ</b> → Bấm nút <b>Tải lên</b> → Chọn file JSON cũ. Sau khi nạp xong, hãy tạo 1 ghi chú mới bất kỳ, thao tác này sẽ kích hoạt lệnh <code>pushAll()</code> đẩy đè file JSON đó ngược lên Cloud.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
 
-    <!-- ==================== FOOTER ==================== -->
-    <footer class="bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-6 py-16">
-            <div class="grid md:grid-cols-3 gap-12">
-                <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                            <i data-lucide="layers" class="w-5 h-5 text-white"></i>
-                        </div>
-                        <div>
-                            <span class="text-sm font-semibold">LifeOS</span>
-                            <span class="text-xs text-slate-500 ml-1">V8.8</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-slate-400 leading-relaxed">Hồ sơ kiến trúc hệ thống — Tài liệu kỹ thuật nội bộ dành cho quản trị và phát triển.</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Kiến trúc</p>
-                    <ul class="space-y-2">
-                        <li><a href="#core-stack" class="text-sm text-slate-400 hover:text-white transition-colors">Core Stack</a></li>
-                        <li><a href="#storage" class="text-sm text-slate-400 hover:text-white transition-colors">Storage Flow</a></li>
-                        <li><a href="#sync" class="text-sm text-slate-400 hover:text-white transition-colors">Smart Sync</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Hướng dẫn</p>
-                    <ul class="space-y-2">
-                        <li><a href="#profile" class="text-sm text-slate-400 hover:text-white transition-colors">Quản lý Profile</a></li>
-                        <li><a href="#vault" class="text-sm text-slate-400 hover:text-white transition-colors">Kho lưu trữ</a></li>
-                        <li><a href="#sentinel" class="text-sm text-slate-400 hover:text-white transition-colors">Todo & Sentinel</a></li>
-                        <li><a href="#cross-device" class="text-sm text-slate-400 hover:text-white transition-colors">Cross-device Sync</a></li>
-                    </ul>
-                </div>
+    <footer class="bg-[#0f172a] text-slate-400 py-12 text-sm text-center border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <i data-lucide="layers" class="w-5 h-5 text-brand-500"></i>
+                <span class="font-bold text-white text-lg tracking-widest uppercase">LifeOS V12</span>
             </div>
-            <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p class="text-xs text-slate-500">LifeOS V8.8 — Architecture Profile Document</p>
-                <div class="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    System Operational
-                </div>
-            </div>
+            <p>Hồ sơ Kiến trúc Hệ thống được bảo vệ và tối ưu hóa ở mức độ Chuyên gia (Enterprise Grade).</p>
+            <p class="mt-1 opacity-60 font-mono text-xs">Master Branch - Strictly Defensive Programming Applied.</p>
         </div>
     </footer>
 
-    <!-- ==================== BACK TO TOP ==================== -->
-    <button id="backToTop" class="fixed bottom-6 right-6 z-40 w-11 h-11 bg-slate-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-slate-800 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
-        <i data-lucide="arrow-up" class="w-4 h-4"></i>
+    <button id="backToTop" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-slate-900 text-white rounded-xl shadow-xl shadow-slate-900/30 flex items-center justify-center hover:bg-brand-600 hover:-translate-y-1 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none border border-slate-700 focus:outline-none">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
     </button>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
 
         // Mobile menu toggle
@@ -911,24 +467,22 @@
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.remove('hidden');
             mobileMenu.classList.add('flex');
+            document.body.style.overflow = 'hidden'; 
         });
 
-        mobileMenuClose.addEventListener('click', () => {
+        const closeMenu = () => {
             mobileMenu.classList.add('hidden');
             mobileMenu.classList.remove('flex');
-        });
+            document.body.style.overflow = '';
+        };
 
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-                mobileMenu.classList.remove('flex');
-            });
-        });
+        mobileMenuClose.addEventListener('click', closeMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
 
-        // Back to top button
+        // Back to top button logic
         const backToTop = document.getElementById('backToTop');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 600) {
+            if (window.scrollY > 400) {
                 backToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
                 backToTop.classList.add('opacity-100', 'translate-y-0');
             } else {
@@ -941,39 +495,34 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // TOC active state tracking
+        // Sticky TOC Active State Logic
         const tocLinks = document.querySelectorAll('#tocNav .toc-link');
-        const sections = [];
-
-        tocLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            const section = document.querySelector(href);
-            if (section) sections.push({ el: section, link: link });
-        });
+        const sections = Array.from(tocLinks).map(link => {
+            const section = document.querySelector(link.getAttribute('href'));
+            return section ? { el: section, link: link } : null;
+        }).filter(Boolean);
 
         function updateTOC() {
-            let current = sections[0];
-            const scrollPos = window.scrollY + 160;
+            const scrollPos = window.scrollY + 180;
+            let currentSection = sections[0];
 
             for (const item of sections) {
                 if (item.el.offsetTop <= scrollPos) {
-                    current = item;
+                    currentSection = item;
                 }
             }
 
             tocLinks.forEach(l => l.classList.remove('active'));
-            if (current) current.link.classList.add('active');
+            if (currentSection) {
+                currentSection.link.classList.add('active');
+            }
         }
 
-        window.addEventListener('scroll', updateTOC);
-        updateTOC();
+        window.addEventListener('scroll', updateTOC, { passive: true });
+        setTimeout(updateTOC, 100);
 
-        // Intersection Observer for fade-in animations on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
+        // Intersection Observer cho Hiệu ứng Fade in up
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -983,7 +532,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.layer-card, .code-block').forEach(el => {
+        document.querySelectorAll('.layer-card, .code-block, section h2, .golden-rule').forEach(el => {
             el.style.opacity = '0';
             observer.observe(el);
         });
