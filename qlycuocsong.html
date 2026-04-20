@@ -8,10 +8,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V18 - Immortal Sentinel & UI Perfect</title>
+<title>LifeOS V19 - Absolute Perfection</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#6366f1',secondary:'#ec4899',darkbg:'#0f172a',darkcard:'#1e293b'},fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+<script>
+    if(localStorage.theme==='dark'||(!('theme' in localStorage)&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}
+    tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#6366f1',secondary:'#ec4899',darkbg:'#0f172a',darkcard:'#1e293b'},fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -51,7 +54,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-200 min-h-[100dvh] flex flex-col transition-colors duration-300">
 
 <audio id="mstq-silence" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
-<audio id="mstq-alarm" loop playsinline webkit-playsinline src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+<audio id="mstq-alarm" loop playsinline webkit-playsinline src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 dark:bg-darkbg flex-col items-center justify-center p-4 hidden">
 <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in">LifeOS Family</h1>
@@ -75,12 +78,11 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <div><h1 class="text-lg sm:text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
 <div class="flex items-center gap-2 mt-0.5"><span id="current-date" class="hidden sm:inline text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider"></span>
 <span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div></div></div>
-<div class="flex gap-1.5 sm:gap-3 items-center relative flex-shrink-0 z-50">
-<a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="hidden lg:flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800/50 px-2 sm:px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" title="Home Mimishop"><i class="ph-bold ph-house-heart text-sm sm:text-base"></i> Home Mimishop</a>
-<a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="hidden md:flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50 px-2 sm:px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> Hướng dẫn</a>
+<div class="flex gap-1.5 sm:gap-2 items-center relative overflow-x-auto hide-scrollbar pl-2">
+<a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800/50 px-2 sm:px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" title="Home Mimishop"><i class="ph-bold ph-house-heart text-sm sm:text-base"></i> <span class="hidden md:inline">Home Mimishop</span></a>
+<a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50 px-2 sm:px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
 
 <span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"></span>
-
 <div id="profile-selector" class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible">
     <button id="profile-btn" onclick="window.toggleProfileMenu()" class="text-[11px] sm:text-[12px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 border border-indigo-100 dark:border-indigo-800/50 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95"><span id="profile-name-badge">N/A</span> <i class="ph-bold ph-caret-down text-[10px]"></i></button>
     <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-darkcard rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 z-[9999] origin-top-right transition-transform" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
@@ -150,13 +152,9 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-40 transition-transform duration-300">
 <form id="form-mobile" class="w-full flex items-center bg-white/95 dark:bg-darkcard/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] dark:shadow-[0_-5px_20px_rgba(0,0,0,.3)] border border-slate-200 dark:border-slate-700 pb-[env(safe-area-inset-bottom)]">
 <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
-<input type="text" id="input-mobile" placeholder="Gõ NLP: mai lúc 5h30, hằng ngày..." class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-2 text-slate-800 dark:text-white placeholder-slate-400" autocomplete="off">
+<input type="text" id="input-mobile" placeholder="Gõ NLP: 14h30 đọc sách !gấp..." class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-2 text-slate-800 dark:text-white placeholder-slate-400" autocomplete="off">
 <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md shadow-indigo-500/30 flex-shrink-0 transition-transform"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
 </form></div>
-
-<button id="fab-add-vault" onclick="window.VaultUI.openModal()" class="lg:hidden fixed bottom-[100px] right-4 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-[0_8px_30px_rgb(99,102,241,0.4)] items-center justify-center active:scale-90 transition-all z-40 hidden animate-pop-in border-2 border-white/20">
-    <i class="ph-bold ph-plus text-2xl"></i>
-</button>
 
 <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 z-40 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] lg:hidden">
 <div class="flex justify-around px-2 py-2">
@@ -190,7 +188,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
             </div>
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 dark:bg-slate-800 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
-        <div class="text-sm text-slate-600 dark:text-slate-400 mb-6 bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 leading-relaxed shadow-inner">Đã cấy <b>"Kén Tĩnh lặng" (Web Worker & Audio)</b> chống ngủ gật. Đảm bảo âm thanh và báo thức luôn hoạt động ngầm ngay cả khi bạn tắt màn hình.</div>
+        <div class="text-sm text-slate-600 dark:text-slate-400 mb-6 bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 leading-relaxed shadow-inner">Đã cấy <b>"Kén Tĩnh lặng" (Web Worker & Audio)</b> chống ngủ gật. Báo thức sẽ réo bất chấp bạn tắt màn hình.</div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 dark:border-rose-800 flex justify-center items-center gap-2 transition-all hover:bg-rose-100 dark:hover:bg-rose-900/40"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
             <button onclick="window.vibrate([20]); window.playGoogleTTS('Hệ thống hoạt động tốt. Xin chào bạn.'); window.showToast('Đang phát...','ph-speaker-high')" class="py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 font-bold text-sm active:scale-95 border border-indigo-100 dark:border-indigo-800 flex justify-center items-center gap-2 transition-all hover:bg-indigo-100 dark:hover:bg-indigo-900/40"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
@@ -217,7 +215,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 
 <script>
 // ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & SAFE DOM HELPERS THEO CHUẨN V18)
+// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & SAFE DOM HELPERS THEO CHUẨN V19)
 // ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
@@ -231,7 +229,6 @@ const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.disp
 const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
 window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
 
-// LƯU CỤC BỘ TRÁNH F5 MẤT DỮ LIỆU
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
@@ -305,7 +302,6 @@ window.startBackgroundWorker = () => {
         window.bgWorker.postMessage('start');
     } catch(e) { console.warn("Worker Fallback"); }
 };
-window.startBackgroundWorker();
 
 // Tiết kiệm Pin
 document.addEventListener('visibilitychange', () => { 
@@ -333,12 +329,16 @@ window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session
 window.loadUserData=()=>{
     try{
         setTxt('profile-name-badge',window.PROFILES[window.viewingUser]?.name||'N/A');
+        
+        // TẢI TỪ LOCALSTORAGE TRƯỚC ĐỂ F5 KHÔNG BỊ TRẮNG TRANG
         const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
         if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
         window.renderTasksOnly();
+        
         window.VaultStorageLayer.init(window.viewingUser);
         window.VaultUI.renderVaultCards();
         setTxt('streak-count',window.stats?.streak||0);
+        
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
     }catch(e){console.error(e)}
 };
@@ -390,7 +390,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM (OVERLAY BUTTONS MỚI)
+// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
 // ==============================================================================
 window.parseTaskNLP = (rawText) => {
     let text = rawText; let isDaily = false; let priority = false; let tags = []; let timeStr = null; let alarmTime = null;
@@ -418,10 +418,15 @@ window.parseTaskNLP = (rawText) => {
         timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         
         let now = new Date(); let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+        
         if (isTomorrow) {
             target.setDate(target.getDate() + 1);
-        } else if (target.getTime() <= now.getTime()) {
-            target.setDate(target.getDate() + 1);
+        } else if (target.getTime() < now.getTime()) {
+            // FIX V19: Nếu đặt giờ trong quá khứ MÀ KHÔNG GÕ CHỮ "MAI", CỨ ĐỂ NGUYÊN HÔM NAY ĐỂ NÓ KÊU BÁO ĐỘNG "QUÁ HẠN" NGAY LẬP TỨC
+            // Trừ khi là lặp hằng ngày thì đẩy sang ngày mai
+            if(isDaily) {
+                target.setDate(target.getDate() + 1);
+            }
         }
         dueDate = window.getIsoDate(target);
         alarmTime = target.getTime(); 
@@ -436,7 +441,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// SENTINEL ALARM LOGIC (EPOCH TIMESTAMP)
+// SENTINEL ALARM LOGIC
 window.activeAlarmTaskId = null;
 window.alarmTextToSpeak = "";
 window.isAlarmRinging = false;
@@ -455,7 +460,6 @@ window.triggerGlobalAlarm = (taskId, taskText) => {
     if(alarmAudio && window.soundEnabled) { alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
 };
 
-// Đã cập nhật Logic Nút Overlay theo yêu cầu
 window.stopGlobalAlarm = (actionType) => { 
     window.isAlarmRinging = false;
     const alarmAudio = el('mstq-alarm');
@@ -471,12 +475,10 @@ window.stopGlobalAlarm = (actionType) => {
                 t.completed = true;
                 if(window.confetti) window.confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }});
             } else if (actionType === 'snooze') {
-                // Báo lại sau 5 phút (Snooze = Bỏ qua)
                 t.alarmTime = Date.now() + 5 * 60000; 
                 t.alerted = false; 
                 window.showToast('Sẽ báo lại sau 5 phút', 'ph-clock');
             } else if (actionType === 'dismiss') {
-                // Tắt chuông hoàn toàn hôm nay
                 t.alerted = true;
             }
             window.saveLocalTodos();
@@ -506,7 +508,7 @@ window.checkAlarms = () => {
             }
             needsSync = true;
         }
-        // Kiểm tra báo động tuyệt đối bằng Epoch Ms
+        // Kiểm tra báo động tuyệt đối bằng Epoch Ms (Fix ngủ đông)
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false) {
             if (nowMs >= t.alarmTime && !t.alerted) {
                 t.alerted = true; hasAlert = true; needsSync = true;
@@ -518,6 +520,9 @@ window.checkAlarms = () => {
     if(needsSync) { window.saveLocalTodos(); if(document.visibilityState==='visible') window.renderTasksOnly(); } 
     if(hasAlert) { window.triggerGlobalAlarm(triggeredId, alarmTexts.join(', ')); }
 };
+
+// Fallback interval chống điếc nếu Web Worker bị lỗi
+setInterval(() => { if(!window.isAlarmRinging) window.checkAlarms(); }, 5000);
 
 // Nút Bật/Tắt báo thức UI
 window.toggleAlarm = (e, id) => {
@@ -533,7 +538,7 @@ window.toggleAlarm = (e, id) => {
 };
 
 // ==============================================================================
-// 3. XỬ LÝ NHIỆM VỤ, LỌC VÀ HIỂN THỊ THẺ BADGE
+// 3. XỬ LÝ NHIỆM VỤ, LỌC VÀ HIỂN THỊ THẺ BADGE (FIX HOÀN TOÀN)
 // ==============================================================================
 window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-white','dark:bg-slate-600','text-primary','shadow-sm');b.classList.add('text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a){a.classList.add('active','bg-white','dark:bg-slate-600','text-primary','shadow-sm');a.classList.remove('text-slate-500')}window.renderTasksOnly()};
 
@@ -562,7 +567,7 @@ window.renderTasksOnly=()=>{
         const aO=(!a.completed&&a.dueDate&&a.dueDate<today)?1:0, bO=(!b.completed&&b.dueDate&&b.dueDate<today)?1:0;
         if(aO!==bO)return bO-aO;
         if(a.alarmTime&&!b.alarmTime)return -1; if(!a.alarmTime&&b.alarmTime)return 1;
-        if(a.alarmTime&&b.alarmTime)return a.alarmTime - b.alarmTime; // Đã fix lỗi string localeCompare
+        if(a.alarmTime&&b.alarmTime)return a.alarmTime - b.alarmTime; 
         const w={high:3,medium:2,low:1}; return (w[b.priority]||0)-(w[a.priority]||0);
     });
 
@@ -570,7 +575,7 @@ window.renderTasksOnly=()=>{
     else{
         hideEl('empty-state');
         setHtml('todo-list',d.map(t=>{
-            // UI Badges System
+            // UI Badges System V19
             let badges = '';
             if(t.timeStr) {
                 const isEnabled = t.alarmEnabled !== false;
@@ -606,14 +611,30 @@ window.renderTasksOnly=()=>{
     window.updateProgress()
 };
 
-window.toggleTask=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){t.completed=!t.completed;window.vibrate(15);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();if(t.completed){if(window.soundEnabled)window.playGoogleTTS('Tuyệt vời');if(window.confetti)window.confetti({particleCount:50,spread:60,origin:{y:0.8}})}}};
-window.cleanupTasks=()=>{window.todos=(window.todos||[]).filter(t=>!t.completed);window.vibrate([20,30]);window.saveLocalTodos();if(window.FirebaseSync)window.FirebaseSync.pushAll();window.renderTasksOnly();window.showToast('Đã dọn rác','ph-broom');if(window.soundEnabled)window.playGoogleTTS('Đã dọn dẹp')};
+window.toggleTask=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){t.completed=!t.completed;window.vibrate(15);
+    if(t.completed && window.stats.lastDate !== window.getTodayStr()){ window.stats.streak++; window.stats.lastDate=window.getTodayStr(); } // FIX LỖI ĐẾM LỬA
+    window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();
+    if(t.completed){if(window.soundEnabled)window.playGoogleTTS('Tuyệt vời');if(window.confetti)window.confetti({particleCount:50,spread:60,origin:{y:0.8}})}
+}};
 
-window.updateProgress=()=>{const t=(window.todos||[]).length,d=(window.todos||[]).filter(x=>x.completed).length,p=t===0?0:Math.round((d/t)*100);setTxt('progress-text',p+'%');const c=el('progress-ring');if(c){c.style.strokeDashoffset=113-(p/100)*113;c.style.color=p===100?'#10b981':'#6366f1'}};
+// NÚT DỌN RÁC (ĐÃ FIX LỖI KHÔNG HOẠT ĐỘNG VÌ THIẾU LƯU LOCAL)
+window.cleanupTasks=()=>{
+    const count = (window.todos||[]).filter(t=>t.completed).length;
+    if(count === 0) { window.showToast('Không có rác để dọn','ph-warning-circle'); return; }
+    window.todos=(window.todos||[]).filter(t=>!t.completed);
+    window.vibrate([20,30]);
+    window.saveLocalTodos(); // BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ FIX LỖI
+    if(window.FirebaseSync)window.FirebaseSync.pushAll();
+    window.renderTasksOnly();
+    window.showToast(`Đã dọn ${count} mục`,'ph-broom');
+    if(window.soundEnabled)window.playGoogleTTS('Đã dọn dẹp');
+};
+
+window.updateProgress=()=>{const t=(window.todos||[]).length,d=(window.todos||[]).filter(x=>x.completed).length,p=t===0?0:Math.round((d/t)*100);setTxt('progress-text',p+'%');const c=el('progress-ring');if(c){c.style.strokeDashoffset=113-(p/100)*113;c.style.color=p===100?'#10b981':'#6366f1'} setTxt('streak-count', window.stats.streak||0);};
 window.pinToFocus=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){const f=el('focus-task-card'); if(f) {f.classList.remove('hidden'); f.style.display='';} setTxt('focus-task-name',t.text);const n=document.querySelectorAll('.nav-btn');if(n.length>1 && window.innerWidth<1024){window.switchTab('view-focus',n[1]);} window.vibrate(15);}};
 window.unpinTask=()=>{const f=el('focus-task-card'); if(f){f.classList.add('hidden'); f.style.display='none';} window.vibrate(10)};
 
-// XÓA NHIỆM VỤ (FLEXBOX MODAL)
+// XÓA NHIỆM VỤ
 window.confirmDeleteTask=id=>{
     window.vibrate(20); const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return;
     const confirmHTML = `
@@ -643,7 +664,6 @@ window.execDeleteTask=id=>{
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return;
     window.vibrate(15);
-    
     let rawText = t.text;
     if(t.isDaily) rawText += ' hằng ngày';
     let dDate = t.dueDate || t.date;
@@ -692,9 +712,11 @@ window.timerState={mode:'countdown',cd:null,sw:null,cdTime:0,swTime:0,cdRun:fals
 window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;const cu=el('mode-countdown-ui'),su=el('mode-stopwatch-ui'),tc=el('tab-countdown'),ts=el('tab-stopwatch');if(cu)cu.classList.toggle('hidden',m!=='countdown');if(su)su.classList.toggle('hidden',m!=='stopwatch');if(tc)tc.className=`flex-1 py-2 text-sm font-bold rounded-lg transition-all active:scale-95 ${m==='countdown'?'shadow-sm bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400':'text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800'}`;if(ts)ts.className=`flex-1 py-2 text-sm font-bold rounded-lg transition-all active:scale-95 ${m==='stopwatch'?'shadow-sm bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400':'text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800'}`};
 window.applyTimerPreset=m=>{window.vibrate(10);setVal('in-hr','');setVal('in-min',m);setVal('in-sec','00')};
 window.validateTimerInput=(e,m)=>{if(e.value>m)e.value=m;if(e.value<0)e.value=0;if(e.value.length>2)e.value=e.value.slice(0,2)};window._fmt=n=>n.toString().padStart(2,'0');
+
 window.toggleCountdown=()=>{window.vibrate([20,30]);window.unlockAudio();const b=el('cd-toggle-btn');if(!b)return;if(window.timerState.cdRun){clearInterval(window.timerState.cd);window.timerState.cdRun=false;b.innerHTML='<i class="ph-fill ph-play"></i> Tiếp tục';b.className='flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-indigo-500/30 active:scale-95 transition-all flex justify-center items-center gap-2';document.querySelector('#mode-countdown-ui .time-display')?.classList.remove('running')}else{if(window.timerState.cdTime<=0){const h=parseInt(getVal('in-hr')||0),m=parseInt(getVal('in-min')||0),s=parseInt(getVal('in-sec')||0);window.timerState.cdTime=h*3600+m*60+s;if(window.timerState.cdTime<=0){window.highlightError('in-min');return}hideEl('cd-setup-area');showFlex('cd-display-area')}window.timerState.cdRun=true;b.innerHTML='<i class="ph-fill ph-pause"></i> Tạm dừng';b.className='flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex justify-center items-center gap-2';document.querySelector('#mode-countdown-ui .time-display')?.classList.add('running');window.timerState.cd=setInterval(()=>{if(window.timerState.cdTime>0){window.timerState.cdTime--;const h=Math.floor(window.timerState.cdTime/3600),m=Math.floor((window.timerState.cdTime%3600)/60),s=window.timerState.cdTime%60;const ch=el('cd-hr');if(ch){if(h>0){ch.classList.remove('hidden');ch.textContent=window._fmt(h)+':'}else ch.classList.add('hidden')}setTxt('cd-min',window._fmt(m));setTxt('cd-sec',window._fmt(s))}else{clearInterval(window.timerState.cd);window.timerState.cdRun=false;document.querySelector('#mode-countdown-ui .time-display')?.classList.remove('running');
     window.triggerGlobalAlarm(null, 'Thời gian Tập trung đã hoàn thành!'); window.resetCountdown()}},1000)}};
 window.resetCountdown=()=>{window.vibrate(10);clearInterval(window.timerState.cd);window.timerState.cdRun=false;window.timerState.cdTime=0;showFlex('cd-setup-area');hideEl('cd-display-area');const b=el('cd-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-indigo-500/30 active:scale-95 transition-all flex justify-center items-center gap-2'}document.querySelector('#mode-countdown-ui .time-display')?.classList.remove('running')};
+
 window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b=el('sw-toggle-btn');if(!b)return;if(window.timerState.swRun){clearInterval(window.timerState.sw);window.timerState.swRun=false;b.innerHTML='<i class="ph-fill ph-play"></i> Tiếp tục';b.className='flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex justify-center items-center gap-2'}else{window.timerState.swRun=true;b.innerHTML='<i class="ph-fill ph-pause"></i> Tạm dừng';b.className='flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex justify-center items-center gap-2';let st=Date.now()-window.timerState.swTime;window.timerState.sw=setInterval(()=>{window.timerState.swTime=Date.now()-st;const m=Math.floor(window.timerState.swTime/60000),s=Math.floor((window.timerState.swTime%60000)/1000),ms=Math.floor((window.timerState.swTime%1000)/10);setTxt('sw-min',window._fmt(m));setTxt('sw-sec',window._fmt(s));setTxt('sw-ms','.'+window._fmt(ms))},10)}};
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.sw);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex justify-center items-center gap-2'}};
 
@@ -773,7 +795,7 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
         const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||!es)return;
         let d=window.VaultStorageLayer.getData();
         if(this._c!=='all'){d=d.filter(e=>{if(this._c==='custom')return e.category==='custom'||!['account','crypto','note','service'].includes(e.category);return e.category===this._c})}
-        if(this._q){const q=this._q.toLowerCase();d=d.filter(e=>(e.name||'').toLowerCase().includes(q)||((e.content||e.note||'').toLowerCase().includes(q)))}
+        if(this._q){const q=this._q.toLowerCase();d=d.filter(e=>(e.name||'').toLowerCase().includes(q)||((e.content||'').toLowerCase().includes(q)))}
         if(!d.length){c.innerHTML='';showFlex('vaultEmptyState');this.stopTOTPUpdater();return}
         hideEl('vaultEmptyState');
         const ht=d.some(e=>{const p=window.VaultUtils.parseSmartContent(e.content);return!!p.totp});
@@ -893,7 +915,7 @@ window.FirebaseSync={
                 if(c.data && Array.isArray(c.data)){ 
                     const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
                     if (cleanCloudTodos.length === 0 && (window.todos||[]).length > 0) {
-                        this.pushAll();
+                        this.pushAll(); 
                     } else if (cloudTime >= localTime || localTime === 0) {
                         const ls=JSON.stringify(window.todos||[]), cs=JSON.stringify(cleanCloudTodos); 
                         if(ls!==cs){
@@ -941,12 +963,15 @@ window.FirebaseSync={
 window.pwaLogicCore={_dp:null,init(){window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();this._dp=e;showFlex('btnInstall')});window.addEventListener('appinstalled',()=>{this._dp=null;hideEl('btnInstall');window.showToast('Đã cài App!','ph-check-circle')})},handleInstallClick(){if(!this._dp)return;this._dp.prompt();this._dp.userChoice.then(c=>{if(c.outcome==='accepted')window.showToast('Đang cài...','ph-download-simple');this._dp=null}).catch(()=>{})}};
 
 // ==============================================================================
-// 5. KHỞI ĐỘNG HỆ THỐNG
+// 5. KHỞI ĐỘNG HỆ THỐNG VÀ WORKER NỀN
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     try { window.pwaLogicCore.init(); } catch(e) {}
     el('theme-toggle')?.addEventListener('click', window.toggleThemeLogic);
     
+    // Tích hợp Background Worker
+    window.startBackgroundWorker();
+
     const vsi = el('vaultSearchInput'); 
     if(vsi) { 
         const debSearch = window.VaultUtils.debounce(e => window.VaultApp.filterData(e.target.value), 300); 
@@ -987,9 +1012,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!v) { window.highlightError('input-mobile'); return; }
         handleTaskSubmit(v); i.value = '';
     });
-
-    // START KÉN TĨNH LẶNG (WORKER HẬU CẢNH BẤT TỬ)
-    window.startBackgroundWorker();
 
     const todoList = el('todo-list');
     if(todoList) {
@@ -1045,6 +1067,9 @@ document.addEventListener('DOMContentLoaded', () => {
         rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); window.showToast('Không nghe rõ!','ph-warning-circle'); if(window.soundEnabled&&window.speak)window.speak('Tôi chưa nghe rõ.', 1.0, 0.9); };
         document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { window.initTTS(); try{rec.start();}catch(e){window.showToast('Đang nghe...','ph-microphone');} }); });
     } else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
+    
+    // Fallback AI Voice
+    setInterval(()=>{ if(window.ttsActive && window.synth) { window.synth.getVoices(); } }, 10000);
 });
 </script>
 </body>
