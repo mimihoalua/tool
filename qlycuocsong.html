@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V31 - Audio Ducking & Realtime Flush</title>
+<title>LifeOS V32 - Audio Ducking & Immortal Sync</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -368,7 +368,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 
 <script>
 // ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & DOM CHUẨN V31 MASTER)
+// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & DOM CHUẨN V32 MASTER)
 // ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
@@ -387,13 +387,13 @@ document.addEventListener('click', (e) => {
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
 
-// CHỐT CHẶN FIREBASE REALTIME FLUSH: Ép đẩy dữ liệu lên mây tức thì
+// KHÓA TỬ HUYỆT FIREBASE FLUSH: Ép đẩy dữ liệu lên mây tức thì không có độ trễ
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
         window.lastLocalPush = Date.now(); 
         localStorage.setItem('lifeos_v8_time_' + window.viewingUser, window.lastLocalPush.toString());
-        // Lệnh Bọc Thép: Ép Cloud nhận dữ liệu cập nhật
+        // FIREBASE PUSH: Ép Cloud nhận dữ liệu cập nhật ngay lúc này
         if(window.FirebaseSync && window.cloudSyncCompleted) { window.FirebaseSync.pushAll(); }
     }
 };
@@ -422,7 +422,7 @@ window.addEventListener('load', () => {
 });
 
 // ==============================================================================
-// 2. KÉN ÂM THANH XEN KẼ (AUDIO DUCKING) & TRÍ TUỆ NHÂN TẠO
+// 2. KÉN ÂM THANH XEN KẼ (AUDIO DUCKING) & TRÍ TUỆ NHÂN TẠO SENTINEL
 // ==============================================================================
 window.playBeepOscillator = () => {
     try { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(window.audioCtx.state === 'suspended') window.audioCtx.resume(); const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(880, window.audioCtx.currentTime); osc.frequency.setValueAtTime(1108.73, window.audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(1, window.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(window.audioCtx.destination); osc.start(); osc.stop(window.audioCtx.currentTime + 0.5); } catch(e){}
@@ -431,7 +431,7 @@ window.playBeepOscillator = () => {
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.initTTS=()=>{
     if(!window.synth)return; window.ttsActive=true;
-    const l=()=>{const v=window.synth.getVoices();window.voice=v.find(x=>x.lang.includes('vi'))||v[0];}; l();window.synth.onvoiceschanged=l;
+    const l=()=>{const v=window.synth.getVoices();window.voice=v.find(x=>x.lang.includes('vi'))||v[0];setTxt('voice-info-badge',window.voice?window.voice.name:'Chưa có giọng VN')}; l();window.synth.onvoiceschanged=l;
     el('bot-icon')?.classList.add('text-white','speaking-glow'); window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
 };
 
@@ -439,16 +439,14 @@ window.playSpeechTTS=(text)=>{
     if(!window.soundEnabled) return; window.playBeepOscillator();
     let safeText = text.length > 150 ? text.substring(0, 150) + '...' : text;
     try { 
-        const c = el('tts-audio'); 
-        if(c) { 
-            c.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(safeText)}`; 
-            c.play().catch(()=>{ 
-                if(window.synth) { window.synth.cancel(); const u=new SpeechSynthesisUtterance(safeText); if(window.voice)u.voice=window.voice; u.rate=1.1; u.pitch=1.1; window.synth.speak(u); } 
-            }); 
+        if(window.synth) { 
+            window.synth.cancel(); 
+            const u=new SpeechSynthesisUtterance(safeText); 
+            if(window.voice) u.voice=window.voice; 
+            u.rate=1.1; u.pitch=1.1; 
+            window.synth.speak(u); 
         } 
-    } catch(e) { 
-        if(window.synth) { window.synth.cancel(); const u=new SpeechSynthesisUtterance(safeText); if(window.voice)u.voice=window.voice; u.rate=1.1; u.pitch=1.1; window.synth.speak(u); } 
-    }
+    } catch(e) {}
 };
 
 window.audioInitialized = false; window.lastSentinelCheck = Date.now();
@@ -463,18 +461,18 @@ window.unlockAudio=()=>{
     if(window.audioCtx) window.audioCtx.resume();
     window.audioInitialized = true;
     
-    // VÒNG LẶP AUDIO DUCKING (XEN KẼ ÂM THANH: LOA XUỐNG 20% ĐỂ AI ĐỌC NHIỆM VỤ)
+    // VÒNG LẶP AUDIO DUCKING (HẠ ÂM LƯỢNG ĐỂ AI NÓI)
     if(a) {
         a.addEventListener('timeupdate', () => {
             const nowMs = Date.now();
             if(window.isAlarmRinging) { 
-                if (nowMs - window.lastSpeechTime > 8000) { 
+                if (nowMs - window.lastSpeechTime > 8000) {  // 8 giây nhắc 1 lần
                     window.vibrate([500, 200, 500]); 
                     if(window.soundEnabled) { 
-                        if(b) b.volume = 0.2; // DUCK VOL
+                        if(b) b.volume = 0.2; // DUCK VOL - Bóp tiếng chuông vật lý xuống 20%
                         window.playSpeechTTS(window.alarmTextToSpeak); 
                         window.lastSpeechTime = nowMs;
-                        setTimeout(() => { if(b && window.isAlarmRinging) b.volume = 1.0; }, 5000); // RESTORE VOL
+                        setTimeout(() => { if(b && window.isAlarmRinging) b.volume = 1.0; }, 5000); // RESTORE VOL lên 100% sau 5 giây
                     } 
                 } 
                 return; 
@@ -556,7 +554,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// SENTINEL & SMART SNOOZE (BÁO LẠI NHẢY SỐ + LƯU LÊN CLOUD NGAY LẬP TỨC)
+// SENTINEL & THUẬT TOÁN NHẢY SỐ SNOOZE 5 PHÚT V32
 window.notifiedTasks = new Set(); window.activeAlarmTaskIds = []; window.alarmTextToSpeak = ""; window.isAlarmRinging = false;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     if(window.isAlarmRinging) return;
@@ -569,7 +567,11 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     if(alarmAudio && window.soundEnabled) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.volume = 0.2; alarmAudio.play().catch(()=>{}); }
     if(ttsAudio && window.soundEnabled) { ttsAudio.muted = false; }
     
-    if(window.soundEnabled) { window.playSpeechTTS(window.alarmTextToSpeak); window.lastSpeechTime = Date.now(); setTimeout(() => { if(alarmAudio && window.isAlarmRinging) alarmAudio.volume = 1.0; }, 5000); }
+    if(window.soundEnabled) { 
+        window.playSpeechTTS(window.alarmTextToSpeak); 
+        window.lastSpeechTime = Date.now(); 
+        setTimeout(() => { if(alarmAudio && window.isAlarmRinging) alarmAudio.volume = 1.0; }, 5000); 
+    }
 };
 
 window.stopGlobalAlarm = (actionType) => { 
@@ -585,13 +587,14 @@ window.stopGlobalAlarm = (actionType) => {
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; } 
                 else if (actionType === 'snooze') { 
-                    // THUẬT TOÁN SNOOZE NHẢY SỐ (CỘNG 5 PHÚT VÀ CẬP NHẬT GIAO DIỆN)
+                    // THUẬT TOÁN NHẢY SỐ (SNOOZE) VÀ HIỂN THỊ CẬP NHẬT GIAO DIỆN
                     const newAlarmMs = Date.now() + 5 * 60000;
                     t.alarmTime = newAlarmMs; 
                     t.alerted = false; 
                     const d = new Date(newAlarmMs);
                     t.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                    window.notifiedTasks.delete(String(id)); needsSync = true; 
+                    window.notifiedTasks.delete(String(id)); 
+                    needsSync = true; 
                 } 
                 else if (actionType === 'dismiss') { if(t.isDaily) { t.alarmTime += 86400000; t.alerted = false; needsSync = true; } }
             }
@@ -617,7 +620,7 @@ window.checkAlarms = () => {
         }
     });
     if(needsSync) { window.saveLocalTodos(); if(document.visibilityState==='visible') window.renderTasksOnly(); } 
-    if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' & ')); }
+    if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
 };
 
 window.toggleAlarm = (e, id) => {
@@ -719,7 +722,7 @@ window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110'}};
 
 // ==============================================================================
-// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (Nguyên Bản V27, Lược bớt mã thừa)
+// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (V32 - REALTIME FLUSH)
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -810,29 +813,33 @@ window.FirebaseSync={
                 const cloudTime = c.updatedAt || 0;
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
-                // LOGIC CHẶN ÉP DỮ LIỆU TỪ MÁY CHỦ: BẮT BUỘC ĐẨY TỪ LOCAL NẾU MỚI HƠN
-                if (localTime > cloudTime + 1000) { 
-                    this.pushAll(); 
-                    return; // Chặn kéo
-                }
-
                 if(c.data && Array.isArray(c.data)){ 
                     const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
-                    if (!window.cloudSyncCompleted) {
-                        window.todos = cleanCloudTodos; localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos)); localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
+                    
+                    // BỨC TƯỜNG LỬA BẢO VỆ F5 (REALTIME OVERRIDE)
+                    if (cloudTime > localTime) {
+                        // Firebase là mới nhất -> nhận
+                        window.todos = cleanCloudTodos; 
+                        localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos)); 
+                        localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
                         if(document.visibilityState === 'visible') window.renderTasksOnly();
-                    } else if (cloudTime >= localTime) {
-                        const ls=JSON.stringify(window.todos||[]), cs=JSON.stringify(cleanCloudTodos); 
-                        if(ls!==cs){ window.todos=cleanCloudTodos; localStorage.setItem('lifeos_v8_data_'+this._k,cs); localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString()); if(document.visibilityState === 'visible') window.renderTasksOnly(); }
+                    } else if (localTime > cloudTime) {
+                        // Ổ cứng là mới nhất (Snooze/Delete chưa kịp đẩy) -> Ép Firebase nhận lại
+                        this.pushAll();
+                    } else {
+                        if (!window.cloudSyncCompleted) { window.todos = cleanCloudTodos; if(document.visibilityState === 'visible') window.renderTasksOnly(); }
                     }
                 }
                 
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
                 if(c.vaultData&&Array.isArray(c.vaultData)){ 
-                    if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
-                        const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
-                        const lv=JSON.stringify(window.VaultStorageLayer.getData()),cv=JSON.stringify(cleanCloudData); 
-                        if(lv!==cv){window.VaultStorageLayer.replaceAll(cleanCloudData); if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();}
+                    const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
+                    if (cloudTime > localTime) {
+                        window.VaultStorageLayer.replaceAll(cleanCloudData); 
+                        if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();
+                    } else if (cloudTime === localTime && !window.cloudSyncCompleted) {
+                        window.VaultStorageLayer.replaceAll(cleanCloudData);
+                        if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();
                     }
                 }
                 window.cloudSyncCompleted = true;
