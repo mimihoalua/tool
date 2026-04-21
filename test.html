@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Core Tester V1</title>
+    <style>
+        body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 300px; overflow-y: auto; color: #34d399; }
+    </style>
+</head>
+<body>
+    <h2>Kiểm Thử Xuyên Giáp MIUI</h2>
+    
+    <audio id="silence" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+    <audio id="alarm" loop playsinline src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <button class="btn-green" onclick="initEngine()">1. Khởi động Động cơ (Bắt buộc)</button>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center;">
+        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
+    </div>
+
+    <button class="btn-red" onclick="stopAll()" style="margin-top: 20px;">3. Tắt Báo động</button>
+
+    <h3 style="margin-top: 30px;">Nhật ký hệ thống:</h3>
+    <div id="log">Chờ lệnh...<br></div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        function printLog(msg) { 
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `[${time}] ${msg}<br>`; 
+            logEl.scrollTop = logEl.scrollHeight; 
+        }
+
+        let isEngineRunning = false;
+        let wakeLock = null;
+
+        // Khắc phục lỗi TTS 1 câu bằng cách gắn biến vào window để chống Garbage Collection
+        window.speechHacks = [];
+
+        async function initEngine() {
+            printLog("Đang kích hoạt Mỏ neo tĩnh lặng...");
+            const a = document.getElementById('silence');
+            const b = document.getElementById('alarm');
+            
+            a.play().catch(e => printLog("Lỗi Silence: " + e));
+            
+            b.muted = true;
+            b.play().catch(e => printLog("Lỗi Alarm: " + e));
+            setTimeout(() => { b.pause(); b.muted = false; }, 500);
+
+            // Xin quyền WakeLock giữ sáng CPU
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    printLog("WakeLock CPU OK.");
+                } catch (err) { printLog("WakeLock bị từ chối."); }
+            }
+
+            // Gọi thử một câu TTS rỗng để mở luồng
+            const u = new SpeechSynthesisUtterance('');
+            u.volume = 0;
+            window.speechSynthesis.speak(u);
+
+            isEngineRunning = true;
+            printLog("Động cơ SẴN SÀNG. Hãy thử hẹn giờ!");
+        }
+
+        function triggerAlarmWithDucking(text) {
+            printLog("KÍCH HOẠT BÁO ĐỘNG ĐỎ!");
+            const b = document.getElementById('alarm');
+            
+            // 1. Hạ âm lượng loa vật lý (Ducking)
+            b.volume = 0.2;
+            b.play();
+
+            // 2. Gọi chị Google đọc (Chia nhỏ câu để chống lỗi ngắt quãng)
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.1;
+                
+                // Gắn vào window để không bị xóa khỏi RAM
+                window.speechHacks.push(utterance);
+
+                utterance.onend = () => {
+                    printLog("TTS Đọc xong. Trả loa về 100%");
+                    b.volume = 1.0; // Trả lại 100% âm lượng
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startTimer() {
+            if (!isEngineRunning) { alert("Chưa bật động cơ!"); return; }
+            
+            const sec = parseInt(document.getElementById('secInput').value);
+            printLog(`Đã hẹn giờ ${sec} giây. HÃY TẮT MÀN HÌNH NGAY!`);
+            
+            // Dùng thủ thuật Web Worker nội bộ để đếm giờ (Chống bị Chrome ép xung)
+            const inlineWorker = `
+                let t;
+                self.onmessage = function(e) {
+                    if (e.data.cmd === 'start') {
+                        t = setTimeout(() => { self.postMessage('FIRE'); }, e.data.ms);
+                    }
+                };
+            `;
+            const blob = new Blob([inlineWorker], { type: 'application/javascript' });
+            const worker = new Worker(URL.createObjectURL(blob));
+            
+            worker.onmessage = (e) => {
+                if (e.data === 'FIRE') {
+                    triggerAlarmWithDucking("Đã đến giờ. Nhiệm vụ ưu tiên: Thức dậy ngay lập tức. Tôi nhắc lại, thức dậy ngay lập tức.");
+                }
+            };
+            
+            worker.postMessage({ cmd: 'start', ms: sec * 1000 });
+        }
+
+        function stopAll() {
+            document.getElementById('alarm').pause();
+            window.speechSynthesis.cancel();
+            printLog("Đã tắt toàn bộ âm thanh.");
+        }
+    </script>
+</body>
+</html>
