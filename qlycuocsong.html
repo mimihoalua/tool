@@ -8,14 +8,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V26 - 5 Seasons Immortal</title>
+<title>LifeOS V27 - 5 Seasons & Immortal Beep</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
+    window.themeIcons = ['ph-sun', 'ph-lemon', 'ph-orange-slice', 'ph-flower-lotus', 'ph-leaf'];
     const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+    tailwind.config={theme:{extend:{colors:{primary:'var(--c-primary)',secondary:'var(--c-hover)',darkbg:'var(--c-bg)',darkcard:'var(--c-card)'},fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -29,33 +30,38 @@
 :root, [data-theme="light"] {
     --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; 
     --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b;
+    --c-meta: #f8fafc;
 }
 [data-theme="lemon"] {
     --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; 
     --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d;
+    --c-meta: #fefce8;
 }
 [data-theme="orange"] {
     --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; 
     --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c;
+    --c-meta: #fff7ed;
 }
 [data-theme="rose"] {
     --c-primary: #f43f5e; --c-hover: #e11d48; --c-bg: #fff1f2; --c-card: #ffffff; 
     --c-sub: #ffe4e6; --c-border: #fecdd3; --c-text: #881337; --c-mut: #e11d48;
+    --c-meta: #fff1f2;
 }
 [data-theme="mint"] {
     --c-primary: #10b981; --c-hover: #059669; --c-bg: #f0fdfa; --c-card: #ffffff; 
     --c-sub: #ccfbf1; --c-border: #99f6e4; --c-text: #134e4a; --c-mut: #0d9488;
+    --c-meta: #f0fdfa;
 }
 
-body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none; touch-action:manipulation; background-color: var(--c-bg) !important; color: var(--c-text) !important; }
-.bg-white, .bg-darkcard { background-color: var(--c-card) !important; }
-.bg-slate-50, .bg-slate-100, .bg-indigo-50, .bg-primary\/10 { background-color: var(--c-sub) !important; }
-.border-slate-100, .border-slate-200, .border-slate-300, .border-slate-700, .border-slate-800, .border-indigo-100, .border-indigo-200 { border-color: var(--c-border) !important; }
-.text-slate-800, .text-slate-700, .text-slate-900 { color: var(--c-text) !important; }
-.text-slate-600, .text-slate-500, .text-slate-400, .text-indigo-600, .text-indigo-500 { color: var(--c-mut) !important; }
-.bg-primary, .bg-indigo-600, .bg-emerald-500 { background-color: var(--c-primary) !important; color: #fff !important; }
-.text-primary, .text-emerald-500 { color: var(--c-primary) !important; }
-.border-primary, .border-emerald-500 { border-color: var(--c-primary) !important; }
+body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none; touch-action:manipulation; background-color: var(--c-bg) !important; color: var(--c-text) !important; transition: background-color 0.4s ease, color 0.4s ease; }
+.bg-white, .bg-darkcard { background-color: var(--c-card) !important; transition: background-color 0.4s ease; }
+.bg-slate-50, .bg-slate-100, .bg-indigo-50, .bg-primary\/10 { background-color: var(--c-sub) !important; transition: background-color 0.4s ease; }
+.border-slate-100, .border-slate-200, .border-slate-300, .border-slate-700, .border-slate-800, .border-indigo-100, .border-indigo-200 { border-color: var(--c-border) !important; transition: border-color 0.4s ease; }
+.text-slate-800, .text-slate-700, .text-slate-900 { color: var(--c-text) !important; transition: color 0.4s ease; }
+.text-slate-600, .text-slate-500, .text-slate-400, .text-indigo-600, .text-indigo-500 { color: var(--c-mut) !important; transition: color 0.4s ease; }
+.bg-primary, .bg-indigo-600, .bg-emerald-500 { background-color: var(--c-primary) !important; color: #fff !important; transition: background-color 0.4s ease; }
+.text-primary, .text-emerald-500 { color: var(--c-primary) !important; transition: color 0.4s ease; }
+.border-primary, .border-emerald-500 { border-color: var(--c-primary) !important; transition: border-color 0.4s ease; }
 .hover\:bg-indigo-700:hover, .hover\:brightness-110:hover { background-color: var(--c-hover) !important; filter: brightness(1.1); }
 .shadow-primary\/30 { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
 
@@ -66,7 +72,7 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 .custom-scrollbar{scrollbar-width:thin;scrollbar-color:var(--c-primary) transparent}.custom-scrollbar::-webkit-scrollbar{width:4px}.custom-scrollbar::-webkit-scrollbar-thumb{background:var(--c-primary);border-radius:2px}
 
 .view-section{display:none}@keyframes viewEnter{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}.view-section.active{display:block;animation:viewEnter .4s cubic-bezier(.16,1,.3,1) forwards}@media(min-width:1024px){.view-section{display:block!important;animation:none!important}#bottom-nav,#mobile-input,#fab-add-vault{display:none!important}}
-.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);box-shadow:0 4px 6px -1px rgba(0,0,0,.02),0 2px 4px -1px rgba(0,0,0,.02);overflow:hidden;transition:box-shadow .2s,transform .2s}.swipe-item:active{transform:scale(.98)}.swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;justify-content:flex-start;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
+.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);box-shadow:0 4px 6px -1px rgba(0,0,0,.02),0 2px 4px -1px rgba(0,0,0,.02);overflow:hidden;transition:box-shadow .2s,transform .2s, background-color 0.4s, border-color 0.4s}.swipe-item:active{transform:scale(.98)}.swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;justify-content:flex-start;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
 @keyframes scaleIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}.animate-scaleIn{animation:scaleIn .3s cubic-bezier(.16,1,.3,1) forwards}@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}.animate-pop-in{animation:popIn .4s cubic-bezier(.16,1,.3,1) forwards}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.animate-fadeIn{animation:fadeIn .3s ease forwards}
 .sentinel-pulse{animation:sentinelPulse 2s infinite}@keyframes sentinelPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
 .alarm-flash{animation:alarmFlash .5s infinite alternate}@keyframes alarmFlash{from{border-color:#ef4444;box-shadow:0 0 15px rgba(239,68,68,.3);background-color:rgba(225,29,72,.95)}to{border-color:#f97316;box-shadow:0 0 25px rgba(249,115,22,.6);background-color:rgba(159,18,57,.95)}}
@@ -90,8 +96,6 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <audio id="mstq-silence" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
-<audio id="mstq-alarm" loop playsinline webkit-playsinline preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-<audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 flex-col items-center justify-center p-4 hidden">
 <h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in" style="color:var(--c-primary); background:none; -webkit-text-fill-color:var(--c-primary);">LifeOS Family</h1>
@@ -114,7 +118,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
 <div><h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
 <div class="flex items-center gap-2 mt-0.5">
-<span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div></div></div>
+<span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div></div></div>
 
 <div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
     <div class="flex items-center gap-1.5 sm:gap-2">
@@ -128,16 +132,18 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
         <button id="profile-btn" onclick="window.toggleProfileMenu()" class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95"><span id="profile-name-badge">N/A</span> <i class="ph-bold ph-caret-down text-[10px]"></i></button>
         <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
     </div>
+
+    <span class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-orange-200 ml-0.5 shrink-0"><i class="ph-fill ph-fire text-sm sm:text-base"></i> <span id="streak-count">0</span></span>
     
     <button id="theme-toggle" onclick="window.cycleTheme()" class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center">
-        <i id="theme-icon" class="ph-bold ph-sun text-base sm:text-lg transition-transform"></i>
+        <i id="theme-icon" class="ph-bold text-base sm:text-lg transition-transform text-primary"></i>
     </button>
 </div>
 </header>
 
 <main class="flex-grow w-full max-w-[1400px] mx-auto p-3 sm:p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 pb-32 lg:pb-8 relative">
 
-<div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
+<div class="lg:col-span-8 flex flex-col h-full view-section active scroll-mt-24" id="view-tasks">
 <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
 <form id="form-pc" class="flex gap-3">
     <button type="button" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl"></i></button>
@@ -153,11 +159,11 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 </form>
 </div>
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-4">
-<div class="flex items-center gap-3 w-full sm:w-auto"><div class="w-12 h-12 rounded-full border-4 border-slate-100 flex items-center justify-center relative flex-shrink-0 bg-white shadow-sm"><svg class="absolute inset-0 w-full h-full transform -rotate-90"><circle id="progress-ring" cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" class="text-primary transition-all duration-1000 ease-out" stroke-dasharray="113" stroke-dashoffset="113"></circle></svg><span id="progress-text" class="text-[10px] font-black text-slate-700 z-10">0%</span></div><div class="flex gap-1.5 bg-slate-50 p-1.5 rounded-xl overflow-x-auto hide-scrollbar custom-scroll-area shadow-inner border border-slate-200 flex-grow sm:flex-grow-0"><button data-filter="all" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-primary text-white shadow-sm transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Tất cả</button><button data-filter="active" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Chưa xong</button><button data-filter="overdue" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Quá hạn</button></div></div>
+<div class="flex items-center gap-3 w-full sm:w-auto"><div class="w-12 h-12 rounded-full border-4 border-slate-100 flex items-center justify-center relative flex-shrink-0 bg-white shadow-sm"><svg class="absolute inset-0 w-full h-full transform -rotate-90"><circle id="progress-ring" cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" class="text-slate-200 transition-all duration-1000 ease-out" stroke-dasharray="113" stroke-dashoffset="113"></circle></svg><span id="progress-text" class="text-[10px] font-black text-slate-700 z-10">0%</span></div><div class="flex gap-1.5 bg-slate-50 p-1.5 rounded-xl overflow-x-auto hide-scrollbar custom-scroll-area shadow-inner border border-slate-200 flex-grow sm:flex-grow-0"><button data-filter="all" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-primary text-white shadow-sm transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Tất cả</button><button data-filter="active" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Chưa xong</button><button data-filter="overdue" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Quá hạn</button></div></div>
 <button onclick="window.cleanupTasks()" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-4 py-2.5 rounded-xl transition-all active:scale-95 w-full sm:w-auto flex justify-center items-center gap-2 shadow-sm shrink-0 hover:bg-rose-100"><i class="ph-bold ph-broom text-base"></i> Dọn rác (Đã xong)</button></div>
 <div class="flex-grow overflow-y-auto custom-scroll-area pr-1 relative lg:max-h-[650px]"><ul id="todo-list" class="space-y-3 pb-4 relative z-10"></ul><div id="empty-state" class="hidden absolute inset-0 flex-col items-center justify-center text-slate-400 z-0 opacity-80 pointer-events-none"><div class="animate-float flex flex-col items-center"><i class="ph-duotone ph-leaf text-6xl mb-3 text-primary"></i><p class="text-lg font-bold text-slate-600">Không gian thanh tịnh</p><p class="text-xs mt-1 font-medium">Thêm nhiệm vụ mới để bắt đầu</p></div></div></div></div>
 
-<div class="lg:col-span-4 flex flex-col h-full view-section" id="view-focus">
+<div class="lg:col-span-4 flex flex-col h-full view-section scroll-mt-24" id="view-focus">
 <div class="bg-white p-5 sm:p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center justify-start lg:sticky lg:top-24 transition-shadow hover:shadow-xl relative overflow-hidden min-h-[500px]">
 <div class="absolute inset-0 bg-primary opacity-5 pointer-events-none rounded-[2rem]"></div>
 <div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button onclick="window.toggleTimerSound()" id="timer-sound-btn" class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
@@ -174,9 +180,9 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <div class="flex gap-3 w-full mt-6"><button id="cd-toggle-btn" onclick="window.toggleCountdown()" class="flex-1 bg-primary text-white font-bold py-4 rounded-2xl text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all flex justify-center items-center gap-2"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="cd-reset-btn" onclick="window.resetCountdown()" class="px-5 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 transition-all hover:bg-white shadow-sm border border-slate-200"><i class="ph-bold ph-arrow-counter-clockwise text-xl"></i></button></div></div>
 <div id="mode-stopwatch-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
 <div class="py-12 flex flex-col items-center w-full"><div class="font-time text-6xl sm:text-7xl font-black text-slate-800 tracking-tighter time-display flex items-baseline justify-center" id="sw-display-container"><span id="sw-min">00</span><span class="text-primary opacity-50 relative -top-1 sm:-top-2 mx-1">:</span><span id="sw-sec">00</span><span id="sw-ms" class="text-2xl sm:text-3xl text-primary ml-1 font-bold">.00</span></div></div>
-<div class="flex gap-3 w-full mt-4"><button id="sw-toggle-btn" onclick="window.toggleStopwatch()" class="flex-1 bg-primary text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="sw-reset-btn" onclick="window.resetStopwatch()" class="px-5 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 transition-all hover:bg-white shadow-sm border border-slate-200"><i class="ph-bold ph-arrow-counter-clockwise text-xl"></i></button></div></div></div></div>
+<div class="flex gap-3 w-full mt-4"><button id="sw-toggle-btn" onclick="window.toggleStopwatch()" class="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="sw-reset-btn" onclick="window.resetStopwatch()" class="px-5 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 transition-all hover:bg-white shadow-sm border border-slate-200"><i class="ph-bold ph-arrow-counter-clockwise text-xl"></i></button></div></div></div></div>
 
-<div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-vault">
+<div class="lg:col-span-12 flex flex-col h-full view-section mt-2 scroll-mt-24" id="view-vault">
 <div class="vault-container-special rounded-[2rem] p-3 sm:p-5 lg:p-8 border-4 border-white/40 shadow-2xl flex-grow overflow-y-auto relative min-h-[500px] custom-scroll-area">
 <div class="bg-white/50 backdrop-blur-xl border border-white/60 rounded-2xl px-4 py-3 mb-6 shadow-sm sticky top-0 z-30 flex flex-col lg:flex-row items-center justify-between gap-4">
 <div class="flex items-center gap-3 w-full lg:w-auto"><div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg"><i class="ph-bold ph-vault text-2xl"></i></div><h2 class="text-xl font-black text-slate-800 tracking-tight">Kho Lưu Trữ</h2></div>
@@ -257,10 +263,10 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
         <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Cảnh báo iOS/Android:</b><br>Bật chuông điện thoại (Bỏ gạt rung). Chạm màn hình 1 lần để tải trước Audio. Background Audio sẽ đếm giờ bất chấp tắt màn hình!
+            <b>Kiểm tra Âm thanh:</b><br>Bật chuông điện thoại. Bấm nút Test bên dưới để đảm bảo App đã kết nối Audio Cứng và Audio Giọng nói. Báo thức sẽ réo bất chấp khóa màn hình!
         </div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
-            <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
+            <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Cứng</button>
             <button onclick="window.vibrate([20]); window.playSpeechTTS('Hệ thống hoạt động tốt. Xin chào bạn.'); window.showToast('Đang phát...','ph-speaker-high')" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
         </div>
     </div>
@@ -273,7 +279,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
     </div>
     <p id="alarm-message" class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words"></p>
     <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
-        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
+        <button onclick="window.stopGlobalAlarm('complete')" class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
         <div class="grid grid-cols-2 gap-3 mt-2">
             <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
             <button onclick="window.stopGlobalAlarm('dismiss')" class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
@@ -328,7 +334,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 
 <script>
 // ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & BỌC THÉP DOM CHUẨN V25)
+// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & BỌC THÉP DOM CHUẨN V26)
 // ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
@@ -347,10 +353,12 @@ document.addEventListener('click', (e) => {
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
 
+// CHỐT CHẶN BẢO VỆ DỮ LIỆU F5
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
         window.lastLocalPush = Date.now(); 
+        localStorage.setItem('lifeos_v8_time_' + window.viewingUser, window.lastLocalPush.toString());
     }
 };
 
@@ -362,7 +370,49 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// NATIVE TTS
+// THEME CYCLE 5 SEASONS
+window.cycleTheme=()=>{
+    window.vibrate(10);
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    let nextIndex = (window.themes.indexOf(currentTheme) + 1) % window.themes.length;
+    const nextTheme = window.themes[nextIndex];
+    
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('lifeos_v22_theme', nextTheme);
+    
+    let metaColor = '#f8fafc'; let icon = 'ph-sun text-blue-500';
+    if(nextTheme === 'lemon') { metaColor = '#fefce8'; icon = 'ph-lemon'; }
+    else if(nextTheme === 'orange') { metaColor = '#fff7ed'; icon = 'ph-orange-slice'; }
+    else if(nextTheme === 'rose') { metaColor = '#fff1f2'; icon = 'ph-flower-lotus'; }
+    else if(nextTheme === 'mint') { metaColor = '#f0fdfa'; icon = 'ph-leaf'; }
+    
+    document.getElementById('meta-theme-color')?.setAttribute('content', metaColor);
+    el('theme-icon').className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
+    window.showToast(`Giao diện: ${nextTheme.toUpperCase()}`, 'ph-palette');
+};
+
+window.addEventListener('load', () => {
+    const t = document.documentElement.getAttribute('data-theme');
+    let icon = 'ph-sun';
+    if(t === 'lemon') icon = 'ph-lemon';
+    else if(t === 'orange') icon = 'ph-orange-slice';
+    else if(t === 'rose') icon = 'ph-flower-lotus';
+    else if(t === 'mint') icon = 'ph-leaf';
+    const ic = el('theme-icon'); if(ic) ic.className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
+});
+
+// THẺ ÂM THANH V26 - ĐÁNH BẠI ĐIẾC
+window.playBeepOscillator = () => {
+    try {
+        if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(window.audioCtx.state === 'suspended') window.audioCtx.resume();
+        const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain();
+        osc.type = 'square'; osc.frequency.setValueAtTime(880, window.audioCtx.currentTime); osc.frequency.setValueAtTime(1108.73, window.audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(1, window.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.5);
+        osc.connect(gain); gain.connect(window.audioCtx.destination); osc.start(); osc.stop(window.audioCtx.currentTime + 0.5);
+    } catch(e){}
+};
+
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.initTTS=()=>{
     if(!window.synth)return; window.ttsActive=true;
@@ -374,6 +424,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS=(text)=>{
     if(!window.soundEnabled) return;
+    window.playBeepOscillator(); // Vừa kêu tiếng bíp vật lý
     try {
         const c = el('tts-audio');
         if(c) {
@@ -389,20 +440,19 @@ window.playSpeechTTS=(text)=>{
     }
 };
 
-// BẬT MỎ NEO SILENCE VÀ WORKER NỀN (CHỐNG NGỦ GẬT)
+// BẬT MỎ NEO SILENCE KÉP TRỊ ĐIẾC
 window.audioInitialized = false;
 window.lastSentinelCheck = Date.now();
-window.notifiedTasks = new Set(); 
-
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio');
     
-    // Đánh lừa HĐH di động cho phép play() ngầm
+    // Trik MUTED để đánh lừa Hệ điều hành di động cho phép play()
     if(a) { a.play().catch(()=>{}); }
     if(b) { b.muted = true; b.loop = true; b.play().catch(()=>{}); }
     if(c) { c.muted = true; c.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; c.play().catch(()=>{}); }
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
+    if(window.audioCtx) window.audioCtx.resume();
     
     window.audioInitialized = true;
     
@@ -412,14 +462,7 @@ window.unlockAudio=()=>{
             if(window.isAlarmRinging) {
                 if (nowMs - window.lastSpeechTime > 8000) {
                     window.vibrate([500, 200, 500]);
-                    
-                    // FIX LỖI ĐIẾC V25: KÍCH HOẠT LẠI MỌI KÊNH AUDIO KHI BÁO ĐỘNG
-                    if(window.soundEnabled) { 
-                        if(b && b.muted) b.muted = false; // Bỏ mute
-                        if(b && b.paused) b.play().catch(()=>{}); // Bắt play lại nếu bị đứt
-                        window.playSpeechTTS(window.alarmTextToSpeak); 
-                        window.lastSpeechTime = nowMs; 
-                    }
+                    if(window.soundEnabled) { window.playSpeechTTS(window.alarmTextToSpeak); window.lastSpeechTime = nowMs; }
                 }
                 return; 
             }
@@ -483,7 +526,6 @@ window.loadUserData=()=>{
         window.VaultUI.renderVaultCards();
         setTxt('streak-count',window.stats?.streak||0);
         
-        // CHỐNG MẤT DỮ LIỆU KHI TẢI LẠI TRANG
         window.cloudSyncCompleted = false;
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
     }catch(e){console.error(e)}
@@ -491,10 +533,11 @@ window.loadUserData=()=>{
 
 window.switchTab=(id,b)=>{
     window.vibrate([15]); window.unlockAudio();
-    // CUỘN LÊN ĐẦU TIÊN
+    
+    // SMOOTH SCROLL CHUẨN XÁC
     if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else if(id==='view-focus') el('view-focus').scrollIntoView({behavior:'smooth'});
-    else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
+    else if(id==='view-focus') { const el = document.getElementById('view-focus'); if(el) el.scrollIntoView({behavior:'smooth'}); }
+    else if(id==='view-vault') { const el = document.getElementById('view-vault'); if(el) el.scrollIntoView({behavior:'smooth'}); }
 
     if(window.innerWidth >= 1024) return;
 
@@ -531,43 +574,12 @@ window.switchTab=(id,b)=>{
     }
 };
 
-window.cycleTheme=()=>{
-    window.vibrate(10);
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    let nextIndex = (window.themes.indexOf(currentTheme) + 1) % window.themes.length;
-    const nextTheme = window.themes[nextIndex];
-    
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('lifeos_v22_theme', nextTheme);
-    
-    let metaColor = '#f8fafc'; let icon = 'ph-sun';
-    if(nextTheme === 'lemon') { metaColor = '#fefce8'; icon = 'ph-lemon'; }
-    else if(nextTheme === 'orange') { metaColor = '#fff7ed'; icon = 'ph-orange-slice'; }
-    else if(nextTheme === 'rose') { metaColor = '#fff1f2'; icon = 'ph-flower-lotus'; }
-    else if(nextTheme === 'mint') { metaColor = '#f0fdfa'; icon = 'ph-leaf'; }
-    
-    document.getElementById('meta-theme-color')?.setAttribute('content', metaColor);
-    el('theme-icon').className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
-    window.showToast(`Giao diện: ${nextTheme.toUpperCase()}`, 'ph-palette');
-};
-
-window.addEventListener('load', () => {
-    const t = document.documentElement.getAttribute('data-theme') || 'light';
-    let icon = 'ph-sun';
-    if(t === 'lemon') icon = 'ph-lemon';
-    else if(t === 'orange') icon = 'ph-orange-slice';
-    else if(t === 'rose') icon = 'ph-flower-lotus';
-    else if(t === 'mint') icon = 'ph-leaf';
-    const ic = el('theme-icon'); if(ic) ic.className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
-});
-
-
 window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
 window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
+// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM (FIX LỖI QUÁ GIỜ)
 // ==============================================================================
 window.parseTaskNLP = (rawText) => {
     let text = rawText; let isDaily = false; let priority = false; let tags = []; let timeStr = null; let alarmTime = null;
@@ -627,7 +639,8 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// SENTINEL ALARM LOGIC (RAM KÉN BẤT TỬ)
+// SENTINEL ALARM LOGIC (RAM KÉN BẤT TỬ V26)
+window.notifiedTasks = new Set();
 window.activeAlarmTaskIds = [];
 window.alarmTextToSpeak = "";
 window.isAlarmRinging = false;
@@ -674,6 +687,7 @@ window.stopGlobalAlarm = (actionType) => {
                     window.notifiedTasks.delete(String(id));
                     needsSync = true;
                 } else if (actionType === 'dismiss') {
+                    // Tạm ẩn, F5 sẽ réo lại. Ngoại trừ Daily thì lùi ngày.
                     if(t.isDaily) { t.alarmTime += 86400000; t.alerted = false; needsSync = true; }
                 }
             }
@@ -715,7 +729,6 @@ window.checkAlarms = () => {
             needsSync = true;
         }
         
-        // KIỂM TRA BÁO ĐỘNG RAM BẤT TỬ
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false) {
             if (nowMs >= t.alarmTime && !t.alerted && !window.notifiedTasks.has(String(t.id))) {
                 window.notifiedTasks.add(String(t.id));
@@ -846,7 +859,7 @@ window.confirmDeleteTask=id=>{
                 <p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(t.text)}"</p>
             </div>
             <div class="flex gap-3 flex-shrink-0 mt-2">
-                <button onclick="window.vibrate(10); document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200">Hủy</button>
+                <button onclick="window.vibrate(10); document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200">Hủy</button>
                 <button onclick="window.execDeleteTask('${id}'); document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button>
             </div>
         </div>
@@ -860,7 +873,7 @@ window.execDeleteTask=id=>{
     window.renderTasksOnly(); window.showToast('Đã xóa nhiệm vụ','ph-trash'); if(window.soundEnabled)window.playSpeechTTS('Đã xóa');
 };
 
-// SỬA NHIỆM VỤ
+// SỬA NHIỆM VỤ CÓ TÍCH HỢP DATE PICKER ĐỒNG BỘ
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return;
     window.vibrate(15);
@@ -1096,7 +1109,7 @@ window.VaultApp={
                     <p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(e.name)}"</p>
                 </div>
                 <div class="flex gap-3 flex-shrink-0 mt-2">
-                    <button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Giữ lại</button>
+                    <button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200">Giữ lại</button>
                     <button onclick="window.VaultApp.execDeleteEntry('${id}'); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button>
                 </div>
             </div>
@@ -1124,8 +1137,6 @@ window.VaultApp={
         }; r.readAsText(f); e.target.value='';
     }
 };
-
-window.cloudSyncCompleted = false;
 
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
@@ -1204,6 +1215,7 @@ window.pwaLogicCore={_dp:null,init(){window.addEventListener('beforeinstallpromp
 document.addEventListener('DOMContentLoaded', () => {
     try { window.pwaLogicCore.init(); } catch(e) {}
     
+    // Đợi 2 giây mới khởi động Background Worker để không tranh chấp với Firebase lúc tải
     setTimeout(() => { window.startBackgroundWorker(); }, 2000);
 
     const vsi = el('vaultSearchInput'); 
@@ -1310,16 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { window.showLoginGate(); }
     } catch (err) { localStorage.removeItem('lifeos_v8_session'); localStorage.removeItem('lifeos_v8_viewing'); window.showLoginGate(); }
     
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(SR){
-        const rec = new SR(); rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false;
-        rec.onstart = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.add('text-rose-500','animate-pulse')); window.vibrate(30); window.unlockAudio(); };
-        rec.onresult = e => { const val = e.results[0][0].transcript; if(window.innerWidth >= 1024){ setVal('input-pc',val); el('form-pc')?.dispatchEvent(new Event('submit')); } else { setVal('input-mobile',val); el('form-mobile')?.dispatchEvent(new Event('submit')); } };
-        rec.onend = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); };
-        rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); window.showToast('Không nghe rõ!','ph-warning-circle'); if(window.soundEnabled)window.playSpeechTTS('Tôi chưa nghe rõ.'); };
-        document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { window.initTTS(); try{rec.start();}catch(e){window.showToast('Đang nghe...','ph-microphone');} }); });
-    } else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
-    
+    // Tự đánh thức AI Voice ẩn danh
     setInterval(()=>{ if(window.ttsActive && window.synth) { window.synth.getVoices(); } }, 10000);
 });
 </script>
