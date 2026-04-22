@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V1</title>
+    <title>Audio Core Tester V2</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
         button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; }
+        .btn-yellow { background: #f59e0b; color: black; }
         .btn-green { background: #10b981; color: white; }
         .btn-red { background: #ef4444; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
@@ -14,21 +15,22 @@
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử Xuyên Giáp MIUI</h2>
+    <h2>Kiểm Thử V2: Đâm Xuyên MIUI</h2>
     
     <audio id="silence" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     <audio id="alarm" loop playsinline src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <button class="btn-green" onclick="initEngine()">1. Khởi động Động cơ (Bắt buộc)</button>
+    <button class="btn-yellow" onclick="requestPermissions()">1. Xin quyền Thông báo (Rất quan trọng)</button>
+    <button class="btn-green" onclick="initEngine()">2. Khởi động Động cơ</button>
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center;">
-        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
+        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold;">
+        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">3. Hẹn giờ (Tắt màn hình ngay)</button>
     </div>
 
-    <button class="btn-red" onclick="stopAll()" style="margin-top: 20px;">3. Tắt Báo động</button>
+    <button class="btn-red" onclick="stopAll()" style="margin-top: 20px;">4. Tắt Báo động</button>
 
-    <h3 style="margin-top: 30px;">Nhật ký hệ thống:</h3>
+    <h3 style="margin-top: 20px;">Nhật ký hệ thống:</h3>
     <div id="log">Chờ lệnh...<br></div>
 
     <script>
@@ -40,10 +42,19 @@
         }
 
         let isEngineRunning = false;
-        let wakeLock = null;
 
-        // Khắc phục lỗi TTS 1 câu bằng cách gắn biến vào window để chống Garbage Collection
-        window.speechHacks = [];
+        async function requestPermissions() {
+            if (!("Notification" in window)) {
+                printLog("Trình duyệt không hỗ trợ Notification.");
+                return;
+            }
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                printLog("✅ Đã cấp quyền hiển thị Thông báo (Pop-up).");
+            } else {
+                printLog("❌ Quyền Thông báo bị từ chối.");
+            }
+        }
 
         async function initEngine() {
             printLog("Đang kích hoạt Mỏ neo tĩnh lặng...");
@@ -56,49 +67,66 @@
             b.play().catch(e => printLog("Lỗi Alarm: " + e));
             setTimeout(() => { b.pause(); b.muted = false; }, 500);
 
-            // Xin quyền WakeLock giữ sáng CPU
             if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    printLog("WakeLock CPU OK.");
-                } catch (err) { printLog("WakeLock bị từ chối."); }
+                try { await navigator.wakeLock.request('screen'); printLog("WakeLock CPU OK."); } 
+                catch (err) { printLog("WakeLock bị từ chối."); }
             }
 
-            // Gọi thử một câu TTS rỗng để mở luồng
-            const u = new SpeechSynthesisUtterance('');
-            u.volume = 0;
-            window.speechSynthesis.speak(u);
+            // Mở luồng TTS
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance('');
+                u.volume = 0; window.speechSynthesis.speak(u);
+            }
 
             isEngineRunning = true;
             printLog("Động cơ SẴN SÀNG. Hãy thử hẹn giờ!");
         }
 
-        function triggerAlarmWithDucking(text) {
+        function triggerKickStartAlarm(text) {
             printLog("KÍCH HOẠT BÁO ĐỘNG ĐỎ!");
-            const b = document.getElementById('alarm');
             
-            // 1. Hạ âm lượng loa vật lý (Ducking)
-            b.volume = 0.2;
+            // 1. KICK-START: Bắn System Notification để ép Android chớp sáng màn hình
+            if (Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.showNotification("ĐẾN GIỜ RỒI!", {
+                        body: text,
+                        icon: "https://placehold.co/192x192/10b981/ffffff?text=OS",
+                        vibrate: [500, 200, 500, 200, 500],
+                        requireInteraction: true,
+                        priority: "max"
+                    });
+                }).catch(() => {
+                    // Fallback nếu không có Service Worker
+                    new Notification("ĐẾN GIỜ RỒI!", { body: text, requireInteraction: true });
+                });
+                printLog("Đã bắn System Notification.");
+            }
+
+            // 2. Kích hoạt Loa vật lý (Ducking)
+            const b = document.getElementById('alarm');
+            b.volume = 0.2; 
             b.play();
 
-            // 2. Gọi chị Google đọc (Chia nhỏ câu để chống lỗi ngắt quãng)
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'vi-VN';
-                utterance.rate = 1.1;
-                
-                // Gắn vào window để không bị xóa khỏi RAM
-                window.speechHacks.push(utterance);
+            // 3. Chèn luồng TTS ngay khi CPU đang bị "giật mình" bởi Notification
+            setTimeout(() => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'vi-VN';
+                    utterance.rate = 1.1;
+                    
+                    utterance.onend = () => {
+                        printLog("TTS Đọc xong. Trả loa về 100%");
+                        b.volume = 1.0; 
+                    };
+                    
+                    // Fallback an toàn: Dù TTS lỗi, loa vẫn lên 100% sau 5 giây
+                    setTimeout(() => { b.volume = 1.0; }, 5000);
 
-                utterance.onend = () => {
-                    printLog("TTS Đọc xong. Trả loa về 100%");
-                    b.volume = 1.0; // Trả lại 100% âm lượng
-                };
-
-                window.speechSynthesis.speak(utterance);
-            }
+                    window.speechSynthesis.speak(utterance);
+                    printLog("Đã tống lệnh đọc TTS vào CPU.");
+                }
+            }, 300); // Trễ 300ms đợi chớp màn hình
         }
 
         function startTimer() {
@@ -107,7 +135,7 @@
             const sec = parseInt(document.getElementById('secInput').value);
             printLog(`Đã hẹn giờ ${sec} giây. HÃY TẮT MÀN HÌNH NGAY!`);
             
-            // Dùng thủ thuật Web Worker nội bộ để đếm giờ (Chống bị Chrome ép xung)
+            // Worker nội bộ
             const inlineWorker = `
                 let t;
                 self.onmessage = function(e) {
@@ -121,7 +149,7 @@
             
             worker.onmessage = (e) => {
                 if (e.data === 'FIRE') {
-                    triggerAlarmWithDucking("Đã đến giờ. Nhiệm vụ ưu tiên: Thức dậy ngay lập tức. Tôi nhắc lại, thức dậy ngay lập tức.");
+                    triggerKickStartAlarm("Nhiệm vụ ưu tiên: Rời khỏi giường ngay lập tức.");
                 }
             };
             
