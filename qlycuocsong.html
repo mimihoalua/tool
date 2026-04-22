@@ -392,10 +392,13 @@ document.addEventListener('click', (e) => {
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
 
+// FIX TỬ HUYỆT RACE CONDITION: Đồng bộ timestamp vào cả lúc gán Local
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
-        window.lastLocalPush = Date.now(); 
+        const ts = Date.now();
+        window.lastLocalPush = ts; 
+        localStorage.setItem('lifeos_v8_time_' + window.viewingUser, ts.toString());
     }
 };
 
@@ -1008,7 +1011,7 @@ window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110'}};
 
 // ==============================================================================
-// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (GHI ĐÈ 1: HỦY LUỒNG LẮNG NGHE & FIX LỖI DATA)
+// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (FIX LỖI DATA RACE TỐI ƯU HÓA TIMESTAMP)
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -1051,7 +1054,23 @@ window.VaultUtils={
 };
 
 window.VaultState={data:[],activeInterval:null,activeCategory:'all'};
-window.VaultStorageLayer={_k:'',init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];if(!Array.isArray(this._data))this._data=[]}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},getData(){return window.VaultState.data||[]},saveLocalOnly(){localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[]))},add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}};
+// FIX: Ghi Timestamp vào ổ cứng mỗi khi thay đổi Data Vault
+window.VaultStorageLayer={
+    _k:'',
+    init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];if(!Array.isArray(this._data))this._data=[]}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},
+    getData(){return window.VaultState.data||[]},
+    saveLocalOnly(){
+        localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[]));
+        const ts = Date.now();
+        window.lastLocalPush = ts;
+        const usr = this._k.replace('lifeos_v8_vault_', '');
+        localStorage.setItem('lifeos_v8_time_' + usr, ts.toString());
+    },
+    add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},
+    update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},
+    remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},
+    replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}
+};
 
 window.VaultUI={_c:'all',_q:'',_tI:null,
     openModal(id){
@@ -1182,6 +1201,7 @@ window.VaultApp={
 
 window.cloudSyncCompleted = false;
 
+// FIX: PHẪU THUẬT LÕI FIREBASE SYNC (CỨU DEADLOCK)
 window.FirebaseSync = {
     _d: null, _u: null, _i: false, _k: '',
     init(k) {
@@ -1197,35 +1217,38 @@ window.FirebaseSync = {
         if(!this._d || !this._k) return;
         try {
             this._u = this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d => {
-                if(!d.exists) { window.cloudSyncCompleted = true; return; }
+                // FIX TỬ HUYỆT: Giải phóng cờ ngay lập tức khi mạng thông
+                window.cloudSyncCompleted = true; 
+                
+                if(!d.exists) { this.pushAll(); return; }
                 const c = d.data(); if(!c) return;
                 
                 const cloudTime = c.updatedAt || 0;
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
+                // Nếu Local có dữ liệu chưa kịp đẩy -> Đẩy ép lên Cloud
                 if (localTime > cloudTime) { this.pushAll(); return; }
 
+                // Nếu Cloud mới hơn -> Tải về máy
                 if(c.data && Array.isArray(c.data)) { 
                     const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
-                    if (!window.cloudSyncCompleted) {
-                        window.todos = cleanCloudTodos; localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos)); localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
+                    const ls = JSON.stringify(window.todos||[]), cs = JSON.stringify(cleanCloudTodos); 
+                    if(ls !== cs) { 
+                        window.todos = cleanCloudTodos; 
+                        localStorage.setItem('lifeos_v8_data_'+this._k, cs); 
+                        localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString()); 
                         if(document.visibilityState === 'visible' && window.renderTasksOnly) window.renderTasksOnly(); 
-                        if(window.preloadNextAlarm) window.preloadNextAlarm();
-                    } else if (cloudTime >= localTime) {
-                        const ls = JSON.stringify(window.todos||[]), cs = JSON.stringify(cleanCloudTodos); 
-                        if(ls !== cs) { window.todos = cleanCloudTodos; localStorage.setItem('lifeos_v8_data_'+this._k, cs); localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString()); if(document.visibilityState === 'visible' && window.renderTasksOnly) window.renderTasksOnly(); if(window.preloadNextAlarm) window.preloadNextAlarm(); }
+                        if(window.checkAlarms) window.checkAlarms(); 
                     }
                 }
                 
                 if(c.stats) { localStorage.setItem('lifeos_stats_v8_'+this._k, JSON.stringify(c.stats)); window.stats=c.stats; const sc = document.getElementById('streak-count'); if(sc) sc.textContent = window.stats.streak||0; }
                 if(c.vaultData && Array.isArray(c.vaultData) && window.VaultUtils && window.VaultStorageLayer) { 
                     const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
-                    if (cloudTime >= localTime || !window.cloudSyncCompleted) {
-                        window.VaultStorageLayer.replaceAll(cleanCloudData); 
-                        if(document.visibilityState === 'visible' && window.VaultUI) window.VaultUI.renderVaultCards();
-                    }
+                    window.VaultStorageLayer.replaceAll(cleanCloudData); 
+                    if(document.visibilityState === 'visible' && window.VaultUI) window.VaultUI.renderVaultCards();
                 }
-                window.cloudSyncCompleted = true;
+                
                 const dt = document.getElementById('pwaStatusDot'); if(dt) dt.className = 'status-dot dot-green mt-0.5 hidden md:inline-block';
             }, e => { const dt = document.getElementById('pwaStatusDot'); if(dt) dt.className = 'status-dot dot-red mt-0.5 hidden md:inline-block'; });
         } catch(e) {}
@@ -1233,9 +1256,15 @@ window.FirebaseSync = {
     pushAll() {
         if(!this._i || !this._d || !this._k || !window.cloudSyncCompleted) return;
         try {
-            const currentTs = window.lastLocalPush || Date.now();
+            const currentTs = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || Date.now().toString());
             const safeTodos = (window.todos||[]).map(t => ({...t, id: String(t.id)}));
-            this._d.collection('LifeOS_Profiles').doc(this._k).set({ data: safeTodos, stats: window.stats||{streak:0}, sentinelLogs: window.sentinelLogs||[], vaultData: (window.VaultStorageLayer ? window.VaultStorageLayer.getData() : [])||[], updatedAt: currentTs },{merge:true}).catch(e=>{});
+            this._d.collection('LifeOS_Profiles').doc(this._k).set({ 
+                data: safeTodos, 
+                stats: window.stats||{streak:0}, 
+                sentinelLogs: window.sentinelLogs||[], 
+                vaultData: (window.VaultStorageLayer ? window.VaultStorageLayer.getData() : [])||[], 
+                updatedAt: currentTs 
+            },{merge:true}).catch(e=>{});
         } catch(e) {}
     }
 };
