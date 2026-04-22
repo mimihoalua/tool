@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="referrer" content="no-referrer"> <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" id="meta-theme-color" content="#f8fafc">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -409,6 +410,7 @@ window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 // X-QUANG TTS (NATIVE + GOOGLE GTX + RESPONSIVE VOICE FALLBACK)
 // ==============================================================================
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
+
 window.initTTS=()=>{
     if(!window.synth)return; window.ttsActive=true;
     const l=()=>{const v=window.synth.getVoices();window.voice=v.find(x=>x.lang.includes('vi'))||v[0];setTxt('voice-info-badge',window.voice?window.voice.name:'Chưa có giọng VN')};
@@ -521,10 +523,7 @@ window.startBackgroundWorker = () => {
 
 document.addEventListener('visibilitychange', () => { 
     if (document.visibilityState === 'hidden') window.unlockAudio(); 
-    if (document.visibilityState === 'visible') { 
-        if (window.renderTasksOnly) window.renderTasksOnly(); 
-        if (window.VaultUI) window.VaultUI.renderVaultCards(); 
-    }
+    // KHÔNG BAO GIỜ GỌI renderTasksOnly() Ở ĐÂY NỮA, SẼ GÂY RÁC UI KHI F5 HOẶC MỞ TAB TRÊN PC
 });
 
 // Dao động vật lý (Bypass loa ngoài thiết bị)
@@ -793,7 +792,7 @@ window.stopGlobalAlarm = (actionType) => {
 
         if(needsSync) {
             window.saveLocalTodos();
-            if(document.visibilityState === 'visible') window.renderTasksOnly();
+            window.renderTasksOnly();
             if(window.FirebaseSync) window.FirebaseSync.pushAll();
         }
     }
@@ -829,7 +828,7 @@ window.checkAlarms = () => {
     
     if(needsSync) { 
         window.saveLocalTodos(); 
-        if(document.visibilityState === 'visible') window.renderTasksOnly(); 
+        window.renderTasksOnly(); 
         if(window.FirebaseSync) window.FirebaseSync.pushAll(); 
     } 
     if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
@@ -854,7 +853,7 @@ window.toggleAlarm = (e, id) => {
 window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white','shadow-sm');b.classList.add('bg-white','text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a){a.classList.add('active','bg-primary','text-white','shadow-sm');a.classList.remove('bg-white','text-slate-500')}window.renderTasksOnly()};
 
 window.renderTasksOnly=()=>{
-    if(document.visibilityState === 'hidden') return;
+    // KHÔNG BAO GIỜ BỌC visibilityState Ở ĐÂY NỮA, NÓ LÀ KẺ THÙ CỦA ĐỒNG BỘ!
     let d=window.todos||[];
     const today = window.getIsoDate();
     const nowMs = Date.now();
@@ -966,6 +965,7 @@ window.execDeleteTask=id=>{
     window.renderTasksOnly(); window.showToast('Đã xóa nhiệm vụ','ph-trash'); if(window.soundEnabled)window.playSpeechTTS('Đã xóa');
 };
 
+// SỬA NHIỆM VỤ
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return;
     window.vibrate(15);
@@ -1101,7 +1101,17 @@ window.VaultUtils={
 };
 
 window.VaultState={data:[],activeInterval:null,activeCategory:'all'};
-window.VaultStorageLayer={_k:'',init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];if(!Array.isArray(this._data))this._data=[]}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},getData(){return window.VaultState.data||[]},saveLocalOnly(){localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[]))},add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}};
+
+window.VaultStorageLayer={
+    _k:'',
+    init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];if(!Array.isArray(this._data))this._data=[]}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},
+    getData(){return window.VaultState.data||[]},
+    saveLocalOnly(){ localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[])); },
+    add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},
+    update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},
+    remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},
+    replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}
+};
 
 window.VaultUI={_c:'all',_q:'',_tI:null,
     openModal(id){
@@ -1128,7 +1138,7 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
     stopTOTPUpdater(){if(this._tI){clearInterval(this._tI);this._tI=null}},
     _tU(){document.querySelectorAll('.vault-totp-code').forEach(e=>{const s=e.dataset.secret;if(!s)return;const c=window.VaultUtils.generateTOTP(s);if(c)e.textContent=c});const n=Math.floor(Date.now()/1000),p=((n%30)/30)*100;document.querySelectorAll('.totp-progress').forEach(e=>{e.style.width=p+'%'})},
     renderVaultCards(){
-        if(document.visibilityState === 'hidden') return;
+        // KHÔNG BAO GIỜ BỌC visibilityState Ở ĐÂY NỮA
         const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||!es)return;
         let d=window.VaultStorageLayer.getData();
         if(this._c!=='all'){d=d.filter(e=>{if(this._c==='custom')return e.category==='custom'||!['account','crypto','note','service'].includes(e.category);return e.category===this._c})}
@@ -1231,7 +1241,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 5. ĐỒNG BỘ ĐÁM MÂY (ASYNC PENDING LOCK CHỐNG ECHO DEADLOCK)
+// 5. ĐỒNG BỘ ĐÁM MÂY (ASYNC PENDING LOCK CHỐNG ECHO DEADLOCK VÀ VISIBILITY DEADLOCK)
 // ==============================================================================
 window.cloudSyncCompleted = false;
 
@@ -1260,7 +1270,7 @@ window.FirebaseSync = {
             firebase.auth().signInAnonymously().then(() => { 
                 this._listen(); 
             }).catch(e => {
-                this._listen(); // Fallback nếu fail auth
+                this._listen(); // Fallback
             });
         } catch(e) { this._i = false; }
     },
@@ -1282,12 +1292,13 @@ window.FirebaseSync = {
                     const ls = JSON.stringify(window.todos||[]);
                     const cs = JSON.stringify(cleanCloudTodos);
                     
-                    // CHỈ UPDATE NẾU CÓ SỰ THAY ĐỔI THẬT SỰ (CHỐNG NHÁY UI VÀ RÁC CPU)
+                    // CHỈ UPDATE NẾU CÓ SỰ THAY ĐỔI THẬT SỰ
                     if (ls !== cs || !window.cloudSyncCompleted) {
                         window.todos = cleanCloudTodos; 
                         localStorage.setItem('lifeos_v8_data_'+this._k, cs); 
-                        if(document.visibilityState === 'visible' && window.renderTasksOnly) window.renderTasksOnly(); 
-                        if(window.checkAlarms) window.checkAlarms(); // Vẫn tính toán báo thức kể cả tắt màn hình
+                        // KHÔNG CHECK VISIBLE Ở ĐÂY NỮA, ÉP VẼ DOM ĐỂ ĐỒNG BỘ CHÉO THIẾT BỊ HOẠT ĐỘNG
+                        if(window.renderTasksOnly) window.renderTasksOnly(); 
+                        if(window.checkAlarms) window.checkAlarms(); 
                     }
                 }
                 
@@ -1303,7 +1314,8 @@ window.FirebaseSync = {
                     const cv = JSON.stringify(cleanCloudData); 
                     if(lv !== cv || !window.cloudSyncCompleted) {
                         window.VaultStorageLayer.replaceAll(cleanCloudData); 
-                        if(document.visibilityState === 'visible' && window.VaultUI) window.VaultUI.renderVaultCards();
+                        // KHÔNG CHECK VISIBLE Ở ĐÂY NỮA
+                        if(window.VaultUI) window.VaultUI.renderVaultCards();
                     }
                 }
                 
@@ -1339,7 +1351,7 @@ window.FirebaseSync = {
                 clearTimeout(this._pendingTimeout);
                 if(dt) dt.className = 'status-dot dot-green mt-0.5 hidden md:inline-block';
             }).catch(e => {
-                this._pending = false; // Hạ cờ nếu lỗi
+                this._pending = false; 
                 clearTimeout(this._pendingTimeout);
                 if(dt) dt.className = 'status-dot dot-red mt-0.5 hidden md:inline-block';
             });
