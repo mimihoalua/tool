@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V5</title>
+    <title>Audio Core Tester V6</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
         button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
@@ -14,16 +14,16 @@
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V5: Base64 & AI Nội Sinh</h2>
+    <h2>Kiểm Thử V6: Giọng Nói Ngậm Sẵn</h2>
     
-    <audio id="alarm-player" loop playsinline webkit-playsinline></audio>
-    <audio id="silence-player" loop playsinline webkit-playsinline></audio>
+    <audio id="alarm-player" loop playsinline src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="tts-player" loop playsinline></audio>
 
-    <button class="btn-green" onclick="initEngine()">1. Khởi động Ống Thủy</button>
+    <button class="btn-green" id="btn-start" onclick="initEngine()">1. Khởi động Ống Thủy</button>
     
     <div style="display: flex; gap: 10px; margin-top: 10px;">
         <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px;">
-        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
+        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình)</button>
     </div>
 
     <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">3. Tắt Báo Động</button>
@@ -38,95 +38,64 @@
             logEl.scrollTop = logEl.scrollHeight; 
         }
 
-        // Base64 Chuông Báo Thức Ngắn (1 giây)
-        const ALARM_BASE64 = "data:audio/mp3;base64,//OExAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAcAAAPbQAIERUYGyAhJSgqLTA0Nz0/QkNIS05SVVheYGVpbnByd3x+gYSKjZCUlpmdn6Sora+xt7q9v8PHz9LV2dzf4eTp7u/x9fr9/gAAADJMQU1FMy45OXIxA1sAAAAALiAAABAAIAdBAAAA8AAA9tAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//OExAAAAAAANIAAAAAExBTUUzLjk5LjUAAAEsAABoAAAAAAAMAAAgADwz+4OFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/84TEAAAACpP14AAAwAIwGABGg8gRkOQ4gIg0ODAQgIQIgEwA/f+gBgBgA8X//wBv/+Q4v/wA2Q8QYg0ODAQgA//zgMQAAAII41oADxggAAAP/84TEAAQAANJAAAAAAA//zhMQAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAAD//zhMQAAAAADSAAAAAAP/84TEAAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAAD//zhMQAAAAADSAAAAAAP/84TEAAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAA=";
-        const SILENCE_BASE64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-
         let isEngineRunning = false;
         let alarm = document.getElementById('alarm-player');
-        let silence = document.getElementById('silence-player');
+        let tts = document.getElementById('tts-player');
         
-        let ttsVoice = null;
-        let speechHacks = []; // Chống Garbage Collection
-
-        // Nạp giọng AI
-        function loadVoice() {
-            if ('speechSynthesis' in window) {
-                const voices = window.speechSynthesis.getVoices();
-                ttsVoice = voices.find(v => v.lang.includes('vi')) || voices[0];
-            }
-        }
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = loadVoice;
-        }
+        let pingWorker;
 
         async function initEngine() {
-            printLog("Đang nạp Bom Nổ Chậm Base64...");
+            document.getElementById('btn-start').disabled = true;
+            printLog("Đang nạp file Âm thanh vào bộ nhớ RAM...");
             
-            // Ống thủy Tĩnh lặng chạy 100% volume để giữ Audio Focus
-            silence.src = SILENCE_BASE64;
-            silence.play().catch(e => printLog("Lỗi nạp Silence: " + e));
-
-            // Nạp file Chuông Base64 nhưng Mute nó đi
-            alarm.src = ALARM_BASE64;
+            // 1. Nạp file Chuông (Muted & Loop)
             alarm.muted = true;
             alarm.play().then(() => {
-                printLog("✅ Ống thủy đã ngậm Chuông Base64 ngầm.");
+                printLog("✅ Ống thủy Chuông đã ngậm thành công.");
             }).catch(e => printLog("❌ Lỗi nạp Chuông: " + e));
+
+            // 2. Nạp File Google TTS TRỰC TIẾP LÀM SOURCE NGAY TỪ ĐẦU (Muted & Loop)
+            const preloadedText = "Đã đến giờ. Hãy làm nhiệm vụ. Tỉnh dậy đi bạn ơi.";
+            const ttsURL = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(preloadedText)}`;
+            
+            tts.src = ttsURL;
+            tts.muted = true; // Phải Mute thì mới chạy ngầm liên tục được
+            tts.play().then(() => {
+                printLog("✅ Ống thủy TTS đã ngậm luồng giọng nói thành công.");
+            }).catch(e => printLog("❌ Lỗi nạp TTS: " + e));
 
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
                 catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
             }
 
-            // Gọi AI đọc thử 1 từ câm để kích hoạt Engine
-            loadVoice();
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance('');
-                u.volume = 0; window.speechSynthesis.speak(u);
-            }
-
             isEngineRunning = true;
         }
 
-        function triggerAlarm(text) {
+        function triggerAlarm() {
             printLog("🚨 ĐÃ ĐẾN GIỜ! BÁO ĐỘNG!");
 
-            // 1. Tháo Mute Chuông Vật lý
+            // THỦ THUẬT V6: CHỈ VIỆC UN-MUTE (GỠ TẮT TIẾNG)
+            // OS không thể cấm bạn Un-mute một file đang phát sẵn!
+            
+            // 1. Gỡ Mute Chuông và hạ Vol
             alarm.muted = false;
-            alarm.volume = 0.2; // Bóp volume xuống để AI đọc
-            printLog("▶️ Đang phát Chuông (Vol 0.2)");
+            alarm.volume = 0.2; 
+            printLog("▶️ Đã Un-mute Chuông (Vol 0.2)");
 
-            // 2. Ép AI Đọc Ngay Lập Tức
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                if (ttsVoice) utterance.voice = ttsVoice;
-                utterance.lang = 'vi-VN';
-                utterance.rate = 1.1;
-                
-                speechHacks.push(utterance); // Gắn vào RAM
+            // 2. Gỡ Mute Giọng Google
+            tts.currentTime = 0; // Trả về đầu file
+            tts.muted = false;
+            tts.volume = 1.0;
+            printLog("▶️ Đã Un-mute Giọng Google");
 
-                utterance.onstart = () => printLog("▶️ AI đang đọc nội dung...");
-                
-                utterance.onend = () => {
-                    printLog("⏹️ AI đọc xong. Nâng chuông lên Max.");
-                    alarm.volume = 1.0;
-                };
-
-                // Fallback nếu AI câm nín, sau 5 giây vẫn ép chuông lên Max
-                setTimeout(() => { 
-                    if (alarm.volume < 1.0) {
-                        printLog("⚠️ Timeout AI. Nâng chuông Max.");
-                        alarm.volume = 1.0; 
-                    }
-                }, 5000);
-
-                window.speechSynthesis.speak(utterance);
-            } else {
+            // Kỹ thuật căn giờ thủ công (Vì onended hay bị lỗi khi tắt màn hình)
+            // Canh đúng 5 giây sau (AI đọc xong), dập Mute thằng TTS và kích Max Chuông
+            setTimeout(() => {
+                printLog("⏹️ Tắt TTS. Nâng chuông lên Max.");
+                tts.muted = true;
                 alarm.volume = 1.0;
-            }
+            }, 6000);
         }
 
         function startTimer() {
@@ -135,31 +104,47 @@
             const sec = parseInt(document.getElementById('secInput').value);
             printLog(`⏳ Hẹn giờ ${sec} giây. TẮT MÀN HÌNH ĐI THÔI!`);
             
-            // Web Worker
+            // Web Worker Ping liên tục
             const inlineWorker = `
+                let ticks = 0;
+                let target = 0;
                 let t;
                 self.onmessage = function(e) {
                     if (e.data.cmd === 'start') {
-                        t = setTimeout(() => { self.postMessage('FIRE'); }, e.data.ms);
+                        target = e.data.ms / 1000;
+                        t = setInterval(() => { 
+                            ticks++;
+                            self.postMessage({ type: 'ping', val: ticks });
+                            if (ticks >= target) {
+                                clearInterval(t);
+                                self.postMessage({ type: 'FIRE' });
+                            }
+                        }, 1000);
                     }
                 };
             `;
             const blob = new Blob([inlineWorker], { type: 'application/javascript' });
-            const worker = new Worker(URL.createObjectURL(blob));
+            pingWorker = new Worker(URL.createObjectURL(blob));
             
-            worker.onmessage = (e) => {
-                if (e.data === 'FIRE') {
-                    triggerAlarm("Đã đến giờ. Tỉnh dậy ngay lập tức!");
+            pingWorker.onmessage = (e) => {
+                if (e.data.type === 'ping') {
+                    // Cập nhật giao diện đếm ngược liên tục (chống Freeze UI)
+                    console.log(`Tick: ${e.data.val}`);
+                    document.title = `Tick: ${e.data.val}`;
+                }
+                else if (e.data.type === 'FIRE') {
+                    triggerAlarm();
                 }
             };
             
-            worker.postMessage({ cmd: 'start', ms: sec * 1000 });
+            pingWorker.postMessage({ cmd: 'start', ms: sec * 1000 });
         }
 
         function stopAll() {
             alarm.muted = true;
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            printLog("Đã tắt báo động. Hệ thống chờ.");
+            tts.muted = true;
+            if (pingWorker) pingWorker.terminate();
+            printLog("Đã tắt báo động. Trở về trạng thái ngủ đông.");
         }
     </script>
 </body>
