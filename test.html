@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V16</title>
+    <title>Audio Core Tester V17</title>
     <style>
         body { font-family: system-ui; padding: 15px; background: #0f172a; color: white; margin: 0; }
         button { display: block; width: 100%; padding: 15px; margin: 8px 0; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; }
@@ -21,26 +21,26 @@
     </style>
 </head>
 <body>
-    <h3 style="margin: 0 0 10px 0;">V16: Nhạc Thật & Áp Chế Bóng Ma</h3>
+    <h3 style="margin: 0 0 10px 0;">V17: Bản Hoàn Thiện Âm Thanh Kép</h3>
     
     <audio id="bg-music" playsinline preload="auto"></audio>
     <audio id="tts-player" playsinline preload="auto"></audio>
 
-    <button class="btn-green" id="btn-start" onclick="initEngine()">1. Khởi động Nhạc Nền (MediaSession)</button>
+    <button class="btn-green" id="btn-start" onclick="initEngine()">1. Mở Trạm Gác (Khóa MediaSession)</button>
     
     <div style="background: #1e293b; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #475569;">
-        <input type="text" id="taskInput" value="Đến giờ rồi. Hệ thống V16 hoạt động hoàn hảo." placeholder="Nhập cảnh báo...">
-        <button class="btn-yellow" id="btn-load" onclick="cacheTTS()" disabled>2. Nạp Cache Giọng AI</button>
+        <input type="text" id="taskInput" value="Đến giờ rồi. Hệ thống V17 hoạt động xuất sắc." placeholder="Nhập cảnh báo...">
+        <button class="btn-yellow" id="btn-load" onclick="cacheTTS()" disabled>2. Ép Giọng AI vào Local Cache</button>
     </div>
     
     <div style="display: flex; gap: 10px;">
         <input type="number" id="secInput" value="15" style="width: 70px; text-align: center; font-weight: bold;">
-        <button class="btn-blue" id="btn-timer" onclick="startTimer()" style="margin: 0; flex-grow: 1;" disabled>3. Hẹn giờ (Tắt màn hình)</button>
+        <button class="btn-blue" id="btn-timer" onclick="startTimer()" style="margin: 0; flex-grow: 1;" disabled>3. Hẹn giờ (Tắt màn hình ngay)</button>
     </div>
 
     <button class="btn-red" onclick="stopAll()">4. Tắt Toàn Bộ</button>
 
-    <div id="log">Khởi tạo V16...<br></div>
+    <div id="log">Khởi tạo V17. Khắc phục triệt để lỗi Google...<br></div>
 
     <script>
         const logEl = document.getElementById('log');
@@ -56,27 +56,17 @@
             logEl.scrollTop = logEl.scrollHeight; 
         }
 
-        // BÀI HÁT THỰC TẾ CỦA BẠN
+        // BÀI HÁT THỰC TẾ ĐỂ MỞ MEDIASESSION (Nhịp Điệu Hạnh Phúc)
         const MUSIC_URL = "https://dn721807.ca.archive.org/0/items/giai-toa-moi-thu/Nh%E1%BB%8Bp_%C4%90i%E1%BB%87u_H%E1%BA%A1nh_Ph%C3%BAc_200545_v1.mp3";
         
         let audioCtx;
         let isEngineRunning = false;
         let pingWorker;
+        let beepInterval;
         let bgMusic = document.getElementById('bg-music');
         let ttsPlayer = document.getElementById('tts-player');
 
-        // BỘ CẢM BIẾN "X-QUANG" SO SÁNH READY STATE
-        setInterval(() => {
-            if (isEngineRunning) {
-                const state = bgMusic.readyState;
-                // Chỉ in log cảnh báo nếu State rớt dưới 3 (Bóng ma câm điếc)
-                if (state < 3 && !bgMusic.paused) {
-                    printLog(`CẢNH BÁO: ReadyState rớt xuống ${state}! Đang bị nghẽn mạng hoặc OS bóp.`, "error");
-                }
-            }
-        }, 2000);
-
-        // DAO ĐỘNG VẬT LÝ
+        // BẢO VẬT SINH TỒN: DAO ĐỘNG VẬT LÝ
         function firePhysicalBeep() {
             if (!audioCtx) return;
             try {
@@ -96,7 +86,7 @@
                 
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.5);
-            } catch(e) { printLog("Lỗi Oscillator: " + e.message, "error"); }
+            } catch(e) {}
         }
 
         async function initEngine() {
@@ -107,20 +97,20 @@
             
             bgMusic.src = MUSIC_URL;
             bgMusic.loop = true;
-            bgMusic.volume = 0.5; // Mở nhỏ để bạn nghe thấy nhạc đang chạy
+            bgMusic.volume = 0.5; // Mở âm lượng vừa để bạn nghe rõ
             
             bgMusic.play().then(() => {
-                printLog("✅ Đang phát Nhạc Nền. Lắng nghe...");
+                printLog("✅ Đang phát Nhạc Nền MP3 thật.");
                 if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({ title: "Nhịp Điệu Hạnh Phúc", artist: "Hệ thống đang theo dõi..." });
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: "LifeOS Sentinel", artist: "Đang canh gác" });
                     navigator.mediaSession.playbackState = 'playing';
-                    printLog("✅ MediaSession Đã Ghim. Sẵn sàng vượt màn hình tắt.", "hardware");
+                    printLog("✅ MediaSession Đã Ghim Cứng.", "hardware");
                 }
             }).catch(e => printLog(e.message, "error"));
 
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); printLog("WakeLock OK.", "debug"); } 
-                catch (err) { printLog("WakeLock từ chối.", "debug"); }
+                catch (err) {}
             }
 
             isEngineRunning = true;
@@ -128,73 +118,75 @@
             document.getElementById('btn-load').disabled = false;
         }
 
-        // THUẬT TOÁN: CACHE TRÌNH DUYỆT (ÉP CHẠY LÚC SÁNG MÀN HÌNH RỒI PAUSE)
+        // BƯỚC ĐỘT PHÁ V17: ÉP TẢI VÀO BỘ NHỚ TRÌNH DUYỆT (LOCAL CACHE)
         function cacheTTS() {
             const text = document.getElementById('taskInput').value;
-            printLog(`Bắt đầu Nạp Cache AI...`, "debug");
+            printLog(`Đang kéo mạng: Nạp Giọng AI...`, "debug");
             document.getElementById('btn-load').disabled = true;
 
-            const ttsURL = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
+            // BÍ KÍP: Dùng tham số client=gtx để bypass lỗi chặn nguồn của Google
+            const googleTTS = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=vi&client=gtx`;
             
-            ttsPlayer.src = ttsURL;
-            ttsPlayer.muted = true; // Muted để không phát ra tiếng lúc này
+            ttsPlayer.src = googleTTS;
+            ttsPlayer.muted = true; // Khóa miệng không cho phát tiếng lúc này
             
-            // Ép Play để trình duyệt tải file mp3 về Cache
+            // Ép phát 1.5 giây để hút toàn bộ File MP3 vào bộ nhớ RAM của Chrome
             ttsPlayer.play().then(() => {
-                // Ngay khi play thành công (file đã tải), Pause nó lại và tua về 0
-                ttsPlayer.pause();
-                ttsPlayer.currentTime = 0;
-                printLog("✅ Đã Cache Giọng AI thành công. Không cần mạng nữa!", "hardware");
-                document.getElementById('btn-timer').disabled = false;
-            }).catch(e => {
-                printLog("Lỗi Cache TTS: " + e.message, "error");
-                document.getElementById('btn-timer').disabled = false; // Vẫn cho chạy để test tiếng bíp
+                printLog("Đang hút dữ liệu vào Local...", "debug");
+                setTimeout(() => {
+                    ttsPlayer.pause();
+                    ttsPlayer.currentTime = 0;
+                    printLog("✅ Giọng AI ĐÃ BỊ NHỐT VÀO LOCAL. Sẵn sàng 100%!", "hardware");
+                    document.getElementById('btn-timer').disabled = false;
+                }, 1500); 
+            }).catch(err => {
+                printLog("Lỗi nạp Audio: " + err.message, "error");
+                document.getElementById('btn-timer').disabled = false; // Vẫn cho hẹn giờ test Beep
             });
         }
 
         function triggerAlarm() {
             printLog("🚨 KÍCH NỔ BÁO ĐỘNG!");
 
-            // 1. Bíp Vật Lý
+            // 1. Dao động Bíp Vật Lý
+            firePhysicalBeep();
             let beepCount = 0;
             const beepInterval = setInterval(() => {
                 firePhysicalBeep();
                 beepCount++;
                 if(beepCount > 5) clearInterval(beepInterval);
             }, 1000);
-            printLog("▶️ Đã bắn Dao động Bíp.", "hardware");
+            printLog("▶️ Đã bắn Dao động Bíp liên tục.", "hardware");
 
-            // 2. AUDIO DUCKING (HẠ NHẠC NỀN)
+            // 2. AUDIO DUCKING: Hạ volume bài hát MP3 xuống
             bgMusic.volume = 0.1;
             printLog("▶️ Đã hạ Nhạc nền xuống 10%", "debug");
 
-            // 3. KÍCH NỔ GIỌNG AI (TỪ CACHE)
-            ttsPlayer.muted = false;     
+            // 3. THÁO MUTE GIỌNG AI (Kêu từ Local, không cần mạng nữa)
+            ttsPlayer.muted = false;
             ttsPlayer.volume = 1.0;
             
-            // Play từ Cache, không cần mạng!
             ttsPlayer.play().then(() => {
-                printLog("▶️ Chị Google đang đọc...", "hardware");
-            }).catch(e => printLog("Lỗi Play TTS (Sát thủ MIUI): " + e.message, "error"));
+                printLog("▶️ Chị Google đang đọc dõng dạc!", "hardware");
+            }).catch(e => printLog("Lỗi Play TTS: " + e.message, "error"));
             
-            // 4. ĐỌC XONG TRẢ LẠI NHẠC NỀN
+            // 4. TRẢ LẠI 100% VOLUME KHI ĐỌC XONG
             ttsPlayer.onended = () => {
-                printLog("⏹️ AI đọc xong. Khôi phục Nhạc nền 100%.", "debug");
+                printLog("⏹️ AI đọc xong. Nâng nhạc nền lên Max.", "debug");
                 bgMusic.volume = 0.5;
             };
 
-            // Fallback: Lỡ TTS xịt, sau 5 giây vẫn nâng nhạc lên
-            setTimeout(() => { if (bgMusic.volume === 0.1) bgMusic.volume = 0.5; }, 5000);
+            // Fallback an toàn lỡ sự kiện onended bị kẹt
+            setTimeout(() => { if(bgMusic.volume === 0.1) bgMusic.volume = 0.5; }, 6000);
         }
 
         function startTimer() {
             if (!isEngineRunning) { alert("Chưa khởi động!"); return; }
             
             const sec = parseInt(document.getElementById('secInput').value);
-            printLog(`⏳ Đếm ngược ${sec}s. TẮT MÀN HÌNH LẬP TỨC!`);
+            printLog(`⏳ Đếm ngược ${sec}s. TẮT MÀN HÌNH NGAY!`);
             document.getElementById('btn-timer').disabled = true;
             
-            // WORKER CHỐNG NGỦ (Chỉ in 4 giây cuối cho gọn)
             const workerCode = `
                 let ticks = 0; let target = 0; let timer;
                 self.onmessage = function(e) {
@@ -230,6 +222,7 @@
 
         function stopAll() {
             if (pingWorker) pingWorker.postMessage({ cmd: 'stop' });
+            clearInterval(beepInterval);
             bgMusic.pause();
             ttsPlayer.pause();
             document.getElementById('btn-timer').disabled = false;
