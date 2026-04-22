@@ -22,10 +22,9 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script src="./jsOTP.min.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 <style>
 /* MA TRẬN 5 MÀU THEME - MULTI SEASONS */
 :root, [data-theme="light"] {
@@ -364,7 +363,9 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// NATIVE TTS
+// ==============================================================================
+// NATIVE TTS & FALLBACK BẢO VỆ ORB
+// ==============================================================================
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.initTTS=()=>{
     if(!window.synth)return; window.ttsActive=true;
@@ -374,21 +375,34 @@ window.initTTS=()=>{
     window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
 };
 
-window.playSpeechTTS=(text)=>{
-    if(!window.soundEnabled) return;
-    try {
-        const c = el('tts-audio');
-        if(c) {
-            c.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
-            c.play().catch(()=>{ 
-                if(window.synth) { window.synth.cancel(); const u=new SpeechSynthesisUtterance(text); if(window.voice)u.voice=window.voice; u.rate=1.1; u.pitch=1.1; window.synth.speak(u); }
-            });
-        } else {
-            if(window.synth) { window.synth.cancel(); const u=new SpeechSynthesisUtterance(text); if(window.voice)u.voice=window.voice; u.rate=1.1; u.pitch=1.1; window.synth.speak(u); }
+window.playSpeechTTS = (text) => {
+    if (!window.soundEnabled) return;
+    
+    // Fallback Native an toàn tuyệt đối
+    const speakNative = () => {
+        if(window.synth) {
+            window.synth.cancel(); 
+            const u = new SpeechSynthesisUtterance(text); 
+            if(window.voice) u.voice = window.voice; 
+            u.rate = 1.1; 
+            u.pitch = 1.1; 
+            window.synth.speak(u); 
         }
-    } catch(e) {
-        if(window.synth) { window.synth.cancel(); const u=new SpeechSynthesisUtterance(text); if(window.voice)u.voice=window.voice; u.rate=1.1; u.pitch=1.1; window.synth.speak(u); }
-    }
+    };
+
+    try {
+        const c = document.getElementById('tts-audio');
+        if (c) {
+            c.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
+            const playPromise = c.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn("Google TTS Blocked, Fallback to Native TTS:", error);
+                    speakNative();
+                });
+            }
+        } else { speakNative(); }
+    } catch (e) { speakNative(); }
 };
 
 // BẬT MỎ NEO SILENCE VÀ WORKER NỀN (CHỐNG NGỦ GẬT)
@@ -972,11 +986,11 @@ window.VaultUtils={
         });
         if(h){p.rawNotes=p.notes.join('\n');}else{p.rawNotes=c;}return p
     },
-    // [TÍCH HỢP FIX]: Ngăn lỗi sập trang khi gọi OTP
+    // ================= FALLBACK jsOTP =================
     generateTOTP(s){
         if(!s) return null;
         if(typeof window.jsOTP === 'undefined') {
-            console.warn("⚠️ jsOTP không tồn tại! Vui lòng đặt file jsOTP.min.js cùng cấp với qlycuocsong.html.");
+            console.warn("⚠️ jsOTP không tồn tại! Fallback activated.");
             return 'THIẾU-LIB'; 
         }
         try{ return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase()) }
