@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V18</title>
+    <meta name="referrer" content="no-referrer">
+    <title>Audio Core Tester V19</title>
     <style>
         body { font-family: system-ui; padding: 15px; background: #0f172a; color: white; margin: 0; }
         button { display: block; width: 100%; padding: 15px; margin: 8px 0; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; }
@@ -13,25 +14,25 @@
         .btn-blue { background: #3b82f6; color: white; }
         .btn-red { background: #ef4444; color: white; }
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 15px; margin-bottom: 8px; box-sizing: border-box; }
-        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 11px; height: 48vh; overflow-y: auto; color: #34d399; margin-top: 10px; line-height: 1.6; border: 1px solid #475569; word-wrap: break-word; }
+        #log { background: #1e293b; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 10px; height: 50vh; overflow-y: auto; color: #34d399; margin-top: 10px; line-height: 1.5; border: 1px solid #475569; word-wrap: break-word; }
         .ping-text { color: #60a5fa; }
         .debug-text { color: #facc15; }
         .error-text { color: #f87171; }
         .hardware-text { color: #f472b6; font-weight: bold; }
-        .net-text { color: #a78bfa; font-weight: bold; }
+        .event-text { color: #a78bfa; }
     </style>
 </head>
 <body>
-    <h3 style="margin: 0 0 10px 0;">V18: X-Quang Mạng & Bypass Google</h3>
+    <h3 style="margin: 0 0 10px 0;">V19: Tàng Hình Cấp Cao & X-Quang</h3>
     
     <audio id="bg-music" playsinline preload="auto"></audio>
-    <audio id="tts-player" playsinline preload="auto"></audio>
+    <audio id="tts-player" playsinline></audio>
 
     <button class="btn-green" id="btn-start" onclick="initEngine()">1. Mở Trạm Gác (Khóa MediaSession)</button>
     
     <div style="background: #1e293b; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #475569;">
-        <input type="text" id="taskInput" value="Đã tải xong file âm thanh. Sẵn sàng báo động." placeholder="Nhập cảnh báo...">
-        <button class="btn-yellow" id="btn-load" onclick="fetchAndCacheTTS()" disabled>2. Hút File Google vào RAM</button>
+        <input type="text" id="taskInput" value="Hệ thống V19 hoàn hảo. Tỉnh dậy đi bạn." placeholder="Nhập cảnh báo...">
+        <button class="btn-yellow" id="btn-load" onclick="loadTTS()" disabled>2. Nạp Giọng AI (Bypass Lõi)</button>
     </div>
     
     <div style="display: flex; gap: 10px;">
@@ -41,7 +42,7 @@
 
     <button class="btn-red" onclick="stopAll()">4. Tắt Toàn Bộ</button>
 
-    <div id="log">Khởi động Engine V18 (Full Network Debug)...<br></div>
+    <div id="log">Khởi động Engine V19 (Full Event Debug)...<br></div>
 
     <script>
         const logEl = document.getElementById('log');
@@ -52,7 +53,7 @@
             if (type === 'debug') span = `<span class="debug-text">⚙️ ${msg}</span>`;
             if (type === 'error') span = `<span class="error-text">❌ ${msg}</span>`;
             if (type === 'hardware') span = `<span class="hardware-text">🔊 ${msg}</span>`;
-            if (type === 'net') span = `<span class="net-text">🌐 ${msg}</span>`;
+            if (type === 'event') span = `<span class="event-text">📡 ${msg}</span>`;
             
             logEl.innerHTML += `[${time}] ${span}<br>`; 
             logEl.scrollTop = logEl.scrollHeight; 
@@ -67,19 +68,42 @@
         let ttsPlayer = document.getElementById('tts-player');
         let beepInterval;
 
-        // BỘ LẮNG NGHE LỖI AUDIO SIÊU CHI TIẾT
+        // ==========================================
+        // MÁY ĐO ĐIỆN TÂM ĐỒ (X-QUANG TTS PLAYER)
+        // ==========================================
+        const eventsToLog = ['loadstart', 'loadedmetadata', 'loadeddata', 'canplay', 'canplaythrough', 'stalled', 'suspend', 'playing'];
+        eventsToLog.forEach(evt => {
+            ttsPlayer.addEventListener(evt, () => {
+                printLog(`[Event Audio] ${evt.toUpperCase()}`, 'event');
+                if (evt === 'canplaythrough') {
+                    printLog("✅ THÀNH CÔNG: Đã ngậm MP3 vào RAM hoàn hảo!", "hardware");
+                    document.getElementById('btn-timer').disabled = false;
+                    document.getElementById('btn-load').innerText = "Đã Nạp Xong";
+                }
+            });
+        });
+
         ttsPlayer.addEventListener('error', (e) => {
             const err = ttsPlayer.error;
             let errMsg = "Không rõ";
             if(err) {
                 switch(err.code) {
-                    case 1: errMsg = "MEDIA_ERR_ABORTED (Bị hủy)"; break;
-                    case 2: errMsg = "MEDIA_ERR_NETWORK (Lỗi mạng)"; break;
-                    case 3: errMsg = "MEDIA_ERR_DECODE (Lỗi giải mã)"; break;
-                    case 4: errMsg = "MEDIA_ERR_SRC_NOT_SUPPORTED (Nguồn bị từ chối/File hỏng)"; break;
+                    case 1: errMsg = "Bị hủy"; break;
+                    case 2: errMsg = "Lỗi mạng"; break;
+                    case 3: errMsg = "Lỗi giải mã"; break;
+                    case 4: errMsg = "Nguồn từ chối (403/Bot Detect)"; break;
                 }
             }
-            printLog(`Audio Error: ${errMsg}`, "error");
+            printLog(`[Event LỖI] ${errMsg}`, "error");
+            
+            // TỰ ĐỘNG CHUYỂN SANG MẠNG LƯỚI DỰ PHÒNG (RESPONSIVE VOICE)
+            if (ttsPlayer.src.includes('google')) {
+                printLog("⚠️ Google từ chối. Kích hoạt mạng dự phòng API 2...", "debug");
+                const text = document.getElementById('taskInput').value;
+                const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(text)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                ttsPlayer.src = backupUrl;
+                ttsPlayer.load();
+            }
         });
 
         // DAO ĐỘNG VẬT LÝ NGUYÊN BẢN
@@ -89,19 +113,13 @@
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
                 osc.frequency.setValueAtTime(1108.73, audioCtx.currentTime + 0.1);
-                
                 gain.gain.setValueAtTime(1, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
             } catch(e) { printLog("Lỗi Bíp: " + e.message, "error"); }
         }
 
@@ -134,76 +152,55 @@
             document.getElementById('btn-load').disabled = false;
         }
 
-        // THUẬT TOÁN V18: FETCH & BLOB (HÚT FILE VÀO RAM)
-        async function fetchAndCacheTTS() {
+        // TẢI GIỌNG AI BẰNG NGUỒN TRỰC TIẾP
+        function loadTTS() {
             const text = document.getElementById('taskInput').value;
-            printLog(`Đang hút file Google TTS qua cổng GTX...`, "net");
+            printLog(`Bắt đầu Nạp URL trực tiếp (Bypass Referrer)...`, "debug");
             document.getElementById('btn-load').disabled = true;
-            document.getElementById('btn-load').innerText = "Đang hút...";
+            document.getElementById('btn-load').innerText = "Đang nạp...";
 
-            // CỔNG BÍ MẬT CLIENT=GTX (Giúp bypass CORS 403 Forbidden của Google)
             const gtxURL = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
             
-            try {
-                const response = await fetch(gtxURL);
-                printLog(`HTTP Status: ${response.status} ${response.statusText}`, "net");
-                
-                if (!response.ok) throw new Error("Mạng từ chối HTTP " + response.status);
-                
-                const blob = await response.blob();
-                printLog(`Kích thước file hút được: ${blob.size} bytes`, "net");
-                
-                if (blob.size < 100) throw new Error("File quá nhỏ, có thể là trang lỗi HTML.");
-
-                // Biến file thành Object URL nội bộ
-                const blobUrl = URL.createObjectURL(blob);
-                
-                // Nạp vào thẻ Audio và Câm miệng nó đi (Ngậm sâm)
-                ttsPlayer.src = blobUrl;
-                ttsPlayer.muted = true;
-                ttsPlayer.loop = true;
-                
-                await ttsPlayer.play();
-                printLog("✅ Thẻ Audio đã ngậm file MP3 nội bộ chạy ngầm!", "hardware");
-                
-                document.getElementById('btn-load').innerText = "Đã Hút Xong";
-                document.getElementById('btn-timer').disabled = false;
-                
-            } catch (error) {
-                printLog(`Lỗi hút file: ${error.message}`, "error");
-                document.getElementById('btn-load').innerText = "Lỗi. Thử lại";
-                document.getElementById('btn-load').disabled = false;
-                // Vẫn mở nút hẹn giờ để test tiếng bíp nếu TTS xịt
-                document.getElementById('btn-timer').disabled = false;
-            }
+            // Ép thẻ audio nhận link. Nhờ <meta referrer>, Google sẽ cho tải MP3.
+            ttsPlayer.src = gtxURL;
+            
+            // Yêu cầu trình duyệt tải file xuống bộ nhớ ngay lập tức
+            ttsPlayer.load();
+            
+            // X-Quang sẽ bắt đầu in ra tiến trình tải ở bên trên.
+            // Nút Hẹn Giờ sẽ tự mở khi Event CANPLAYTHROUGH bắn ra.
+            
+            // Mở trước nút hẹn giờ sau 5s phòng khi mạng chậm quá event không nổ
+            setTimeout(() => { document.getElementById('btn-timer').disabled = false; }, 5000);
         }
 
         function triggerAlarm() {
             printLog("🚨 KÍCH NỔ BÁO ĐỘNG!");
 
-            // 1. DAO ĐỘNG VẬT LÝ
+            // 1. DAO ĐỘNG VẬT LÝ LUÔN KÊU
             firePhysicalBeep();
             beepInterval = setInterval(firePhysicalBeep, 1000);
             printLog("▶️ Đã bắn Dao động Bíp liên tục.", "hardware");
 
-            // 2. AUDIO DUCKING
+            // 2. AUDIO DUCKING (Bóp cổ nhạc nền)
             bgMusic.volume = 0.1;
             printLog("▶️ Đã hạ Nhạc nền xuống 10%", "debug");
 
-            // 3. THÁO BỊT MIỆNG TTS
-            if (ttsPlayer.src) {
-                ttsPlayer.currentTime = 0;   // Tua lại đầu
-                ttsPlayer.muted = false;     // Tháo Mute
-                ttsPlayer.loop = false;      // Tắt lặp
+            // 3. ÉP THẺ TTS HÁT TỪ RAM
+            if (ttsPlayer.readyState >= 2) { // 2 = HAVE_CURRENT_DATA
+                ttsPlayer.currentTime = 0;   
                 ttsPlayer.volume = 1.0;
-                printLog("🗣️ Đang phát file MP3 nội bộ...", "hardware");
+                
+                ttsPlayer.play().then(() => {
+                    printLog("🗣️ Đang phát Giọng AI nội bộ...", "hardware");
+                }).catch(e => printLog("Lỗi Play TTS: " + e.message, "error"));
                 
                 ttsPlayer.onended = () => {
                     printLog("⏹️ AI đọc xong. Khôi phục Nhạc nền 100%.", "debug");
                     bgMusic.volume = 0.5;
                 };
             } else {
-                printLog("Không có file MP3 để hát.", "error");
+                printLog("Lỗi: MP3 TTS chưa được tải vào RAM.", "error");
                 setTimeout(() => { bgMusic.volume = 0.5; }, 5000);
             }
         }
@@ -237,8 +234,8 @@
             
             pingWorker.onmessage = (e) => {
                 if (e.data.type === 'ping') {
-                    // CHỈ PING 4 GIÂY CUỐI
-                    if (e.data.val >= e.data.target - 3) {
+                    // CHỈ PING TỪ GIÂY THỨ 8 ĐẾN 15
+                    if (e.data.val >= e.data.target - 7) {
                         printLog(`Ping... ${e.data.val}s`, 'ping');
                     }
                 } else if (e.data.type === 'fire') {
