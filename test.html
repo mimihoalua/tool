@@ -3,40 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V10</title>
+    <title>Audio Core Tester V11</title>
     <style>
-        body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
-        button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
-        .btn-yellow { background: #f59e0b; color: black; }
+        body { font-family: system-ui; padding: 15px; background: #0f172a; color: white; margin: 0; }
+        button { display: block; width: 100%; padding: 15px; margin: 8px 0; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
         .btn-green { background: #10b981; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-red { background: #ef4444; color: white; }
-        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 350px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
+        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; height: 55vh; overflow-y: auto; color: #34d399; margin-top: 10px; line-height: 1.6; border: 1px solid #475569; }
         .ping-text { color: #60a5fa; }
+        .debug-text { color: #facc15; }
+        .error-text { color: #f87171; }
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V10: Phục Hồi Dao Động Vật Lý & Thông Báo</h2>
+    <h3 style="margin: 0 0 10px 0;">V11: Trình Phát Nhạc & Full Debug</h3>
     
-    <audio id="silence-player" loop playsinline></audio>
+    <audio id="music-player" playsinline></audio>
 
-    <button class="btn-yellow" onclick="requestPermissions()">1. Xin quyền Thông Báo (Quan trọng)</button>
-    <button class="btn-green" id="btn-start" onclick="initEngine()">2. Khởi động Hệ Thống</button>
+    <button class="btn-green" id="btn-start" onclick="initEngine()">1. Mở Trình Phát Nhạc Ngầm</button>
     
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px;">
-        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">3. Hẹn giờ (Tắt màn hình ngay)</button>
+    <div style="display: flex; gap: 10px;">
+        <input type="number" id="secInput" value="15" style="width: 70px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px;">
+        <button class="btn-blue" id="btn-timer" onclick="startTimer()" style="margin: 0; flex-grow: 1;" disabled>2. Hẹn giờ (Chờ Tải TTS...)</button>
     </div>
 
-    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">4. Tắt Báo Động</button>
+    <button class="btn-red" onclick="stopAll()">3. Tắt Toàn Bộ</button>
 
-    <div id="log">Chờ lệnh...<br></div>
+    <div id="log">Khởi tạo môi trường Debug...<br></div>
 
     <script>
         const logEl = document.getElementById('log');
-        function printLog(msg, isPing = false) { 
-            const time = new Date().toLocaleTimeString();
-            const span = isPing ? `<span class="ping-text">${msg}</span>` : msg;
+        function printLog(msg, type = 'normal') { 
+            const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            let span = msg;
+            if (type === 'ping') span = `<span class="ping-text">${msg}</span>`;
+            if (type === 'debug') span = `<span class="debug-text">⚙️ DEBUG: ${msg}</span>`;
+            if (type === 'error') span = `<span class="error-text">❌ LỖI: ${msg}</span>`;
+            
             logEl.innerHTML += `[${time}] ${span}<br>`; 
             logEl.scrollTop = logEl.scrollHeight; 
         }
@@ -46,28 +50,41 @@
         let audioCtx;
         let isEngineRunning = false;
         let pingWorker;
-        let alarmInterval;
-        let notifInterval;
+        let musicPlayer = document.getElementById('music-player');
+        let ttsBlobUrl = null; // Chứa bài hát chị Google
 
-        async function requestPermissions() {
-            if ("Notification" in window) {
-                const permission = await Notification.requestPermission();
-                if (permission === "granted") printLog("✅ Quyền Thông báo ĐÃ CẤP.");
-                else printLog("❌ Quyền Thông báo BỊ TỪ CHỐI.");
-            } else {
-                printLog("⚠️ Trình duyệt không hỗ trợ Notification.");
+        // 1. CHUẨN BỊ BÀI HÁT TTS (Làm lúc màn hình đang sáng để không bị chặn mạng)
+        async function preFetchTTS() {
+            printLog("Bắt đầu Pre-fetch TTS...", "debug");
+            try {
+                const text = "Nhiệm vụ khẩn cấp. Hãy thức dậy và kiểm tra ngay lập tức.";
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+                
+                const blob = await response.blob();
+                ttsBlobUrl = URL.createObjectURL(blob); // Biến file mạng thành file ổ cứng cục bộ
+                printLog(`Đã ép file TTS thành Blob URL: ${ttsBlobUrl.substring(0, 30)}...`, "debug");
+                printLog("✅ Đã tải xong bài hát Giọng AI.");
+                
+                document.getElementById('btn-timer').disabled = false;
+                document.getElementById('btn-timer').innerText = "2. Hẹn giờ (Tắt màn hình ngay)";
+            } catch (err) {
+                printLog("Không tải được TTS: " + err.message, "error");
+                printLog("Vẫn cho phép test tiếng Bíp vật lý.", "debug");
+                document.getElementById('btn-timer').disabled = false;
             }
         }
 
-        // ĐỘNG CƠ VẬT LÝ V8 (Giữ nguyên không sửa)
+        // DAO ĐỘNG VẬT LÝ (Back-up tuyệt đối)
         function firePhysicalBeep() {
-            if (!audioCtx) return;
+            if (!audioCtx) { printLog("AudioCtx null", "error"); return; }
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 
-                // Tiếng còi cứu thương chói tai
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
                 osc.frequency.setValueAtTime(1108.73, audioCtx.currentTime + 0.1);
@@ -80,88 +97,80 @@
                 
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.5);
+                printLog("Đã bắn Dao động Bíp.", "debug");
             } catch(e) {
-                printLog("Lỗi Bíp Vật Lý: " + e.message);
+                printLog("Lỗi Oscillator: " + e.message, "error");
             }
         }
 
         async function initEngine() {
-            printLog("Đang khởi tạo Web Audio API...");
+            printLog("Khởi tạo Trình Phát Nhạc...", "debug");
             
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             audioCtx = new AudioContext();
+            printLog(`AudioContext State: ${audioCtx.state}`, "debug");
             
-            const silence = document.getElementById('silence-player');
-            silence.src = SILENCE_B64;
-            silence.play().then(() => {
-                printLog("✅ Ống thủy tĩnh lặng đang hoạt động.");
-            }).catch(e => printLog("❌ Lỗi Ống thủy: " + e));
-
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance('');
-                u.volume = 0; window.speechSynthesis.speak(u);
-            }
+            // Ép Trình phát nhạc hát bài tĩnh lặng để giữ MediaSession
+            musicPlayer.src = SILENCE_B64;
+            musicPlayer.loop = true;
+            musicPlayer.play().then(() => {
+                printLog("✅ Trình phát nhạc ĐÃ CHẠY.");
+                
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: "LifeOS Music", artist: "Đang canh gác" });
+                    navigator.mediaSession.playbackState = 'playing';
+                    printLog("Đã ghim MediaSession nổi.", "debug");
+                }
+            }).catch(e => printLog(e.message, "error"));
 
             if ('wakeLock' in navigator) {
-                try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
-                catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
+                try { await navigator.wakeLock.request('screen'); printLog("WakeLock OK.", "debug"); } 
+                catch (err) { printLog("WakeLock từ chối.", "debug"); }
             }
 
-            firePhysicalBeep(); // Test loa ngay lúc bật
-            
             isEngineRunning = true;
             document.getElementById('btn-start').disabled = true;
-            document.getElementById('btn-start').style.opacity = '0.5';
-            printLog("🚀 HỆ THỐNG SẴN SÀNG.");
-        }
-
-        // Bắn thông báo đẩy liên tục để ép màn hình sáng
-        function fireNotification() {
-            if ("Notification" in window && Notification.permission === "granted") {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.showNotification("🔔 ĐẾN GIỜ RỒI!", {
-                        body: "Hãy thức dậy và làm nhiệm vụ!",
-                        vibrate: [200, 100, 200, 100, 200], // Rung điện thoại
-                        priority: "max"
-                    });
-                }).catch(() => {
-                    new Notification("🔔 ĐẾN GIỜ RỒI!", { body: "Dậy đi thôi!" });
-                });
-            }
+            
+            // Tiến hành tải bài hát TTS ngay sau khi động cơ chạy
+            preFetchTTS();
         }
 
         function triggerAlarm() {
-            printLog("🚨 ĐÃ ĐẾN GIỜ! PHÁT BÁO ĐỘNG!");
+            printLog("🚨 BÁO ĐỘNG ĐƯỢC KÍCH HOẠT!");
 
-            // 1. Phục hồi tiếng Bíp vật lý chói tai (Chuẩn V8)
+            // 1. Bắn tiếng Bíp Vật lý (Vì nó luôn sống)
             firePhysicalBeep();
-            alarmInterval = setInterval(firePhysicalBeep, 1000);
-            printLog("▶️ Đang phát tiếng bíp vật lý liên tục.");
+            let beepCount = 0;
+            const beepInterval = setInterval(() => {
+                firePhysicalBeep();
+                beepCount++;
+                if(beepCount > 5) clearInterval(beepInterval); // Cho bíp 5 lần
+            }, 1000);
 
-            // 2. Bắn thông báo rung máy
-            fireNotification();
-            notifInterval = setInterval(fireNotification, 5000); // Bắn lại mỗi 5 giây để chớp màn
-
-            // 3. Thử gọi giọng nói AI (Tranh thủ lúc màn hình bị Notification làm chớp sáng)
-            if ('speechSynthesis' in window) {
-                printLog("🗣️ Cố gắng gọi Giọng nói AI...");
-                const utterance = new SpeechSynthesisUtterance("Đã đến giờ báo thức.");
-                utterance.lang = 'vi-VN';
-                utterance.rate = 1.1;
-                window.speechSynthesis.speak(utterance);
+            // 2. ÉP TRÌNH PHÁT NHẠC NEXT SANG BÀI TTS
+            if (ttsBlobUrl) {
+                printLog("▶️ Đang Next sang bài hát TTS...", "debug");
+                musicPlayer.loop = false;
+                musicPlayer.src = ttsBlobUrl;
+                musicPlayer.play().then(() => {
+                    printLog("✅ Trình phát nhạc ĐANG HÁT BÀI TTS!");
+                    if ('mediaSession' in navigator) navigator.mediaSession.metadata.title = "Đang báo động...";
+                }).catch(e => {
+                    printLog("Trình phát nhạc từ chối hát: " + e.message, "error");
+                });
+            } else {
+                printLog("Không có Blob TTS để hát.", "error");
             }
         }
 
         function startTimer() {
-            if (!isEngineRunning) { alert("Chưa khởi động hệ thống!"); return; }
+            if (!isEngineRunning) { alert("Chưa khởi động!"); return; }
             
             const sec = parseInt(document.getElementById('secInput').value);
-            printLog(`⏳ Bắt đầu đếm ngược ${sec} giây. TẮT MÀN HÌNH ĐI!`);
+            printLog(`⏳ Đếm ngược ${sec}s. TẮT MÀN HÌNH NGAY!`);
             
             const workerCode = `
-                let ticks = 0;
-                let target = 0;
-                let timer;
+                let ticks = 0; let target = 0; let timer;
                 self.onmessage = function(e) {
                     if (e.data.cmd === 'start') {
                         target = e.data.sec;
@@ -173,9 +182,7 @@
                                 self.postMessage({ type: 'fire' });
                             }
                         }, 1000);
-                    } else if (e.data.cmd === 'stop') {
-                        clearInterval(timer);
-                    }
+                    } else if (e.data.cmd === 'stop') { clearInterval(timer); }
                 };
             `;
             const blob = new Blob([workerCode], { type: 'application/javascript' });
@@ -184,7 +191,10 @@
             
             pingWorker.onmessage = (e) => {
                 if (e.data.type === 'ping') {
-                    printLog(`Ping... ${e.data.val}s`, true);
+                    // YÊU CẦU CỦA BẠN: CHỈ HIỂN THỊ TỪ GIÂY THỨ 8
+                    if (e.data.val >= 8) {
+                        printLog(`Ping... ${e.data.val}s`, 'ping');
+                    }
                 } else if (e.data.type === 'fire') {
                     triggerAlarm();
                 }
@@ -195,10 +205,9 @@
 
         function stopAll() {
             if (pingWorker) pingWorker.postMessage({ cmd: 'stop' });
-            clearInterval(alarmInterval);
-            clearInterval(notifInterval);
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            printLog("Đã tắt báo động và bộ đếm.");
+            musicPlayer.pause();
+            musicPlayer.src = "";
+            printLog("Đã tắt toàn bộ.");
         }
     </script>
 </body>
