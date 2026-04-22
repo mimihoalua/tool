@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinh Thánh Kiến Trúc - Tiêu Chuẩn Kỹ Thuật Tối Cao</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        code, pre { font-family: 'Fira Code', monospace; }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1rem;
+        }
+
+        .code-block {
+            background-color: #020617; color: #e2e8f0; padding: 1.25rem; border-radius: 0.75rem;
+            font-size: 0.875rem; overflow-x: auto; border: 1px solid #1e293b;
+        }
+        .code-block span.comment { color: #64748b; font-style: italic; }
+        .code-block span.keyword { color: #c084fc; }
+        .code-block span.function { color: #38bdf8; }
+        .code-block span.string { color: #a3e635; }
+
+        .gradient-text {
+            background: linear-gradient(to right, #34d399, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="selection:bg-emerald-500/30 selection:text-emerald-200">
+
+    <div class="fixed inset-0 z-[-1] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')]"></div>
+
+    <header class="pt-24 pb-16 px-6 text-center border-b border-slate-800">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-mono text-xs font-bold tracking-widest border border-emerald-500/20 mb-6">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            TIÊU CHUẨN KIẾN TRÚC BẮT BUỘC
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight">KINH THÁNH CÔNG NGHỆ <br><span class="gradient-text">WEB AUDIO BACKGROUND</span></h1>
+        <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto font-light leading-relaxed">
+            Bộ quy tắc tối thượng áp dụng cho mọi dự án phát nhạc chạy nền. Đảm bảo ứng dụng vượt qua mọi rào cản cấm ngặt của Android Doze Mode và MIUI, giữ tỷ lệ sống sót 100% trong bóng tối.
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-16 space-y-12">
+
+        <div class="glass-card p-8 md:p-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 blur-3xl rounded-full group-hover:bg-emerald-500/30 transition-all"></div>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-2xl text-emerald-400 shadow-inner">I</div>
+                <h2 class="text-2xl md:text-3xl font-bold">Lõi Âm Thanh Kép (1 Động - 1 Tĩnh)</h2>
+            </div>
+            
+            <p class="text-slate-300 leading-relaxed mb-6">
+                Cấu trúc thẻ DOM bắt buộc phải duy trì <b>Đúng 2 thẻ Audio</b>. Cấm dùng Base64. Cấm chèn Audio vào bên trong React Tree.
+            </p>
+
+            <div class="space-y-6">
+                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50 border-l-4 border-l-emerald-500">
+                    <h4 class="text-lg font-bold text-white mb-2">A. Single Native Player (Thẻ Động)</h4>
+                    <p class="text-sm text-slate-400 mb-3">Phục vụ luồng nhạc chính. Chỉ dùng 1 thẻ để HĐH cấp phát Audio Focus duy nhất, chống liệt phím màn hình khóa.</p>
+                    <code class="px-2 py-1 bg-slate-900 text-emerald-300 rounded font-mono text-sm border border-slate-700">&lt;audio id="mstq-player" preload="auto" playsinline webkit-playsinline&gt;&lt;/audio&gt;</code>
+                </div>
+
+                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50 border-l-4 border-l-indigo-500">
+                    <h4 class="text-lg font-bold text-white mb-2">B. Passive Silence Anchor (Thẻ Tĩnh - V2)</h4>
+                    <p class="text-sm text-slate-400 mb-3">Phục vụ khóa lệnh CPU. Bắt buộc dùng <b>File MP3 rỗng dài 30 phút</b>. Tuyệt đối không dùng chuỗi Data Base64 ngắn để tránh sinh ra "Bão Sự Kiện" đánh sập RAM.</p>
+                    <code class="px-2 py-1 bg-slate-900 text-indigo-300 rounded font-mono text-sm border border-slate-700">&lt;audio id="mstq-silence" preload="auto" loop playsinline src="silence_30min.mp3"&gt;&lt;/audio&gt;</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-8 md:p-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 blur-3xl rounded-full group-hover:bg-blue-500/30 transition-all"></div>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-2xl text-blue-400 shadow-inner">II</div>
+                <h2 class="text-2xl md:text-3xl font-bold">Network Prefetching (Tải Mạng Tàng Hình)</h2>
+            </div>
+            
+            <p class="text-slate-300 leading-relaxed mb-6">
+                Việc chuyển bài bằng cách đổi <code>src</code> khi màn hình đang tắt sẽ bị MIUI kết án tử hình. Mạng phải được lấy ngầm trước khi bài cũ kết thúc.
+            </p>
+
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
+                <h4 class="text-md font-bold text-white mb-3">Luật 20 Giây Cuối:</h4>
+                <p class="text-sm text-slate-400 mb-4">Khi thanh đo của bài đang phát chạm mốc đếm ngược 20 giây cuối, hàm <code>fetch()</code> không đồng bộ sẽ được kích hoạt để nạp bài tiếp theo vào bộ nhớ đệm (Cache) của máy.</p>
+                <div class="code-block">
+<span class="keyword">if</span> (target.duration > 30 && target.currentTime >= target.duration - 20) {
+    <span class="comment">// Gọi mạng ẩn danh qua mode no-cors, nhét vào Cache</span>
+    <span class="function">fetch</span>(nextSong.stream_url, { mode: <span class="string">'no-cors'</span>, cache: <span class="string">'force-cache'</span> });
+}
+                </div>
+                <div class="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                    <p class="text-xs text-rose-300 font-bold uppercase tracking-wider mb-1">Quy tắc Cứu Giải:</p>
+                    <p class="text-sm text-slate-300">Vì file lấy về là Opaque Blob (bảo mật), khi gán link này vào thẻ audio lúc sang bài mới, bắt buộc phải gọi <code>audio.load()</code> để ép phần cứng C++ giải nén Cache, nếu không sẽ bị kẹt vĩnh viễn.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-8 md:p-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/20 blur-3xl rounded-full group-hover:bg-amber-500/30 transition-all"></div>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-2xl text-amber-400 shadow-inner">III</div>
+                <h2 class="text-2xl md:text-3xl font-bold">Zero CPU (Chế Độ Đóng Băng Giao Diện)</h2>
+            </div>
+            
+            <p class="text-slate-300 leading-relaxed mb-6">
+                Một UI liên tục giật (Render) trong bóng tối là miếng mồi ngon cho hệ thống dọn rác của Android.
+            </p>
+
+            <ul class="space-y-4">
+                <li class="flex items-start gap-4 bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
+                    <span class="text-xl">🛑</span>
+                    <div>
+                        <h4 class="font-bold text-white text-sm mb-1">Cấm Cập Nhật UI</h4>
+                        <p class="text-xs text-slate-400">Các hàm SetState (như chạy thanh tiến trình) bắt buộc phải bị bọc trong lớp IF: <code>if (document.visibilityState === 'visible')</code>.</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-4 bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
+                    <span class="text-xl">🛑</span>
+                    <div>
+                        <h4 class="font-bold text-white text-sm mb-1">Cấm Ghi Ổ Cứng (I/O)</h4>
+                        <p class="text-xs text-slate-400">Không ghi LocalStorage khi màn hình đang khóa. Hành vi ghi dữ liệu liên tục kích hoạt báo động ngốn điện của máy.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="glass-card p-8 md:p-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/20 blur-3xl rounded-full group-hover:bg-rose-500/30 transition-all"></div>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-rose-500 border border-rose-400 flex items-center justify-center font-black text-2xl text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]">IV</div>
+                <h2 class="text-2xl md:text-3xl font-bold text-white">Bọc Thép Màn Hình Khóa (Lockscreen API)</h2>
+            </div>
+            
+            <p class="text-slate-300 leading-relaxed mb-6">
+                Lỗi liệt phím Play/Pause trên màn hình khóa xảy ra do lệnh Callback gọi vào biến React đã bị đóng băng.
+            </p>
+
+            <div class="bg-slate-800/80 p-6 rounded-xl border border-rose-500/30">
+                <h4 class="text-md font-bold text-white mb-3">Giao thức Móc nối Trực tiếp (Direct DOM Hook):</h4>
+                <p class="text-sm text-slate-400 mb-4">API MediaSession phải chọc thẳng vào ID phần cứng, và được trang bị bộ "Thuốc trợ tim" <code>load()</code> đề phòng HĐH kẹp cổ luồng.</p>
+                <div class="code-block">
+<span class="keyword">const</span> <span class="function">handlePlay</span> = () => {
+    <span class="keyword">const</span> a = document.<span class="function">getElementById</span>(<span class="string">'mstq-player'</span>);
+    <span class="keyword">const</span> anchor = document.<span class="function">getElementById</span>(<span class="string">'mstq-silence'</span>);
+    
+    <span class="comment">// 1. Khóa hãm chống spam lệnh play Mỏ neo</span>
+    <span class="keyword">if</span> (anchor && anchor.paused) anchor.<span class="function">play</span>().<span class="keyword">catch</span>(()=>{});
+    
+    <span class="keyword">if</span> (a) {
+        <span class="comment">// 2. Giải phóng xung đột bằng thủ thuật Load + Play</span>
+        a.<span class="function">play</span>().<span class="keyword">catch</span>(() => {
+            a.<span class="function">load</span>();
+            a.<span class="function">play</span>().<span class="keyword">catch</span>(()=>{});
+        });
+    }
+};
+                </div>
+            </div>
+        </div>
+
+    </main>
+    
+    <footer class="border-t border-slate-800 py-12 mt-12 text-center text-slate-500 no-print">
+        <p class="font-bold tracking-widest uppercase text-sm text-slate-400">Kinh Thánh Kiến Trúc - Bất Tử Hóa Ứng Dụng</p>
+        <p class="text-xs mt-2 font-mono">Đã được chứng thực qua máy đo Sentinel Hệ đa luồng.</p>
+    </footer>
+
+</body>
+</html>
