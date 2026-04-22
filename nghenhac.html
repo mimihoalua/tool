@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Nghe Nhạc - XIEMSANSANG</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <style>
+    :root, [data-theme] { transition: background-color 0.4s ease, color 0.4s ease; }
+    
+    [data-theme=light] { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --primary: #2563eb; --primary-fg: #ffffff; --border: #e2e8f0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(37, 99, 235, 0.08); }
+    [data-theme=peach] { --bg: #fff1f2; --card: #ffffff; --text: #4c0519; --muted: #9f1239; --primary: #f43f5e; --primary-fg: #ffffff; --border: #fecdd3; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(244, 63, 94, 0.08); }
+    [data-theme=mint]  { --bg: #f0fdf4; --card: #ffffff; --text: #064e3b; --muted: #059669; --primary: #10b981; --primary-fg: #ffffff; --border: #bbf7d0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(16, 185, 129, 0.08); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 14px; font-weight: 600; transition: transform 0.1s; cursor: pointer; }
+    .btn:active { transform: scale(0.95); } 
+    .btn-primary { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+    
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+    .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--border); transition: background-color 0.2s; cursor: pointer; }
+    .song-row:active { background-color: var(--border); }
+    .song-row.active { background-color: var(--active-bg); }
+    .song-row.active .song-idx { color: var(--primary); font-weight: 900; animation: pulse 1.5s infinite; }
+    
+    .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .action-btn:active { background: var(--border); transform: scale(0.9); }
+
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; width: 90%; max-width: 380px; text-align: center; }
+    .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Custom Select for Timer */
+    select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body class="bg-[var(--bg)] text-[var(--text)] font-sans pb-40">
+  <div id="root"></div>
+
+  <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
+  <audio id="mstq-silence" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+
+  <script type="text/javascript">
+    const { useState, useEffect, useRef, useCallback, createElement: e } = React;
+
+    const SONGS_CACHE_KEY='xs_songs_v3';
+    const RESUME_KEY='xs_resume_v3'; 
+    const THEME_KEY='xs_theme_v3';
+    const SHUFFLE_KEY='xs_shuffle';
+    const REPEAT_KEY='xs_repeat';
+    const INITIAL_VISIBLE=50, VISIBLE_STEP=50;
+
+    const save=(k,v)=>{ try{ if (document.visibilityState === 'hidden') return; localStorage.setItem(k,JSON.stringify(v)); }catch{} };
+    const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
+    const formatTime=s=>{if(!isFinite(s)||s<0)return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return`${m}:${String(sec).padStart(2,'0')}`};
+    const haptic=(ms=14)=>{ try{ navigator.vibrate?.(ms); }catch{} };
+
+    let wakeLock = null;
+    const requestWakeLock = async () => { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } };
+    const releaseWakeLock = () => { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }).catch(()=>{}); } };
+
+    const Icon = ({d=24,p="M5 12h14", f="none", sw="1.7"}) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:f, stroke:"currentColor", strokeWidth:sw}, e('path', {d:p, strokeLinecap:"round", strokeLinejoin:"round"}));
+    const Icons={
+      play:(d)=>e(Icon, {d:d, p:"M8 5v14l11-7z", f:"currentColor", sw:"1"}), 
+      pause:(d)=>e(Icon, {d:d, p:"M6 5h4v14H6zM14 5h4v14h-4z", f:"currentColor", sw:"1"}),
+      next:(d)=>e(Icon, {d:d, p:"M13 5 20 12l-7 7V5z M4 5h2v14H4z", f:"currentColor", sw:"1"}), 
+      back:(d)=>e(Icon, {d:d, p:"M11 19 4 12l7-7v14z M18 5h2v14h-2z", f:"currentColor", sw:"1"}),
+      share:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('circle',{cx:"18",cy:"5",r:"3"}), e('circle',{cx:"6",cy:"12",r:"3"}), e('circle',{cx:"18",cy:"19",r:"3"}), e('line',{x1:"8.59",y1:"13.51",x2:"15.42",y2:"17.49"}), e('line',{x1:"15.41",y1:"6.51",x2:"8.59",y2:"10.49"})),
+      download:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('path',{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}), e('polyline',{points:"7 10 12 15 17 10"}), e('line',{x1:"12",y1:"15",x2:"12",y2:"3"})),
+      palette: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('circle',{cx:"12",cy:"12",r:"10"}), e('path',{d:"M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"})),
+      trash: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"3 6 5 6 21 6"}), e('path',{d:"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"})),
+      shuffle: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"16 3 21 3 21 8"}), e('line',{x1:"4",y1:"20",x2:"21",y2:"3"}), e('polyline',{points:"21 16 21 21 16 21"}), e('line',{x1:"15",y1:"15",x2:"21",y2:"21"}), e('line',{x1:"4",y1:"4",x2:"9",y2:"9"})),
+      repeat: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"})),
+      repeatOne: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"}), e('line',{x1:"12",y1:"10",x2:"12",y2:"14"}), e('line',{x1:"10",y1:"12",x2:"12",y2:"10"}))
+    };
+
+    const THEME_LIST = ['light', 'peach', 'mint'];
+
+    function App(){
+      const [isInitialized, setIsInitialized] = useState(false); 
+      const [theme, setTheme] = useState(localStorage.getItem(THEME_KEY) || 'light');
+      
+      useEffect(()=>{
+          document.documentElement.setAttribute('data-theme',theme);
+          localStorage.setItem(THEME_KEY,theme);
+      },[theme]);
+
+      const [toast, setToast] = useState(null);
+      useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
+
+      const [playlist,setPlaylist]=useState([]);
+      const [loading,setLoading]=useState(true);
+      const [visible,setVisible]=useState(INITIAL_VISIBLE);
+      const [filter,setFilter]=useState('');
+
+      const [currentIndex,setCurrentIndex]=useState(0);
+      const [playing,setPlaying]=useState(false);
+      const [progress,setProgress]=useState({current:0,duration:0});
+      
+      const [shuffle,setShuffle]=useState(load(SHUFFLE_KEY,false));
+      const [repeat,setRepeat]=useState(load(REPEAT_KEY,'all')); // 'off', 'all', 'one'
+      
+      const playlistRef = useRef(playlist); useEffect(()=>{playlistRef.current=playlist},[playlist]);
+      const currentIndexRef = useRef(currentIndex); 
+      const shuffleRef = useRef(shuffle); useEffect(()=>{shuffleRef.current=shuffle; save(SHUFFLE_KEY,shuffle);},[shuffle]);
+      const repeatRef = useRef(repeat); useEffect(()=>{repeatRef.current=repeat; save(REPEAT_KEY,repeat);},[repeat]);
+
+      const audioRef=useRef(null);
+      useEffect(()=>{ audioRef.current=document.getElementById('mstq-player'); },[]);
+
+      // HẸN GIỜ TẮT NHẠC
+      const [timerLeft,setTimerLeft]=useState(null);
+      const timerRef=useRef(null);
+      const handleTimerChange = (e) => {
+          const val = parseInt(e.target.value);
+          haptic();
+          clearInterval(timerRef.current);
+          if (val === 0) {
+              setTimerLeft(null); setToast('Đã hủy hẹn giờ'); return;
+          }
+          const ms = val * 60 * 1000;
+          const end = Date.now() + ms;
+          setTimerLeft(ms);
+          setToast(`Đã hẹn tắt sau ${val} phút`);
+          timerRef.current = setInterval(() => { 
+              const left = end - Date.now(); 
+              if(left <= 0){ clearInterval(timerRef.current); setTimerLeft(null); if(audioRef.current) audioRef.current.pause(); setPlaying(false); } 
+              else setTimerLeft(left); 
+          }, 1000);
+      };
+
+      const clearCache = () => {
+          if(confirm("Bạn có chắc chắn muốn xóa Cache và làm mới ứng dụng?")) {
+              localStorage.clear();
+              location.reload();
+          }
+      };
+
+      const refetch=useCallback(async()=>{
+        setLoading(true);
+        try{
+          let all=[];
+          const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+          const url=`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
+          
+          const r=await fetch(url,{cache:'no-store'}); 
+          if(r.ok){
+              const j=await r.json(); 
+              const docs=j?.response?.docs||[];
+              for(const d of docs){
+                try{
+                  const meta=await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(r=>r.json());
+                  (meta.files||[]).forEach(f=>{
+                    if(String(f.format||'').toUpperCase().includes('MP3')){
+                      // ƯU TIÊN LẤY TÊN FILE ĐỂ TRÁNH TRÙNG TÊN THƯ MỤC
+                      let trackTitle = f.name; 
+                      if(f.title && f.title.trim() !== d.title.trim()) trackTitle = f.title; // Dùng thẻ title nếu nó khác tên thư mục
+                      
+                      all.push({
+                          id:`${d.identifier}/${f.name}`,
+                          title: trackTitle.replace(/\.mp3$/i,'').replace(/_/g,' ').trim(),
+                          artist:d.creator||'Xiemsansang',
+                          stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`,
+                          duration:parseFloat(f.length||0)||0
+                      });
+                    }
+                  });
+                }catch{}
+              }
+          }
+          if(all.length > 0) { setPlaylist(all); save(SONGS_CACHE_KEY,all); } 
+          else throw new Error("Empty list");
+        }catch{
+          const cached=load(SONGS_CACHE_KEY,[]);
+          if(cached && cached.length > 0) setPlaylist(cached);
+          else setToast("Không có dữ liệu.");
+        }
+        setLoading(false);
+      },[]);
+      useEffect(()=>{refetch()},[refetch]);
+
+      async function shareTrack(s){ haptic(); try{ if(navigator.share) await navigator.share({title:s.title, url:s.stream_url}); else { await navigator.clipboard.writeText(s.stream_url); setToast('Đã copy link!'); } }catch{} }
+      async function downloadTrack(s) { haptic(); setToast(`Đang lấy file tải về...`); try { const a = document.createElement('a'); a.href = s.stream_url; a.download = `${s.title}.mp3`; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); } catch (e) { setToast('Lỗi tải file'); } }
+
+      const getNextIndexLogic = (idx) => {
+          const pl = playlistRef.current;
+          if (shuffleRef.current && pl.length > 1) {
+              let nextIdx = Math.floor(Math.random() * pl.length);
+              return (nextIdx === idx) ? (nextIdx + 1) % pl.length : nextIdx;
+          }
+          return (idx + 1) % pl.length;
+      };
+      
+      const getPrevIndexLogic = (idx) => (idx - 1 + playlistRef.current.length) % playlistRef.current.length;
+
+      const lastMediaSessionUpdateRef = useRef(0), lastUiUpdateRef = useRef(0), isTransitioningRef = useRef(false), prefetchDoneRef = useRef(false);
+
+      const triggerNetworkPrefetch = (idx) => { const nextSong = playlistRef.current[idx]; if (nextSong && nextSong.stream_url) fetch(nextSong.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=>{}); };
+
+      const playNativeSync = (i) => {
+        const a = audioRef.current; if(!a) return;
+        const s = playlistRef.current[i]; if(!s) return; 
+        
+        isTransitioningRef.current = true; prefetchDoneRef.current = false;
+        setCurrentIndex(i); currentIndexRef.current = i;
+        if (document.visibilityState === 'visible') setPlaying(true); 
+
+        if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
+        
+        a.loop = false; 
+        if (a.src !== s.stream_url) { a.src = s.stream_url; a.load(); }
+
+        const playPromise = a.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isTransitioningRef.current = false; requestWakeLock();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            }).catch(e => {
+                isTransitioningRef.current = false;
+                setTimeout(() => { a.load(); a.play().catch(()=>{}); }, 800);
+                if (document.visibilityState === 'visible') setPlaying(false); 
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            });
+        }
+      }; 
+
+      const playPauseUI = useCallback(() => {
+          haptic();
+          const a = audioRef.current; if(!a) return;
+          const anchor = document.getElementById('mstq-silence');
+          if (anchor && anchor.paused) anchor.play().catch(()=>{});
+
+          if(!playlistRef.current.length) return;
+          if(playing || (!a.paused && a.currentTime > 0)){ 
+            if (document.visibilityState === 'visible') setPlaying(false); 
+            a.pause(); releaseWakeLock();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+          } else { 
+            a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); });
+            if (document.visibilityState === 'visible') setPlaying(true);
+            requestWakeLock();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+          }
+      }, [playing]); 
+
+      const initAudioEngine = () => {
+          haptic(); setIsInitialized(true);
+          const anchor = document.getElementById('mstq-silence');
+          if (anchor) anchor.play().catch(()=>{});
+          if (playlistRef.current.length > 0 && !playing) playNativeSync(currentIndexRef.current);
+      };
+
+      useEffect(()=>{
+        const a = audioRef.current; if(!a) return;
+        const onTime = (e) => { 
+          const target = e.target;
+          if(isNaN(target.duration) || target.duration <= 0) return;
+          if (document.visibilityState === 'visible') {
+              const now = Date.now();
+              if (now - lastUiUpdateRef.current > 500) { setProgress({current: target.currentTime, duration: target.duration}); lastUiUpdateRef.current = now; }
+          }
+          
+          if (target.duration > 30 && target.currentTime >= target.duration - 20) {
+              if (!prefetchDoneRef.current) { prefetchDoneRef.current = true; triggerNetworkPrefetch(getNextIndexLogic(currentIndexRef.current)); }
+          }
+        };
+
+        const onEndedNative = () => {
+            if (repeatRef.current === 'one') { a.currentTime = 0; a.play().catch(()=>{}); return; }
+            if (repeatRef.current === 'off' && currentIndexRef.current === playlistRef.current.length - 1 && !shuffleRef.current) {
+                if (document.visibilityState === 'visible') setPlaying(false); return;
+            }
+            if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current));
+        };
+        
+        a.addEventListener('timeupdate',onTime); a.addEventListener('ended',onEndedNative);
+        return()=>{ a.removeEventListener('timeupdate',onTime); a.removeEventListener('ended',onEndedNative); };
+      },[]); 
+
+      useEffect(()=>{
+        if(!('mediaSession' in navigator)) return;
+        try{
+          navigator.mediaSession.setActionHandler('play', playPauseUI);
+          navigator.mediaSession.setActionHandler('pause', playPauseUI);
+          navigator.mediaSession.setActionHandler('nexttrack', () => { if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current)); });
+          navigator.mediaSession.setActionHandler('previoustrack', () => { if (!isTransitioningRef.current) playNativeSync(getPrevIndexLogic(currentIndexRef.current)); });
+        }catch(e){}
+      },[]);
+
+      const list = filter.trim() ? playlist.filter(s => (s.title||'').toLowerCase().includes(filter.toLowerCase())) : playlist;
+      const currentSong = playlist[currentIndex] || null;
+
+      return e('div', null,
+        toast && e('div', {className: "toast-container"}, e('div', {className: "toast-msg"}, toast)),
+        
+        /* HEADER & CÔNG CỤ */
+        e('div', {className: "px-4 pt-6 pb-4 border-b border-[var(--border)] bg-[var(--card)]/50"},
+            e('h1', {className: "text-2xl font-black text-[var(--primary)] uppercase tracking-wide"}, "Xiemsansang"),
+            e('p', {className: "text-sm text-[var(--muted)] mt-0.5 font-medium mb-4"}, "Luồng phát Pre-fetch bất tận"),
+            
+            // Thanh công cụ 1 hàng gọn gàng
+            e('div', {className: "flex items-center gap-3"},
+                e('select', {className: "timer-dropdown flex-1", onChange: handleTimerChange},
+                    e('option', {value: "0"}, "🕒 Hẹn giờ: Tắt"),
+                    [15,30,45,60,90,120].map(m => e('option', {key:m, value: m}, `🕒 Tắt sau ${m} phút`))
+                ),
+                e('button', {onClick: clearCache, className: "w-10 h-10 flex justify-center items-center rounded-full bg-rose-100 text-rose-600 active:scale-90"}, Icons.trash(20)),
+                e('button', {onClick: ()=>{haptic(); setTheme(THEME_LIST[(THEME_LIST.indexOf(theme) + 1) % THEME_LIST.length])}, className: "w-10 h-10 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90"}, Icons.palette(20))
+            ),
+            
+            // Đồng hồ đếm ngược
+            timerLeft && e('div', {className: "mt-3 text-center text-xs font-bold text-rose-500 animate-pulse"}, `Hệ thống sẽ dừng sau: ${formatTime(Math.ceil(timerLeft/1000))}`),
+
+            !isInitialized && e('button', {
+                className: "mt-5 btn btn-primary w-full py-4 text-lg shadow-lg shadow-[var(--primary)]/30 animate-pulse", 
+                onClick: initAudioEngine
+            }, "▶ Khởi Động & Phát Nhạc")
+        ),
+
+        /* PLAYLIST BLOCK */
+        e('div', {className: "px-2 pt-3"},
+            e('div', {className: "px-2 mb-3"},
+                e('input', {className: "w-full bg-[var(--card)] border border-[var(--border)] rounded-xl py-3 px-4 focus:outline-none focus:ring-2 ring-[var(--primary)]/50 shadow-sm transition-shadow", placeholder: "Tìm tên bài hát...", value: filter, onChange: e=>setFilter(e.target.value)})
+            ),
+            
+            loading ? e('div', {className: "p-10 text-center text-[var(--primary)] font-bold animate-pulse"}, "Đang đồng bộ máy chủ...") :
+            e('div', {className: "border border-[var(--border)] bg-[var(--card)]/80 rounded-2xl overflow-hidden shadow-sm"}, 
+                list.slice(0,visible).map((s, index) => {
+                    const isCurrent = currentIndexRef.current === playlist.findIndex(x => x.id === s.id);
+                    return e('div', { key: s.id, className: `song-row ${isCurrent ? 'active' : ''}`, onClick: () => {if(!isInitialized) initAudioEngine(); else pickSong(s);} },
+                        e('div', {className: `w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-[var(--muted)]'}`}, isCurrent ? "▶" : (index + 1)),
+                        e('div', {className: "flex-1 min-w-0 pr-2"}, 
+                            e('div', {className: `truncate text-[0.95rem] ${isCurrent ? 'text-[var(--primary)] font-bold' : 'text-[var(--text)] font-semibold'}`}, s.title),
+                            e('div', {className: "truncate text-[11px] font-medium text-[var(--muted)] mt-0.5"}, s.artist)
+                        ),
+                        e('div', {className: "flex items-center gap-1 flex-shrink-0"},
+                            e('button', { className: "action-btn text-[var(--primary)]", onClick: (ev)=>{ ev.stopPropagation(); shareTrack(s); } }, Icons.share(18)),
+                            e('span', { className: "text-xs font-mono font-bold text-[var(--muted)] w-10 text-center" }, formatTime(s.duration)),
+                            e('button', { className: "action-btn text-rose-500", onClick: (ev)=>{ ev.stopPropagation(); downloadTrack(s); } }, Icons.download(20))
+                        )
+                    );
+                }),
+                list.length>visible && e('button', { onClick: ()=>setVisible(v=>v+VISIBLE_STEP), className: "w-full py-4 text-sm font-bold text-[var(--primary)] hover:bg-[var(--active-bg)] transition-colors" }, "⬇ Tải thêm danh sách xuống")
+            )
+        ),
+
+        /* MINI PLAYER ĐA NĂNG */
+        currentSong && isInitialized && e('div', { className: "fixed bottom-0 left-0 right-0 w-full bg-[var(--card)]/95 border-t border-[var(--border)] backdrop-blur-2xl p-4 pb-[env(safe-area-inset-bottom)] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"},
+          
+          e('div', {className: "flex items-center justify-between gap-2 w-full max-w-2xl mx-auto mb-3"},
+              e('div', {className: "flex-1 min-w-0 pr-2"},
+                e('p', {className: "truncate font-extrabold text-[0.95rem] text-[var(--text)]"}, currentSong.title),
+                e('p', {className: "text-xs font-medium text-[var(--primary)] mt-0.5"}, playing ? "Đang phát..." : "Đã tạm dừng")
+              )
+          ),
+
+          e('div', {className: "flex items-center justify-between w-full max-w-2xl mx-auto px-2"},
+              // Nút Shuffle
+              e('button', {onClick: ()=>{haptic(); setShuffle(!shuffle)}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, Icons.shuffle(20)),
+              
+              // Cụm Play
+              e('div', {className: "flex items-center gap-4"},
+                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getPrevIndexLogic(currentIndex))}, Icons.back(22)), 
+                e('button', {className: "w-14 h-14 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg active:scale-95 transition-transform", onClick: playPauseUI}, playing?Icons.pause(28):Icons.play(28)), 
+                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getNextIndexLogic(currentIndex))}, Icons.next(22))
+              ),
+              
+              // Nút Repeat
+              e('button', {onClick: ()=>{haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all')}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
+          ),
+
+          e('div', {className: "max-w-2xl mx-auto mt-4 h-1.5 bg-[var(--border)] rounded-full overflow-hidden"},
+            e('div', {className: "h-full bg-[var(--primary)] rounded-full transition-all duration-[500ms] ease-linear", style:{width:`${progress.duration>0?(progress.current/progress.duration)*100:0}%`}})
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(e(App, null));
+  </script>
+</body>
+</html>
