@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ Kiến trúc Hệ thống — LifeOS V17 Master</title>
+    <title>Hồ sơ Kiến trúc Hệ thống — LifeOS V34 Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -17,7 +17,8 @@
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
+                        brand: { 50: '#fefce8', 100: '#fef9c3', 500: '#84cc16', 600: '#65a30d', 900: '#3f6212' },
+                        accent: { 500: '#f97316', 600: '#ea580c' }
                     }
                 }
             }
@@ -31,46 +32,44 @@
         .delay-100 { animation-delay: 0.1s; } .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; } .delay-500 { animation-delay: 0.5s; }
 
-        html { scroll-behavior: smooth; }
+        body { background-color: #f8fafc; }
         
         .code-block {
             background: #0f172a; color: #e2e8f0; font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem; line-height: 1.7; border-radius: 1rem; overflow-x: auto;
             border: 1px solid #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
-        .code-block .keyword { color: #c678dd; } /* Tím */
-        .code-block .function { color: #61afef; } /* Xanh dương */
-        .code-block .string { color: #98c379; } /* Xanh lá */
+        .code-block .keyword { color: #c678dd; } 
+        .code-block .function { color: #61afef; } 
+        .code-block .string { color: #98c379; } 
         .code-block .comment { color: #5c6370; font-style: italic; }
 
         .toc-link { transition: all 200ms ease; }
-        .toc-link:hover { color: #0ea5e9; padding-left: 0.5rem; }
-        .toc-link.active { color: #0ea5e9; font-weight: 700; border-left-color: #0ea5e9; background: linear-gradient(90deg, #f0f9ff 0%, transparent 100%); }
+        .toc-link:hover { color: #65a30d; padding-left: 0.5rem; }
+        .toc-link.active { color: #65a30d; font-weight: 700; border-left-color: #84cc16; background: linear-gradient(90deg, #fefce8 0%, transparent 100%); }
 
         .layer-card { transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1); }
-        .layer-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); border-color: #e2e8f0; }
-
-        .syntax-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .layer-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); border-color: #84cc16; }
         
         .golden-rule { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #f59e0b; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb:hover { background: #84cc16; }
     </style>
 </head>
-<body class="font-sans bg-slate-50 text-slate-700 selection:bg-brand-500 selection:text-white">
+<body class="font-sans text-slate-700 selection:bg-brand-500 selection:text-white">
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 h-20 flex items-center transition-all">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 h-20 flex items-center transition-all shadow-sm">
         <div class="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
-                <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
-                    <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i data-lucide="book-open" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <span class="text-lg font-black text-slate-900 tracking-tight">LifeOS</span>
-                    <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full ml-1.5 hidden sm:inline-block">V17 Master</span>
+                    <span class="text-xs font-bold text-white bg-brand-500 px-2 py-0.5 rounded-full ml-1.5 hidden sm:inline-block shadow-sm">V34 Final</span>
                 </div>
             </div>
             
@@ -78,7 +77,7 @@
                 <a href="#golden-rules" class="text-sm text-amber-600 hover:text-amber-700 flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Quy tắc Vàng</a>
                 <a href="#core-stack" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Kiến trúc</a>
                 <a href="#storage" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Dữ liệu</a>
-                <a href="#manual" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Cẩm nang</a>
+                <a href="#miui-hacks" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">Kỷ nguyên MIUI</a>
                 
                 <div class="w-px h-6 bg-slate-200 mx-1"></div>
                 <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="flex items-center gap-2 px-5 py-2.5 border-2 border-brand-500 text-brand-600 rounded-xl font-bold text-sm hover:bg-brand-50 hover:shadow-lg hover:shadow-brand-500/20 transition-all active:scale-95">
@@ -102,7 +101,7 @@
             <i data-lucide="x" class="w-6 h-6 text-slate-700"></i>
         </button>
         
-        <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="mobile-link mb-6 w-full py-4 bg-brand-600 text-white text-lg font-bold rounded-2xl shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 active:scale-95 transition-all">
+        <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="mobile-link mb-6 w-full py-4 bg-brand-500 text-white text-lg font-bold rounded-2xl shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 active:scale-95 transition-all">
             <i data-lucide="monitor-smartphone" class="w-5 h-5"></i>
             Mở App Quản Lý OS
         </a>
@@ -110,42 +109,39 @@
         <a href="#golden-rules" class="mobile-link py-4 border-b border-slate-100 text-lg text-amber-600 font-bold flex items-center gap-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Quy tắc Vàng</a>
         <a href="#core-stack" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Kiến trúc Hệ thống</a>
         <a href="#storage" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Luồng Dữ liệu</a>
-        <a href="#manual" class="mobile-link py-4 border-b border-slate-100 text-lg text-slate-800 font-bold">Cẩm nang Vận hành</a>
+        <a href="#miui-hacks" class="mobile-link py-4 border-b border-slate-100 text-lg text-rose-600 font-bold">Kỷ nguyên Vượt rào MIUI</a>
     </div>
 
-    <section class="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-white">
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-50 rounded-full blur-[100px] opacity-60 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-50 rounded-full blur-[80px] opacity-40 pointer-events-none"></div>
+    <section class="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-white border-b border-slate-200">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-50 rounded-full blur-[100px] opacity-80 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-50 rounded-full blur-[80px] opacity-60 pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="fade-in-up">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-full mb-8 shadow-sm">
-                        <span class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest">Enterprise Architecture Profile</span>
+                        <span class="w-2 h-2 bg-accent-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-brand-900 uppercase tracking-widest">Enterprise Architecture Profile</span>
                     </div>
                     <h1 class="font-serif-display text-5xl md:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
                         Hồ sơ<br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">Kiến trúc</span><br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-accent-500">Kiến trúc</span><br>
                         Hệ thống
                     </h1>
                     <p class="text-lg text-slate-600 leading-relaxed max-w-lg mb-10 font-medium">
-                        Tài liệu kỹ thuật nội bộ V17. Định hình các nguyên tắc cốt lõi giúp ứng dụng <strong>hoạt động mượt mà 100%, chống Crash, chống đơ</strong> trên mọi nền tảng.
+                        Tài liệu kỹ thuật nội bộ Bản Chén Thánh V34 (Final Masterpiece). Định hình các nguyên tắc cốt lõi giúp ứng dụng <strong>hoạt động mượt mà 100%, tích hợp Audio Ducking xuyên màn hình tắt, và ngăn chặn tuyệt đối lỗi F5 mất dữ liệu trên Firebase</strong>.
                     </p>
                     <div class="flex flex-wrap gap-4">
                         <a href="#golden-rules" class="inline-flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5">
                             Quy tắc bắt buộc
                             <i data-lucide="arrow-down" class="w-4 h-4"></i>
                         </a>
-                        <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-brand-600 text-sm font-bold rounded-xl border-2 border-brand-100 hover:bg-brand-50 hover:border-brand-300 transition-all shadow-sm">
-                            <i data-lucide="external-link" class="w-4 h-4"></i> Truy cập App OS
-                        </a>
                     </div>
                 </div>
 
                 <div class="fade-in-up delay-300 relative hidden lg:block">
                     <div class="relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
-                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=1000" alt="Architecture" class="w-full h-[550px] object-cover">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000" alt="Architecture" class="w-full h-[550px] object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
                         <div class="absolute bottom-8 left-8 right-8">
                             <div class="flex items-center gap-3 mb-4">
@@ -153,22 +149,22 @@
                                     <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-white font-bold text-lg leading-tight">Master Branch</h3>
-                                    <p class="text-brand-200 text-xs">Phiên bản ổn định tuyệt đối V17</p>
+                                    <h3 class="text-white font-bold text-lg leading-tight">Master Branch V34</h3>
+                                    <p class="text-brand-200 text-xs">Phiên bản Chén Thánh hoàn hảo</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                                    <div class="text-white text-xl font-black">100%</div>
-                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Deep Merge</div>
+                                    <div class="text-white text-xl font-black flex items-center"><i data-lucide="music-notes" class="w-5 h-5 mr-1 text-pink-400"></i> MP3</div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">MediaSession Hack</div>
                                 </div>
                                 <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                                    <div class="text-white text-xl font-black">0<span class="text-sm">ms</span></div>
-                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Độ trễ Local</div>
+                                    <div class="text-accent-500 text-xl font-black flex items-center"><i data-lucide="zap" class="w-5 h-5 mr-1"></i> RAM</div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Pre-fetch AI Voice</div>
                                 </div>
                                 <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                                    <div class="text-brand-400 text-xl font-black flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-1"></i> Sync</div>
-                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Chống F5</div>
+                                    <div class="text-brand-400 text-xl font-black flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-1"></i> Safe</div>
+                                    <div class="text-white/60 text-[10px] font-bold uppercase tracking-wider mt-1">Realtime Flush</div>
                                 </div>
                             </div>
                         </div>
@@ -181,18 +177,18 @@
     <div class="bg-slate-900 py-3 overflow-hidden border-y border-slate-800">
         <div class="animate-marquee whitespace-nowrap flex items-center gap-10">
             <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-brand-400"></i> Cảm biến Đa giác quan</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="layout" class="w-3 h-3 text-cyan-400"></i> No Absolute Layout</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> 6 Profiles Sync</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Deep Timestamp Merge</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> String Casting</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="activity" class="w-3 h-3 text-blue-400"></i> Báo Thức Bất Tử</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="music-notes" class="w-3 h-3 text-pink-400"></i> MediaSession Anchor</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="palette" class="w-3 h-3 text-emerald-400"></i> 5 Mùa Giao Diện</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Khóa Tử Huyệt Firebase</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> Tàng Hình Referrer</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="activity" class="w-3 h-3 text-blue-400"></i> RAM Pre-Fetch AI</span>
             
             <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="hexagon" class="w-3 h-3 text-brand-400"></i> Cảm biến Đa giác quan</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="layout" class="w-3 h-3 text-cyan-400"></i> No Absolute Layout</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="box" class="w-3 h-3 text-emerald-400"></i> 6 Profiles Sync</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Deep Timestamp Merge</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> String Casting</span>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="activity" class="w-3 h-3 text-blue-400"></i> Báo Thức Bất Tử</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="music-notes" class="w-3 h-3 text-pink-400"></i> MediaSession Anchor</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="palette" class="w-3 h-3 text-emerald-400"></i> 5 Mùa Giao Diện</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="shield" class="w-3 h-3 text-amber-400"></i> Khóa Tử Huyệt Firebase</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-rose-400"></i> Tàng Hình Referrer</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><i data-lucide="activity" class="w-3 h-3 text-blue-400"></i> RAM Pre-Fetch AI</span>
         </div>
     </div>
 
@@ -207,12 +203,12 @@
                         <a href="#core-stack" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">1. Kiến trúc Cốt lõi</a>
                         <a href="#storage" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">2. Cấu trúc Lưu trữ</a>
                         <a href="#sync" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">3. Đồng bộ Thông minh</a>
+                        <a href="#miui-hacks" class="toc-link text-sm font-semibold text-rose-500 border-l-2 border-transparent pl-3 py-2 -ml-[18px]">4. Kỷ Nguyên Vượt Rào MIUI</a>
                         <div class="h-4"></div>
                         <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-2">CẨM NANG VẬN HÀNH</p>
-                        <a href="#profile" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.1. Quản lý Hồ sơ</a>
-                        <a href="#vault" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.2. Kho lưu trữ</a>
-                        <a href="#sentinel" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.3. Báo thức Bất tử</a>
-                        <a href="#cross-device" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">4.4. Cứu hộ PWA</a>
+                        <a href="#profile" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">5.1. Quản lý Hồ sơ</a>
+                        <a href="#vault" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">5.2. Kho lưu trữ</a>
+                        <a href="#cross-device" class="toc-link text-sm font-semibold text-slate-500 border-l-2 border-transparent pl-3 py-1.5 -ml-[18px]">5.3. UI Đa Mùa & Music</a>
                     </nav>
                 </div>
             </aside>
@@ -224,78 +220,85 @@
                         <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><i data-lucide="shield-alert" class="w-5 h-5 text-amber-600"></i></div>
                         <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight">Quy tắc Vàng (Không thể vi phạm)</h2>
                     </div>
-                    <p class="text-slate-600 mb-6 font-medium">Bất kỳ AI hay lập trình viên nào chỉnh sửa mã nguồn V17 đều phải tuân thủ tuyệt đối 3 nguyên tắc Lập trình phòng ngự (Defensive Programming) sau đây để hệ thống không bao giờ bị Crash hay Đơ màn hình:</p>
+                    <p class="text-slate-600 mb-6 font-medium">Bất kỳ ai chỉnh sửa mã nguồn LifeOS đều phải tuân thủ tuyệt đối các nguyên tắc sau đây để bảo vệ cấu trúc xương sống của ứng dụng:</p>
                     
                     <div class="space-y-4">
                         <div class="golden-rule p-5 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
-                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Luôn ép kiểu ID thành Chuỗi (String Casting)</h4>
-                            <p class="text-sm text-amber-800/80 mb-3">Lỗi đơ nút Sửa/Xóa sinh ra do JS nhầm lẫn giữa kiểu <code>Number</code> và <code>String</code> từ Firebase trả về. Khi viết hàm tìm kiếm, Sửa hoặc Xóa, <strong>BẮT BUỘC</strong> phải bọc <code>String()</code> cho cả ID nguồn và đích.</p>
-                            <div class="code-block p-3 text-xs bg-slate-900/90 border-amber-900/20">
-                                <span class="comment">// ❌ SAI (Gây đơ Web vì sai kiểu dữ liệu):</span><br>
-                                <span class="keyword">const</span> item = data.find(x => x.id === id);<br><br>
-                                <span class="comment">// ✅ ĐÚNG VÀ BẮT BUỘC:</span><br>
-                                <span class="keyword">const</span> item = data.find(x => <span class="function">String</span>(x.id) === <span class="function">String</span>(id));
-                            </div>
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Khóa Tử Huyệt Firebase (Realtime Flush)</h4>
+                            <p class="text-sm text-amber-800/80 mb-3">Tốc độ mạng có độ trễ. Khi thay đổi Local (tạo task, xóa task, báo lại 5 phút), <strong>bắt buộc gọi FirebaseSync.pushAll() NGAY LẬP TỨC</strong>. Đồng thời, trong hàm `_listen`, nếu Timestamp Local mới hơn Cloud, phải từ chối nhận bản nháp từ Cloud và ép Cloud ghi đè ngược lại. Chống lỗi F5 mất dữ liệu tuyệt đối.</p>
                         </div>
 
                         <div class="golden-rule p-5 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
-                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Bọc thép Giao diện Modal (No Absolute Layout)</h4>
-                            <p class="text-sm text-amber-800/80 mb-3">Không bao giờ dùng thuộc tính CSS <code>position: absolute</code> cho các Form thao tác. Toàn bộ các Bảng <strong>Thêm mới Kho, Sửa Nhiệm Vụ, Xóa vĩnh viễn</strong> đều phải dùng kiến trúc <strong>Flexbox bồng bềnh</strong> có thanh cuộn ở giữa. Cấm để bàn phím ảo điện thoại nảy lên che khuất, gây kẹt mất nút "Lưu".</p>
-                            <div class="code-block p-3 text-xs bg-slate-900/90 border-amber-900/20">
-                                <span class="comment">&lt;!-- Cấu trúc chuẩn chống vỡ Layout (Flex-box) --&gt;</span><br>
-                                class="fixed inset-0 flex items-center justify-center"<br>
-                                class="flex flex-col max-h-[90vh]" <br>
-                                <span class="comment">&lt;!-- Giữa Form cho tự động cuộn (Scrollable) --&gt;</span><br>
-                                class="flex-grow overflow-y-auto"
-                            </div>
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Mỏ Neo Tĩnh Lặng Bằng MP3 Thật</h4>
+                            <p class="text-sm text-amber-800/80 mb-3">Để hệ điều hành (như MIUI) không đóng băng App khi tắt màn hình, phải sử dụng một thẻ Audio phát <strong>file MP3 thực tế</strong> (không dùng base64 giả) ở mức Volume cực nhỏ (0.01). Điều này sẽ ghim cứng MediaSession lên màn hình khóa, bảo kê sự sống cho các Web Worker đếm giờ ngầm.</p>
                         </div>
 
                         <div class="golden-rule p-5 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
-                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> Hợp nhất Thời gian Thực (Deep Timestamp Merge)</h4>
-                            <p class="text-sm text-amber-800/80 mb-0">Tuyệt đối cấm hành vi ghi đè dữ liệu một cách mù quáng. Khi ứng dụng tải về dữ liệu từ Firebase, nó phải so sánh <code>cloudTime</code> và <code>localTime</code>. Nếu Firebase tải về mảng rỗng <code>[]</code> nhưng ở máy đang có dữ liệu $\rightarrow$ Không được xóa trắng, mà phải kích hoạt ép Firebase nhận lại dữ liệu từ máy!</p>
+                            <h4 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2"><span class="bg-amber-200 text-amber-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> Ngậm Sâm Cục Bộ (Pre-fetch RAM) & Tàng Hình Referrer</h4>
+                            <p class="text-sm text-amber-800/80 mb-0">Hệ điều hành cấm tải file từ URL khi màn hình tắt. Do đó, mỗi khi có báo thức mới, phải gọi hàm `load()` để tải trước file Giọng nói AI Google vào RAM. Thêm thẻ <code>&lt;meta name="referrer" content="no-referrer"&gt;</code> để Google Translate không chặn lỗi 403 (CORS).</p>
                         </div>
                     </div>
                 </section>
 
                 <hr class="border-slate-200 mb-16">
 
+                <section id="miui-hacks" class="mb-24 scroll-mt-28">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-rose-600 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded border border-rose-200">Chương Đặc Biệt</span>
+                        <div class="h-px flex-1 bg-slate-200"></div>
+                    </div>
+                    <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">4. Kỷ Nguyên Vượt Rào MIUI (The Great Escape)</h2>
+                    <p class="text-slate-600 mb-6 text-sm">Ghi nhận chiến dịch kỹ thuật kéo dài qua 19 phiên bản để phá vỡ cơ chế "Giết App Ngầm" khắc nghiệt của Android/MIUI trên thiết bị Xiaomi 13T.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                            <div class="text-rose-500 mb-4"><i data-lucide="shield-off" class="w-8 h-8"></i></div>
+                            <h4 class="text-lg font-bold text-white mb-2">Thách thức Lịch sử</h4>
+                            <ul class="text-sm space-y-3 list-disc pl-4 opacity-80">
+                                <li>HĐH chặn mọi kết nối mạng (Network Fetch) khi tắt màn hình, khiến Google TTS câm nín.</li>
+                                <li>HĐH đóng băng API <code>window.speechSynthesis</code> ở chế độ ngủ.</li>
+                                <li>Thẻ Audio bị thu hồi Audio Focus nếu cố tình chuyển đổi <code>src</code> bài hát lúc màn hình đen.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-emerald-50 text-emerald-900 p-6 rounded-2xl border border-emerald-200 shadow-sm">
+                            <div class="text-emerald-500 mb-4"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
+                            <h4 class="text-lg font-bold text-emerald-950 mb-2">Bẻ Khóa (Hack) Hoàn Hảo</h4>
+                            <ul class="text-sm space-y-3 list-disc pl-4 opacity-90">
+                                <li><strong>Dao động Bíp Bất Tử:</strong> Dùng <code>AudioContext.createOscillator()</code> tạo tần số âm thanh vật lý trực tiếp từ Chip, xuyên thủng mọi hàng rào.</li>
+                                <li><strong>MediaSession Đích Thực:</strong> Dùng file <code>.mp3</code> thật phát lặp 24/7 (vol=0.01) để ép HĐH hiện trình phát nổi bảo kê hệ thống.</li>
+                                <li><strong>Pre-fetch RAM & Loop:</strong> Tải sẵn giọng AI vào bộ đệm RAM lúc màn hình sáng. Tới giờ hẹn, tháo MUTE (Câm) và cho lặp <code>loop = true</code> để nhắc việc liên tục.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="core-stack" class="mb-24 scroll-mt-28">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded">Chương 1</span>
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded">Chương 1</span>
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
                     <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">Kiến trúc Cốt lõi</h2>
                     <div class="grid md:grid-cols-2 gap-5">
                         <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
-                            <div class="w-10 h-10 bg-brand-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="layout-template" class="w-5 h-5 text-brand-600"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-2">Giao diện (UI) SPA</h3>
-                            <p class="text-sm text-slate-600 mb-3">Thiết kế chuẩn <strong>SPA</strong> (Single Page Application) bằng HTML5, TailwindCSS. Chuyển tab tức thời mà không cần reload trang.</p>
+                            <div class="w-10 h-10 bg-brand-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="palette" class="w-5 h-5 text-brand-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Hệ thống 5 Giao diện</h3>
+                            <p class="text-sm text-slate-600 mb-3">Ma trận CSS Variables xoay vòng 5 trạng thái rực rỡ: <strong>Mặc định (Indigo), Chanh (Lemon), Cam (Orange), Hồng (Rose), Ngọc (Mint)</strong>.</p>
                         </div>
                         <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
                             <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="brain" class="w-5 h-5 text-emerald-600"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-2">Logic bọc thép (DOM Guards)</h3>
-                            <p class="text-sm text-slate-600 mb-3">Sử dụng các Helper Functions (<code>setTxt</code>, <code>setVal</code>) chặn đứng mọi nguy cơ lỗi Null Reference khi DOM chưa tải kịp.</p>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Trí tuệ nhân tạo NLP V26</h3>
+                            <p class="text-sm text-slate-600 mb-3">Bóc tách tự do ngôn ngữ tiếng Việt. Sửa lỗi đứt gãy tương lai: Nếu gõ giờ trong quá khứ của hôm nay, hệ thống báo động tức thì.</p>
                         </div>
                         <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
-                            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="database" class="w-5 h-5 text-indigo-600"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-2">Cơ sở dữ liệu (2 Lớp)</h3>
-                            <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-4">
-                                <li><strong>Lớp 1 (Offline):</strong> <code>localStorage</code> - Lưu tại máy, tốc độ 0ms.</li>
-                                <li><strong>Lớp 2 (Cloud):</strong> Firebase Firestore tĩnh đồng bộ Real-time ẩn danh.</li>
-                            </ul>
-                        </div>
-                        <div class="layer-card bg-white border border-slate-200 rounded-2xl p-6">
-                            <div class="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="activity" class="w-5 h-5 text-rose-600"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-2">Cơ chế Auto-Heal (Tự chữa lành)</h3>
-                            <p class="text-sm text-slate-600 mb-3">Nếu Cache thiết bị cũ lưu phiên đăng nhập không tồn tại, hệ thống tự thanh tẩy, đưa về màn hình Login mà không để sập giao diện.</p>
+                            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-4"><i data-lucide="music" class="w-5 h-5 text-indigo-600"></i></div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">Nghe Nhạc Tích Hợp</h3>
+                            <p class="text-sm text-slate-600 mb-3">Tab Nghe nhạc độc lập (Xiemsansang), liên kết với Archive.org. Chạy mượt mà dưới dạng Background Player.</p>
                         </div>
                     </div>
                 </section>
 
                 <section id="storage" class="mb-24 scroll-mt-28">
                     <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">2. Cấu trúc Lưu trữ (Storage Flow)</h2>
-                    <p class="text-slate-600 mb-6 text-sm">Mỗi hồ sơ (Profile) sở hữu 4 Key độc lập trong bộ nhớ. Dữ liệu trên Cloud sẽ được phân bổ an toàn theo đường dẫn <code>LifeOS_Profiles/[tên-đăng-nhập]</code>.</p>
-                    
                     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 border-b border-slate-200">
@@ -306,47 +309,19 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <tr>
-                                    <td class="p-4 font-mono text-xs text-blue-600 font-bold">lifeos_v8_data_[tên]</td>
-                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">todos</code> (Nhiệm vụ, Checkbox, Báo thức).</td>
+                                    <td class="p-4 font-mono text-xs text-brand-600 font-bold">lifeos_v8_data_[tên]</td>
+                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold text-slate-800">todos</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-4 font-mono text-xs text-emerald-600 font-bold">lifeos_stats_v8_[tên]</td>
-                                    <td class="p-4 text-slate-600">Object <code class="bg-slate-100 px-1 rounded font-bold">stats</code> (Đếm chuỗi ngày kỷ luật).</td>
+                                    <td class="p-4 font-mono text-xs text-brand-600 font-bold">lifeos_v8_time_[tên]</td>
+                                    <td class="p-4 text-slate-600">Mốc thời gian Deep Merge chống mất dữ liệu khi F5.</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-4 font-mono text-xs text-amber-600 font-bold">lifeos_v8_logs_[tên]</td>
-                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">sentinelLogs</code> (Nhật ký báo thức AI).</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4 font-mono text-xs text-purple-600 font-bold">lifeos_v8_vault_[tên]</td>
-                                    <td class="p-4 text-slate-600">Mảng <code class="bg-slate-100 px-1 rounded font-bold">VaultState.data</code> (Kho lưu trữ / Password).</td>
+                                    <td class="p-4 font-mono text-xs text-brand-600 font-bold">lifeos_v8_vault_[tên]</td>
+                                    <td class="p-4 text-slate-600">Kho lưu trữ Vault Data.</td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                </section>
-
-                <section id="sync" class="mb-24 scroll-mt-28">
-                    <h2 class="font-serif-display text-3xl font-bold text-slate-900 tracking-tight mb-6">3. Đồng bộ Thông minh (Smart Sync)</h2>
-                    <div class="flex flex-col md:flex-row gap-6">
-                        <div class="flex-1 bg-white border border-slate-200 rounded-2xl p-6 relative shadow-sm hover:shadow-md transition-shadow">
-                            <div class="absolute top-4 right-4 text-slate-100"><i data-lucide="upload-cloud" class="w-12 h-12"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-4 relative z-10 text-indigo-600">Luồng Đẩy (Online Push)</h3>
-                            <ul class="space-y-3 text-sm text-slate-600 relative z-10">
-                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0">1</span> Người dùng thao tác Lưu/Xóa.</li>
-                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">2</span> <div><code>saveLocalTodos()</code> ghi vào máy cục bộ lập tức (0.01s). Render lại UI tức thời.</div></li>
-                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-slate-900 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">3</span> <div>Gọi lệnh đẩy Json lên Firestore âm thầm (Kèm biến thời gian <code>updatedAt</code>).</div></li>
-                            </ul>
-                        </div>
-                        <div class="flex-1 bg-white border border-slate-200 rounded-2xl p-6 relative shadow-sm hover:shadow-md transition-shadow">
-                            <div class="absolute top-4 right-4 text-slate-100"><i data-lucide="download-cloud" class="w-12 h-12"></i></div>
-                            <h3 class="text-base font-bold text-slate-900 mb-4 relative z-10 text-emerald-600">Luồng Kéo (Realtime Pull)</h3>
-                            <ul class="space-y-3 text-sm text-slate-600 relative z-10">
-                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0">1</span> Firebase cài cắm <code>onSnapshot()</code>.</li>
-                                <li class="flex items-center gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0">2</span> Mạng báo có bản cập nhật mới từ thiết bị khác.</li>
-                                <li class="flex items-start gap-2"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex justify-center items-center text-[10px] font-bold shrink-0 mt-0.5">3</span> <div>Thuật toán Deep Merge đối chiếu thời gian. Nếu tải về thành công, đè LocalStorage và render lại UI (Không F5).</div></li>
-                            </ul>
-                        </div>
                     </div>
                 </section>
 
@@ -359,96 +334,18 @@
                 <div class="space-y-8">
                     <div id="profile" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
                         <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600"><i data-lucide="users" class="w-5 h-5"></i></div>
-                            <h3 class="text-xl font-bold text-slate-900">4.1 Quản lý Hồ sơ (Profile)</h3>
+                            <div class="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600"><i data-lucide="users" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">5.1 Quản lý 6 Hồ sơ (Profiles)</h3>
                         </div>
-                        <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
-                            <div>
-                                <p class="mb-3">Danh sách <strong>chuẩn 6 thành viên</strong> được định nghĩa cứng trong HTML tại <code>window.PROFILES</code>:</p>
-                                <ul class="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium">
-                                    <li class="flex justify-between items-center"><strong>Admin</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded text-rose-600 font-bold shadow-sm">admin</code></li>
-                                    <li class="flex justify-between items-center"><strong>Xiêm</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
-                                    <li class="flex justify-between items-center"><strong>Thành</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
-                                    <li class="flex justify-between items-center"><strong>Thắm</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
-                                    <li class="flex justify-between items-center"><strong>Phúc</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
-                                    <li class="flex justify-between items-center"><strong>My</strong> <code class="bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm text-slate-800">a</code></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <p class="mb-2 font-bold text-indigo-700 flex items-center gap-2"><i data-lucide="crown" class="w-4 h-4"></i> Đặc quyền Quản trị:</p>
-                                <p class="mb-3 leading-relaxed">Chỉ khi đăng nhập tài khoản <strong>Admin</strong>, bạn mới xem được danh sách 6 người trên Top Nav Menu để xem/sửa chéo dữ liệu.</p>
-                                <div class="bg-amber-50 text-amber-800 p-3 rounded-xl text-xs border border-amber-200 mt-4 font-medium flex items-start gap-2">
-                                    <i data-lucide="key" class="w-4 h-4 shrink-0 mt-0.5"></i>
-                                    <span>Mật khẩu Master PIN là <strong>9999</strong> dùng được cho mọi tài khoản để phá khóa.</span>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="mb-3 text-sm text-slate-600">Đặc quyền Quản trị: Mật khẩu Vạn năng Master PIN là <strong>9999</strong>, bẻ khóa mọi tài khoản và xem chéo (Cross-view).</p>
                     </div>
 
                     <div id="vault" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
                         <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                            <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600"><i data-lucide="vault" class="w-5 h-5"></i></div>
-                            <h3 class="text-xl font-bold text-slate-900">4.2 Kho lưu trữ Đa năng (Vault)</h3>
+                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600"><i data-lucide="vault" class="w-5 h-5"></i></div>
+                            <h3 class="text-xl font-bold text-slate-900">5.2 Kho lưu trữ Đa năng (Vault)</h3>
                         </div>
-                        <p class="text-sm text-slate-600 mb-4">Hệ thống bóc tách tự động (Auto-Parse). Hãy gõ các cú pháp sau ở <strong>đầu dòng</strong> của ô Nội dung dữ liệu để thẻ hiển thị sang trọng:</p>
-                        
-                        <div class="bg-[#0f172a] rounded-xl p-5 font-mono text-sm leading-loose text-slate-300 shadow-inner border border-slate-800 mb-4 overflow-x-auto relative">
-                            <span class="text-cyan-400 font-bold">Tài khoản:</span> admin@gmail.com <span class="text-slate-500 italic text-xs ml-2">→ Icon user + Copy</span><br>
-                            <span class="text-rose-400 font-bold">Mật khẩu:</span> 123456 <span class="text-slate-500 italic text-xs ml-2">→ Ẩn dạng ••• + Mắt + Copy</span><br>
-                            <span class="text-amber-400 font-bold">2FA:</span> JBSWY3DPEHPK3PXP <span class="text-slate-500 italic text-xs ml-2">→ Tự đếm OTP Live 30s</span><br>
-                            <span class="text-emerald-400 font-bold">Link:</span> https://facebook.com <span class="text-slate-500 italic text-xs ml-2">→ Click vào mở URL web</span><br>
-                            <br>
-                            <span class="text-slate-400 italic">Dòng chữ bình thường dưới cùng tự gom thành Note thô.</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs font-bold text-brand-700 bg-brand-50 px-3 py-2.5 rounded-lg w-fit border border-brand-100 shadow-sm">
-                            <i data-lucide="wand-2" class="w-4 h-4"></i>
-                            Nút "Tạo MK" trong Form tự sinh chuỗi kèm rung Haptic.
-                        </div>
-                    </div>
-
-                    <div id="sentinel" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
-                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                            <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600"><i data-lucide="bot" class="w-5 h-5"></i></div>
-                            <h3 class="text-xl font-bold text-slate-900">4.3 Báo thức Bất tử (Immortal Sentinel)</h3>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
-                            <div>
-                                <p class="mb-2 font-bold text-slate-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Smart Input (NLP Tiếng Việt):</p>
-                                <p class="mb-3">Chỉ cần gõ cú pháp tự nhiên, hệ thống tự cắt. Có thể nhấn vào chiếc chuông trên thẻ để Bật/Tắt báo thức:</p>
-                                <code class="block bg-slate-50 p-3 rounded-xl font-mono text-slate-800 mb-3 border border-slate-200 shadow-sm text-xs">mai lúc 14h30 đọc sách !gấp #hoc_tap</code>
-                                <p>Cắt tự động: Ngày mai, Giờ (14:30), Khẩn cấp (!gấp), Tag.</p>
-                            </div>
-                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                                <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="mic" class="w-4 h-4 text-brand-500"></i> The Silence Anchor (Mỏ neo Tĩnh lặng)</h4>
-                                <ul class="space-y-3 text-slate-600 text-xs leading-relaxed">
-                                    <li class="flex gap-2"><i data-lucide="shield-alert" class="w-4 h-4 shrink-0 text-rose-500"></i> <strong>Chống ngủ gật:</strong> Ứng dụng dùng thẻ Audio ẩn lặp vô tận để đánh lừa Hệ điều hành. Vòng lặp đếm giờ được gắn thẳng vào sự kiện phần cứng, cam kết báo thức reo dù bạn tắt màn hình.</li>
-                                    <li class="flex gap-2"><i data-lucide="volume-2" class="w-4 h-4 shrink-0 text-indigo-500"></i> <strong>Chuông & Giọng nói:</strong> Đến giờ hẹn, chuông Digital Alarm kêu + AI đọc to tên công việc lặp đi lặp lại mỗi 8s cho tới khi bạn bấm Tắt.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="cross-device" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 scroll-mt-28 shadow-sm">
-                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                            <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600"><i data-lucide="smartphone-nfc" class="w-5 h-5"></i></div>
-                            <h3 class="text-xl font-bold text-slate-900">4.4 Cứu hộ PWA & Đổi thiết bị</h3>
-                        </div>
-                        <ul class="space-y-5 text-sm text-slate-600">
-                            <li class="flex gap-4">
-                                <div class="mt-0.5 bg-blue-50 p-2 rounded-lg text-blue-600"><i data-lucide="smartphone" class="w-5 h-5"></i></div>
-                                <div>
-                                    <strong class="text-slate-900 text-base">Đăng nhập máy mới (Tự động):</strong>
-                                    <p class="mt-1 leading-relaxed">Vào link trang web trên thiết bị mới, chọn tên Profile, nhập mã PIN. Dữ liệu từ Firebase Cloud sẽ tự động tải xuống LocalStorage và hiển thị trong <strong>2 giây</strong>.</p>
-                                </div>
-                            </li>
-                            <li class="flex gap-4">
-                                <div class="mt-0.5 bg-amber-50 p-2 rounded-lg text-amber-600"><i data-lucide="file-json" class="w-5 h-5"></i></div>
-                                <div>
-                                    <strong class="text-slate-900 text-base">Cứu dữ liệu bằng file JSON:</strong>
-                                    <p class="mt-1 leading-relaxed">Vào <b>Kho lưu trữ</b> → Bấm nút <b>Tải lên</b> → Chọn file JSON. Sau khi nạp, hãy thao tác tạo 1 ghi chú mới bất kỳ, thao tác này kích hoạt <code>pushAll()</code> đẩy JSON đó lưu vĩnh viễn lên Cloud.</p>
-                                </div>
-                            </li>
-                        </ul>
+                        <p class="text-sm text-slate-600 mb-4">Gõ cú pháp <code>Tài khoản:</code>, <code>Mật khẩu:</code>, <code>2FA:</code>, <code>Link:</code> ở đầu dòng để hệ thống Auto-Parse hiển thị UI xịn xò. Mã 2FA tự động tạo mã Live đếm ngược mỗi 30s.</p>
                     </div>
                 </div>
 
@@ -459,20 +356,15 @@
     <footer class="bg-[#0f172a] text-slate-400 py-12 text-sm text-center border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
             <div class="flex items-center justify-center gap-2 mb-6">
-                <i data-lucide="layers" class="w-5 h-5 text-brand-500"></i>
-                <span class="font-bold text-white text-xl tracking-widest uppercase">LifeOS V17</span>
+                <i data-lucide="book-open" class="w-5 h-5 text-brand-500"></i>
+                <span class="font-bold text-white text-xl tracking-widest uppercase">LifeOS V34 Master Final</span>
             </div>
-            <p class="mb-6 max-w-md">Hồ sơ Kiến trúc Hệ thống được bảo vệ và tối ưu hóa ở mức độ Chuyên gia (Enterprise Grade).</p>
-            <p class="opacity-60 font-mono text-[10px] uppercase tracking-widest mb-6">Master Branch - Strictly Defensive Programming Applied.</p>
+            <p class="mb-6 max-w-md">Hồ sơ Kiến trúc Hệ thống được bảo vệ và tối ưu hóa ở mức độ Chuyên gia (Enterprise Grade). Bẻ khóa thành công giới hạn hệ điều hành di động.</p>
             <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all duration-300">
                 <i data-lucide="external-link" class="w-4 h-4"></i> Trở về App OS
             </a>
         </div>
     </footer>
-
-    <button id="backToTop" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-slate-900 text-white rounded-xl shadow-xl shadow-slate-900/30 flex items-center justify-center hover:bg-brand-600 hover:-translate-y-1 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none border border-slate-700 focus:outline-none">
-        <i data-lucide="arrow-up" class="w-5 h-5"></i>
-    </button>
 
     <script>
         lucide.createIcons();
@@ -484,77 +376,34 @@
         const mobileLinks = document.querySelectorAll('.mobile-link');
 
         mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('hidden');
-            mobileMenu.classList.add('flex');
-            document.body.style.overflow = 'hidden'; 
+            mobileMenu.classList.remove('hidden'); mobileMenu.classList.add('flex'); document.body.style.overflow = 'hidden'; 
         });
 
-        const closeMenu = () => {
-            mobileMenu.classList.add('hidden');
-            mobileMenu.classList.remove('flex');
-            document.body.style.overflow = '';
-        };
-
+        const closeMenu = () => { mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('flex'); document.body.style.overflow = ''; };
         mobileMenuClose.addEventListener('click', closeMenu);
         mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
 
-        // Back to top button logic
-        const backToTop = document.getElementById('backToTop');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 400) {
-                backToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-                backToTop.classList.add('opacity-100', 'translate-y-0');
-            } else {
-                backToTop.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-                backToTop.classList.remove('opacity-100', 'translate-y-0');
-            }
-        });
-
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
         // Sticky TOC Active State Logic
         const tocLinks = document.querySelectorAll('#tocNav .toc-link');
-        const sections = Array.from(tocLinks).map(link => {
-            const section = document.querySelector(link.getAttribute('href'));
-            return section ? { el: section, link: link } : null;
-        }).filter(Boolean);
+        const sections = Array.from(tocLinks).map(link => { const section = document.querySelector(link.getAttribute('href')); return section ? { el: section, link: link } : null; }).filter(Boolean);
 
         function updateTOC() {
             const scrollPos = window.scrollY + 180;
             let currentSection = sections[0];
-
-            for (const item of sections) {
-                if (item.el.offsetTop <= scrollPos) {
-                    currentSection = item;
-                }
-            }
-
+            for (const item of sections) { if (item.el.offsetTop <= scrollPos) { currentSection = item; } }
             tocLinks.forEach(l => l.classList.remove('active'));
-            if (currentSection) {
-                currentSection.link.classList.add('active');
-            }
+            if (currentSection) { currentSection.link.classList.add('active'); }
         }
 
         window.addEventListener('scroll', updateTOC, { passive: true });
         setTimeout(updateTOC, 100);
 
-        // Intersection Observer cho Hiệu ứng Fade in up
+        // Intersection Observer
         const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-up');
-                    observer.unobserve(entry.target);
-                }
-            });
+            entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('fade-in-up'); observer.unobserve(entry.target); } });
         }, observerOptions);
-
-        document.querySelectorAll('.layer-card, .code-block, section h2, .golden-rule').forEach(el => {
-            el.style.opacity = '0';
-            observer.observe(el);
-        });
+        document.querySelectorAll('.layer-card, .code-block, section h2, .golden-rule').forEach(el => { el.style.opacity = '0'; observer.observe(el); });
     </script>
 </body>
 </html>
