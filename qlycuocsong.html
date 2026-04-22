@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V34 - Final Masterpiece</title>
+<title>LifeOS V35 - Ultimate Masterpiece</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -72,11 +72,14 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 @keyframes errorPulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 .totp-progress{transition:width 1s linear}
 
-/* MUSIC SPECIFIC */
-.music-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 64px; transition: background-color 0.2s; cursor: pointer; border-bottom: 1px solid var(--c-border); }
+/* MUSIC SPECIFIC STYLES */
+.music-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; transition: background-color 0.2s; cursor: pointer; border-bottom: 1px solid var(--c-border); }
 .music-row:active { background-color: var(--c-border); }
 .music-row.active { background-color: var(--c-sub); }
 .music-row.active .music-idx { color: var(--c-primary); font-weight: 900; animation: pulseRed 1.5s infinite; }
+.action-btn-music { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+.action-btn-music:active { background: var(--c-border); transform: scale(0.9); }
+select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer; }
 </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
@@ -197,45 +200,61 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 </div></div></div></div>
 
 <div class="lg:col-span-12 flex flex-col h-full view-section mt-2 scroll-mt-24" id="view-music">
-    <div class="bg-white border border-slate-200 rounded-[2rem] p-4 shadow-sm flex-grow min-h-[500px] flex flex-col relative pb-28">
-        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div class="bg-white/80 backdrop-blur-md border border-slate-200 rounded-[2rem] p-4 lg:p-6 shadow-sm flex-grow min-h-[500px] flex flex-col relative pb-[120px]">
+        
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3 pb-4 border-b border-slate-100">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg"><i class="ph-bold ph-music-notes text-2xl"></i></div>
-                <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Xiemsansang</h2>
+                <div>
+                    <h2 class="text-xl font-black text-primary uppercase tracking-tight">Xiemsansang</h2>
+                    <p class="text-[10px] text-slate-500 font-medium">Luồng phát Pre-fetch bất tận</p>
+                </div>
             </div>
             <div class="flex items-center gap-2">
-                <select id="music-timer-select" class="bg-slate-50 border border-slate-200 text-primary font-bold text-sm rounded-xl px-3 py-2.5 outline-none cursor-pointer shadow-sm">
-                    <option value="0">Hẹn giờ: Không</option>
-                    <option value="15">Tắt sau 15 phút</option>
-                    <option value="30">Tắt sau 30 phút</option>
-                    <option value="60">Tắt sau 60 phút</option>
+                <select id="music-timer-select" class="timer-dropdown text-sm shadow-sm" onchange="window.MusicApp.setTimer(this.value)">
+                    <option value="0">🕒 Hẹn giờ: Tắt</option>
+                    <option value="15">🕒 Tắt sau 15 phút</option>
+                    <option value="30">🕒 Tắt sau 30 phút</option>
+                    <option value="45">🕒 Tắt sau 45 phút</option>
+                    <option value="60">🕒 Tắt sau 60 phút</option>
+                    <option value="90">🕒 Tắt sau 90 phút</option>
+                    <option value="120">🕒 Tắt sau 120 phút</option>
                 </select>
-                <button onclick="window.clearAppCache()" class="w-10 h-10 flex justify-center items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 active:scale-90 transition-transform shadow-sm" title="Xóa Cache"><i class="ph-bold ph-trash text-lg"></i></button>
+                <button onclick="window.clearAppCache()" class="w-9 h-9 flex justify-center items-center rounded-full bg-rose-50 text-rose-600 border border-rose-100 active:scale-90 transition-transform shadow-sm" title="Làm mới & Xóa Cache"><i class="ph-bold ph-trash text-lg"></i></button>
             </div>
         </div>
+
         <div class="mb-4">
-            <input type="text" id="music-search" placeholder="Tìm tên bài hát..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 focus:border-primary outline-none shadow-inner font-semibold text-slate-800">
+            <div class="relative">
+                <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                <input type="text" id="music-search" placeholder="Tìm tên bài hát..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:border-primary outline-none shadow-inner font-semibold text-slate-800" oninput="window.MusicApp.renderList(this.value)">
+            </div>
         </div>
+
         <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ máy chủ Archive.org...</div>
-        <div class="flex-grow overflow-y-auto custom-scroll-area border border-slate-200 rounded-xl bg-slate-50/50 relative">
-            <div id="music-list-container" class="divide-y divide-slate-100 pb-16"></div>
-        </div>
-        <div id="music-mini-player" class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 rounded-b-[2rem] hidden flex-col shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-            <div class="flex items-center justify-between w-full mb-2 px-2">
+        
+        <div class="flex-grow overflow-y-auto custom-scroll-area rounded-2xl bg-white shadow-sm border border-slate-200 relative">
+            <div id="music-list-container" class="divide-y divide-slate-100"></div>
+            </div>
+
+        <div id="music-mini-player" class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-slate-200 p-4 rounded-b-[2rem] hidden flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
+            <div class="flex items-center justify-between gap-4 w-full max-w-3xl mx-auto mb-2 px-2">
                 <div class="flex-1 min-w-0 pr-2">
                     <p id="m-title" class="truncate font-extrabold text-[15px] text-slate-800"></p>
-                    <p id="m-status" class="text-xs font-bold text-primary mt-0.5">Đã dừng</p>
+                    <p id="m-status" class="text-xs font-medium text-primary mt-0.5">Đã tạm dừng</p>
                 </div>
-                <div class="flex items-center gap-3 flex-shrink-0">
-                    <button onclick="window.MusicApp.toggleShuffle()" id="m-btn-shuffle" class="w-9 h-9 rounded-full text-slate-400 flex justify-center items-center bg-slate-50 active:scale-90"><i class="ph-bold ph-shuffle text-lg"></i></button>
-                    <button onclick="window.MusicApp.playPrev()" class="w-10 h-10 rounded-full bg-indigo-50 text-primary flex justify-center items-center active:scale-90 border border-indigo-100"><i class="ph-bold ph-skip-back text-xl"></i></button>
-                    <button onclick="window.MusicApp.togglePlay()" id="m-btn-play" class="w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 flex justify-center items-center active:scale-95"><i class="ph-fill ph-play text-2xl"></i></button>
-                    <button onclick="window.MusicApp.playNext()" class="w-10 h-10 rounded-full bg-indigo-50 text-primary flex justify-center items-center active:scale-90 border border-indigo-100"><i class="ph-bold ph-skip-forward text-xl"></i></button>
-                    <button onclick="window.MusicApp.toggleRepeat()" id="m-btn-repeat" class="w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 border border-primary/20"><i class="ph-bold ph-repeat text-lg"></i></button>
+                <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                    <button onclick="window.MusicApp.toggleShuffle()" id="m-btn-shuffle" class="w-9 h-9 rounded-full text-slate-400 flex justify-center items-center active:scale-90 transition-colors"><i class="ph-bold ph-shuffle text-lg"></i></button>
+                    <div class="flex items-center gap-2 sm:gap-3 bg-slate-50 p-1 rounded-full border border-slate-100 shadow-inner">
+                        <button onclick="window.MusicApp.playPrev()" class="w-10 h-10 rounded-full bg-white text-primary flex justify-center items-center active:scale-90 shadow-sm"><i class="ph-bold ph-skip-back text-xl"></i></button>
+                        <button onclick="window.MusicApp.togglePlay()" id="m-btn-play" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 flex justify-center items-center active:scale-95"><i class="ph-fill ph-play text-2xl sm:text-3xl"></i></button>
+                        <button onclick="window.MusicApp.playNext()" class="w-10 h-10 rounded-full bg-white text-primary flex justify-center items-center active:scale-90 shadow-sm"><i class="ph-bold ph-skip-forward text-xl"></i></button>
+                    </div>
+                    <button onclick="window.MusicApp.toggleRepeat()" id="m-btn-repeat" class="w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 transition-colors border border-primary/20"><i class="ph-bold ph-repeat text-lg"></i></button>
                 </div>
             </div>
-            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mx-2 mt-1" style="width: calc(100% - 16px);">
-                <div id="m-progress" class="h-full bg-primary transition-all duration-300 ease-linear" style="width:0%"></div>
+            <div class="w-full max-w-3xl mx-auto h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2 relative">
+                <div id="m-progress" class="absolute top-0 left-0 bottom-0 bg-primary transition-all duration-[500ms] ease-linear rounded-full" style="width:0%"></div>
             </div>
         </div>
     </div>
@@ -294,12 +313,12 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
         <div class="flex items-center justify-between mb-6 flex-shrink-0">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
-                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">Sẵn sàng AI Voice</span></div>
+                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-emerald-600 block mt-0.5"><i class="ph-bold ph-check"></i> Đã ngậm RAM AI Voice</span></div>
             </div>
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
         <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Kiểm tra Âm thanh:</b><br>Bật chuông điện thoại. Bấm nút Test bên dưới để đảm bảo App đã kết nối Audio Cứng và Audio Giọng nói. Báo thức sẽ réo bất chấp khóa màn hình!
+            <b>Kiểm tra Âm thanh:</b><br>Bật chuông điện thoại. Hệ thống V35 đã nạp sẵn file giọng nói AI vào RAM (Pre-fetch Bypass). Báo thức sẽ réo xuyên qua màn hình tắt của MIUI!
         </div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Cứng</button>
@@ -320,7 +339,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
             <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
             <button onclick="window.stopGlobalAlarm('dismiss')" class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
         </div>
-        <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
+        <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Bấm XÁC NHẬN để lưu tiến độ lên Cloud.</p>
     </div>
 </div>
 
@@ -368,7 +387,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 
 <script>
 // ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC V34 MASTER - EPIC HACKS)
+// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC V35 MASTER)
 // ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
@@ -387,12 +406,13 @@ document.addEventListener('click', (e) => {
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
 
-// KHÓA TỬ HUYỆT FIREBASE FLUSH
+// KHÓA TỬ HUYỆT FIREBASE FLUSH: Ép Firebase nhận tín hiệu ngay lập tức
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
         window.lastLocalPush = Date.now(); 
         localStorage.setItem('lifeos_v8_time_' + window.viewingUser, window.lastLocalPush.toString());
+        // ĐÈN BÁO ĐỎ: Bắn ngay lên Cloud không trễ nhịp nào
         if(window.FirebaseSync) { window.FirebaseSync.pushAll(); }
     }
 };
@@ -415,7 +435,7 @@ window.cycleTheme=()=>{
 };
 
 // ==============================================================================
-// 2. KÉN ÂM THANH XEN KẼ (AUDIO DUCKING) & TRÍ TUỆ NHÂN TẠO RAM PRE-FETCH
+// 2. HỆ THỐNG ÂM THANH BẤT TỬ & PRE-FETCH AI
 // ==============================================================================
 window.playBeepOscillator = () => {
     try { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(window.audioCtx.state === 'suspended') window.audioCtx.resume(); const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(880, window.audioCtx.currentTime); osc.frequency.setValueAtTime(1108.73, window.audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(1, window.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(window.audioCtx.destination); osc.start(); osc.stop(window.audioCtx.currentTime + 0.5); } catch(e){}
@@ -425,7 +445,7 @@ window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;win
 window.audioInitialized = false; window.lastSentinelCheck = Date.now();
 window.beepInterval = null;
 
-// TỰ ĐỘNG TẢI TRƯỚC BÁO THỨC TIẾP THEO (PRE-FETCH RAM HACK)
+// TỰ ĐỘNG TẢI TRƯỚC GIỌNG CHỊ GOOGLE VÀO RAM (NO-REFERRER HACK)
 window.preloadNextAlarm = () => {
     if(!window.todos) return;
     const now = Date.now();
@@ -437,11 +457,12 @@ window.preloadNextAlarm = () => {
 
     if(upcoming.length > 0) {
         const nextTask = upcoming[0];
-        const text = `Nhiệm vụ ưu tiên: ${nextTask.text}. Hãy thực hiện ngay lập tức.`;
+        const text = `Nhiệm vụ: ${nextTask.text}. Hãy thực hiện ngay lập tức.`;
+        // Kéo thẳng qua cổng GTX, nhờ thẻ <meta> tàng hình nên Google cho tải MP3
         const gtxURL = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
         if(tts.src !== gtxURL) {
             tts.src = gtxURL;
-            tts.load(); // Ngậm sẵn vào RAM
+            tts.load(); // Ép trình duyệt ngậm file vào RAM
         }
     } else {
         const defaultText = "Đã hết thời gian tập trung.";
@@ -465,9 +486,10 @@ window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     const a = el('mstq-silence'), c = el('tts-audio'), d = el('mstq-player');
     
-    // Mở neo tĩnh lặng để giữ MediaSession bằng nhạc thật
+    // Khởi động nhạc thật để giăng bẫy MediaSession
     if(a) { a.volume = 0.01; a.play().catch(()=>{}); }
-    // Khởi tạo thẻ tải trước
+    
+    // Kích hoạt thẻ TTS ngầm
     if(c) { c.muted = true; c.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; c.play().catch(()=>{}); setTimeout(()=>{c.muted=false; c.pause(); window.preloadNextAlarm();}, 500); }
     if(d) { d.muted = true; d.play().catch(()=>{}); setTimeout(()=>{d.muted=false; d.pause();}, 200); }
     
@@ -487,7 +509,7 @@ document.body.addEventListener('touchstart', window.unlockAudio, {once:true}); d
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') window.unlockAudio(); if (document.visibilityState === 'visible') { window.renderTasksOnly(); if(window.VaultUI) window.VaultUI.renderVaultCards(); window.preloadNextAlarm(); } });
 
 // ==============================================================================
-// SENTINEL & THUẬT TOÁN BÁO LẠI NHẢY SỐ (CỘNG 5 PHÚT) VÀ LƯU CLOUD
+// SENTINEL KÍCH NỔ BÁO ĐỘNG
 // ==============================================================================
 window.notifiedTasks = new Set(); window.activeAlarmTaskIds = []; window.isAlarmRinging = false;
 
@@ -499,21 +521,18 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     
     const overlay = el('alarm-overlay'); const msg = el('alarm-message'); if(overlay && msg) { msg.textContent = textToSpeak; showFlex('alarm-overlay'); }
     
-    const anchor = el('mstq-silence');
-    if(anchor) anchor.volume = 0.05; // Ducking: Hạ nhạc nền để chị Google nói
-    
     // KÊU BÍP VẬT LÝ LIÊN TỤC
     window.playBeepOscillator();
     window.beepInterval = setInterval(window.playBeepOscillator, 2000);
 
-    // PHÁT GIỌNG CHỊ GOOGLE TỪ RAM LIÊN TỤC (LOOP = TRUE)
+    // PHÁT GIỌNG CHỊ GOOGLE TỪ RAM (ĐỌC LẶP LẠI LIÊN TỤC THEO YÊU CẦU)
     const tts = el('tts-audio');
     if(tts && window.soundEnabled) {
         tts.currentTime = 0;
-        tts.loop = true; // NGƯỜI DÙNG YÊU CẦU: NÓI LIÊN TỤC
+        tts.loop = true; // LOOP ĐỂ CHỊ GOOGLE KÊU ĐẾN KHI BẠN DẬY
         tts.volume = 1.0;
         tts.play().catch(e => {
-            // Fallback nếu lỗi
+            // Fallback nếu có lỗi
             window.playSpeechTTS(textToSpeak);
         });
     }
@@ -523,7 +542,6 @@ window.stopGlobalAlarm = (actionType) => {
     window.isAlarmRinging = false;
     clearInterval(window.beepInterval);
     const tts = el('tts-audio'); if(tts) { tts.pause(); tts.loop = false; }
-    const anchor = el('mstq-silence'); if(anchor) anchor.volume = 0.01;
     
     hideEl('alarm-overlay'); window.vibrate(10);
     
@@ -534,6 +552,7 @@ window.stopGlobalAlarm = (actionType) => {
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; } 
                 else if (actionType === 'snooze') { 
+                    // THUẬT TOÁN SNOOZE NHẢY SỐ
                     const newAlarmMs = Date.now() + 5 * 60000;
                     t.alarmTime = newAlarmMs; t.alerted = false; 
                     const d = new Date(newAlarmMs);
@@ -666,7 +685,7 @@ window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110'}};
 
 // ==============================================================================
-// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (V34 - REALTIME FLUSH)
+// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC 
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -757,7 +776,7 @@ window.FirebaseSync={
                 const cloudTime = c.updatedAt || 0;
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
-                // BỨC TƯỜNG LỬA BẢO VỆ F5 (REALTIME OVERRIDE)
+                // BỨC TƯỜNG LỬA BẢO VỆ F5
                 if (localTime > cloudTime) { 
                     this.pushAll(); 
                     return; 
@@ -803,10 +822,17 @@ window.FirebaseSync={
 window.pwaLogicCore={_dp:null,init(){window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();this._dp=e;showFlex('btnInstall')});window.addEventListener('appinstalled',()=>{this._dp=null;hideEl('btnInstall');window.showToast('Đã cài App!','ph-check-circle')})},handleInstallClick(){if(!this._dp)return;this._dp.prompt();this._dp.userChoice.then(c=>{if(c.outcome==='accepted')window.showToast('Đang cài...','ph-download-simple');this._dp=null}).catch(()=>{})}};
 
 // ==============================================================================
-// 5. MODULE MUSIC APP (VANILLA JS TÍCH HỢP)
+// 5. MODULE MUSIC APP (VANILLA JS PHIÊN BẢN HOÀN CHỈNH TÍCH HỢP TỪ REACT)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, repeat: 'all', shuffle: false, _cd: null, audio: null,
+    
+    formatTime(s) {
+        if(!isFinite(s)||s<0) return '0:00';
+        const m = Math.floor(s/60), sec = Math.floor(s%60);
+        return `${m}:${String(sec).padStart(2,'0')}`;
+    },
+    
     init() {
         this.audio = document.getElementById('mstq-player');
         if(!this.audio) return;
@@ -829,11 +855,6 @@ window.MusicApp = {
             this.playIndex(this.getNextIdx());
         });
 
-        const searchEl = document.getElementById('music-search');
-        if(searchEl) searchEl.addEventListener('input', (e) => this.renderList(e.target.value));
-        const timerEl = document.getElementById('music-timer-select');
-        if(timerEl) timerEl.addEventListener('change', (e) => this.setTimer(parseInt(e.target.value)));
-
         if('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
             navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
@@ -841,6 +862,7 @@ window.MusicApp = {
             navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
         }
     },
+    
     async fetchData() {
         try {
             const res = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent('identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)')}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`);
@@ -857,74 +879,123 @@ window.MusicApp = {
                                 id: `${d.identifier}/${f.name}`,
                                 title: trackTitle.replace(/\.mp3$/i,'').replace(/_/g,' ').trim(),
                                 artist: d.creator || 'Xiemsansang',
+                                duration: parseFloat(f.length || 0) || 0,
                                 stream_url: `https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`
                             });
                         }
                     });
                 } catch(e) {}
             }
-            if(all.length) { this.playlist = all; const loadEl = document.getElementById('music-loading'); if(loadEl) loadEl.style.display='none'; this.renderList(); }
+            if(all.length > 0) { 
+                this.playlist = all; 
+                const loadEl = document.getElementById('music-loading'); 
+                if(loadEl) loadEl.style.display='none'; 
+                this.renderList(); 
+            }
         } catch(e) {}
     },
+    
     renderList(filter = '') {
         const c = document.getElementById('music-list-container'); if(!c) return;
         const q = filter.toLowerCase();
         const list = q ? this.playlist.filter(s => s.title.toLowerCase().includes(q)) : this.playlist;
+        
         c.innerHTML = list.map((s, i) => {
             const isActive = this.currentIndex === this.playlist.indexOf(s);
-            return `<div class="music-row hover:bg-slate-100 ${isActive ? 'active' : ''}" onclick="window.MusicApp.playIndex(${this.playlist.indexOf(s)})">
-                <div class="w-8 text-xs font-mono flex-shrink-0 ${isActive ? 'music-idx' : 'text-slate-400 font-bold'}">${isActive ? '▶' : i+1}</div>
+            const safeTitle = s.title.replace(/'/g, "\\'");
+            return `
+            <div class="music-row hover:bg-slate-50 ${isActive ? 'active' : ''}" onclick="window.MusicApp.playIndex(${this.playlist.indexOf(s)})">
+                <div class="w-10 text-center text-xs font-mono flex-shrink-0 ${isActive ? 'music-idx' : 'text-slate-400 font-bold'}">${isActive ? '▶' : i+1}</div>
                 <div class="flex-1 min-w-0 pr-2 py-3">
-                    <div class="truncate text-[14px] ${isActive ? 'text-primary font-bold' : 'text-slate-700 font-semibold'}">${s.title}</div>
-                    <div class="truncate text-[10px] text-slate-400 mt-0.5">${s.artist}</div>
+                    <div class="truncate text-[14px] ${isActive ? 'text-primary font-black' : 'text-slate-700 font-bold'}">${s.title}</div>
+                    <div class="truncate text-[10px] text-slate-500 font-medium mt-0.5">${s.artist}</div>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    <button class="action-btn-music text-primary" onclick="event.stopPropagation(); window.MusicApp.shareTrack('${s.stream_url}', '${safeTitle}')"><i class="ph-bold ph-share-network text-lg"></i></button>
+                    <span class="text-xs font-mono font-bold text-slate-400 w-12 text-center">${this.formatTime(s.duration)}</span>
+                    <button class="action-btn-music text-rose-500" onclick="event.stopPropagation(); window.MusicApp.downloadTrack('${s.stream_url}', '${safeTitle}')"><i class="ph-bold ph-download-simple text-lg"></i></button>
                 </div>
             </div>`;
         }).join('');
     },
+    
+    async shareTrack(url, title) {
+        window.vibrate(10);
+        try {
+            if(navigator.share) await navigator.share({title: title, url: url});
+            else { await navigator.clipboard.writeText(url); window.showToast('Đã copy link bài hát!', 'ph-copy'); }
+        } catch(e) {}
+    },
+    
+    downloadTrack(url, title) {
+        window.vibrate(10); window.showToast(`Đang tải: ${title}...`, 'ph-download-simple');
+        try {
+            const a = document.createElement('a');
+            a.href = url; a.download = `${title}.mp3`; a.target = '_blank';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        } catch(e) { window.showToast('Lỗi tải file', 'ph-warning'); }
+    },
+    
     playIndex(i) {
         const s = this.playlist[i]; if(!s) return;
         this.currentIndex = i; window.unlockAudio();
         if(this.audio.src !== s.stream_url) { this.audio.src = s.stream_url; this.audio.load(); }
         this.audio.play().then(() => {
-            this.setPlaying(true); const searchEl = document.getElementById('music-search'); this.renderList(searchEl ? searchEl.value : '');
+            this.setPlaying(true); 
+            const searchEl = document.getElementById('music-search'); 
+            this.renderList(searchEl ? searchEl.value : '');
+            
             const mini = document.getElementById('music-mini-player'); if(mini) mini.style.display = 'flex';
             const tit = document.getElementById('m-title'); if(tit) tit.textContent = s.title;
             if('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({title: s.title, artist: s.artist});
         }).catch(e => { setTimeout(()=>this.audio.play(), 800); });
     },
+    
     togglePlay() {
         if(!this.playlist.length) return; window.unlockAudio();
         if(this.playing || !this.audio.paused) { this.audio.pause(); this.setPlaying(false); }
         else { if(!this.audio.src) this.playIndex(this.currentIndex); else { this.audio.play(); this.setPlaying(true); } }
     },
+    
     setPlaying(b) { 
         this.playing = b; 
-        const pb = document.getElementById('m-btn-play'); if(pb) pb.innerHTML = b ? '<i class="ph-fill ph-pause text-2xl"></i>' : '<i class="ph-fill ph-play text-2xl"></i>';
-        const ms = document.getElementById('m-status'); if(ms) ms.textContent = b ? "Đang phát..." : "Đã dừng";
+        const pb = document.getElementById('m-btn-play'); if(pb) pb.innerHTML = b ? '<i class="ph-fill ph-pause text-2xl sm:text-3xl"></i>' : '<i class="ph-fill ph-play text-2xl sm:text-3xl"></i>';
+        const ms = document.getElementById('m-status'); if(ms) ms.textContent = b ? "Đang phát..." : "Đã tạm dừng";
         if('mediaSession' in navigator) navigator.mediaSession.playbackState = b ? 'playing' : 'paused';
     },
+    
     getNextIdx() {
         if(this.shuffle && this.playlist.length > 1) {
             let n = Math.floor(Math.random() * this.playlist.length); return n === this.currentIndex ? (n + 1) % this.playlist.length : n;
         }
         return (this.currentIndex + 1) % this.playlist.length;
     },
+    
     playNext() { this.playIndex(this.getNextIdx()); },
     playPrev() { this.playIndex((this.currentIndex - 1 + this.playlist.length) % this.playlist.length); },
+    
     toggleShuffle() { 
-        this.shuffle = !this.shuffle; window.vibrate(10); const b = document.getElementById('m-btn-shuffle');
-        if(b) b.className = this.shuffle ? 'w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 border border-primary/20' : 'w-9 h-9 rounded-full text-slate-400 bg-slate-50 flex justify-center items-center active:scale-90 border border-slate-200';
+        this.shuffle = !this.shuffle; window.vibrate(10); 
+        const b = document.getElementById('m-btn-shuffle');
+        if(b) b.className = this.shuffle ? 'w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 transition-colors' : 'w-9 h-9 rounded-full text-slate-400 flex justify-center items-center active:scale-90 transition-colors';
     },
+    
     toggleRepeat() {
-        this.repeat = this.repeat === 'all' ? 'one' : this.repeat === 'one' ? 'off' : 'all'; window.vibrate(10); const b = document.getElementById('m-btn-repeat');
+        this.repeat = this.repeat === 'all' ? 'one' : this.repeat === 'one' ? 'off' : 'all'; window.vibrate(10); 
+        const b = document.getElementById('m-btn-repeat');
         if(b) {
-            b.className = this.repeat !== 'off' ? 'w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 border border-primary/20' : 'w-9 h-9 rounded-full text-slate-400 bg-slate-50 flex justify-center items-center active:scale-90 border border-slate-200';
+            b.className = this.repeat !== 'off' ? 'w-9 h-9 rounded-full text-primary bg-primary/10 flex justify-center items-center active:scale-90 transition-colors border border-primary/20' : 'w-9 h-9 rounded-full text-slate-400 flex justify-center items-center active:scale-90 transition-colors';
             b.innerHTML = this.repeat === 'one' ? '<i class="ph-bold ph-repeat-once text-lg"></i>' : '<i class="ph-bold ph-repeat text-lg"></i>';
         }
     },
-    setTimer(m) {
-        clearInterval(this._cd); if(m === 0) { window.showToast('Đã hủy hẹn giờ nhạc'); return; }
-        window.showToast(`Nhạc sẽ tắt sau ${m} phút`); this._cd = setTimeout(() => { if(this.playing) this.togglePlay(); }, m * 60000);
+    
+    setTimer(val) {
+        window.vibrate(10);
+        clearInterval(this._cd); 
+        const m = parseInt(val);
+        if(m === 0) { window.showToast('Đã hủy hẹn giờ nhạc'); return; }
+        window.showToast(`Hệ thống sẽ tắt nhạc sau ${m} phút`, 'ph-timer'); 
+        this._cd = setTimeout(() => { if(this.playing) this.togglePlay(); }, m * 60000);
     }
 };
 
