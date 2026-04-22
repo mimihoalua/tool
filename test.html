@@ -3,30 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V9</title>
+    <title>Audio Core Tester V10</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
         button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
+        .btn-yellow { background: #f59e0b; color: black; }
         .btn-green { background: #10b981; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-red { background: #ef4444; color: white; }
-        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 400px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
+        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 350px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
         .ping-text { color: #60a5fa; }
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V9: Pre-fetch AI Voice & MediaSession</h2>
+    <h2>Kiểm Thử V10: Phục Hồi Dao Động Vật Lý & Thông Báo</h2>
     
-    <audio id="media-player" playsinline></audio>
+    <audio id="silence-player" loop playsinline></audio>
 
-    <button class="btn-green" id="btn-start" onclick="initEngine()">1. Khởi động Trạm Phát</button>
+    <button class="btn-yellow" onclick="requestPermissions()">1. Xin quyền Thông Báo (Quan trọng)</button>
+    <button class="btn-green" id="btn-start" onclick="initEngine()">2. Khởi động Hệ Thống</button>
     
     <div style="display: flex; gap: 10px; margin-top: 10px;">
         <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px;">
-        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
+        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">3. Hẹn giờ (Tắt màn hình ngay)</button>
     </div>
 
-    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">3. Tắt Báo Động</button>
+    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">4. Tắt Báo Động</button>
 
     <div id="log">Chờ lệnh...<br></div>
 
@@ -40,58 +42,72 @@
         }
 
         const SILENCE_B64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        const ALARM_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
         
-        let player = document.getElementById('media-player');
+        let audioCtx;
         let isEngineRunning = false;
         let pingWorker;
-        let preloadedVoiceURL = null; // Biến lưu URL ảo của giọng nói
+        let alarmInterval;
+        let notifInterval;
 
-        // Hàm tải trước (Pre-fetch) giọng Google Dịch thành file Blob nội bộ
-        async function fetchGoogleVoice(text) {
-            printLog(`⏳ Đang âm thầm tải giọng AI: "${text}"...`);
-            const ttsURL = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
-            
+        async function requestPermissions() {
+            if ("Notification" in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") printLog("✅ Quyền Thông báo ĐÃ CẤP.");
+                else printLog("❌ Quyền Thông báo BỊ TỪ CHỐI.");
+            } else {
+                printLog("⚠️ Trình duyệt không hỗ trợ Notification.");
+            }
+        }
+
+        // ĐỘNG CƠ VẬT LÝ V8 (Giữ nguyên không sửa)
+        function firePhysicalBeep() {
+            if (!audioCtx) return;
             try {
-                const response = await fetch(ttsURL);
-                if (!response.ok) throw new Error("Mạng lỗi");
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
                 
-                const blob = await response.blob();
-                preloadedVoiceURL = URL.createObjectURL(blob);
-                printLog("✅ Đã tải xong Giọng nói AI vào bộ nhớ RAM.");
-            } catch (err) {
-                printLog("❌ Lỗi tải giọng AI: " + err.message);
+                // Tiếng còi cứu thương chói tai
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                osc.frequency.setValueAtTime(1108.73, audioCtx.currentTime + 0.1);
+                
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {
+                printLog("Lỗi Bíp Vật Lý: " + e.message);
             }
         }
 
         async function initEngine() {
-            printLog("Đang khởi tạo Trạm Phát Nhạc Ngầm...");
+            printLog("Đang khởi tạo Web Audio API...");
             
-            // 1. Tải trước giọng nói
-            await fetchGoogleVoice("Đã đến giờ báo thức. Hãy thức dậy ngay lập tức.");
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            
+            const silence = document.getElementById('silence-player');
+            silence.src = SILENCE_B64;
+            silence.play().then(() => {
+                printLog("✅ Ống thủy tĩnh lặng đang hoạt động.");
+            }).catch(e => printLog("❌ Lỗi Ống thủy: " + e));
 
-            // 2. Ép Player chạy bài hát "Tĩnh Lặng" để kích hoạt MediaSession
-            player.src = SILENCE_B64;
-            player.loop = true;
-            
-            player.play().then(() => {
-                printLog("✅ Trạm phát đã hoạt động. MediaSession ĐÃ KHÓA.");
-                
-                // Khai báo MediaSession để Xiaomi tin đây là App nghe nhạc
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: "Hệ Thống Canh Gác",
-                        artist: "LifeOS Sentinel",
-                        artwork: [{src: "https://placehold.co/512x512/10b981/ffffff?text=OS", sizes: "512x512", type: "image/png"}]
-                    });
-                    navigator.mediaSession.playbackState = 'playing';
-                }
-            }).catch(e => printLog("❌ Lỗi kích hoạt Player: " + e));
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance('');
+                u.volume = 0; window.speechSynthesis.speak(u);
+            }
 
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
                 catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
             }
+
+            firePhysicalBeep(); // Test loa ngay lúc bật
             
             isEngineRunning = true;
             document.getElementById('btn-start').disabled = true;
@@ -99,46 +115,41 @@
             printLog("🚀 HỆ THỐNG SẴN SÀNG.");
         }
 
+        // Bắn thông báo đẩy liên tục để ép màn hình sáng
+        function fireNotification() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.showNotification("🔔 ĐẾN GIỜ RỒI!", {
+                        body: "Hãy thức dậy và làm nhiệm vụ!",
+                        vibrate: [200, 100, 200, 100, 200], // Rung điện thoại
+                        priority: "max"
+                    });
+                }).catch(() => {
+                    new Notification("🔔 ĐẾN GIỜ RỒI!", { body: "Dậy đi thôi!" });
+                });
+            }
+        }
+
         function triggerAlarm() {
             printLog("🚨 ĐÃ ĐẾN GIỜ! PHÁT BÁO ĐỘNG!");
 
-            // THỦ THUẬT: Giả lập việc "Next bài" trên Trình Phát Nhạc
-            
-            // Bước 1: Cho phát đĩa Chuông (Volume 20%)
-            player.loop = false;
-            player.volume = 0.2;
-            player.src = ALARM_URL;
-            player.play();
-            printLog("▶️ Đang phát đĩa Chuông (Vol 0.2)");
-            
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata.title = "Đang báo động!";
-            }
+            // 1. Phục hồi tiếng Bíp vật lý chói tai (Chuẩn V8)
+            firePhysicalBeep();
+            alarmInterval = setInterval(firePhysicalBeep, 1000);
+            printLog("▶️ Đang phát tiếng bíp vật lý liên tục.");
 
-            // Bước 2: Khi đĩa Chuông vừa dứt, tự động "Next" sang đĩa AI Voice
-            player.onended = () => {
-                if (preloadedVoiceURL) {
-                    printLog("⏹️ Đổi đĩa. Đang phát đĩa Giọng AI (Vol Max)...");
-                    player.volume = 1.0;
-                    player.src = preloadedVoiceURL;
-                    player.play().catch(e => printLog("Lỗi phát AI: " + e));
-                    
-                    // Bước 3: AI đọc xong, "Next" sang đĩa tĩnh lặng để chờ tiếp
-                    player.onended = () => {
-                        printLog("⏹️ Xong. Quay về chế độ canh gác.");
-                        player.volume = 1.0;
-                        player.loop = true;
-                        player.src = SILENCE_B64;
-                        player.play();
-                        player.onended = null; // Xóa sự kiện để tránh lặp
-                    };
-                } else {
-                    // Nếu lỗi không có mạng lúc bật máy, cứ bật chuông to lên
-                    player.volume = 1.0;
-                    player.loop = true;
-                    player.play();
-                }
-            };
+            // 2. Bắn thông báo rung máy
+            fireNotification();
+            notifInterval = setInterval(fireNotification, 5000); // Bắn lại mỗi 5 giây để chớp màn
+
+            // 3. Thử gọi giọng nói AI (Tranh thủ lúc màn hình bị Notification làm chớp sáng)
+            if ('speechSynthesis' in window) {
+                printLog("🗣️ Cố gắng gọi Giọng nói AI...");
+                const utterance = new SpeechSynthesisUtterance("Đã đến giờ báo thức.");
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.1;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         function startTimer() {
@@ -184,9 +195,10 @@
 
         function stopAll() {
             if (pingWorker) pingWorker.postMessage({ cmd: 'stop' });
-            player.pause();
-            player.onended = null; // Reset logic chuyển bài
-            printLog("Đã tắt đài phát thanh.");
+            clearInterval(alarmInterval);
+            clearInterval(notifInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            printLog("Đã tắt báo động và bộ đếm.");
         }
     </script>
 </body>
