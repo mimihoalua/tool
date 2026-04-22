@@ -9,7 +9,6 @@
   <title>Nghe Nhạc - XIEMSANSANG</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
@@ -46,7 +45,7 @@
   <div id="root"></div>
 
   <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
-  <audio id="mstq-silence" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+  <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
 
   <script type="text/javascript">
     const { useState, useEffect, useRef, useCallback, createElement: e } = React;
@@ -106,7 +105,7 @@
       const [progress,setProgress]=useState({current:0,duration:0});
       
       const [shuffle,setShuffle]=useState(load(SHUFFLE_KEY,false));
-      const [repeat,setRepeat]=useState(load(REPEAT_KEY,'all')); // 'off', 'all', 'one'
+      const [repeat,setRepeat]=useState(load(REPEAT_KEY,'all')); 
       
       const playlistRef = useRef(playlist); useEffect(()=>{playlistRef.current=playlist},[playlist]);
       const currentIndexRef = useRef(currentIndex); 
@@ -160,9 +159,8 @@
                   const meta=await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(r=>r.json());
                   (meta.files||[]).forEach(f=>{
                     if(String(f.format||'').toUpperCase().includes('MP3')){
-                      // ƯU TIÊN LẤY TÊN FILE ĐỂ TRÁNH TRÙNG TÊN THƯ MỤC
                       let trackTitle = f.name; 
-                      if(f.title && f.title.trim() !== d.title.trim()) trackTitle = f.title; // Dùng thẻ title nếu nó khác tên thư mục
+                      if(f.title && f.title.trim() !== d.title.trim()) trackTitle = f.title;
                       
                       all.push({
                           id:`${d.identifier}/${f.name}`,
@@ -254,7 +252,7 @@
       const initAudioEngine = () => {
           haptic(); setIsInitialized(true);
           const anchor = document.getElementById('mstq-silence');
-          if (anchor) anchor.play().catch(()=>{});
+          if (anchor && anchor.paused) anchor.play().catch(()=>{});
           if (playlistRef.current.length > 0 && !playing) playNativeSync(currentIndexRef.current);
       };
 
@@ -285,11 +283,36 @@
         return()=>{ a.removeEventListener('timeupdate',onTime); a.removeEventListener('ended',onEndedNative); };
       },[]); 
 
+      // BỌC THÉP API LOCKSCREEN (Không tái sử dụng playPauseUI để tránh lỗi logic React)
       useEffect(()=>{
         if(!('mediaSession' in navigator)) return;
+        
+        const handlePlay = () => {
+            const a = document.getElementById('mstq-player');
+            const anchor = document.getElementById('mstq-silence');
+            if (anchor && anchor.paused) anchor.play().catch(()=>{});
+            
+            if (a) {
+                a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); });
+                if (document.visibilityState === 'visible') setPlaying(true);
+                navigator.mediaSession.playbackState = 'playing';
+                requestWakeLock();
+            }
+        };
+
+        const handlePause = () => {
+            const a = document.getElementById('mstq-player');
+            if (a) {
+                a.pause();
+                if (document.visibilityState === 'visible') setPlaying(false);
+                navigator.mediaSession.playbackState = 'paused';
+                releaseWakeLock();
+            }
+        };
+
         try{
-          navigator.mediaSession.setActionHandler('play', playPauseUI);
-          navigator.mediaSession.setActionHandler('pause', playPauseUI);
+          navigator.mediaSession.setActionHandler('play', handlePlay);
+          navigator.mediaSession.setActionHandler('pause', handlePause);
           navigator.mediaSession.setActionHandler('nexttrack', () => { if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current)); });
           navigator.mediaSession.setActionHandler('previoustrack', () => { if (!isTransitioningRef.current) playNativeSync(getPrevIndexLogic(currentIndexRef.current)); });
         }catch(e){}
@@ -306,7 +329,7 @@
             e('h1', {className: "text-2xl font-black text-[var(--primary)] uppercase tracking-wide"}, "Xiemsansang"),
             e('p', {className: "text-sm text-[var(--muted)] mt-0.5 font-medium mb-4"}, "Luồng phát Pre-fetch bất tận"),
             
-            // Thanh công cụ 1 hàng gọn gàng
+            // Thanh công cụ
             e('div', {className: "flex items-center gap-3"},
                 e('select', {className: "timer-dropdown flex-1", onChange: handleTimerChange},
                     e('option', {value: "0"}, "🕒 Hẹn giờ: Tắt"),
@@ -363,17 +386,14 @@
           ),
 
           e('div', {className: "flex items-center justify-between w-full max-w-2xl mx-auto px-2"},
-              // Nút Shuffle
               e('button', {onClick: ()=>{haptic(); setShuffle(!shuffle)}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, Icons.shuffle(20)),
               
-              // Cụm Play
               e('div', {className: "flex items-center gap-4"},
                 e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getPrevIndexLogic(currentIndex))}, Icons.back(22)), 
                 e('button', {className: "w-14 h-14 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg active:scale-95 transition-transform", onClick: playPauseUI}, playing?Icons.pause(28):Icons.play(28)), 
                 e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getNextIndexLogic(currentIndex))}, Icons.next(22))
               ),
               
-              // Nút Repeat
               e('button', {onClick: ()=>{haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all')}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
           ),
 
