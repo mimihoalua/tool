@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V7</title>
+    <title>Audio Core Tester V8</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
         button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
         .btn-green { background: #10b981; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-red { background: #ef4444; color: white; }
-        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 350px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
+        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 400px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
+        .ping-text { color: #60a5fa; }
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V7: Ping Liên Tục & Báo Thức Vật Lý</h2>
+    <h2>Kiểm Thử V8: Debug Ping & Dao Động Vật Lý</h2>
     
-    <audio id="alarm-player" loop playsinline src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-    <audio id="silence-player" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+    <audio id="silence-player" loop playsinline></audio>
 
     <button class="btn-green" id="btn-start" onclick="initEngine()">1. Khởi động Hệ Thống (Bắt buộc)</button>
     
@@ -32,112 +32,143 @@
 
     <script>
         const logEl = document.getElementById('log');
-        function printLog(msg) { 
+        function printLog(msg, isPing = false) { 
             const time = new Date().toLocaleTimeString();
-            logEl.innerHTML += `[${time}] ${msg}<br>`; 
+            const span = isPing ? `<span class="ping-text">${msg}</span>` : msg;
+            logEl.innerHTML += `[${time}] ${span}<br>`; 
             logEl.scrollTop = logEl.scrollHeight; 
         }
 
+        const SILENCE_B64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        
+        let audioCtx;
         let isEngineRunning = false;
-        let alarm = document.getElementById('alarm-player');
-        let silence = document.getElementById('silence-player');
         let pingWorker;
+        let alarmInterval;
+
+        // Hàm tạo tiếng bíp vật lý xuyên rào cản
+        function firePhysicalBeep() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Tần số âm thanh
+                osc.frequency.setValueAtTime(1108.73, audioCtx.currentTime + 0.1);
+                
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {
+                printLog("Lỗi Oscillator: " + e.message);
+            }
+        }
 
         async function initEngine() {
-            document.getElementById('btn-start').disabled = true;
-            printLog("Đang nạp hệ thống âm thanh...");
+            printLog("Đang khởi tạo Web Audio API...");
             
-            // 1. Khởi động Silence Anchor (Quan trọng để giữ Audio Focus)
+            // Khởi tạo Audio Context do người dùng tương tác
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            
+            // Chạy file im lặng để giữ Audio Context không bị MIUI đóng băng
+            const silence = document.getElementById('silence-player');
+            silence.src = SILENCE_B64;
             silence.play().then(() => {
-                printLog("✅ Ống thủy Tĩnh lặng đã hoạt động.");
-            }).catch(e => printLog("❌ Lỗi Silence: " + e));
+                printLog("✅ Ống thủy tĩnh lặng đang hoạt động.");
+            }).catch(e => printLog("❌ Lỗi Ống thủy: " + e));
 
-            // 2. Nạp Chuông báo thức (Muted)
-            alarm.muted = true;
-            alarm.play().then(() => {
-                printLog("✅ Ống thủy Chuông đã ngậm sẵn.");
-            }).catch(e => printLog("❌ Lỗi nạp Chuông: " + e));
+            // Thử một câu TTS rỗng để mở luồng
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance('');
+                u.volume = 0; window.speechSynthesis.speak(u);
+            }
 
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
                 catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
             }
 
-            // Khởi tạo Speech Synthesis (Mặc dù có thể bị chặn khi tắt màn hình)
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance('');
-                u.volume = 0; window.speechSynthesis.speak(u);
-            }
-
+            // Phát thử một tiếng bíp để xác nhận Engine hoạt động
+            firePhysicalBeep();
+            
             isEngineRunning = true;
+            document.getElementById('btn-start').disabled = true;
+            document.getElementById('btn-start').style.opacity = '0.5';
+            printLog("🚀 HỆ THỐNG SẴN SÀNG.");
         }
 
         function triggerAlarm() {
-            printLog("🚨 ĐÃ ĐẾN GIỜ! BÁO ĐỘNG!");
+            printLog("🚨 ĐÃ ĐẾN GIỜ! PHÁT BÁO ĐỘNG!");
 
-            // THÁO MUTE CHUÔNG VẬT LÝ
-            alarm.muted = false;
-            alarm.volume = 1.0; // Phát to nhất có thể
-            alarm.currentTime = 0;
-            printLog("▶️ Đang phát Chuông (Vol 1.0)");
+            // 1. Kích hoạt tiếng bíp vật lý liên tục mỗi giây
+            firePhysicalBeep();
+            alarmInterval = setInterval(firePhysicalBeep, 1000);
+            printLog("▶️ Đang phát tiếng bíp vật lý liên tục.");
 
-            // Thử gọi TTS (Có thể sẽ thất bại nếu màn hình đang tắt)
+            // 2. Thử gọi giọng nói AI (Dù biết có thể bị chặn khi tắt màn hình)
             if ('speechSynthesis' in window) {
-                printLog("🗣️ Thử gọi Giọng nói AI...");
-                const utterance = new SpeechSynthesisUtterance("Đã đến giờ, xin hãy chú ý.");
+                printLog("🗣️ Cố gắng gọi Giọng nói AI...");
+                const utterance = new SpeechSynthesisUtterance("Đã đến giờ báo thức.");
                 utterance.lang = 'vi-VN';
                 window.speechSynthesis.speak(utterance);
             }
         }
 
         function startTimer() {
-            if (!isEngineRunning) { alert("Phải bấm nút 1 trước!"); return; }
+            if (!isEngineRunning) { alert("Chưa khởi động hệ thống!"); return; }
             
             const sec = parseInt(document.getElementById('secInput').value);
-            printLog(`⏳ Hẹn giờ ${sec} giây. TẮT MÀN HÌNH ĐI THÔI!`);
+            printLog(`⏳ Bắt đầu đếm ngược ${sec} giây. TẮT MÀN HÌNH ĐI!`);
             
-            // Web Worker Ping liên tục
-            const inlineWorker = `
+            // Khởi tạo Web Worker để ping liên tục
+            const workerCode = `
                 let ticks = 0;
                 let target = 0;
-                let t;
+                let timer;
                 self.onmessage = function(e) {
                     if (e.data.cmd === 'start') {
-                        target = e.data.ms / 1000;
-                        t = setInterval(() => { 
+                        target = e.data.sec;
+                        timer = setInterval(() => { 
                             ticks++;
                             self.postMessage({ type: 'ping', val: ticks });
                             if (ticks >= target) {
-                                clearInterval(t);
-                                self.postMessage({ type: 'FIRE' });
+                                clearInterval(timer);
+                                self.postMessage({ type: 'fire' });
                             }
                         }, 1000);
+                    } else if (e.data.cmd === 'stop') {
+                        clearInterval(timer);
                     }
                 };
             `;
-            const blob = new Blob([inlineWorker], { type: 'application/javascript' });
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            if (pingWorker) pingWorker.terminate();
             pingWorker = new Worker(URL.createObjectURL(blob));
             
             pingWorker.onmessage = (e) => {
                 if (e.data.type === 'ping') {
-                    console.log(`Ping: ${e.data.val}s`); // In ra console nếu cắm cáp debug
-                    // Cập nhật tiêu đề trang (có thể xem được nếu màn hình mở)
-                    document.title = `Chờ: ${e.data.val}s`;
-                }
-                else if (e.data.type === 'FIRE') {
+                    printLog(`Ping... ${e.data.val}s`, true);
+                } else if (e.data.type === 'fire') {
                     triggerAlarm();
                 }
             };
             
-            pingWorker.postMessage({ cmd: 'start', ms: sec * 1000 });
+            pingWorker.postMessage({ cmd: 'start', sec: sec });
         }
 
         function stopAll() {
-            alarm.muted = true;
-            if (pingWorker) pingWorker.terminate();
+            if (pingWorker) pingWorker.postMessage({ cmd: 'stop' });
+            clearInterval(alarmInterval);
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            document.title = "Audio Core Tester V7";
-            printLog("Đã tắt báo động.");
+            printLog("Đã tắt báo động và bộ đếm.");
         }
     </script>
 </body>
