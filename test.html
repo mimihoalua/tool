@@ -3,34 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V2</title>
+    <title>Audio Core Tester V3</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
-        button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; }
-        .btn-yellow { background: #f59e0b; color: black; }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
         .btn-green { background: #10b981; color: white; }
-        .btn-red { background: #ef4444; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
-        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 300px; overflow-y: auto; color: #34d399; }
+        .btn-red { background: #ef4444; color: white; }
+        #log { background: #1e293b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 350px; overflow-y: auto; color: #34d399; margin-top: 20px; line-height: 1.5; }
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V2: Đâm Xuyên MIUI</h2>
+    <h2>Kiểm Thử V3: Đài Phát Thanh Ảo</h2>
     
-    <audio id="silence" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
-    <audio id="alarm" loop playsinline src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="master-player" playsinline webkit-playsinline></audio>
 
-    <button class="btn-yellow" onclick="requestPermissions()">1. Xin quyền Thông báo (Rất quan trọng)</button>
-    <button class="btn-green" onclick="initEngine()">2. Khởi động Động cơ</button>
+    <button class="btn-green" onclick="initEngine()">1. Khởi động Ống Thủy</button>
     
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold;">
-        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">3. Hẹn giờ (Tắt màn hình ngay)</button>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <input type="number" id="secInput" value="15" style="width: 80px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px;">
+        <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
     </div>
 
-    <button class="btn-red" onclick="stopAll()" style="margin-top: 20px;">4. Tắt Báo động</button>
+    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">3. Tắt Đài</button>
 
-    <h3 style="margin-top: 20px;">Nhật ký hệ thống:</h3>
     <div id="log">Chờ lệnh...<br></div>
 
     <script>
@@ -41,101 +37,95 @@
             logEl.scrollTop = logEl.scrollHeight; 
         }
 
+        const SILENCE_60MIN = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        const ALARM_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
         let isEngineRunning = false;
+        let masterPlayer = document.getElementById('master-player');
 
-        async function requestPermissions() {
-            if (!("Notification" in window)) {
-                printLog("Trình duyệt không hỗ trợ Notification.");
-                return;
-            }
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                printLog("✅ Đã cấp quyền hiển thị Thông báo (Pop-up).");
-            } else {
-                printLog("❌ Quyền Thông báo bị từ chối.");
-            }
+        // Bật Audio Context để đệm loa vật lý (backup)
+        let audioCtx;
+        function beepBackup() {
+            try {
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e){}
         }
 
         async function initEngine() {
-            printLog("Đang kích hoạt Mỏ neo tĩnh lặng...");
-            const a = document.getElementById('silence');
-            const b = document.getElementById('alarm');
+            printLog("Đang kích hoạt Đài Phát Thanh Ảo...");
             
-            a.play().catch(e => printLog("Lỗi Silence: " + e));
-            
-            b.muted = true;
-            b.play().catch(e => printLog("Lỗi Alarm: " + e));
-            setTimeout(() => { b.pause(); b.muted = false; }, 500);
+            // Ép Đài phát thanh hát bài "Im lặng"
+            masterPlayer.src = SILENCE_60MIN;
+            masterPlayer.loop = true;
+            masterPlayer.play().then(() => {
+                printLog("✅ Ống thủy đã ngậm luồng Audio Focus thành công.");
+                
+                // Cắm cờ MediaSession để giữ mạng
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: "LifeOS Sentinel", artist: "Đang canh gác..." });
+                    navigator.mediaSession.playbackState = 'playing';
+                }
+            }).catch(e => printLog("❌ Lỗi kích hoạt loa: " + e));
 
             if ('wakeLock' in navigator) {
-                try { await navigator.wakeLock.request('screen'); printLog("WakeLock CPU OK."); } 
-                catch (err) { printLog("WakeLock bị từ chối."); }
+                try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
+                catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
             }
 
-            // Mở luồng TTS
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance('');
-                u.volume = 0; window.speechSynthesis.speak(u);
-            }
-
+            beepBackup(); // Kích hoạt thử Web Audio API
             isEngineRunning = true;
-            printLog("Động cơ SẴN SÀNG. Hãy thử hẹn giờ!");
         }
 
-        function triggerKickStartAlarm(text) {
-            printLog("KÍCH HOẠT BÁO ĐỘNG ĐỎ!");
+        function triggerRadioSwap(ttsText) {
+            printLog("🚨 BÁO ĐỘNG ĐỎ! Tiến hành tráo đĩa nhạc...");
+            beepBackup();
+
+            const ttsURL = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(ttsText)}`;
+
+            // Tắt loop để chuẩn bị chuyển bài
+            masterPlayer.loop = false;
             
-            // 1. KICK-START: Bắn System Notification để ép Android chớp sáng màn hình
-            if (Notification.permission === "granted") {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.showNotification("ĐẾN GIỜ RỒI!", {
-                        body: text,
-                        icon: "https://placehold.co/192x192/10b981/ffffff?text=OS",
-                        vibrate: [500, 200, 500, 200, 500],
-                        requireInteraction: true,
-                        priority: "max"
-                    });
-                }).catch(() => {
-                    // Fallback nếu không có Service Worker
-                    new Notification("ĐẾN GIỜ RỒI!", { body: text, requireInteraction: true });
-                });
-                printLog("Đã bắn System Notification.");
-            }
+            // TRACK 1: Nhét đĩa Chuông Báo Thức vào Đài
+            masterPlayer.src = ALARM_URL;
+            masterPlayer.volume = 0.3; // Ducking: Cho chuông kêu nhỏ 30% để chuẩn bị AI nói
+            masterPlayer.play().catch(e => printLog("Lỗi phát chuông: " + e));
+            printLog("▶️ Đang phát Track 1 (Chuông)");
 
-            // 2. Kích hoạt Loa vật lý (Ducking)
-            const b = document.getElementById('alarm');
-            b.volume = 0.2; 
-            b.play();
-
-            // 3. Chèn luồng TTS ngay khi CPU đang bị "giật mình" bởi Notification
-            setTimeout(() => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'vi-VN';
-                    utterance.rate = 1.1;
+            // Bắt sự kiện Track 1 hát xong
+            masterPlayer.onended = () => {
+                printLog("⏹️ Track 1 xong. Chuyển sang Track 2 (Giọng AI)...");
+                
+                // TRACK 2: Nhét đĩa Giọng Google vào Đài
+                masterPlayer.src = ttsURL;
+                masterPlayer.volume = 1.0; // Max volume cho AI
+                masterPlayer.play().catch(e => printLog("Lỗi phát AI: " + e));
+                
+                // Bắt sự kiện Track 2 hát xong
+                masterPlayer.onended = () => {
+                    printLog("⏹️ Track 2 xong. Trả lại Đài Phát Thanh tĩnh lặng.");
                     
-                    utterance.onend = () => {
-                        printLog("TTS Đọc xong. Trả loa về 100%");
-                        b.volume = 1.0; 
-                    };
+                    // TRACK 3: Trả về đĩa Im Lặng để canh gác tiếp
+                    masterPlayer.src = SILENCE_60MIN;
+                    masterPlayer.loop = true;
+                    masterPlayer.play();
                     
-                    // Fallback an toàn: Dù TTS lỗi, loa vẫn lên 100% sau 5 giây
-                    setTimeout(() => { b.volume = 1.0; }, 5000);
-
-                    window.speechSynthesis.speak(utterance);
-                    printLog("Đã tống lệnh đọc TTS vào CPU.");
-                }
-            }, 300); // Trễ 300ms đợi chớp màn hình
+                    // Xóa sự kiện onended để chống lặp vô tận
+                    masterPlayer.onended = null;
+                };
+            };
         }
 
         function startTimer() {
-            if (!isEngineRunning) { alert("Chưa bật động cơ!"); return; }
+            if (!isEngineRunning) { alert("Phải bấm nút 1 trước!"); return; }
             
             const sec = parseInt(document.getElementById('secInput').value);
-            printLog(`Đã hẹn giờ ${sec} giây. HÃY TẮT MÀN HÌNH NGAY!`);
+            printLog(`⏳ Hẹn giờ ${sec} giây. TẮT MÀN HÌNH ĐI THÔI!`);
             
-            // Worker nội bộ
+            // Dùng Web Worker đếm giờ dưới gầm máy
             const inlineWorker = `
                 let t;
                 self.onmessage = function(e) {
@@ -149,7 +139,7 @@
             
             worker.onmessage = (e) => {
                 if (e.data === 'FIRE') {
-                    triggerKickStartAlarm("Nhiệm vụ ưu tiên: Rời khỏi giường ngay lập tức.");
+                    triggerRadioSwap("Nhiệm vụ khẩn cấp. Nấu cơm ngay lập tức kẻo cháy nồi.");
                 }
             };
             
@@ -157,9 +147,9 @@
         }
 
         function stopAll() {
-            document.getElementById('alarm').pause();
-            window.speechSynthesis.cancel();
-            printLog("Đã tắt toàn bộ âm thanh.");
+            masterPlayer.pause();
+            masterPlayer.onended = null;
+            printLog("Đã tắt nguồn đài phát thanh.");
         }
     </script>
 </body>
