@@ -37,7 +37,6 @@
     .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* Custom Select for Timer */
     select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer; }
   </style>
 </head>
@@ -50,9 +49,9 @@
   <script type="text/javascript">
     const { useState, useEffect, useRef, useCallback, createElement: e } = React;
 
-    const SONGS_CACHE_KEY='xs_songs_v3';
-    const RESUME_KEY='xs_resume_v3'; 
-    const THEME_KEY='xs_theme_v3';
+    const SONGS_CACHE_KEY='xs_songs_v4';
+    const RESUME_KEY='xs_resume_v4'; 
+    const THEME_KEY='xs_theme_v4';
     const SHUFFLE_KEY='xs_shuffle';
     const REPEAT_KEY='xs_repeat';
     const INITIAL_VISIBLE=50, VISIBLE_STEP=50;
@@ -203,6 +202,21 @@
 
       const triggerNetworkPrefetch = (idx) => { const nextSong = playlistRef.current[idx]; if (nextSong && nextSong.stream_url) fetch(nextSong.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=>{}); };
 
+      // HÀM ĐỒNG BỘ THỜI GIAN LÊN TRÌNH PHÁT NỔI (LOCKSCREEN)
+      const updatePositionState = (a) => {
+          if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+              if (a && !isNaN(a.duration) && !isNaN(a.currentTime) && isFinite(a.duration) && a.duration > 0) {
+                  try {
+                      navigator.mediaSession.setPositionState({
+                          duration: a.duration,
+                          playbackRate: a.playbackRate || 1,
+                          position: a.currentTime
+                      });
+                  } catch(e) {}
+              }
+          }
+      };
+
       const playNativeSync = (i) => {
         const a = audioRef.current; if(!a) return;
         const s = playlistRef.current[i]; if(!s) return; 
@@ -220,7 +234,10 @@
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 isTransitioningRef.current = false; requestWakeLock();
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                    updatePositionState(a); // Gửi số liệu báo cáo độ dài ra màn hình ngoài
+                }
             }).catch(e => {
                 isTransitioningRef.current = false;
                 setTimeout(() => { a.load(); a.play().catch(()=>{}); }, 800);
@@ -261,11 +278,19 @@
         const onTime = (e) => { 
           const target = e.target;
           if(isNaN(target.duration) || target.duration <= 0) return;
+          
           if (document.visibilityState === 'visible') {
               const now = Date.now();
               if (now - lastUiUpdateRef.current > 500) { setProgress({current: target.currentTime, duration: target.duration}); lastUiUpdateRef.current = now; }
           }
           
+          // Bơm số liệu thanh tiến trình ra Lockscreen (1 giây/lần tránh hao pin)
+          const currentSec = Math.floor(target.currentTime);
+          if (currentSec !== lastMediaSessionUpdateRef.current) {
+              updatePositionState(target);
+              lastMediaSessionUpdateRef.current = currentSec;
+          }
+
           if (target.duration > 30 && target.currentTime >= target.duration - 20) {
               if (!prefetchDoneRef.current) { prefetchDoneRef.current = true; triggerNetworkPrefetch(getNextIndexLogic(currentIndexRef.current)); }
           }
@@ -283,7 +308,7 @@
         return()=>{ a.removeEventListener('timeupdate',onTime); a.removeEventListener('ended',onEndedNative); };
       },[]); 
 
-      // BỌC THÉP API LOCKSCREEN (Không tái sử dụng playPauseUI để tránh lỗi logic React)
+      // BỌC THÉP API LOCKSCREEN BAO GỒM TUA NHẠC
       useEffect(()=>{
         if(!('mediaSession' in navigator)) return;
         
@@ -310,11 +335,29 @@
             }
         };
 
+        // HÀM XỬ LÝ LỆNH TUA TỪ LOCKSCREEN
+        const handleSeek = (details) => {
+            const a = document.getElementById('mstq-player');
+            if (a && a.readyState >= 1) {
+                if (details.fastSeek && 'fastSeek' in a) {
+                    a.fastSeek(details.seekTime);
+                } else if (details.seekTime !== undefined) {
+                    a.currentTime = details.seekTime;
+                }
+                updatePositionState(a); // Ép vẽ lại số liệu sau khi tua
+            } else if (a) {
+                a.load();
+                a.currentTime = details.seekTime || 0;
+                a.play().catch(()=>{});
+            }
+        };
+
         try{
           navigator.mediaSession.setActionHandler('play', handlePlay);
           navigator.mediaSession.setActionHandler('pause', handlePause);
           navigator.mediaSession.setActionHandler('nexttrack', () => { if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current)); });
           navigator.mediaSession.setActionHandler('previoustrack', () => { if (!isTransitioningRef.current) playNativeSync(getPrevIndexLogic(currentIndexRef.current)); });
+          navigator.mediaSession.setActionHandler('seekto', handleSeek); // Bật tính năng kéo tua nhạc
         }catch(e){}
       },[]);
 
