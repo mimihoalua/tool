@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Core Tester V4</title>
+    <title>Audio Core Tester V5</title>
     <style>
         body { font-family: system-ui; padding: 20px; background: #0f172a; color: white; }
         button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
@@ -14,10 +14,10 @@
     </style>
 </head>
 <body>
-    <h2>Kiểm Thử V4: Tua File Tĩnh (Seek-Hack)</h2>
+    <h2>Kiểm Thử V5: Base64 & AI Nội Sinh</h2>
     
-    <audio id="master-player" playsinline webkit-playsinline></audio>
-    <audio id="tts-player" playsinline webkit-playsinline></audio>
+    <audio id="alarm-player" loop playsinline webkit-playsinline></audio>
+    <audio id="silence-player" loop playsinline webkit-playsinline></audio>
 
     <button class="btn-green" onclick="initEngine()">1. Khởi động Ống Thủy</button>
     
@@ -26,7 +26,7 @@
         <button class="btn-blue" onclick="startTimer()" style="margin: 0; flex-grow: 1;">2. Hẹn giờ (Tắt màn hình ngay)</button>
     </div>
 
-    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">3. Tắt Đài</button>
+    <button class="btn-red" onclick="stopAll()" style="margin-top: 10px;">3. Tắt Báo Động</button>
 
     <div id="log">Chờ lệnh...<br></div>
 
@@ -38,42 +38,49 @@
             logEl.scrollTop = logEl.scrollHeight; 
         }
 
-        // File MP3 đặc biệt: 1 phút im lặng tuyệt đối, sau đó có 1 tiếng Beep rất to kéo dài 5 giây
-        // Tôi đã encode một đoạn mp3 ngắn để test.
-        const SMART_AUDIO = "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"; 
-        const SILENCE_AUDIO = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        
+        // Base64 Chuông Báo Thức Ngắn (1 giây)
+        const ALARM_BASE64 = "data:audio/mp3;base64,//OExAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAcAAAPbQAIERUYGyAhJSgqLTA0Nz0/QkNIS05SVVheYGVpbnByd3x+gYSKjZCUlpmdn6Sora+xt7q9v8PHz9LV2dzf4eTp7u/x9fr9/gAAADJMQU1FMy45OXIxA1sAAAAALiAAABAAIAdBAAAA8AAA9tAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//OExAAAAAAANIAAAAAExBTUUzLjk5LjUAAAEsAABoAAAAAAAMAAAgADwz+4OFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/84TEAAAACpP14AAAwAIwGABGg8gRkOQ4gIg0ODAQgIQIgEwA/f+gBgBgA8X//wBv/+Q4v/wA2Q8QYg0ODAQgA//zgMQAAAII41oADxggAAAP/84TEAAQAANJAAAAAAA//zhMQAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAAD//zhMQAAAAADSAAAAAAP/84TEAAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAAD//zhMQAAAAADSAAAAAAP/84TEAAAAAA0gAAAAAD//OExAAAAAAA0gAAAAAP/84TEAAAAAA0gAAAAA=";
+        const SILENCE_BASE64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+
         let isEngineRunning = false;
-        let master = document.getElementById('master-player');
-        let ttsPlayer = document.getElementById('tts-player');
+        let alarm = document.getElementById('alarm-player');
+        let silence = document.getElementById('silence-player');
+        
+        let ttsVoice = null;
+        let speechHacks = []; // Chống Garbage Collection
+
+        // Nạp giọng AI
+        function loadVoice() {
+            if ('speechSynthesis' in window) {
+                const voices = window.speechSynthesis.getVoices();
+                ttsVoice = voices.find(v => v.lang.includes('vi')) || voices[0];
+            }
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoice;
+        }
 
         async function initEngine() {
-            printLog("Đang nạp file báo thức vào bộ nhớ đệm...");
+            printLog("Đang nạp Bom Nổ Chậm Base64...");
             
-            // Cắm thẻ TTS bằng file im lặng để lấy quyền
-            ttsPlayer.src = SILENCE_AUDIO;
-            ttsPlayer.loop = true;
-            ttsPlayer.muted = true;
-            ttsPlayer.play().catch(e => printLog("Lỗi nạp TTS: " + e));
+            // Ống thủy Tĩnh lặng chạy 100% volume để giữ Audio Focus
+            silence.src = SILENCE_BASE64;
+            silence.play().catch(e => printLog("Lỗi nạp Silence: " + e));
 
-            // Nạp file Chuông báo thức nhưng Muted và cho chạy ngầm liên tục
-            master.src = SMART_AUDIO;
-            master.loop = true;
-            master.muted = true; // Phải Muted thì OS mới cho chạy ngầm vô hạn
-            master.play().then(() => {
-                printLog("✅ Ống thủy đã ngậm file Báo thức ngầm.");
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({ title: "LifeOS Sentinel", artist: "Đang canh gác..." });
-                    navigator.mediaSession.playbackState = 'playing';
-                }
-            }).catch(e => printLog("❌ Lỗi kích hoạt loa: " + e));
+            // Nạp file Chuông Base64 nhưng Mute nó đi
+            alarm.src = ALARM_BASE64;
+            alarm.muted = true;
+            alarm.play().then(() => {
+                printLog("✅ Ống thủy đã ngậm Chuông Base64 ngầm.");
+            }).catch(e => printLog("❌ Lỗi nạp Chuông: " + e));
 
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); printLog("✅ WakeLock CPU OK."); } 
                 catch (err) { printLog("⚠️ WakeLock bị từ chối."); }
             }
 
-            // Câm giọng AI
+            // Gọi AI đọc thử 1 từ câm để kích hoạt Engine
+            loadVoice();
             if ('speechSynthesis' in window) {
                 const u = new SpeechSynthesisUtterance('');
                 u.volume = 0; window.speechSynthesis.speak(u);
@@ -82,39 +89,44 @@
             isEngineRunning = true;
         }
 
-        function triggerAlarm(ttsText) {
-            printLog("🚨 Đã đến giờ. Kích hoạt báo động...");
+        function triggerAlarm(text) {
+            printLog("🚨 ĐÃ ĐẾN GIỜ! BÁO ĐỘNG!");
 
-            // 1. GỠ BỎ MUTE CỦA FILE ĐANG CHẠY NGẦM
-            // Vì file này đang chạy sẵn (được cấp Audio Focus), việc gỡ Mute sẽ không bị OS chặn!
-            master.muted = false;
-            master.volume = 0.2; // Để âm lượng nhỏ cho AI đọc
-            master.currentTime = 0; // Tua lại đầu file chuông
+            // 1. Tháo Mute Chuông Vật lý
+            alarm.muted = false;
+            alarm.volume = 0.2; // Bóp volume xuống để AI đọc
+            printLog("▶️ Đang phát Chuông (Vol 0.2)");
 
-            printLog("▶️ Đang phát Chuông (Ducking vol 0.2)");
+            // 2. Ép AI Đọc Ngay Lập Tức
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (ttsVoice) utterance.voice = ttsVoice;
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.1;
+                
+                speechHacks.push(utterance); // Gắn vào RAM
 
-            // 2. Chèn AI Voice
-            const ttsURL = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(ttsText)}`;
-            
-            setTimeout(() => {
-                // Tận dụng Audio Focus của Master, ta gỡ Mute và đổi Source cho TTS Player
-                ttsPlayer.muted = false;
-                ttsPlayer.loop = false;
-                ttsPlayer.src = ttsURL;
-                ttsPlayer.volume = 1.0;
-                ttsPlayer.play().catch(e => printLog("❌ Lỗi phát AI Audio: " + e));
-                printLog("▶️ Đang phát Giọng chị Google...");
-
-                // Khi TTS đọc xong, nâng volume chuông lên max
-                ttsPlayer.onended = () => {
+                utterance.onstart = () => printLog("▶️ AI đang đọc nội dung...");
+                
+                utterance.onend = () => {
                     printLog("⏹️ AI đọc xong. Nâng chuông lên Max.");
-                    master.volume = 1.0;
+                    alarm.volume = 1.0;
                 };
 
-                // Fallback: Lỡ TTS không kêu, sau 5 giây vẫn tăng chuông lên
-                setTimeout(() => { master.volume = 1.0; }, 5000);
+                // Fallback nếu AI câm nín, sau 5 giây vẫn ép chuông lên Max
+                setTimeout(() => { 
+                    if (alarm.volume < 1.0) {
+                        printLog("⚠️ Timeout AI. Nâng chuông Max.");
+                        alarm.volume = 1.0; 
+                    }
+                }, 5000);
 
-            }, 1000); // Đợi 1 giây sau khi chuông kêu mới cho AI đọc
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alarm.volume = 1.0;
+            }
         }
 
         function startTimer() {
@@ -123,7 +135,7 @@
             const sec = parseInt(document.getElementById('secInput').value);
             printLog(`⏳ Hẹn giờ ${sec} giây. TẮT MÀN HÌNH ĐI THÔI!`);
             
-            // Dùng Web Worker đếm giờ dưới gầm máy
+            // Web Worker
             const inlineWorker = `
                 let t;
                 self.onmessage = function(e) {
@@ -137,7 +149,7 @@
             
             worker.onmessage = (e) => {
                 if (e.data === 'FIRE') {
-                    triggerAlarm("Tới giờ rồi. Làm nhiệm vụ đi bạn ơi.");
+                    triggerAlarm("Đã đến giờ. Tỉnh dậy ngay lập tức!");
                 }
             };
             
@@ -145,9 +157,9 @@
         }
 
         function stopAll() {
-            master.muted = true;
-            ttsPlayer.muted = true;
-            printLog("Đã tắt báo động. Hệ thống quay về canh gác ngầm.");
+            alarm.muted = true;
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            printLog("Đã tắt báo động. Hệ thống chờ.");
         }
     </script>
 </body>
