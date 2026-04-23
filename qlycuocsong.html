@@ -1202,7 +1202,7 @@ window.FirebaseSync={
                     const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
                     
                     if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
-                        console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud.");
+                        console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud. Nội dung mảng:", JSON.stringify(cleanCloudTodos));
                         window.todos = cleanCloudTodos;
                         localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
                         localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
