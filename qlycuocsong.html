@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V30 - Immortal Symphony</title>
+<title>LifeOS V31 - Master Symphony</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -21,12 +21,11 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="/tool/jsOTP.min.js"></script>
-<script src="/tool/firebase-app-compat.js"></script>
-<script src="/tool/firebase-firestore-compat.js"></script>
-<script src="/tool/firebase-auth-compat.js"></script>
+<script src="./jsOTP.min.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 <style>
-/* MA TRẬN 5 MÀU THEME */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -81,7 +80,7 @@ input[type="time"]::-webkit-calendar-picker-indicator,input[type="date"]::-webki
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
-<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="/tool/silence_30min.mp3"></audio>
+<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="./silence_30min.mp3"></audio>
 <audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 flex-col items-center justify-center p-4 hidden">
@@ -449,7 +448,21 @@ window.playSpeechTTS = (text) => {
     try {
         const c = document.getElementById('tts-audio');
         if (c) {
-            c.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
+            // Dùng googleapis.com để vượt mặt một số bộ chặn
+            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
+            
+            // X-Quang xử lý lỗi: Nếu Google chặn, bẻ lái sang ResponsiveVoice
+            c.onerror = () => {
+                if (c.src.includes('google')) {
+                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(text)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                    c.src = backupUrl;
+                    c.load();
+                    c.play().catch(()=>{ speakNative(); });
+                } else {
+                    speakNative(); 
+                }
+            };
+            
             const playPromise = c.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => { speakNative(); });
@@ -1196,7 +1209,7 @@ window.VaultApp={
                 <div class="flex-grow overflow-y-auto custom-scroll-area min-h-0 p-2">
                     <div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200 shrink-0"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div>
                     <h2 class="text-xl font-black mb-2 text-slate-800 shrink-0">Xóa vĩnh viễn?</h2>
-                    <p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(e.name)}"</p>
+                    <p class="text-sm text-slate-50 mb-6 break-words">"${window.escapeHTML(e.name)}"</p>
                 </div>
                 <div class="flex gap-3 flex-shrink-0 mt-2">
                     <button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Giữ lại</button>
@@ -1413,7 +1426,6 @@ window.MusicApp = {
     
     renderList() {
         const container = el('music-list-container');
-        // Clear all except loading
         Array.from(container.children).forEach(c => { if(c.id !== 'music-loading') c.remove(); });
         
         const list = this.filterText.trim() ? this.playlist.filter(s => (s.title||'').toLowerCase().includes(this.filterText.toLowerCase())) : this.playlist;
@@ -1451,7 +1463,7 @@ window.MusicApp = {
     updateMiniPlayer() {
         const s = this.playlist[this.currentIndex];
         if(!s) return;
-        el('music-title').textContent = s.title;
+        el('music-title').textContent = s.title || '';
         el('music-status').textContent = this.playing ? "Đang phát..." : "Đã tạm dừng";
         
         const btnPlay = el('btn-play-pause');
@@ -1586,10 +1598,13 @@ window.MusicApp = {
             if(!this.isTransitioning) this.play(this.getNextIndex());
         });
         
-        // MediaSession Hooks
         if('mediaSession' in navigator) {
             try {
-                navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
+                navigator.mediaSession.setActionHandler('play', () => {
+                    const anchor = document.getElementById('mstq-silence');
+                    if (anchor && anchor.paused) anchor.play().catch(()=>{});
+                    this.togglePlay();
+                });
                 navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
                 navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext());
                 navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
