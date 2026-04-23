@@ -1196,17 +1196,26 @@ window.FirebaseSync={
                     cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : c.updatedAt;
                 }
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
-                console.log(`🔥 [FIREBASE] So sánh Time: Cloud(${cloudTime}) vs Local(${localTime})`);
 
-                if(c.data && Array.isArray(c.data)){ 
-                    const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
+                // VÁ LỖI MẢNG RỖNG
+                const cloudData = c.data;
+                if(cloudData && Array.isArray(cloudData)){ 
+                    const cleanCloudTodos = cloudData.map(t => ({...t, id: String(t.id)}));
                     
-                    if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
-                        console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud. Nội dung mảng:", JSON.stringify(cleanCloudTodos));
-                        window.todos = cleanCloudTodos;
-                        localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
-                        localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
-                        if(document.visibilityState === 'visible') window.renderTasksOnly();
+                    // CHỈ CẬP NHẬT KHI DỮ LIỆU CLOUD LÀ MỚI HƠN THẬT SỰ VÀ KHÔNG BỊ RỖNG NGỚ NGẨN
+                    if (!window.cloudSyncCompleted || cloudTime > localTime || localTime === 0) {
+                        
+                        // Nếu Cloud trả về mảng rỗng mà Local đang có dữ liệu, KHÔNG CẬP NHẬT, ĐẨY NGƯỢC LÊN
+                        if (cleanCloudTodos.length === 0 && window.todos && window.todos.length > 0) {
+                            console.log("🔥 [FIREBASE] Cloud bị rỗng, ép đẩy Local lên lại!");
+                            this.pushAll();
+                        } else {
+                            console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud. Nội dung mảng:", JSON.stringify(cleanCloudTodos));
+                            window.todos = cleanCloudTodos;
+                            localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
+                            localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
+                            if(document.visibilityState === 'visible') window.renderTasksOnly();
+                        }
                     } else {
                         console.log("🔥 [FIREBASE] Local mới hơn, bỏ qua snapshot này.");
                     }
@@ -1214,7 +1223,7 @@ window.FirebaseSync={
                 
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
                 if(c.vaultData&&Array.isArray(c.vaultData)){ 
-                    if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
+                    if (!window.cloudSyncCompleted || cloudTime > localTime || localTime === 0) {
                         const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
                         window.VaultStorageLayer.replaceAll(cleanCloudData); 
                         if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();
@@ -1234,8 +1243,9 @@ window.FirebaseSync={
             const currentTs = window.lastLocalPush || Date.now();
             localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
             
+            // ĐẢM BẢO KHÔNG BAO GIỜ PUSH null
             const safeTodos = (window.todos||[]).map(t => ({...t, id: String(t.id)}));
-            console.log("🔥 [FIREBASE] Đẩy dữ liệu lên Cloud... TS:", currentTs);
+            console.log("🔥 [FIREBASE] Đẩy dữ liệu lên Cloud... TS:", currentTs, "Dữ liệu:", JSON.stringify(safeTodos));
             
             this._d.collection('LifeOS_Profiles').doc(this._k).set({ 
                 data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[],
@@ -1246,7 +1256,6 @@ window.FirebaseSync={
         }catch(e){console.error('🔥 [FIREBASE] Push CRASH:',e.message)}
     }
 };
-
 window.pwaLogicCore={_dp:null,init(){window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();this._dp=e;showFlex('btnInstall')});window.addEventListener('appinstalled',()=>{this._dp=null;hideEl('btnInstall');window.showToast('Đã cài App!','ph-check-circle')})},handleInstallClick(){if(!this._dp)return;this._dp.prompt();this._dp.userChoice.then(c=>{if(c.outcome==='accepted')window.showToast('Đang cài...','ph-download-simple');this._dp=null}).catch(()=>{})}};
 
 // ==============================================================================
