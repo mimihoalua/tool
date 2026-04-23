@@ -21,7 +21,8 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/jsotp@1.0.1/jsOTP.min.js"></script>
+<script src="./jsOTP.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.10.0/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.10.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.10.0/firebase-auth-compat.js"></script>
@@ -377,29 +378,21 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled) return;
-    
-    // Fallback Native an toàn tuyệt đối
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel(); 
             const u = new SpeechSynthesisUtterance(text); 
             if(window.voice) u.voice = window.voice; 
-            u.rate = 1.1; 
-            u.pitch = 1.1; 
-            window.synth.speak(u); 
+            u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u); 
         }
     };
-
     try {
         const c = document.getElementById('tts-audio');
         if (c) {
             c.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
             const playPromise = c.play();
             if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.warn("Google TTS Blocked, Fallback to Native TTS:", error);
-                    speakNative();
-                });
+                playPromise.catch(error => { speakNative(); });
             }
         } else { speakNative(); }
     } catch (e) { speakNative(); }
@@ -414,7 +407,6 @@ window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio');
     
-    // Đánh lừa HĐH di động cho phép play() ngầm
     if(a) { a.play().catch(()=>{}); }
     if(b) { b.muted = true; b.loop = true; b.play().catch(()=>{}); }
     if(c) { c.muted = true; c.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; c.play().catch(()=>{}); }
@@ -428,11 +420,9 @@ window.unlockAudio=()=>{
             if(window.isAlarmRinging) {
                 if (nowMs - window.lastSpeechTime > 8000) {
                     window.vibrate([500, 200, 500]);
-                    
-                    // FIX LỖI ĐIẾC V25: KÍCH HOẠT LẠI MỌI KÊNH AUDIO KHI BÁO ĐỘNG
                     if(window.soundEnabled) { 
-                        if(b && b.muted) b.muted = false; // Bỏ mute
-                        if(b && b.paused) b.play().catch(()=>{}); // Bắt play lại nếu bị đứt
+                        if(b && b.muted) b.muted = false; 
+                        if(b && b.paused) b.play().catch(()=>{}); 
                         window.playSpeechTTS(window.alarmTextToSpeak); 
                         window.lastSpeechTime = nowMs; 
                     }
@@ -499,7 +489,6 @@ window.loadUserData=()=>{
         window.VaultUI.renderVaultCards();
         setTxt('streak-count',window.stats?.streak||0);
         
-        // CHỐNG MẤT DỮ LIỆU KHI TẢI LẠI TRANG
         window.cloudSyncCompleted = false;
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
     }catch(e){console.error(e)}
@@ -507,7 +496,6 @@ window.loadUserData=()=>{
 
 window.switchTab=(id,b)=>{
     window.vibrate([15]); window.unlockAudio();
-    // CUỘN LÊN ĐẦU TIÊN
     if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
     else if(id==='view-focus') el('view-focus').scrollIntoView({behavior:'smooth'});
     else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
@@ -731,7 +719,6 @@ window.checkAlarms = () => {
             needsSync = true;
         }
         
-        // KIỂM TRA BÁO ĐỘNG RAM BẤT TỬ
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false) {
             if (nowMs >= t.alarmTime && !t.alerted && !window.notifiedTasks.has(String(t.id))) {
                 window.notifiedTasks.add(String(t.id));
@@ -876,7 +863,6 @@ window.execDeleteTask=id=>{
     window.renderTasksOnly(); window.showToast('Đã xóa nhiệm vụ','ph-trash'); if(window.soundEnabled)window.playSpeechTTS('Đã xóa');
 };
 
-// SỬA NHIỆM VỤ
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return;
     window.vibrate(15);
@@ -986,7 +972,6 @@ window.VaultUtils={
         });
         if(h){p.rawNotes=p.notes.join('\n');}else{p.rawNotes=c;}return p
     },
-    // ================= FALLBACK jsOTP =================
     generateTOTP(s){
         if(!s) return null;
         if(typeof window.jsOTP === 'undefined') {
