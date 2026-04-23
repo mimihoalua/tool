@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V27 - Offline Fortress</title>
+<title>LifeOS V28 - Radar Fortress</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -954,7 +954,7 @@ window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110'}};
 
 // ==============================================================================
-// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (ĐÃ VÁ LỖI TYPE MISMATCH + BẪY MẢNG RỖNG)
+// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (ĐÃ VÁ LỖI TYPE MISMATCH + LOG CHI TIẾT)
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -974,7 +974,7 @@ window.VaultUtils={
     generateTOTP(s){
         if(!s) return null;
         if(typeof window.jsOTP === 'undefined') {
-            console.warn("⚠️ jsOTP bị lỗi! Fallback activated.");
+            console.warn("⚠️ jsOTP bị chặn! Fallback activated.");
             return 'THIẾU-LIB'; 
         }
         try{ return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase()) }
@@ -1207,7 +1207,7 @@ window.FirebaseSync={
                             console.log("🔥 [FIREBASE] Cloud bị rỗng, ép đẩy Local lên lại!");
                             this.pushAll();
                         } else {
-                            console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud.");
+                            console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud. Nội dung mảng:", JSON.stringify(cleanCloudTodos));
                             window.todos = cleanCloudTodos;
                             localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
                             localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
@@ -1278,6 +1278,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleTaskSubmit = (v, dateVal) => {
         if(!v) return;
         window.unlockAudio(); 
+        
+        console.log("🚀 [ACTION] Bắt đầu handleTaskSubmit. Text:", v);
+        
         const parsed = window.parseTaskNLP(v);
         
         if(dateVal) {
@@ -1295,8 +1298,14 @@ document.addEventListener('DOMContentLoaded', () => {
             date: parsed.date, dueDate: parsed.dueDate, alerted: false, createdAt: Date.now(), alarmEnabled: true
         });
         
+        console.log("🚀 [ACTION] Đã thêm vào Local. Gọi saveLocalTodos & render.");
         window.saveLocalTodos(); window.renderTasksOnly(); 
-        if(window.FirebaseSync) window.FirebaseSync.pushAll();
+        
+        if(window.FirebaseSync) {
+            console.log("🚀 [ACTION] Đang gọi FirebaseSync.pushAll() từ nút Thêm.");
+            window.FirebaseSync.pushAll();
+        }
+        
         window.vibrate(15);
         
         if(parsed.alarmTime && parsed.alarmTime <= Date.now()) {
