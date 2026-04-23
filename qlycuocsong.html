@@ -22,7 +22,6 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/gh/jiangts/JS-OTP@master/dist/jsOTP.min.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
@@ -955,7 +954,7 @@ window.toggleStopwatch=()=>{window.vibrate([20,30]);window.unlockAudio();const b
 window.resetStopwatch=()=>{window.vibrate(10);clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');const b=el('sw-toggle-btn');if(b){b.innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';b.className='flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110'}};
 
 // ==============================================================================
-// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (THE GOD BUILD - SIÊU DEBUG)
+// 4. KHO LƯU TRỮ VÀ FIREBASE SYNC (ĐÃ VÁ LỖI TYPE MISMATCH)
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -1141,91 +1140,59 @@ window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
     init(k){
         this._k=k;
-        
-        // BẬT CHẾ ĐỘ SIÊU DEBUG CỦA FIREBASE ĐỂ LƯU LOG
-        if (typeof firebase !== 'undefined') {
-            firebase.firestore.setLogLevel('debug');
-        }
-        
         try{
-            if(!firebase.apps.length) firebase.initializeApp({
-                apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
-                authDomain: "tool-mimishop.firebaseapp.com",
-                projectId: "tool-mimishop",
-                storageBucket: "tool-mimishop.firebasestorage.app",
-                messagingSenderId: "536814109954",
-                appId: "1:536814109954:web:b1be76d22957de4b75ee1b",
-                measurementId: "G-R39R19WWRE"
-            });
-            const startFS = () => { 
-                console.log("🔥 [FIREBASE] Khởi tạo Firestore cho profile:", k);
-                this._d=firebase.firestore(); 
-                this._i=true; 
-                const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block'; 
-                this._listen(); 
-                this.pushAll(); 
-            };
-            
-            console.log("🔥 [FIREBASE] Đang SignIn Anonymously...");
-            firebase.auth().signInAnonymously().then(() => {
-                console.log("🔥 [FIREBASE] SignIn THÀNH CÔNG!");
-                startFS();
-            }).catch(e=>{ 
-                console.error('🔥 [FIREBASE] Auth Err:',e.code, e.message); 
-                startFS(); 
-            });
-        }catch(e){ 
-            console.error('🔥 [FIREBASE] Init CRASH:',e.message); 
-            this._i=false; 
-            const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block'; 
-        }
+            if(!firebase.apps.length)firebase.initializeApp({apiKey:"AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",authDomain:"tool-mimishop.firebaseapp.com",projectId:"tool-mimishop",storageBucket:"tool-mimishop.firebasestorage.app",messagingSenderId:"536814109954",appId:"1:536814109954:web:b1be76d22957de4b75ee1b"});
+            const startFS = () => { this._d=firebase.firestore(); this._i=true; const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block'; this._listen(); this.pushAll(); };
+            firebase.auth().signInAnonymously().then(startFS).catch(e=>{ console.warn('Auth Err:',e.message); startFS(); });
+        }catch(e){ console.warn('FB Init:',e.message); this._i=false; const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block'; }
     },
     _listen(){
         if(!this._d||!this._k)return;
         try{
-            console.log("🔥 [FIREBASE] Đăng ký onSnapshot cho doc:", this._k);
             this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=>{
-                console.log("🔥 [FIREBASE] Nhận Dữ Liệu Từ Cloud! Tồn tại:", d.exists);
-                if(!d.exists) { 
-                    window.cloudSyncCompleted = true; 
-                    return; 
-                }
-                const c=d.data();
-                if(!c) return;
+                if(!d.exists) { window.cloudSyncCompleted = true; return; }
+                const c=d.data();if(!c)return;
                 
-                const cloudTime = c.updatedAt || 0;
+                // [FIX LỖI TYPE MISMATCH]: Đảm bảo cloudTime luôn là một con số nguyên (milliseconds)
+                let cloudTime = 0;
+                if (c.updatedAt) {
+                    cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : c.updatedAt;
+                }
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
-                console.log(`🔥 [FIREBASE] So sánh Time: Cloud(${cloudTime}) vs Local(${localTime})`);
 
                 if(c.data && Array.isArray(c.data)){ 
                     const cleanCloudTodos = c.data.map(t => ({...t, id: String(t.id)}));
                     
-                    if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
-                        console.log("🔥 [FIREBASE] Chấp nhận cập nhật DOM từ Cloud.");
+                    if (!window.cloudSyncCompleted) {
                         window.todos = cleanCloudTodos;
                         localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
                         localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
                         if(document.visibilityState === 'visible') window.renderTasksOnly();
-                    } else {
-                        console.log("🔥 [FIREBASE] Local mới hơn, bỏ qua snapshot này.");
-                    }
+                    } else if (cloudTime >= localTime || localTime === 0) {
+                        const ls=JSON.stringify(window.todos||[]), cs=JSON.stringify(cleanCloudTodos); 
+                        if(ls!==cs){
+                            window.todos=cleanCloudTodos;
+                            localStorage.setItem('lifeos_v8_data_'+this._k,cs);
+                            localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
+                            if(document.visibilityState === 'visible') window.renderTasksOnly();
+                        }
+                    } else if (localTime > cloudTime) { this.pushAll(); }
                 }
                 
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
                 if(c.vaultData&&Array.isArray(c.vaultData)){ 
                     if (!window.cloudSyncCompleted || cloudTime >= localTime || localTime === 0) {
                         const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
-                        window.VaultStorageLayer.replaceAll(cleanCloudData); 
-                        if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();
+                        const lv=JSON.stringify(window.VaultStorageLayer.getData()),cv=JSON.stringify(cleanCloudData); 
+                        if(lv!==cv){window.VaultStorageLayer.replaceAll(cleanCloudData); if(document.visibilityState === 'visible') window.VaultUI.renderVaultCards();}
                     }
                 }
                 window.cloudSyncCompleted = true;
                 const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-green mt-0.5 hidden md:inline-block';
             },e=>{
-                console.error('🔥 [FIREBASE] Snap LỖI:',e.message); 
-                const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block';
+                console.warn('Snap Error:',e.message); const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block';
             });
-        }catch(e){console.error('🔥 [FIREBASE] Listen CRASH:',e.message)}
+        }catch(e){console.warn('Listen:',e.message)}
     },
     pushAll(){
         if(!this._i||!this._d||!this._k || !window.cloudSyncCompleted) return;
@@ -1234,15 +1201,11 @@ window.FirebaseSync={
             localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
             
             const safeTodos = (window.todos||[]).map(t => ({...t, id: String(t.id)}));
-            console.log("🔥 [FIREBASE] Đẩy dữ liệu lên Cloud... TS:", currentTs);
-            
             this._d.collection('LifeOS_Profiles').doc(this._k).set({ 
                 data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[],
                 vaultData:window.VaultStorageLayer.getData()||[], updatedAt: currentTs 
-            },{merge:true})
-            .then(() => console.log("🔥 [FIREBASE] Push THÀNH CÔNG!"))
-            .catch(e=>{console.error('🔥 [FIREBASE] Push LỖI:',e.message);});
-        }catch(e){console.error('🔥 [FIREBASE] Push CRASH:',e.message)}
+            },{merge:true}).catch(e=>{console.warn('Push Err:',e.message);});
+        }catch(e){console.warn('Push:',e.message)}
     }
 };
 
