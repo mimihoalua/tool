@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS V41 Bible - The Ultimate Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .golden-rule { border-left: 5px solid #f59e0b; background: #1e293b; padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: transform 0.2s;}
+        .golden-rule:hover { transform: translateY(-2px); }
+        .iron-lock { border-left: 5px solid #6366f1; background: #1e293b; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: transform 0.2s;}
+        .iron-lock:hover { transform: translateY(-2px); }
+        .music-card { border-left: 5px solid #ec4899; background: #1e293b; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: transform 0.2s;}
+        .music-card:hover { transform: translateY(-2px); }
+        .code-snippet { background: #020617; color: #a5b4fc; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; margin-top: 12px; overflow-x: auto; border: 1px solid #334155; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800 px-6 py-4 mb-12 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                </div>
+                <span class="font-black text-xl text-white tracking-tight">LifeOS Bible</span>
+            </div>
+            <a href="https://mimihoalua.github.io/tool/qlycuocsong.html" target="_blank" class="flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 transition active:scale-95 shadow-md shadow-emerald-500/20">
+                <i data-lucide="external-link" class="w-4 h-4"></i> Mở Ứng Dụng
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6">
+        <header class="mb-16 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Industrial Grade Architecture
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">SENTINEL <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">V41</span></h1>
+            <p class="text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">Bộ quy tắc kỹ thuật toàn diện. Đúc kết từ máy soi Console Blackbox và bài test chịu tải vô tận. Bất tử hóa ứng dụng.</p>
+        </header>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-black mb-8 flex items-center gap-3 text-white"><i data-lucide="music" class="text-pink-400 w-8 h-8"></i> 1. Tab Nghe Nhạc (Web Audio Core)</h2>
+            <div class="music-card">
+                <h3 class="font-black text-pink-400 text-xl mb-3">Tử huyệt PWA & Service Worker Cache</h3>
+                <p class="text-slate-300 leading-relaxed font-medium mb-4">
+                    Việc gọi <code>localStorage.removeItem()</code> và <code>location.reload()</code> là không đủ với PWA. Trình duyệt vẫn sẽ lấy code cũ từ Service Worker Storage. Để dọn rác triệt để, phải chọc thủng API <code>caches</code>:
+                </p>
+                <div class="code-snippet mb-4">
+if ('caches' in window) {
+    caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))))
+          .then(() => window.location.href = window.location.pathname + '?v=' + Date.now());
+}
+                </div>
+
+                <h3 class="font-black text-pink-400 text-xl mt-8 mb-3">Quy tắc Event Bubbling (Lây lan sự kiện)</h3>
+                <p class="text-slate-300 leading-relaxed font-medium mb-4">
+                    Các nút chức năng (Share, Download) nằm bên trong một khối Card bấm được (Thẻ bài hát). Bắt buộc bọc <code>event.stopPropagation()</code> và <code>event.preventDefault()</code> để tránh kích hoạt nhầm lệnh Play khi vừa ấn Share.
+                </p>
+
+                <h3 class="font-black text-pink-400 text-xl mt-8 mb-3">Bẫy Web Share API & Promise</h3>
+                <ul class="text-sm space-y-2 text-slate-300 list-disc pl-5">
+                    <li><strong>Lỗi Mobile Webview:</strong> Không nhét thuộc tính <code>text</code> vào <code>navigator.share</code>. Zalo/FB sẽ nuốt lỗi AbortError. Chỉ truyền <code>title</code> và <code>url</code>.</li>
+                    <li><strong>Lời thề Bất đồng bộ:</strong> Lệnh Fallback Copy to Clipboard (<code>navigator.clipboard.writeText</code>) trả về Promise. Phải nối <code>.then()</code> mới được báo Toast "Thành công".</li>
+                </ul>
+
+                <h3 class="font-black text-pink-400 text-xl mt-8 mb-3">CORS & Caching Headers</h3>
+                <p class="text-slate-300 leading-relaxed font-medium mb-4">
+                    Không tự ý nối Query String (như <code>_cb=Date.now()</code>) vào các public API (ví dụ Archive.org). Hành vi này kích hoạt Preflight OPTIONS request, dẫn đến việc bị chặn bởi chính sách CORS.
+                </p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-black mb-8 flex items-center gap-3 text-white"><i data-lucide="shield-alert" class="text-rose-500 w-8 h-8"></i> 2. Cảnh Báo JS Silent Crash</h2>
+            <div class="bg-slate-800 border border-rose-500/30 p-8 rounded-3xl shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl"></div>
+                <p class="font-black text-rose-400 text-lg mb-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Lỗi đứt gãy dây chuyền (N/A Profile):</p>
+                <p class="text-slate-300 leading-relaxed font-medium">Tuyệt đối <strong class="text-rose-500">KHÔNG</strong> bọc <code>try/catch</code> tổng vào các hàm khởi tạo biến Global hoặc cắt xén các hàm cơ sở (như <code>setHtml</code>). Nếu một hàm chết, toàn bộ code phía dưới sẽ ngừng chạy, biến <code class="bg-slate-900 px-1 rounded text-rose-400">PROFILES</code> không được nạp, gây lỗi hiển thị <strong>N/A</strong> và treo vĩnh viễn màn hình đăng nhập.</p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-black mb-8 flex items-center gap-3 text-white"><i data-lucide="lock" class="text-indigo-400 w-8 h-8"></i> 3. Cơ Chế The Iron Lock</h2>
+            <div class="iron-lock">
+                <h3 class="font-black text-indigo-300 text-xl mb-3">Chống Race Condition & Smart Fallback</h3>
+                <p class="text-slate-300 leading-relaxed font-medium mb-4">
+                    Trong môi trường mạng, Snapshot từ Firebase có thể dội về đúng lúc thiết bị vừa gửi dữ liệu lên, gây tự xóa dữ liệu (Race Condition). Giải pháp:
+                </p>
+                <ul class="space-y-3 text-sm text-slate-300 mb-6">
+                    <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-5 h-5 text-indigo-400 shrink-0"></i> <div>Bật cờ <code>window._pendingPush = true</code> trong 1.5s khi đẩy dữ liệu.</div></li>
+                    <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-5 h-5 text-indigo-400 shrink-0"></i> <div><strong>Smart Fallback:</strong> Nếu Snapshot dội về có Timestamp cũ, bỏ qua. Nếu Timestamp MỚI HƠN, phá khóa Iron Lock và nhận dữ liệu ngay lập tức.</div></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-black mb-8 flex items-center gap-3 text-white"><i data-lucide="volume-2" class="text-amber-400 w-8 h-8"></i> 4. Báo Thức X-Quang & Ducking</h2>
+            <div class="golden-rule">
+                <h3 class="font-black text-amber-400 text-xl mb-3">Dynamic Audio Ducking</h3>
+                <p class="text-slate-300 leading-relaxed font-medium mb-4">
+                    Hạ nhạc nền (Tab Music) xuống 20% khi báo thức kêu và tự động phục hồi 100% khi AI đọc xong, tránh âm thanh "đấm nhau".
+                </p>
+                <h3 class="font-black text-amber-400 text-xl mb-3 mt-6">JIT Pre-Caching</h3>
+                <ul class="text-sm space-y-2 text-slate-300 list-disc pl-5">
+                    <li>Dùng <code>meta referrer="no-referrer"</code> để bypass lỗi 403 Google Translate TTS.</li>
+                    <li>Nạp trước âm thanh vào RAM 30 giây trước khi báo thức nổ để chống Doze Mode.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer class="mt-20 pt-10 pb-20 border-t border-slate-800 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-800 mb-4 border border-slate-700">
+                <i data-lucide="cpu" class="w-6 h-6 text-slate-400"></i>
+            </div>
+            <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">LifeOS Sentinel V41</p>
+            <p class="text-slate-500 text-xs mt-2">Built for Industrial Reliability. The Final Truth.</p>
+        </footer>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
