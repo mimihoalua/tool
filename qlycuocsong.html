@@ -1398,11 +1398,26 @@ window.MusicApp = {
     
     // THE ULTIMATE PWA CACHE PURGE
     clearCache() {
-        if(confirm("Bạn có chắc chắn muốn xóa Cache và làm mới toàn bộ ứng dụng?")) {
-            window.vibrate(20); localStorage.clear();
-            if ('caches' in window) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
-            if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => { for(let reg of regs) reg.unregister(); }); }
-            window.showToast("Đang làm sạch hệ thống...", "ph-broom");
+        if(confirm("Bạn có chắc chắn muốn xóa bộ đệm Nhạc và làm mới ứng dụng?")) {
+            window.vibrate(20);
+            
+            // DAO MỔ: Chỉ xóa đúng ổ cứng của Tab Nhạc, tuyệt đối không đụng vào LifeOS Data
+            localStorage.removeItem('xs_songs_v4');
+            
+            // Xóa PWA Cache (Nhạc + Rác HTML cũ)
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            // Hủy Service Worker nếu có
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for(let reg of regs) reg.unregister();
+                });
+            }
+            
+            window.showToast("Đang làm sạch bộ đệm nhạc...", "ph-broom");
             setTimeout(() => { location.reload(true); }, 800);
         }
     },
