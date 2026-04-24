@@ -1398,27 +1398,33 @@ window.MusicApp = {
     
     // THE ULTIMATE PWA CACHE PURGE
     clearCache() {
-        if(confirm("Bạn có chắc chắn muốn xóa bộ đệm Nhạc và làm mới ứng dụng?")) {
+        if(confirm("Bạn có chắc chắn muốn dọn sạch bộ nhớ đệm Nhạc và tải lại ứng dụng? (Không mất dữ liệu cá nhân)")) {
             window.vibrate(20);
+            window.showToast("Đang làm sạch hệ thống...", "ph-broom");
             
-            // DAO MỔ: Chỉ xóa đúng ổ cứng của Tab Nhạc, tuyệt đối không đụng vào LifeOS Data
+            // 1. LƯỠI DAO MỔ: Chỉ xóa dữ liệu của Tab Nhạc, BẢO TOÀN Nhiệm vụ & Kho Lưu Trữ
             localStorage.removeItem('xs_songs_v4');
-            
-            // Xóa PWA Cache (Nhạc + Rác HTML cũ)
+            localStorage.removeItem('xs_shuffle');
+            localStorage.removeItem('xs_repeat');
+
+            // 2. MÁY HÚT BỤI CÔNG NGHIỆP: Xóa sạch rác file MP3 và HTML/CSS cũ trong PWA Caches
             if ('caches' in window) {
                 caches.keys().then(names => {
                     for (let name of names) caches.delete(name);
                 });
             }
-            // Hủy Service Worker nếu có
+
+            // 3. HỦY TIẾN TRÌNH NGẦM CŨ: Xóa Service Worker để ép trình duyệt nhận code mới
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(regs => {
                     for(let reg of regs) reg.unregister();
                 });
             }
-            
-            window.showToast("Đang làm sạch bộ đệm nhạc...", "ph-broom");
-            setTimeout(() => { location.reload(true); }, 800);
+
+            // 4. ÉP TẢI LẠI TRANG: Dùng URL Cache Busting để chống trình duyệt lì lợm tải file cũ
+            setTimeout(() => { 
+                window.location.href = window.location.pathname + '?reload=' + Date.now(); 
+            }, 800);
         }
     },
     
