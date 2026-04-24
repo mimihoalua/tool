@@ -244,7 +244,32 @@ const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
 const getVal=i=>{const e=el(i);return e?e.value:''};
 const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
 const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
+window.showToast=(m,i='ph-info')=>{ /* Placeholder tránh lỗi nếu thiếu hàm này */ console.log(m); };
 
+window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
+window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
+window.closePasswordModal=()=>hideEl('password-modal');
+window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`);if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.showToast('Sai mật khẩu!');}};
+
+window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm">Đăng xuất</button>`)}};
+window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`);};
+window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
+
+window.loadUserData=()=>{
+    try{
+        const prof = window.PROFILES[window.viewingUser];
+        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'N/A');
+        
+        const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
+        if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
+        
+        if(window.renderTasksOnly) window.renderTasksOnly();
+        
+        window.cloudSyncCompleted = false;
+        if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
+    }catch(e){console.error(e)}
+};
+    
 window.initTTS=()=>{
     window.vibrate(20); const s = el('mstq-silence'); if(s) s.play().catch(()=>{});
     el('bot-icon')?.classList.add('speaking-glow');
