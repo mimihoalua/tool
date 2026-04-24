@@ -27,6 +27,7 @@
 <script src="/tool/firebase-firestore-compat.js"></script>
 <script src="/tool/firebase-auth-compat.js"></script>
 <style>
+/* MA TRẬN 5 MÀU THEME - MULTI SEASONS */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -45,13 +46,14 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 .hover\:bg-indigo-700:hover, .hover\:brightness-110:hover { background-color: var(--c-hover) !important; filter: brightness(1.1); }
 .shadow-primary\/30 { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
 
+/* UTILS */
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{display:none}
 .view-section{display:none}@keyframes viewEnter{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}.view-section.active{display:block;animation:viewEnter .4s cubic-bezier(.16,1,.3,1) forwards}
 .swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);overflow:hidden;transition:transform .2s}.swipe-item:active{transform:scale(.98)}
 .swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
 .speaking-glow{animation:speakGlow .8s infinite alternate cubic-bezier(.4,0,.2,1)}@keyframes speakGlow{from{transform:scale(1);filter:drop-shadow(0 0 2px var(--c-primary))}to{transform:scale(1.08);filter:drop-shadow(0 0 10px var(--c-hover))}}
-.alarm-flash{animation:alarmFlash .5s infinite alternate}@keyframes alarmFlash{from{border-color:#ef4444;background-color:rgba(225,29,72,.95)}to{border-color:#f97316;background-color:rgba(159,18,57,.95)}}
+.alarm-flash{animation:alarmFlash .5s infinite alternate}@keyframes alarmFlash{from{border-color:#ef4444;box-shadow:0 0 15px rgba(239,68,68,.3);background-color:rgba(225,29,72,.95)}to{border-color:#f97316;box-shadow:0 0 25px rgba(249,115,22,.6);background-color:rgba(159,18,57,.95)}}
 .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); transition: background-color 0.2s; cursor: pointer; }
 .song-row.active { background-color: var(--c-sub); }
 .song-row.active .song-idx { color: var(--c-primary); font-weight: 900; animation: pulseRed 1.5s infinite; }
@@ -234,12 +236,10 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
     <div class="flex items-center w-full gap-1">
         <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
         <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
-        
         <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
             <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
             <input type="datetime-local" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
         </div>
-
         <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
     </div>
 </form>
@@ -357,9 +357,6 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 </div>
 
 <script>
-// ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & BỌC THÉP CHUẨN V39.9)
-// ==============================================================================
 window.showToast=(m,i='ph-info')=>{
     const c=el('toast-container');if(!c)return;const t=document.createElement('div');
     t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]';
@@ -401,9 +398,6 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// ==============================================================================
-// NATIVE TTS & FALLBACK BẢO VỆ ORB
-// ==============================================================================
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 
@@ -461,7 +455,6 @@ window.playSpeechTTS = (text) => {
     } catch (e) { speakNative(); }
 };
 
-// BẬT MỎ NEO SILENCE VÀ WORKER NỀN (CHỐNG NGỦ GẬT)
 window.audioInitialized = false;
 window.lastSentinelCheck = Date.now();
 window.notifiedTasks = new Set(); 
@@ -507,7 +500,6 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// WORKER NỀN BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const inlineWorker = `let timer; self.onmessage = function(e) { if(e.data === 'start') { timer = setInterval(() => { self.postMessage('tick'); }, 1000); } };`;
@@ -827,10 +819,9 @@ window.FirebaseSync={
                 let cloudTime = 0; if (c.updatedAt) cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : parseInt(c.updatedAt);
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
-                // V39: SMART FALLBACK
                 if(window._pendingPush) { 
-                    if(cloudTime <= localTime) { console.log('Iron Lock: Bỏ qua Snapshot Echo do đang Push'); return; }
-                    else { window._pendingPush = false; console.log('Iron Lock: Smart Fallback - Mở khóa khẩn cấp nhận data mới!'); }
+                    if(cloudTime <= localTime) return;
+                    else window._pendingPush = false; 
                 }
                 
                 const cloudData = c.data;
@@ -1093,7 +1084,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 6. MODULE NGHE NHẠC (V39.9: FIX SHARE + PWA BUST CACHE + CORS)
+// 6. MODULE NGHE NHẠC (V39.9: THE REAL FINAL TRUTH)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '', sleepTimerId: null,
@@ -1115,35 +1106,56 @@ window.MusicApp = {
             window.showToast(`Hẹn tắt nhạc sau ${min} phút`, 'ph-clock');
         }
     },
-    // VÁ LỖI 1: SỬA LẠI HÀM SHARE ĐÚNG CHUẨN, KHÔNG TRUYỀN TEXT GÂY ABORT TRONG WEBVIEW
-    shareSong(idx) {
+
+    // VÁ LỖI 1: BỎ HOÀN TOÀN THUỘC TÍNH TEXT (CHỐNG ABORT Ở WEBVIEW), DÙNG ĐÚNG CHUẨN AWAIT CHO PROMISE CLIPBOARD
+    async shareSong(idx) {
         window.vibrate(10);
         const s = this.playlist[idx];
-        if(!s) return;
-        if (navigator.share) {
-            navigator.share({ title: s.title, url: s.stream_url }).catch(()=>{});
-        } else {
-            if(navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(s.stream_url).then(() => window.showToast('Đã copy link!','ph-link')).catch(()=>{});
+        if (!s) return;
+        try {
+            if (navigator.share) {
+                // CHỈ TRUYỀN TITLE VÀ URL (Tuyệt đối không nhét text)
+                await navigator.share({ title: s.title, url: s.stream_url });
+            } else {
+                throw new Error("Share API Not Supported");
+            }
+        } catch (err) {
+            // NẾU NGƯỜI DÙNG BẤM HỦY SHARE TRÊN ĐIỆN THOẠI (AbortError) THÌ TẮT IM LẶNG, KHÔNG LÀM GÌ CẢ
+            if (err.name === 'AbortError') return;
+            
+            // NẾU LÀ MÁY TÍNH KHÔNG HỖ TRỢ SHARE, HOẶC BỊ TRÌNH DUYỆT CHẶN -> FALLBACK XUỐNG CLIPBOARD BẰNG AWAIT
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(s.stream_url);
+                    window.showToast('Đã copy link bài hát!', 'ph-link');
+                } else {
+                    window.showToast('Thiết bị không hỗ trợ chia sẻ', 'ph-warning-circle');
+                }
+            } catch (clipErr) {
+                window.showToast('Không thể copy link!', 'ph-warning-circle');
             }
         }
     },
-    // VÁ LỖI 2: DỌN SẠCH SERVICE WORKER CACHE + ĐỔI THAM SỐ RELOAD
+
+    // VÁ LỖI 2: DỌN SẠCH TẬN GỐC SERVICE WORKER CACHE THEO CHUẨN PWA
     clearCache() { 
         if(confirm("Bạn có chắc chắn muốn dọn rác và tải lại ứng dụng hoàn toàn sạch sẽ?")) { 
             localStorage.removeItem('xs_songs_v4'); 
             window.showToast('Đang dọn rác hệ thống...', 'ph-broom');
+            
+            // Xóa cứng Caches của Service Worker
             if ('caches' in window) {
                 caches.keys().then(names => {
                     Promise.all(names.map(name => caches.delete(name))).then(() => {
-                        window.location.href = window.location.pathname + '?v=' + Date.now();
+                        window.location.href = window.location.pathname + '?reload=' + Date.now();
                     });
                 });
             } else {
-                window.location.href = window.location.pathname + '?v=' + Date.now();
+                window.location.href = window.location.pathname + '?reload=' + Date.now();
             }
         } 
     },
+
     async refetch() {
         el('music-loading').style.display = 'block'; el('music-loading').textContent = 'Đang đồng bộ máy chủ...';
         try {
@@ -1184,7 +1196,7 @@ window.MusicApp = {
                 this.play(actualIndex); 
             };
             
-            // VÁ LỖI EVENT BUBBLING: Ngăn không cho Click Share lây lan
+            // VÁ LỖI EVENT BUBBLING: Ngăn không cho Click Share lây lan (stopPropagation và preventDefault)
             div.innerHTML = `
             <div class="w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-slate-400'}">${isCurrent ? '▶' : (i + 1)}</div>
             <div class="flex-1 min-w-0 pr-2 pointer-events-none">
@@ -1212,6 +1224,7 @@ window.MusicApp = {
     play(idx) {
         const a = el('mstq-player'); if(!a) return; const s = this.playlist[idx]; if(!s) return;
         
+        // VÁ LỖI HIỂN THỊ MINIPLAYER: Khởi động thanh Player ngay khi bấm
         if (!this.isInitialized) {
             this.isInitialized = true;
             const anchor = el('mstq-silence'); if(anchor && anchor.paused) anchor.play().catch(()=>{});
