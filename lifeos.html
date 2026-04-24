@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V42 - The Iron Lock</title>
-<link id="manifest-link" rel="manifest" href="">
+<title>LifeOS V44 - The Iron Lock</title>
+<link id="manifest-link" rel="manifest" href="manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
@@ -50,13 +50,44 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{display:none}
 .view-section{display:none}@keyframes viewEnter{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}.view-section.active{display:block;animation:viewEnter .4s cubic-bezier(.16,1,.3,1) forwards}
-.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);box-shadow:0 4px 6px -1px rgba(0,0,0,.02),0 2px 4px -1px rgba(0,0,0,.02);overflow:hidden;transition:transform .2s}.swipe-item:active{transform:scale(.98)}
+.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);overflow:hidden;transition:transform .2s}.swipe-item:active{transform:scale(.98)}
 .swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
 .speaking-glow{animation:speakGlow .8s infinite alternate cubic-bezier(.4,0,.2,1)}@keyframes speakGlow{from{transform:scale(1);filter:drop-shadow(0 0 2px var(--c-primary))}to{transform:scale(1.08);filter:drop-shadow(0 0 10px var(--c-hover))}}
 .alarm-flash{animation:alarmFlash .5s infinite alternate}@keyframes alarmFlash{from{border-color:#ef4444;background-color:rgba(225,29,72,.95)}to{border-color:#f97316;background-color:rgba(159,18,57,.95)}}
+
+/* MUSIC STYLES */
+.song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); transition: background-color 0.2s; cursor: pointer; }
+.song-row:active { background-color: var(--c-border); }
+.song-row.active { background-color: var(--c-sub); }
+.song-row.active .song-idx { color: var(--c-primary); font-weight: 900; animation: pulseRed 1.5s infinite; }
+@keyframes pulseRed{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
+
+/* PWA STYLES */
+.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
+.install-fab:active { transform: scale(0.95); }
+.install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
+.guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
+.step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+.animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            if(registration.active && registration.active.scriptURL.includes('sw.js')) {
+                // Giữ lại hoặc unregister tùy chiến lược, ở đây PWA Engine sẽ lo việc đăng ký mới
+            }
+        }
+    });
+}
+</script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline></audio>
 <audio id="mstq-silence" loop playsinline webkit-playsinline src="/tool/silence_30min.mp3"></audio>
@@ -64,7 +95,7 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 <audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 flex-col items-center justify-center p-4 hidden">
-<h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight" style="color:var(--c-primary); background:none; -webkit-text-fill-color:var(--c-primary);">LifeOS Family</h1>
+<h1 class="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 text-center tracking-tight animate-pop-in" style="color:var(--c-primary); background:none; -webkit-text-fill-color:var(--c-primary);">LifeOS Family</h1>
 <p class="text-slate-500 mb-10 text-sm font-semibold text-center">Chọn hồ sơ của bạn để tiếp tục</p>
 <div id="login-profiles" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6 max-w-5xl w-full px-2 overflow-y-auto max-h-[60vh] custom-scrollbar pb-10"></div>
 </div>
@@ -174,7 +205,7 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 </div></div></div></div>
 
 <div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-music">
-<div class="bg-white p-3 sm:p-5 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full relative min-h-[600px] lg:max-h-[800px]">
+<div class="bg-white p-3 sm:p-5 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden min-h-[600px] lg:max-h-[800px]">
     
     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2">
         <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Nghe nhạc cả ngày</h2>
@@ -231,20 +262,14 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
     <div class="flex items-center w-full gap-1">
         <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
         <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
-        
         <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
             <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
             <input type="datetime-local" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
         </div>
-
         <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
     </div>
 </form>
 </div>
-
-<button id="fab-add-vault" onclick="window.VaultUI.openModal()" class="lg:hidden fixed bottom-[100px] right-4 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all z-[60] hidden animate-pop-in border border-white/20 hover:brightness-110">
-    <i class="ph-bold ph-plus text-2xl"></i>
-</button>
 
 <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white/90 backdrop-blur-2xl border-t border-slate-200/80 z-[40] pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] lg:hidden">
 <div class="flex justify-around px-2 py-2">
@@ -271,6 +296,30 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 </div></nav>
 
 <div id="toast-container" class="fixed top-[env(safe-area-inset-top,20px)] mt-4 left-1/2 -translate-x-1/2 z-[9999999] flex flex-col gap-2 pointer-events-none w-max max-w-[90vw]"></div>
+<script>
+window.showToast=(m,i='ph-info')=>{
+    const c=document.getElementById('toast-container');if(!c)return;const t=document.createElement('div');
+    t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]';
+    t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`;
+    c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000);
+};
+
+window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
+window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
+
+const el=i=>document.getElementById(i);
+const setTxt=(i,t)=>{const e=el(i);if(e)e.textContent=t};
+const setHtml=(i,h)=>{const e=el(i);if(e)e.innerHTML=h};
+const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
+const getVal=i=>{const e=el(i);return e?e.value:''};
+const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
+const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
+window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
+window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+window.getTodayStr=()=>window.getIsoDate(); 
+window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
+window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
+</script>
 
 <div id="sentinel-panel" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
@@ -307,22 +356,51 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
     </div>
 </div>
 
+<div id="modal-container"></div>
+
+<div id="vaultFormModal" class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
+            <h2 id="vaultModalTitle" class="text-xl font-black text-slate-800 dark:text-white tracking-tight">Thêm Mục Mới</h2>
+            <button type="button" onclick="window.VaultUI.closeModal()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90"><i class="ph-bold ph-x text-xl"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
+            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
+                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
+            </div>
+            <form id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)" class="space-y-4">
+                <input type="hidden" id="vaultEntryId">
+                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
+                    <select id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white">
+                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
+                    </select>
+                    <div id="vaultCustomCatWrapper" class="hidden mt-3 px-2 pb-2">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
+                        <input type="text" id="vaultEntryCustomCategory" placeholder="VD: Server..." class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
+                    <input type="text" id="vaultEntryName" placeholder="Tên gợi nhớ..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
+                        <span>Nội dung</span>
+                        <button type="button" onclick="window.vibrate([15]);const t=document.getElementById('vaultEntryContent');if(t){const c=t.selectionStart;const v=t.value;const p=(v&&c>0?'\n':'')+'Mật khẩu: '+window.VaultUtils.generatePassword();t.value=v.substring(0,c)+p+v.substring(c);t.selectionStart=t.selectionEnd=c+p.length;t.focus();if(window.soundEnabled)window.playSpeechTTS('Đã tạo mật khẩu an toàn');}" class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
+                    </label>
+                    <textarea id="vaultEntryContent" rows="6" placeholder="Nhập tự do..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
+            <button type="button" onclick="window.vibrate(10); window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
+            <button type="submit" form="vaultForm" class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
+        </div>
+    </div>
+</div>
+
 <script>
-// ==============================================================================
-// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & BỌC THÉP CHUẨN V40)
-// ==============================================================================
-window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
-window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
-
-const el=i=>document.getElementById(i);
-const setTxt=(i,t)=>{const e=el(i);if(e)e.textContent=t};
-const setHtml=(i,h)=>{const e=el(i);if(e)e.innerHTML=h};
-const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
-const getVal=i=>{const e=el(i);return e?e.value:''};
-const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
-const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
-window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
-
 document.addEventListener('click', (e) => {
     const m = el('profile-menu'); const b = el('profile-btn');
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
@@ -337,14 +415,9 @@ window.saveLocalTodos = () => {
     }
 };
 
-window.getIsoDate = (dateObj) => { 
-    const d = dateObj || new Date(); 
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
-};
-window.getTodayStr=()=>window.getIsoDate(); 
-window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
-window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
-
+// ==============================================================================
+// NATIVE TTS & MỎ NEO ÂM THANH
+// ==============================================================================
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 
@@ -440,7 +513,6 @@ window.unlockAudio=()=>{
             if(nowMs - window.lastSentinelCheck > 2000) { window.lastSentinelCheck = nowMs; if(window.checkAlarms) window.checkAlarms(); }
         });
     }
-
     document.body.removeEventListener('touchstart', window.unlockAudio);
     document.body.removeEventListener('click', window.unlockAudio);
 };
@@ -473,10 +545,13 @@ window.closePasswordModal=()=>hideEl('password-modal');
 window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
 window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
 window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
+
+// ==============================================================================
+// V43: DỌN SẠCH SERVICE WORKER CACHE (TẨY GIUN KÈM THUỐC XỔ)
+// ==============================================================================
 window.logout=()=>{
     window.vibrate(20);
-    localStorage.removeItem('lifeos_v8_session');
-    localStorage.removeItem('lifeos_v8_viewing');
+    localStorage.clear(); 
     if ('caches' in window) {
         caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))))
               .then(() => window.location.href = window.location.pathname + '?reload=' + Date.now());
@@ -578,9 +653,6 @@ window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el
 window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
-// ==============================================================================
-// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
-// ==============================================================================
 window.parseTaskNLP = (rawText) => {
     let text = rawText; let isDaily = false; let priority = false; let tags = []; let timeStr = null; let alarmTime = null;
     let dueDate = window.getIsoDate(); 
@@ -624,9 +696,6 @@ window.parseTaskNLP = (rawText) => {
     if (isTomorrow && !timeStr && !dMatch) { let target = new Date(); target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); }
     return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
-
-window.activeAlarmTaskIds = []; window.alarmTextToSpeak = ""; window.isAlarmRinging = false;
-window.beepInterval = null; window.previousMusicVolume = 1.0;
 
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     if(window.isAlarmRinging) return;
@@ -741,9 +810,6 @@ window.toggleAlarm = (e, id) => {
     }
 };
 
-// ==============================================================================
-// 3. THE IRON LOCK (V39 FIREBASE SYNC - SMART FALLBACK)
-// ==============================================================================
 window._pendingPush = false;
 window.cloudSyncCompleted = false;
 
@@ -775,8 +841,8 @@ window.FirebaseSync={
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
                 if(window._pendingPush) { 
-                    if(cloudTime <= localTime) { return; }
-                    else { window._pendingPush = false; }
+                    if(cloudTime <= localTime) return;
+                    else window._pendingPush = false; 
                 }
                 
                 const cloudData = c.data;
@@ -818,9 +884,6 @@ window.FirebaseSync={
     }
 };
 
-// ==============================================================================
-// 4. XỬ LÝ NHIỆM VỤ, LỌC VÀ GIAO DIỆN
-// ==============================================================================
 window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white','shadow-sm');b.classList.add('bg-white','text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a){a.classList.add('active','bg-primary','text-white','shadow-sm');a.classList.remove('bg-white','text-slate-500')}window.renderTasksOnly()};
 
 window.renderTasksOnly=()=>{
@@ -1039,7 +1102,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 6. MODULE NGHE NHẠC (V40.1: BỌC THÉP SHARE API MOBILE & DỌN SẠCH CACHE PWA)
+// 6. MODULE NGHE NHẠC (V40: BẤT ĐỒNG BỘ SHARE VÀ QUÉT SẠCH CACHE PWA)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '', sleepTimerId: null,
@@ -1061,41 +1124,36 @@ window.MusicApp = {
             window.showToast(`Hẹn tắt nhạc sau ${min} phút`, 'ph-clock');
         }
     },
-    // VÁ LỖI 1: XÓA THUỘC TÍNH TEXT TRONG SHARE ĐỂ FIX ABORTERROR TRÊN ZALO/FB. SỬ AWAIT CHO CLIPBOARD.
+    
     async shareSong(idx) {
         window.vibrate(10);
         const s = this.playlist[idx];
         if (!s) return;
         try {
             if (navigator.share) {
-                // CHỈ TRUYỀN TITLE VÀ URL ĐỂ TƯƠNG THÍCH WEBVIEW MOBILE
                 await navigator.share({ title: s.title, url: s.stream_url });
             } else {
-                throw new Error("Share not supported");
+                throw new Error("No Share API");
             }
         } catch (err) {
             if (err.name === 'AbortError') return; 
-            
-            // FALLBACK: COPY LINK DÙNG AWAIT CHUẨN PROMISE
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(s.stream_url);
                     window.showToast('Đã copy link bài hát!', 'ph-link');
                 } else {
-                    window.showToast('Trình duyệt không hỗ trợ copy!', 'ph-warning-circle');
+                    window.showToast('Thiết bị không hỗ trợ chia sẻ', 'ph-warning-circle');
                 }
             } catch (clipErr) {
-                window.showToast('Lỗi khi sao chép link!', 'ph-warning-circle');
+                window.showToast('Không thể copy link!', 'ph-warning-circle');
             }
         }
     },
-    // VÁ LỖI 2: DỌN SẠCH SERVICE WORKER CACHE VÀ LOCALSTORAGE (ÉP ĐĂNG NHẬP LẠI)
+    
     clearCache() { 
         if(confirm("Bạn có chắc chắn muốn dọn rác và tải lại ứng dụng hoàn toàn sạch sẽ?")) { 
             window.showToast('Đang dọn rác hệ thống...', 'ph-broom');
-            // 1. Quét sạch LocalStorage
             localStorage.clear(); 
-            // 2. Tiêu diệt Cache Storage của PWA
             if ('caches' in window) {
                 caches.keys().then(names => {
                     Promise.all(names.map(name => caches.delete(name))).then(() => {
@@ -1112,7 +1170,6 @@ window.MusicApp = {
         try {
             const cached = localStorage.getItem('xs_songs_v4'); if(cached) { this.playlist = JSON.parse(cached); this.renderList(); el('music-loading').style.display = 'none'; return; }
             
-            // TRÁNH LỖI CORS 403: Giữ nguyên URL tĩnh, không nhét query string lạ
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
             
@@ -1172,6 +1229,7 @@ window.MusicApp = {
     updatePositionState(a) { if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) { if (a && !isNaN(a.duration) && !isNaN(a.currentTime) && isFinite(a.duration) && a.duration > 0) { try { navigator.mediaSession.setPositionState({ duration: a.duration, playbackRate: a.playbackRate || 1, position: a.currentTime }); } catch(e) {} } } },
     play(idx) {
         const a = el('mstq-player'); if(!a) return; const s = this.playlist[idx]; if(!s) return;
+        
         if (!this.isInitialized) {
             this.isInitialized = true;
             const anchor = el('mstq-silence'); if(anchor && anchor.paused) anchor.play().catch(()=>{});
@@ -1212,10 +1270,10 @@ window.MusicApp = {
 };
 
 // ==============================================================================
-// 7. BOOTSTRAP CHỐNG CRASH VÀ KHỞI TẠO HOÀN HẢO
+// 7. BOOTSTRAP KHỞI TẠO HỆ THỐNG
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    try { window.pwaLogicCore.init(); } catch(e) {}
+    try { window.pwaEngine.init(); } catch(e) {}
     setTimeout(() => { window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
 
     const vsi = el('vaultSearchInput'); 
@@ -1294,14 +1352,17 @@ document.addEventListener('DOMContentLoaded', () => {
     .install-fab:active { transform: scale(0.95); }
     .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
     .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
-    .step-num { background: #6366f1; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+    .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
-    .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }</style>
-    <button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
+    .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+</style>
+<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-[60] hover:brightness-110">
     <i class="ph-bold ph-download-simple text-xl"></i>
-    <span class="font-bold uppercase tracking-wide">Cài App</span></button><div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+    <span class="font-bold uppercase tracking-wide">Cài App</span>
+</button>
+<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
     <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary">
         <div class="bg-primary p-5 text-white text-center">
             <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
@@ -1309,79 +1370,98 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div id="smartGuideContent" class="p-6"></div>
         <div class="p-4 bg-slate-50 text-center border-t border-slate-100">
-            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-50 transition-colors">Đóng lại</button>
+            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors">Đóng lại</button>
         </div>
-    </div></div><script>
-    window.pwaEngine = {
-        deferredPrompt: null,
-        state: {
-            isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
-            isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
-            isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
-            isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
-            isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
-        },
-        init: function() {
-            if (this.state.isStandalone) return;
+    </div>
+</div>
 
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                this.deferredPrompt = e;
-                const fab = document.getElementById('btnInstall');
-                if(fab) {
-                    fab.style.display = 'flex';
-                    fab.onclick = () => this.handleInstallClick();
-                }
-            });
-            
-            if((this.state.isIOS || this.state.isInApp) && !this.state.isStandalone) {
-                 const fab = document.getElementById('btnInstall');
-                 if(fab) {
-                     fab.style.display = 'flex';
-                     fab.onclick = () => this.handleInstallClick();
-                 }
-            }
-        },
-        handleInstallClick: async function() {
-            const modal = document.getElementById('pwaHealthModal');
-            const content = document.getElementById('smartGuideContent');
-            if(!modal || !content) return;
-            
-            modal.classList.remove('hidden');
-            
-            if (this.state.isStandalone) {
-                content.innerHTML = `<div class="text-center"><div class="text-emerald-500 text-5xl mb-3">🎉</div><h3 class="text-xl font-bold text-slate-800 mb-2">Đã cài đặt thành công!</h3><p class="text-slate-600 text-sm font-medium">Bạn đang sử dụng phiên bản Ứng dụng.<br>Chúc bạn có trải nghiệm tuyệt vời.</p></div>`;
-                return;
-            }
-            if (this.deferredPrompt) {
-                modal.classList.add('hidden');
-                this.deferredPrompt.prompt();
-                const { outcome } = await this.deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    this.deferredPrompt = null;
-                    const fab = document.getElementById('btnInstall');
-                    if(fab) fab.style.display = 'none';
-                }
-                return;
-            }
-            if (this.state.isInApp) {
-                content.innerHTML = `<div class="text-center text-rose-600 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 font-medium">Bạn đang mở bằng Zalo/Facebook nên hệ thống bị chặn.</p><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">1</div><div class="text-sm font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">2</div><div class="text-sm font-medium">Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
-                return;
-            }
-            if (this.state.isIOS) {
-                content.innerHTML = `<div class="text-center font-bold mb-4 text-blue-600 text-lg">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl font-serif">⎋</i> ở dưới cùng màn hình.</div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm font-medium text-slate-700">Kéo lên chọn <b>Thêm vào MH chính</b> (Add to Home Screen).</div></div><div class="guide-step"><div class="step-num">3</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Thêm</b> (Add) ở góc trên cùng.</div></div>`;
-                return;
-            }
-            if (this.state.isAndroid) {
-                content.innerHTML = `<div class="text-center font-bold mb-4 text-emerald-600 text-lg">Dành cho Android</div><div class="guide-step"><div class="step-num bg-emerald-500">1</div><div class="text-sm font-medium text-slate-700">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋮</span> ở góc trên bên phải màn hình.</div></div><div class="guide-step"><div class="step-num bg-emerald-500">2</div><div class="text-sm font-medium text-slate-700">Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
-                return;
-            }
-            if (this.state.isPC) {
-                content.innerHTML = `<div class="text-center"><p class="mb-4 font-bold text-lg text-primary">Cài đặt trên Máy tính</p><div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 inline-block mb-3 text-left w-full"><div class="flex items-start gap-3 mb-2"><span class="text-xl text-primary mt-0.5">💻</span> <span class="text-sm font-medium text-slate-700 leading-relaxed">Bấm biểu tượng <b>Tải xuống (Cài đặt)</b> ở góc phải của thanh nhập địa chỉ web.</span></div><div class="text-xs text-slate-500 italic mt-3 pt-3 border-t border-indigo-200">Hoặc bấm menu 3 chấm > "Cài đặt LifeOS..."</div></div></div>`;
-                return;
-            }
+<script>
+window.pwaEngine = {
+    deferredPrompt: null,
+    state: {
+        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
+        isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
+        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
+        isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+    },
+    init: function() {
+        // LINH HỒN CỦA PWA LÀ ĐÂY: KHAI BÁO SERVICE WORKER
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Reg Failed:', err));
         }
-    };
-    window.pwaEngine.init();</script>
+
+        const fab = document.getElementById('btnInstall');
+        
+        // NẾU ĐANG TRONG APP RỒI THÌ DIỆT LUÔN CÁI NÚT TỪ TRONG TRỨNG
+        if (this.state.isStandalone) {
+            if(fab) fab.style.display = 'none';
+            return;
+        }
+
+        // BẮT SỰ KIỆN KHI NGƯỜI DÙNG VỪA CÀI XONG
+        window.addEventListener('appinstalled', () => {
+            this.deferredPrompt = null;
+            if(fab) fab.style.display = 'none';
+            window.showToast('Cài đặt App thành công!', 'ph-check-circle');
+        });
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+            if(fab) {
+                fab.style.display = 'flex';
+                fab.onclick = () => this.handleInstallClick();
+            }
+        });
+        
+        if((this.state.isIOS || this.state.isInApp) && !this.state.isStandalone) {
+             if(fab) {
+                 fab.style.display = 'flex';
+                 fab.onclick = () => this.handleInstallClick();
+             }
+        }
+    },
+    handleInstallClick: async function() {
+        const modal = document.getElementById('pwaHealthModal');
+        const content = document.getElementById('smartGuideContent');
+        if(!modal || !content) return;
+        
+        modal.classList.remove('hidden');
+        
+        if (this.state.isStandalone) {
+            content.innerHTML = `<div class="text-center"><div class="text-emerald-500 text-5xl mb-3">🎉</div><h3 class="text-xl font-bold text-slate-800 mb-2">Đã cài đặt thành công!</h3><p class="text-slate-600 text-sm font-medium">Bạn đang sử dụng phiên bản Ứng dụng.<br>Chúc bạn có trải nghiệm tuyệt vời.</p></div>`;
+            return;
+        }
+        if (this.deferredPrompt) {
+            modal.classList.add('hidden');
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                this.deferredPrompt = null;
+                const fab = document.getElementById('btnInstall');
+                if(fab) fab.style.display = 'none';
+            }
+            return;
+        }
+        if (this.state.isInApp) {
+            content.innerHTML = `<div class="text-center text-rose-600 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 font-medium">Bạn đang mở bằng Zalo/Facebook nên hệ thống bị chặn.</p><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">1</div><div class="text-sm font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">2</div><div class="text-sm font-medium">Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
+            return;
+        }
+        if (this.state.isIOS) {
+            content.innerHTML = `<div class="text-center font-bold mb-4 text-blue-600 text-lg">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl font-serif">⎋</i> ở dưới cùng màn hình.</div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm font-medium text-slate-700">Kéo lên chọn <b>Thêm vào MH chính</b> (Add to Home Screen).</div></div><div class="guide-step"><div class="step-num">3</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Thêm</b> (Add) ở góc trên cùng.</div></div>`;
+            return;
+        }
+        if (this.state.isAndroid) {
+            content.innerHTML = `<div class="text-center font-bold mb-4 text-emerald-600 text-lg">Dành cho Android</div><div class="guide-step"><div class="step-num bg-emerald-500">1</div><div class="text-sm font-medium text-slate-700">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋮</span> ở góc trên bên phải màn hình.</div></div><div class="guide-step"><div class="step-num bg-emerald-500">2</div><div class="text-sm font-medium text-slate-700">Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
+            return;
+        }
+        if (this.state.isPC) {
+            content.innerHTML = `<div class="text-center"><p class="mb-4 font-bold text-lg text-primary">Cài đặt trên Máy tính</p><div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 inline-block mb-3 text-left w-full"><div class="flex items-start gap-3 mb-2"><span class="text-xl text-primary mt-0.5">💻</span> <span class="text-sm font-medium text-slate-700 leading-relaxed">Bấm biểu tượng <b>Tải xuống (Cài đặt)</b> ở góc phải của thanh nhập địa chỉ web.</span></div><div class="text-xs text-slate-500 italic mt-3 pt-3 border-t border-indigo-200">Hoặc bấm menu 3 chấm > "Cài đặt LifeOS..."</div></div></div>`;
+            return;
+        }
+    }
+};
+</script>
 </body>
 </html>
