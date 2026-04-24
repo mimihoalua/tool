@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V39 - The Iron Lock</title>
+<title>LifeOS V40 - The Iron Lock</title>
 <link id="manifest-link" rel="manifest" href="">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -27,7 +27,6 @@
 <script src="/tool/firebase-firestore-compat.js"></script>
 <script src="/tool/firebase-auth-compat.js"></script>
 <style>
-/* MA TRẬN 5 MÀU THEME - MULTI SEASONS */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -46,7 +45,6 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 .hover\:bg-indigo-700:hover, .hover\:brightness-110:hover { background-color: var(--c-hover) !important; filter: brightness(1.1); }
 .shadow-primary\/30 { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
 
-/* UTILS */
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{display:none}
 .view-section{display:none}@keyframes viewEnter{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}.view-section.active{display:block;animation:viewEnter .4s cubic-bezier(.16,1,.3,1) forwards}
@@ -94,7 +92,7 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 <div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
     <div class="flex items-center gap-1.5 sm:gap-2">
         <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i> <span class="hidden md:inline">Trang chủ</span></a>
-        <a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
+        <a href="https://mimihoalua.github.io/tool/readlifeos.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
     </div>
 
     <span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"></span>
@@ -357,6 +355,9 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 </div>
 
 <script>
+// ==============================================================================
+// 1. CƠ QUAN ĐẦU NÃO (CORE LOGIC & BỌC THÉP CHUẨN V40)
+// ==============================================================================
 window.showToast=(m,i='ph-info')=>{
     const c=el('toast-container');if(!c)return;const t=document.createElement('div');
     t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]';
@@ -398,6 +399,9 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
+// ==============================================================================
+// NATIVE TTS & FALLBACK BẢO VỆ ORB
+// ==============================================================================
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 
@@ -455,6 +459,7 @@ window.playSpeechTTS = (text) => {
     } catch (e) { speakNative(); }
 };
 
+// BẬT MỎ NEO SILENCE VÀ WORKER NỀN (CHỐNG NGỦ GẬT)
 window.audioInitialized = false;
 window.lastSentinelCheck = Date.now();
 window.notifiedTasks = new Set(); 
@@ -500,6 +505,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
+// WORKER NỀN BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const inlineWorker = `let timer; self.onmessage = function(e) { if(e.data === 'start') { timer = setInterval(() => { self.postMessage('tick'); }, 1000); } };`;
@@ -520,15 +526,23 @@ document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') { window.renderTasksOnly(); if(window.VaultUI) window.VaultUI.renderVaultCards(); }
 });
 
-window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
-
 window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
 window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
 window.closePasswordModal=()=>hideEl('password-modal');
 window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
 window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
 window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
-window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
+window.logout=()=>{
+    window.vibrate(20);
+    localStorage.removeItem('lifeos_v8_session');
+    localStorage.removeItem('lifeos_v8_viewing');
+    if ('caches' in window) {
+        caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))))
+              .then(() => window.location.href = window.location.pathname + '?reload=' + Date.now());
+    } else {
+        window.location.href = window.location.pathname + '?reload=' + Date.now();
+    }
+};
 
 window.loadUserData=()=>{
     try{
@@ -787,7 +801,7 @@ window.toggleAlarm = (e, id) => {
 };
 
 // ==============================================================================
-// 3. THE IRON LOCK (V39 FIREBASE SYNC)
+// 3. THE IRON LOCK (V39 FIREBASE SYNC - SMART FALLBACK)
 // ==============================================================================
 window._pendingPush = false;
 window.cloudSyncCompleted = false;
@@ -820,8 +834,8 @@ window.FirebaseSync={
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
 
                 if(window._pendingPush) { 
-                    if(cloudTime <= localTime) return;
-                    else window._pendingPush = false; 
+                    if(cloudTime <= localTime) { return; }
+                    else { window._pendingPush = false; }
                 }
                 
                 const cloudData = c.data;
@@ -1084,7 +1098,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 6. MODULE NGHE NHẠC (V39.9: THE REAL FINAL TRUTH)
+// 6. MODULE NGHE NHẠC (V40: BẤT ĐỒNG BỘ SHARE VÀ QUÉT SẠCH CACHE PWA)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '', sleepTimerId: null,
@@ -1106,24 +1120,21 @@ window.MusicApp = {
             window.showToast(`Hẹn tắt nhạc sau ${min} phút`, 'ph-clock');
         }
     },
-
-    // VÁ LỖI 1: BỎ HOÀN TOÀN THUỘC TÍNH TEXT (CHỐNG ABORT Ở WEBVIEW), DÙNG ĐÚNG CHUẨN AWAIT CHO PROMISE CLIPBOARD
+    // BÀI HỌC VÀNG: Bất đồng bộ Promise và API Webview (Tuyệt đối cấm dùng text)
     async shareSong(idx) {
         window.vibrate(10);
         const s = this.playlist[idx];
         if (!s) return;
         try {
             if (navigator.share) {
-                // CHỈ TRUYỀN TITLE VÀ URL (Tuyệt đối không nhét text)
+                // CHỈ GỬI TITLE VÀ URL (Không chèn text rác để tránh AbortError trên Zalo/Messenger)
                 await navigator.share({ title: s.title, url: s.stream_url });
             } else {
-                throw new Error("Share API Not Supported");
+                throw new Error("No Share API");
             }
         } catch (err) {
-            // NẾU NGƯỜI DÙNG BẤM HỦY SHARE TRÊN ĐIỆN THOẠI (AbortError) THÌ TẮT IM LẶNG, KHÔNG LÀM GÌ CẢ
-            if (err.name === 'AbortError') return;
-            
-            // NẾU LÀ MÁY TÍNH KHÔNG HỖ TRỢ SHARE, HOẶC BỊ TRÌNH DUYỆT CHẶN -> FALLBACK XUỐNG CLIPBOARD BẰNG AWAIT
+            if (err.name === 'AbortError') return; // Người dùng bấm tắt menu share
+            // FALLBACK: Cấm gọi lơ lửng, phải có AWAIT vì Clipboard là một Promise
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(s.stream_url);
@@ -1136,14 +1147,13 @@ window.MusicApp = {
             }
         }
     },
-
-    // VÁ LỖI 2: DỌN SẠCH TẬN GỐC SERVICE WORKER CACHE THEO CHUẨN PWA
+    // BÀI HỌC VÀNG: Dọn rác PWA Service Worker (Ép đăng nhập lại)
     clearCache() { 
         if(confirm("Bạn có chắc chắn muốn dọn rác và tải lại ứng dụng hoàn toàn sạch sẽ?")) { 
-            localStorage.removeItem('xs_songs_v4'); 
             window.showToast('Đang dọn rác hệ thống...', 'ph-broom');
-            
-            // Xóa cứng Caches của Service Worker
+            // 1. Quét sạch LocalStorage (Ép bật lại màn hình Đăng Nhập)
+            localStorage.clear(); 
+            // 2. Chọc thủng Cache Storage của Service Worker
             if ('caches' in window) {
                 caches.keys().then(names => {
                     Promise.all(names.map(name => caches.delete(name))).then(() => {
@@ -1155,13 +1165,12 @@ window.MusicApp = {
             }
         } 
     },
-
     async refetch() {
         el('music-loading').style.display = 'block'; el('music-loading').textContent = 'Đang đồng bộ máy chủ...';
         try {
             const cached = localStorage.getItem('xs_songs_v4'); if(cached) { this.playlist = JSON.parse(cached); this.renderList(); el('music-loading').style.display = 'none'; return; }
             
-            // VÁ LỖI 3: DÙNG LẠI URL GỐC KHÔNG KÈM QUERY RÁC TRÁNH LỖI CORS 403 CỦA ARCHIVE.ORG
+            // LƯU Ý CORS: Tuyệt đối giữ nguyên URL chuẩn, không truyền param rác như _cb vào
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
             
@@ -1190,13 +1199,12 @@ window.MusicApp = {
             const isCurrent = this.currentIndex === actualIndex; 
             const div = document.createElement('div'); div.className = `song-row ${isCurrent ? 'active' : ''}`; 
             
-            // VÁ LỖI HIỂN THỊ: Ép hiện thanh Player khi click bài hát
             div.onclick = (e) => { 
                 if(e.target.closest('button') || e.target.closest('a')) return;
                 this.play(actualIndex); 
             };
             
-            // VÁ LỖI EVENT BUBBLING: Ngăn không cho Click Share lây lan (stopPropagation và preventDefault)
+            // ANTI-BUBBLING Event
             div.innerHTML = `
             <div class="w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-slate-400'}">${isCurrent ? '▶' : (i + 1)}</div>
             <div class="flex-1 min-w-0 pr-2 pointer-events-none">
@@ -1224,7 +1232,6 @@ window.MusicApp = {
     play(idx) {
         const a = el('mstq-player'); if(!a) return; const s = this.playlist[idx]; if(!s) return;
         
-        // VÁ LỖI HIỂN THỊ MINIPLAYER: Khởi động thanh Player ngay khi bấm
         if (!this.isInitialized) {
             this.isInitialized = true;
             const anchor = el('mstq-silence'); if(anchor && anchor.paused) anchor.play().catch(()=>{});
