@@ -1151,20 +1151,26 @@ window.MusicApp = {
     },
     
     clearCache() { 
-        if(confirm("Bạn có chắc chắn muốn dọn rác và tải lại ứng dụng hoàn toàn sạch sẽ?")) { 
-            window.showToast('Đang dọn rác hệ thống...', 'ph-broom');
-            localStorage.clear(); 
-            if ('caches' in window) {
-                caches.keys().then(names => {
-                    Promise.all(names.map(name => caches.delete(name))).then(() => {
-                        window.location.href = window.location.pathname + '?reload=' + Date.now();
-                    });
+    if(confirm("Bạn có chắc chắn muốn dọn rác nhạc và tải lại ứng dụng hoàn toàn sạch sẽ?")) { 
+        window.showToast('Đang dọn rác hệ thống...', 'ph-broom');
+        
+        // DAO MỔ: Chỉ xóa đúng ổ cứng của Tab Nhạc
+        localStorage.removeItem('xs_songs_v4');
+        localStorage.removeItem('xs_shuffle');
+        localStorage.removeItem('xs_repeat');
+
+        // Khối PWA Cache & Reload giữ nguyên vì nó rất tốt
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                Promise.all(names.map(name => caches.delete(name))).then(() => {
+                    window.location.href = window.location.pathname + '?reload=' + Date.now();
                 });
-            } else {
-                window.location.href = window.location.pathname + '?reload=' + Date.now();
-            }
-        } 
-    },
+            });
+        } else {
+            window.location.href = window.location.pathname + '?reload=' + Date.now();
+        }
+    } 
+}
     async refetch() {
         el('music-loading').style.display = 'block'; el('music-loading').textContent = 'Đang đồng bộ máy chủ...';
         try {
