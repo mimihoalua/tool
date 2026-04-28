@@ -12,24 +12,13 @@
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 1rem; }
         
-        /* Chuyển đổi sang Textarea để Edit trực tiếp */
         .code-editor { 
-            width: 100%; 
-            min-height: 500px; 
-            max-height: 700px;
-            background-color: transparent; 
-            color: #818cf8; /* Màu chữ code */
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 0.75rem; 
-            line-height: 1.6; 
-            tab-size: 4;
-            border: none; 
-            outline: none; 
-            resize: vertical; /* Cho phép kéo giãn chiều dọc */
-            white-space: pre; 
-            overflow: auto;
-            scrollbar-width: thin; 
-            scrollbar-color: #475569 transparent; 
+            width: 100%; min-height: 500px; max-height: 700px;
+            background-color: transparent; color: #818cf8; 
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; 
+            line-height: 1.6; tab-size: 4; border: none; outline: none; 
+            resize: vertical; white-space: pre; overflow: auto;
+            scrollbar-width: thin; scrollbar-color: #475569 transparent; 
         }
         .code-editor::-webkit-scrollbar { width: 8px; height: 8px; }
         .code-editor::-webkit-scrollbar-track { background: transparent; }
@@ -37,18 +26,16 @@
         .code-editor::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
         .instruction-step { border-left: 3px solid #6366f1; padding-left: 1rem; margin-bottom: 1.5rem; }
-
-        /* Hiệu ứng Toast thông báo */
-        #toast-msg {
-            transition: opacity 0.3s, transform 0.3s;
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
+        #toast-msg { transition: opacity 0.3s, transform 0.3s; opacity: 0; transform: translateY(20px); pointer-events: none; }
+        #toast-msg.show { opacity: 1; transform: translateY(0); }
+        
+        /* Hiệu ứng Glow khi Đồng bộ Khung Tổng */
+        @keyframes tabGlow {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); background-color: #059669; }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); background-color: #10b981; }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); background-color: #4f46e5; }
         }
-        #toast-msg.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .glow-sync { animation: tabGlow 1s ease-out; }
     </style>
 </head>
 <body class="relative min-h-screen pb-12">
@@ -118,7 +105,7 @@
             <h2 class="text-xl font-black mb-2 flex items-center gap-2 text-indigo-400">
                 <i class="ph-fill ph-code-block"></i> 3. Kho Mã Nguồn Bảo Mật (Workspace)
             </h2>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Bạn có thể sửa, xóa, và dán đè code trực tiếp tại các Tab con, sau đó Đồng bộ vào Khung Tổng.</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Mô hình Meta-Editor: Bạn sửa ở Tab Con, bơm máu vào Khung Tổng, rồi đẩy lên Cloud.</p>
 
             <!-- KHU VỰC QUẢN LÝ TỆP (FILE MANAGER) -->
             <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-4">
@@ -157,7 +144,7 @@
             <div class="bg-[#020617] p-2 rounded-xl border border-slate-800 shadow-inner relative min-h-[500px]">
                 <div id="editorOverlay" class="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl hidden">
                     <i class="ph-duotone ph-folder-open text-5xl text-slate-600 mb-2"></i>
-                    <p class="text-slate-400 text-sm font-medium">Vui lòng Quét và Tải dữ liệu tệp <code class="text-sky-400">readqlycs.html</code> để bắt đầu sửa.</p>
+                    <p class="text-slate-400 text-sm font-medium mt-2">Đang nạp đạn dược... sẵn sàng Extract!</p>
                 </div>
 
                 <div id="tab-tong" class="workspace-content block">
@@ -873,7 +860,7 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
     stopTOTPUpdater(){if(this._tI){clearInterval(this._tI);this._tI=null}},
     _tU(){document.querySelectorAll('.vault-totp-code').forEach(e=&gt;{const s=e.dataset.secret;if(!s)return;const c=window.VaultUtils.generateTOTP(s);if(c)e.textContent=c});const n=Math.floor(Date.now()/1000),p=((n%30)/30)*100;document.querySelectorAll('.totp-progress').forEach(e=&gt;{e.style.width=p+'%'})},
     renderVaultCards(){
-        const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||es)return;
+        const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||!es)return;
         let d=window.VaultStorageLayer.getData();
         if(this._c!=='all'){d=d.filter(e=&gt;{if(this._c==='custom')return e.category==='custom'||!['account','crypto','note','service'].includes(e.category);return e.category===this._c})}
         if(this._q){const q=this._q.toLowerCase();d=d.filter(e=&gt;(e.name||'').toLowerCase().includes(q)||((e.content||'').toLowerCase().includes(q)))}
@@ -975,107 +962,83 @@ window.VaultApp={
 };
 
 window.cloudSyncCompleted = false;
-window._pendingPush = false; // THE IRON LOCK
 
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
     init(k){
         this._k=k;
         try{
-            if(!firebase.apps.length) firebase.initializeApp({
-                apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
-                authDomain: "tool-mimishop.firebaseapp.com",
-                projectId: "tool-mimishop",
-                storageBucket: "tool-mimishop.firebasestorage.app",
-                messagingSenderId: "536814109954",
-                appId: "1:536814109954:web:b1be76d22957de4b75ee1b"
-            });
-            const startFS = () =&gt; { 
-                console.log("🔥 [FIREBASE] Khởi tạo Firestore cho profile:", k);
-                this._d=firebase.firestore(); 
-                this._i=true; 
-                const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block'; 
-                this._listen(); 
-            };
-            firebase.auth().signInAnonymously().then(() =&gt; {
-                startFS();
-            }).catch(e=&gt;{ 
-                startFS(); 
-            });
-        }catch(e){ 
-            this._i=false; 
-            const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block'; 
-        }
+            if(!firebase.apps.length)firebase.initializeApp({apiKey:"AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",authDomain:"tool-mimishop.firebaseapp.com",projectId:"tool-mimishop",storageBucket:"tool-mimishop.firebasestorage.app",messagingSenderId:"536814109954",appId:"1:536814109954:web:b1be76d22957de4b75ee1b"});
+            const startFS = () =&gt; { this._d=firebase.firestore(); this._i=true; const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block'; this._listen(); this.pushAll(); };
+            firebase.auth().signInAnonymously().then(startFS).catch(e=&gt;{ console.warn('Auth Err:',e.message); startFS(); });
+        }catch(e){ console.warn('FB Init:',e.message); this._i=false; const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block'; }
     },
     _listen(){
         if(!this._d||!this._k)return;
         try{
             this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=&gt;{
-                if(!d.exists) return; 
-                const c=d.data();
-                if(!c) return;
+                if(!d.exists) { window.cloudSyncCompleted = true; return; }
+                const c=d.data();if(!c)return;
                 
-                if(window._pendingPush) return;
-                
-                let cloudTime = 0;
-                if (c.updatedAt) cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : parseInt(c.updatedAt);
+                const cloudTime = c.updatedAt || 0;
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
-                
-                const cloudData = c.data;
-                if(cloudData &amp;&amp; Array.isArray(cloudData)){ 
-                    const cleanCloudTodos = cloudData.map(t =&gt; ({...t, id: String(t.id)}));
-                    if (cloudTime &gt;= localTime || localTime === 0) {
+
+                if(c.data &amp;&amp; Array.isArray(c.data)){ 
+                    const cleanCloudTodos = c.data.map(t =&gt; ({...t, id: String(t.id)}));
+                    
+                    if (!window.cloudSyncCompleted) {
                         window.todos = cleanCloudTodos;
                         localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
                         localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
-                        window.renderTasksOnly(); 
-                    } else if (localTime &gt; cloudTime) {
-                        this.pushAll();
-                    }
+                        window.renderTasksOnly();
+                    } else if (cloudTime &gt;= localTime || localTime === 0) {
+                        const ls=JSON.stringify(window.todos||[]), cs=JSON.stringify(cleanCloudTodos); 
+                        if(ls!==cs){
+                            window.todos=cleanCloudTodos;
+                            localStorage.setItem('lifeos_v8_data_'+this._k,cs);
+                            localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
+                            window.renderTasksOnly();
+                        }
+                    } else if (localTime &gt; cloudTime) { this.pushAll(); }
                 }
                 
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
                 if(c.vaultData&amp;&amp;Array.isArray(c.vaultData)){ 
-                    if (cloudTime &gt;= localTime || localTime === 0) {
+                    if (!window.cloudSyncCompleted || cloudTime &gt;= localTime || localTime === 0) {
                         const cleanCloudData = window.VaultUtils.migrateLegacyData(c.vaultData);
-                        window.VaultStorageLayer.replaceAll(cleanCloudData); 
-                        window.VaultUI.renderVaultCards(); 
+                        const lv=JSON.stringify(window.VaultStorageLayer.getData()),cv=JSON.stringify(cleanCloudData); 
+                        if(lv!==cv){window.VaultStorageLayer.replaceAll(cleanCloudData); window.VaultUI.renderVaultCards();}
                     }
                 }
                 window.cloudSyncCompleted = true;
                 const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-green mt-0.5 hidden md:inline-block';
             },e=&gt;{
-                const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block';
+                console.warn('Snap Error:',e.message); const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block';
             });
-        }catch(e){}
+        }catch(e){console.warn('Listen:',e.message)}
     },
     pushAll(){
-        if(!this._i||!this._d||!this._k) return;
-        window._pendingPush = true;
-        const currentTs = Date.now();
-        localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
-        
-        const safeTodos = (window.todos||[]).map(t =&gt; {
-            const cleanT = {...t, id: String(t.id)};
-            Object.keys(cleanT).forEach(key =&gt; cleanT[key] === undefined &amp;&amp; delete cleanT[key]);
-            return cleanT;
-        });
-        
-        this._d.collection('LifeOS_Profiles').doc(this._k).set({ 
-            data:safeTodos, stats:window.stats||{streak:0},
-            vaultData:window.VaultStorageLayer.getData()||[], updatedAt: currentTs 
-        },{merge:true})
-        .then(() =&gt; { window._pendingPush = false; })
-        .catch(e=&gt;{ window._pendingPush = false; });
+        if(!this._i||!this._d||!this._k || !window.cloudSyncCompleted) return;
+        try{
+            const currentTs = window.lastLocalPush || Date.now();
+            localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
+            
+            const safeTodos = (window.todos||[]).map(t =&gt; ({...t, id: String(t.id)}));
+            this._d.collection('LifeOS_Profiles').doc(this._k).set({ 
+                data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[],
+                vaultData:window.VaultStorageLayer.getData()||[], updatedAt: currentTs 
+            },{merge:true}).catch(e=&gt;{console.warn('Push Err:',e.message);});
+        }catch(e){console.warn('Push:',e.message)}
     }
 };
 
 // ==============================================================================
-// 7. MODULE NGHE NHẠC (MUSIC V45)
+// 7. MODULE NGHE NHẠC (MUSIC V47)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
-    shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
+    shuffle: localStorage.getItem('xs_shuffle') === 'true',
+    repeat: localStorage.getItem('xs_repeat') || 'all',
     visibleCount: 50, timerInterval: null, timerEnd: null,
     
     initAudioEngine() {
@@ -1114,7 +1077,7 @@ window.MusicApp = {
         el('music-loading').style.display = 'none';
     },
     
-    // THE CHÉN THÁNH CACHE PURGE
+    // THE ULTIMATE PWA CACHE PURGE
     clearCache() {
         if(confirm("Bạn có chắc chắn muốn dọn sạch bộ nhớ đệm Nhạc và tải lại ứng dụng? (Không mất dữ liệu cá nhân)")) {
             window.vibrate(20);
@@ -1265,147 +1228,4 @@ window.pwaEngine = {
         if (this.state.isInApp) { content.innerHTML = `&lt;div class="text-center text-rose-600 font-bold mb-3"&gt;⚠️ Trình duyệt bị chặn&lt;/div&gt;&lt;p class="text-sm text-slate-600 font-medium mb-3"&gt;Zalo/FB không hỗ trợ cài đặt App.&lt;/p&gt;&lt;div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"&gt;&lt;div class="step-num bg-amber-500"&gt;1&lt;/div&gt;&lt;div class="text-sm"&gt;Bấm &lt;b&gt;⋯&lt;/b&gt; ở góc trên phải.&lt;/div&gt;&lt;/div&gt;&lt;div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"&gt;&lt;div class="step-num bg-amber-500"&gt;2&lt;/div&gt;&lt;div class="text-sm"&gt;Chọn &lt;b&gt;Mở bằng trình duyệt&lt;/b&gt;.&lt;/div&gt;&lt;/div&gt;`; return; }
         if (this.state.isIOS) { content.innerHTML = `&lt;div class="text-center text-lg font-bold mb-4 text-blue-600"&gt;Dành cho iPhone/iPad&lt;/div&gt;&lt;div class="guide-step"&gt;&lt;div class="step-num bg-blue-500"&gt;1&lt;/div&gt;&lt;div class="text-sm"&gt;Bấm nút &lt;b&gt;Chia sẻ&lt;/b&gt; (Vuông có mũi tên) ở dưới.&lt;/div&gt;&lt;/div&gt;&lt;div class="guide-step"&gt;&lt;div class="step-num bg-blue-500"&gt;2&lt;/div&gt;&lt;div class="text-sm"&gt;Chọn &lt;b&gt;Thêm vào MH chính&lt;/b&gt;.&lt;/div&gt;&lt;/div&gt;`; return; }
         if (this.state.isAndroid) { content.innerHTML = `&lt;div class="text-center text-lg font-bold mb-4 text-emerald-600"&gt;Dành cho Android&lt;/div&gt;&lt;div class="guide-step"&gt;&lt;div class="step-num bg-emerald-500"&gt;1&lt;/div&gt;&lt;div class="text-sm"&gt;Bấm &lt;b&gt;⋮&lt;/b&gt; góc trên phải.&lt;/div&gt;&lt;/div&gt;&lt;div class="guide-step"&gt;&lt;div class="step-num bg-emerald-500"&gt;2&lt;/div&gt;&lt;div class="text-sm"&gt;Chọn &lt;b&gt;Cài đặt ứng dụng&lt;/b&gt;.&lt;/div&gt;&lt;/div&gt;`; return; }
-        if (this.state.isPC) { content.innerHTML = `&lt;div class="text-center"&gt;&lt;p class="mb-4 font-bold text-lg text-primary"&gt;Cài đặt trên Máy tính&lt;/p&gt;&lt;div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 inline-block mb-3 text-left w-full"&gt;&lt;div class="flex items-start gap-3 mb-2"&gt;&lt;span class="text-xl text-primary mt-0.5"&gt;💻&lt;/span&gt; &lt;span class="text-sm font-medium text-slate-700 leading-relaxed"&gt;Bấm biểu tượng &lt;b&gt;Tải xuống (Cài đặt)&lt;/b&gt; ở góc phải của thanh nhập địa chỉ web.&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`; return; }
-    }
-};
-
-// ==============================================================================
-// 9. BẬT HỆ THỐNG
-// ==============================================================================
-document.addEventListener('DOMContentLoaded', () =&gt; {
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/mimihoalua/sw.js').then(() =&gt; { window.pwaEngine.init(); }).catch(() =&gt; { window.pwaEngine.init(); }); } else { window.pwaEngine.init(); }
-    setTimeout(() =&gt; { window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
-    const vsi = el('vaultSearchInput'); if(vsi) { const debSearch = window.VaultUtils.debounce(e =&gt; window.VaultApp.filterData(e.target.value), 300); vsi.addEventListener('input', debSearch); }
-    document.body.addEventListener('focus', e =&gt; { if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) setTimeout(() =&gt; e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300); }, true);
-    document.querySelectorAll('.filter-btn').forEach(btn =&gt; { btn.addEventListener('click', (e) =&gt; { window.filterTasks(e.target.getAttribute('data-filter') || 'all'); }); });
-    const handleTaskSubmit = (v, dateVal) =&gt; {
-        if(!v) return; window.unlockAudio(); const parsed = window.parseTaskNLP(v);
-        if(dateVal) { const d = new Date(dateVal); parsed.dueDate = window.getIsoDate(d); parsed.alarmTime = d.getTime(); parsed.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-        const newId = String(Date.now())+Math.floor(Math.random()*1000).toString();
-        window.todos.unshift({ id: newId, text: parsed.text.charAt(0).toUpperCase() + parsed.text.slice(1), completed: false, priority: parsed.priority, tags: parsed.tags, alarmTime: parsed.alarmTime, timeStr: parsed.timeStr, isDaily: parsed.isDaily, dueDate: parsed.dueDate, alerted: false, createdAt: Date.now(), alarmEnabled: true });
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); window.vibrate(15);
-        if(parsed.alarmTime &amp;&amp; parsed.alarmTime &lt;= Date.now()) { window.triggerGlobalAlarm(newId, parsed.text); } else if(parsed.timeStr) { window.showToast(`Đã hẹn AI lúc ${parsed.timeStr}`, 'ph-speaker-high'); if(window.soundEnabled)window.playSpeechTTS(`Đã ghi nhận, báo giọng nói lúc ${window.formatTimeVN(parsed.timeStr)}.`); } else { window.showToast('Đã lưu!', 'ph-check-circle'); if(window.soundEnabled)window.playSpeechTTS('Đã lưu.'); }
-    };
-    el('form-pc')?.addEventListener('submit', (e) =&gt; { e.preventDefault(); const i = el('input-pc'); const v = i.value.trim(); if(!v) { window.highlightError('input-pc'); return; } handleTaskSubmit(v, getVal('dt-pc')); i.value = ''; setVal('dt-pc', ''); });
-    el('form-mobile')?.addEventListener('submit', (e) =&gt; { e.preventDefault(); const i = el('input-mobile'); const v = i.value.trim(); if(!v) { window.highlightError('input-mobile'); return; } handleTaskSubmit(v, getVal('dt-mb')); i.value = ''; setVal('dt-mb', ''); });
-
-    const todoList = el('todo-list');
-    if(todoList) {
-        let swObj = { el: null, startX: 0, startY: 0, curX: 0, isDrag: false, isScr: false, th: 80, id: null, comp: false };
-        todoList.addEventListener('touchstart', e =&gt; { window.unlockAudio(); if(window.innerWidth &gt;= 1024 || e.target.closest('.action-btn-mobile') || e.target.closest('button') || e.target.closest('.cursor-pointer')) return; const f = e.target.closest('.swipe-front'); if(!f) return; const li = f.closest('li'); swObj.el = f; swObj.id = String(li.getAttribute('data-task-id')); const tk = (window.todos||[]).find(t =&gt; String(t.id) === swObj.id); if(tk) swObj.comp = tk.completed; swObj.startX = e.touches[0].clientX; swObj.startY = e.touches[0].clientY; swObj.isDrag = true; swObj.isScr = false; swObj.el.style.transition = 'none'; }, {passive:true});
-        todoList.addEventListener('touchmove', e =&gt; { if(!swObj.isDrag || !swObj.el) return; const dx = e.touches[0].clientX - swObj.startX, dy = e.touches[0].clientY - swObj.startY; if(Math.abs(dy) &gt; Math.abs(dx) &amp;&amp; Math.abs(dy) &gt; 10) { swObj.isScr = true; } if(swObj.isScr) return; if(swObj.comp &amp;&amp; dx &gt; 0) return; let mx = dx; if(mx &gt; swObj.th) mx = swObj.th + (mx - swObj.th)*0.2; if(mx &lt; -swObj.th) mx = -swObj.th + (mx + swObj.th)*0.2; swObj.curX = mx; swObj.el.style.transform = `translateX(${mx}px)`; const pLi = swObj.el.closest('li'), bL = pLi.querySelector('.swipe-bg-left'), bR = pLi.querySelector('.swipe-bg-right'); if(bL &amp;&amp; bR){ if(mx &gt; 0){ bL.style.opacity = Math.min(mx/50, 1); bR.style.opacity = 0; } else { bR.style.opacity = Math.min(Math.abs(mx)/50, 1); bL.style.opacity = 0; } } if(Math.abs(mx) &gt; 20) { e.preventDefault(); e.stopPropagation(); } }, {passive:false});
-        todoList.addEventListener('touchend', e =&gt; { if(!swObj.isDrag || !swObj.el) return; swObj.isDrag = false; swObj.el.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'; const pLi = swObj.el.closest('li'), bL = pLi.querySelector('.swipe-bg-left'), bR = pLi.querySelector('.swipe-bg-right'), cEl = swObj.el, cId = swObj.id; if(swObj.curX &gt; swObj.th &amp;&amp; !swObj.comp){ cEl.style.transform = `translateX(100%)`; setTimeout(()=&gt;{ window.toggleTask(cId); }, 250); } else if(swObj.curX &lt; -swObj.th){ cEl.style.transform = `translateX(-100%)`; setTimeout(()=&gt;{ window.confirmDeleteTask(cId); cEl.style.transform='translateX(0)'; }, 250); } else { cEl.style.transform = `translateX(0)`; if(bL)bL.style.opacity = 0; if(bR)bR.style.opacity = 0; } swObj.el = null; });
-    }
-
-    try { let sS = localStorage.getItem('lifeos_v8_session'); if (sS) { sS = sS.toLowerCase(); let sV = localStorage.getItem('lifeos_v8_viewing'); sV = sV ? sV.toLowerCase() : sS; if (!window.PROFILES || !window.PROFILES[sS]) { localStorage.removeItem('lifeos_v8_session'); localStorage.removeItem('lifeos_v8_viewing'); window.showLoginGate(); } else { if (!window.PROFILES[sV]) { sV = sS; localStorage.setItem('lifeos_v8_viewing', sV); } window.currentUser = sS; window.viewingUser = sV; hideEl('login-gate'); window.loadUserData(); } } else { window.showLoginGate(); } } catch (err) { localStorage.removeItem('lifeos_v8_session'); localStorage.removeItem('lifeos_v8_viewing'); window.showLoginGate(); }
-    
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(SR){ const rec = new SR(); rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false; rec.onstart = () =&gt; { document.querySelectorAll('.btn-voice').forEach(b =&gt; b.classList.add('text-rose-500','animate-pulse')); window.vibrate(30); window.unlockAudio(); }; rec.onresult = e =&gt; { const val = e.results[0][0].transcript; if(window.innerWidth &gt;= 1024){ setVal('input-pc',val); el('form-pc')?.dispatchEvent(new Event('submit')); } else { setVal('input-mobile',val); el('form-mobile')?.dispatchEvent(new Event('submit')); } }; rec.onend = () =&gt; { document.querySelectorAll('.btn-voice').forEach(b =&gt; b.classList.remove('text-rose-500','animate-pulse')); }; rec.onerror = () =&gt; { document.querySelectorAll('.btn-voice').forEach(b =&gt; b.classList.remove('text-rose-500','animate-pulse')); window.showToast('Không nghe rõ!','ph-warning-circle'); if(window.soundEnabled)window.playSpeechTTS('Tôi chưa nghe rõ.'); }; document.querySelectorAll('.btn-voice').forEach(b =&gt; { b.addEventListener('click', () =&gt; { window.initTTS(); try{rec.start();}catch(e){window.showToast('Đang nghe...','ph-microphone');} }); }); } else { document.querySelectorAll('.btn-voice').forEach(b =&gt; b.style.display = 'none'); }
-    setInterval(()=&gt;{ if(window.ttsActive &amp;&amp; window.synth) { window.synth.getVoices(); } }, 10000);
-});
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</textarea>
-                </div>
-                
-                <div id="tab-test" class="workspace-content hidden">
-                    <textarea id="code-test" class="code-editor text-blue-300" spellcheck="false" placeholder="Nội dung Python Test..."># -*- coding: utf-8 -*-
-"""
-SENTINEL MASTER SUITE V17.1 - ENTERPRISE ALL-IN-ONE
-Cập nhật V17.1 (The Omni-Detector):
-- Kế thừa sự hoàn hảo của V17.0.
-- Bổ sung Phase 6: PWA Smart Installer. Tự động kích hoạt và kiểm tra logic nhận diện Hệ điều hành chéo (Cross-OS Detection) trên cả PC và Mobile.
-"""
-
-import os
-import time
-import urllib.parse
-from datetime import datetime
-import colorama
-from colorama import Fore, Style
-from playwright.sync_api import sync_playwright, Page, TimeoutError
-
-colorama.init()
-
-TARGET_URL = "https://mimihoalua.github.io/tool/qlycuocsong.html"
-XIAOMI_USER_AGENT = "Mozilla/5.0 (Linux; Android 13; 2306EPN60G Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/116.0.0.0 Mobile Safari/537.36"
-PC_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
-
-SNAP_DIR = r"C:\Google DRV\LifeOS\Full he sinh thai lifeos\snapLoi"
-os.makedirs(SNAP_DIR, exist_ok=True)
-LOG_FILE = os.path.join(SNAP_DIR, "Sentinel_Blackbox_Log.txt")
-
-if os.path.exists(LOG_FILE):
-    os.remove(LOG_FILE)
-
-def write_log(message: str, to_console: bool = True, color: str = ""):
-    timestamp = datetime.now().strftime("[%H:%M:%S.%f]")[:-3] + "]"
-    raw_msg = f"{timestamp} {message}"
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(raw_msg + "\n")
-    if to_console:
-        print(f"{color}{raw_msg}{Style.RESET_ALL}" if color else raw_msg)
-
-def format_time(seconds: float) -> str:
-    if seconds is None or seconds != seconds or seconds < 0: return "00:00"
-    m = int(seconds // 60)
-    s = int(seconds % 60)
-    return f"{m:02d}:{s:02d}"
-
-def handle_audio_sensor(event_data: dict) -> None:
-    evt = event_data.get("event", "unknown")
-    audio_id = event_data.get("id", "audio")
-    curr_time = format_time(event_data.get("time", 0))
-    ready = event_data.get("ready", 0)
-    
-    raw_src = event_data.get("src", "none")
-    if "translate_tts" in raw_src or "translate.googleapis" in raw_src: src = "[Google TTS Voice]"
-    elif "responsivevoice" in raw_src: src = "[ResponsiveVoice Fallback]"
-    elif "digital_watch_alarm" in raw_src: src = "[Digital Alarm]"
-    elif "silence" in raw_src: src = "[Mỏ neo 30p]"
-    else: src = urllib.parse.unquote(raw_src)[-35:] 
-    
-    prefix = f"   [⚡ SENSOR - {audio_id}]"
-    details = f"(Time: {curr_time} | R-State: {ready} | Src: {src})"
-    
-    if evt in ["playing", "canplay"]:
-        write_log(f"{prefix} {evt.upper()} {details}", color=Fore.GREEN)
-    elif evt == "error":
-        if "tts" in audio_id:
-            write_log(f"{prefix} Bị chặn tải link MP3, Fallback kích hoạt!", color=Fore.YELLOW)
-        else:
-            write_log(f"{prefix} ERROR/CRASH {details}", color=Fore.RED)
-    elif evt == "ended":
-        write_log(f"{prefix} ENDED {details}", color=Fore.MAGENTA)
-    elif evt not in ["timeupdate", "pause", "waiting", "loadstart", "loadeddata", "loadedmetadata"]:
-        write_log(f"{prefix} {evt.upper()} {details}", color=Fore.CYAN)
-
-def inject_super_debug(page: Page) -> None:
-    page.evaluate("""() => {
-        const attachAudioMonitors = () => {
-            const events = ['play', 'playing', 'pause', 'waiting', 'error', 'ended', 'loadstart', 'canplay'];
-            document.querySelectorAll('audio').forEach(audio => {
-                if(audio.dataset.monitored) return;
-                audio.dataset.monitored = 'true';
-                events.forEach(evt => {
-                    audio.addEventListener(evt, e => {
-                        if (window.pyAudioSensor) {
-                            window.pyAudioSensor({
-                                event: e.type, id: e.target.id || 'Unnamed-Audio', src: e.target.src || 'none',
-                                time: (!isNaN(e.target.currentTime) ? e.target.currentTime : 0), ready: e.target.readyState
-                            });
-                        }
-                    });
-                });
-            });
-        };
-        attachAudioMonitors();
-        new MutationObserver(attachAudioMonitors).observe(document.body, { childList: true, subtree: true });
-    }""")
-
-class DeviceTelemetry:
-    def __init__(self, device_name: str, color_code):
-        self.device_name = device_name
-        self.color_code = color_code
-
-    def attach_sensors(self, page: Page) ->
+        if (this.state.isPC) { content.innerHTML = `&lt;div class="text-center"&gt;&lt;p class="mb-4 font-bold text-lg text-primary
