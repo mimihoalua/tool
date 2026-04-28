@@ -145,19 +145,11 @@
                 <button onclick="switchWorkspaceTab('tab-test')" id="w-btn-test" class="workspace-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition">Test_LifeOS.py</button>
             </div>
 
-            <!-- KHU VỰC EDITOR ACTIONS -->
+            <!-- KHU VỰC EDITOR ACTIONS BIẾN HÌNH -->
             <div class="flex items-center justify-between mb-2 px-1">
                 <span id="active-editor-label" class="text-[10px] text-slate-400 font-mono font-bold">Editing: Khung Tổng (Raw)</span>
-                <div class="flex gap-2">
-                    <button onclick="handleLiveSaveClick(this)" class="flex items-center gap-1 text-[10px] bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold">
-                        <i class="ph-bold ph-cloud-arrow-up"></i> Lưu Đè Lên Cloud
-                    </button>
-                    <button onclick="resetGitHubToken()" class="flex items-center gap-1 text-[10px] bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold" title="Nhập lại Token mới">
-                        <i class="ph-bold ph-key"></i> Đổi Khóa
-                    </button>
-                    <button onclick="copyCurrentTabCode()" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
-                        <i class="ph-bold ph-copy"></i> Copy
-                    </button>
+                <div class="flex gap-2" id="action-buttons-container">
+                    <!-- Nút bấm sẽ được JS tự động tiêm vào đây tùy theo Tab -->
                 </div>
             </div>
             
@@ -321,9 +313,14 @@
 
     <script>
         // =====================================================================
-        // UI INTERACTION: TABS & COPY
+        // UI INTERACTION: TABS & DYNAMIC BUTTONS
         // =====================================================================
         let activeEditorId = 'liveEditor';
+
+        // Tự động kích hoạt khi web load xong
+        document.addEventListener('DOMContentLoaded', () => {
+            switchWorkspaceTab('tab-tong');
+        });
 
         function switchWorkspaceTab(tabId) {
             document.querySelectorAll('.workspace-content').forEach(el => el.classList.replace('block', 'hidden'));
@@ -340,10 +337,39 @@
             btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
 
             const label = document.getElementById('active-editor-label');
-            if(tabId === 'tab-tong') { activeEditorId = 'liveEditor'; label.textContent = 'Editing: Khung Tổng (Raw)'; }
-            else if(tabId === 'tab-manifest') { activeEditorId = 'code-manifest'; label.textContent = 'Editing: manifest.json'; }
-            else if(tabId === 'tab-core') { activeEditorId = 'code-core'; label.textContent = 'Editing: qlycuocsong.html'; }
-            else if(tabId === 'tab-test') { activeEditorId = 'code-test'; label.textContent = 'Editing: Test_LifeOS_Final.py'; }
+            const actionContainer = document.getElementById('action-buttons-container');
+
+            // [QA UPGRADE]: Biến hình thanh công cụ theo Workflow (Tab Tổng vs Tab Con)
+            if(tabId === 'tab-tong') { 
+                activeEditorId = 'liveEditor'; 
+                label.textContent = 'Editing: Khung Tổng (Raw)'; 
+                actionContainer.innerHTML = `
+                    <button onclick="handleLiveSaveClick(this)" class="flex items-center gap-1 text-[10px] bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold shadow-lg shadow-emerald-900/20">
+                        <i class="ph-bold ph-cloud-arrow-up"></i> Lưu Đè Lên Cloud
+                    </button>
+                    <button onclick="resetGitHubToken()" class="flex items-center gap-1 text-[10px] bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold" title="Nhập lại Token mới">
+                        <i class="ph-bold ph-key"></i> Đổi Khóa
+                    </button>
+                    <button onclick="copyCurrentTabCode()" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
+                        <i class="ph-bold ph-copy"></i> Copy
+                    </button>
+                `;
+            } else {
+                let subId = tabId === 'tab-manifest' ? 'code-manifest' : tabId === 'tab-core' ? 'code-core' : 'code-test';
+                let tabName = tabId === 'tab-manifest' ? 'Manifest' : tabId === 'tab-core' ? 'HTML Core' : 'Python Test';
+                activeEditorId = subId; 
+                label.textContent = `Editing: ${tabName}`;
+                
+                // Thay nút Lưu Cloud bằng nút Đẩy vào Khung Tổng
+                actionContainer.innerHTML = `
+                    <button onclick="syncToMain('${subId}', '${tabName}')" class="flex items-center gap-1 text-[10px] bg-indigo-600/20 text-indigo-400 px-3 py-1.5 rounded hover:bg-indigo-600 hover:text-white border border-indigo-600/30 transition active:scale-95 font-bold shadow-lg shadow-indigo-900/20" style="animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
+                        <i class="ph-bold ph-arrows-merge"></i> Đồng Bộ Khung Tổng
+                    </button>
+                    <button onclick="copyCurrentTabCode()" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
+                        <i class="ph-bold ph-copy"></i> Copy
+                    </button>
+                `;
+            }
         }
 
         function copyCurrentTabCode() {
@@ -397,56 +423,60 @@
         }
 
         // =====================================================================
-        // META-EDITOR ENGINE: EXTRACT & INJECT
+        // META-EDITOR ENGINE: EXTRACT & INJECT THÔNG MINH
         // =====================================================================
         
-        // Mã hóa ký tự đặc biệt khi nhét vào textarea của HTML
         function encodeHTMLEntities(text) {
             return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
         
-        // Giải mã khi móc từ HTML ra Tab Con để dễ sửa
         function decodeHTMLEntities(text) {
             const txt = document.createElement("textarea");
             txt.innerHTML = text;
             return txt.value;
         }
 
-        // Máy Bơm 1: Rút máu từ Tổng ra 3 Tab Con
+        // [VÁ LỖI TỬ HUYỆT]: Regex cũ chỉ tìm thẻ <textarea>, giờ nó sẽ tìm cả <textarea> lẫn <code>
+        function extractBlock(raw, id) {
+            const regex = new RegExp(`(<(?:textarea|code)[^>]*id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/(?:textarea|code)>)`, 'i');
+            const match = raw.match(regex);
+            return match ? decodeHTMLEntities(match[2].trim()) : "";
+        }
+
         function extractFromTotal() {
             const raw = document.getElementById('liveEditor').value;
             
-            const regexManifest = /(<textarea[^>]*id="code-manifest"[^>]*>)([\s\S]*?)(<\/textarea>)/i;
-            const matchManifest = raw.match(regexManifest);
-            if (matchManifest) document.getElementById('code-manifest').value = decodeHTMLEntities(matchManifest[2]);
+            const m = extractBlock(raw, 'code-manifest');
+            if (m) document.getElementById('code-manifest').value = m;
             
-            const regexCore = /(<textarea[^>]*id="code-core"[^>]*>)([\s\S]*?)(<\/textarea>)/i;
-            const matchCore = raw.match(regexCore);
-            if (matchCore) document.getElementById('code-core').value = decodeHTMLEntities(matchCore[2]);
+            const c = extractBlock(raw, 'code-core');
+            if (c) document.getElementById('code-core').value = c;
             
-            const regexTest = /(<textarea[^>]*id="code-test"[^>]*>)([\s\S]*?)(<\/textarea>)/i;
-            const matchTest = raw.match(regexTest);
-            if (matchTest) document.getElementById('code-test').value = decodeHTMLEntities(matchTest[2]);
+            const t = extractBlock(raw, 'code-test');
+            if (t) document.getElementById('code-test').value = t;
         }
 
-        // Máy Bơm 2: Bơm máu từ 3 Tab Con ngược lại vào Tổng
-        function injectIntoTotal() {
-            let raw = document.getElementById('liveEditor').value;
-            
-            // Nếu khung tổng không phải là file readqlycs.html thì giữ nguyên
-            if(!raw.includes('id="code-manifest"')) return raw;
+        function injectBlock(raw, id, newValue) {
+            const regex = new RegExp(`(<(?:textarea|code)[^>]*id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/(?:textarea|code)>)`, 'i');
+            if(!raw.match(regex)) return raw;
+            // Bơm ngược vào trong và tự động mã hóa Entities để tránh vỡ HTML tổng
+            return raw.replace(regex, (m, p1, p2, p3) => p1 + "\n" + encodeHTMLEntities(newValue).trim() + "\n" + p3);
+        }
 
-            const valManifest = document.getElementById('code-manifest').value;
-            const valCore = document.getElementById('code-core').value;
-            const valTest = document.getElementById('code-test').value;
+        function syncToMain(subId, label) {
+            window.vibrate(15);
+            let raw = document.getElementById('liveEditor').value;
+            const newVal = document.getElementById(subId).value;
             
-            // Dùng function callback để tránh lỗi ký tự $ (dollar) trong code người dùng
-            raw = raw.replace(/(<textarea[^>]*id="code-manifest"[^>]*>)([\s\S]*?)(<\/textarea>)/i, (m, p1, p2, p3) => p1 + encodeHTMLEntities(valManifest) + p3);
-            raw = raw.replace(/(<textarea[^>]*id="code-core"[^>]*>)([\s\S]*?)(<\/textarea>)/i, (m, p1, p2, p3) => p1 + encodeHTMLEntities(valCore) + p3);
-            raw = raw.replace(/(<textarea[^>]*id="code-test"[^>]*>)([\s\S]*?)(<\/textarea>)/i, (m, p1, p2, p3) => p1 + encodeHTMLEntities(valTest) + p3);
-            
+            raw = injectBlock(raw, subId, newVal);
             document.getElementById('liveEditor').value = raw;
-            return raw;
+            
+            showToast(`Đã đồng bộ ${label} vào Khung Tổng! 🚀`, 'success');
+            
+            // Hiệu ứng UX "Ồ": Nút Khung Tổng lóe sáng báo hiệu nhận code mới
+            const btnTong = document.getElementById('w-btn-tong');
+            btnTong.classList.add('ring-2', 'ring-emerald-400', 'bg-emerald-600');
+            setTimeout(() => btnTong.classList.remove('ring-2', 'ring-emerald-400', 'bg-emerald-600'), 1500);
         }
 
         // =====================================================================
@@ -551,13 +581,13 @@
                 editor.value = decodedContent;
                 overlay.classList.add('hidden');
                 
-                // Kích hoạt Meta-Editor nếu là readqlycs.html
+                // Nếu tải đúng file tổng, tự động rã băng (extract) và nhảy tab
                 if(filePath.includes('readqlycs.html')) {
                     extractFromTotal();
-                    switchWorkspaceTab('tab-core'); // Tự động nhảy sang tab HTML Core cho tiện
-                    showToast("Đã tải và trích xuất 3 Tab con!", "success");
+                    switchWorkspaceTab('tab-core');
+                    showToast("Đã tải và bóc tách thành công 3 Tab con!", "success");
                 } else {
-                    switchWorkspaceTab('tab-tong'); // Chỉ hiện khung tổng
+                    switchWorkspaceTab('tab-tong');
                     showToast("Đã tải dữ liệu thành công!", "success");
                 }
 
@@ -573,6 +603,7 @@
             }
         }
 
+        // Bỏ logic Sync tự động ở đây, người dùng phải Đồng bộ tay trước khi Lưu Cloud
         async function handleLiveSaveClick(btnEl) {
             const filePath = document.getElementById('githubFileSelect').value;
             if (!filePath) { showToast("Vui lòng chọn một tệp trước khi lưu!", "error"); return; }
@@ -584,11 +615,8 @@
             btnEl.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Đang Lưu...';
             btnEl.disabled = true;
 
-            // META-EDITOR: Đồng bộ từ 3 Tab Con vào Khung Tổng trước khi lưu
-            let newContent = document.getElementById('liveEditor').value;
-            if(filePath.includes('readqlycs.html')) {
-                newContent = injectIntoTotal();
-            }
+            // Bắn trực tiếp nội dung Khung Tổng hiện tại lên Cloud
+            const newContent = document.getElementById('liveEditor').value;
 
             const cleanUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath}`;
             const getUrl = `${cleanUrl}?nocache=${Date.now()}`;
@@ -621,6 +649,7 @@
 
                 if (putRes.ok) {
                     showToast(`Đã ghi đè lên Cloud: ${filePath}`, "success");
+                    // Load lại mốc mã băm
                     setTimeout(() => { document.getElementById('githubFileSelect').dispatchEvent(new Event('change')); }, 1000);
                 } else {
                     const errObj = await putRes.json(); throw new Error("Lỗi ghi đè API: " + errObj.message);
