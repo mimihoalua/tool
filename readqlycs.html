@@ -957,9 +957,26 @@ window.unlockAudio=()=&gt;{
                         if(b &amp;&amp; b.muted) b.muted = false; 
                         if(b &amp;&amp; b.paused) b.play().catch(()=&gt;{}); 
                         const ttsAudio = el('tts-audio');
-                        if (ttsAudio &amp;&amp; ttsAudio.readyState &gt;= 2) {
-                            ttsAudio.currentTime = 0; ttsAudio.play().catch(()=&gt;{ window.playSpeechTTS(window.alarmTextToSpeak); });
-                        } else {
+            if(ttsAudio &amp;&amp; ttsAudio.readyState &gt;= 2) { 
+                ttsAudio.muted = false;
+                ttsAudio.currentTime = 0; 
+                ttsAudio.play().catch(()=&gt;{ window.playSpeechTTS(window.alarmTextToSpeak); });
+                ttsAudio.onended = () =&gt; {
+                    if (window.isAlarmRinging) {
+                        // Đang báo động -&gt; Nhắc lại liên tục (nghỉ 1.5s giữa các lần cho đỡ gắt)
+                        setTimeout(() =&gt; {
+                            if (window.isAlarmRinging &amp;&amp; ttsAudio) {
+                                ttsAudio.currentTime = 0;
+                                ttsAudio.play().catch(()=&gt;{});
+                                window.lastSpeechTime = Date.now(); // Đồng bộ để không cắn nhau với Watchdog 8s
+                            }
+                        }, 1500);
+                    } else {
+                        // Chỉ trả lại 100% nhạc nền khi đã TẮT báo động
+                        if(window.MusicApp &amp;&amp; window.MusicApp.playing &amp;&amp; musicPlayer) musicPlayer.volume = window.previousMusicVolume;
+                    }
+                };
+            } else {
                             window.playSpeechTTS(window.alarmTextToSpeak); 
                         }
                         window.lastSpeechTime = nowMs; 
