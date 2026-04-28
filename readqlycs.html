@@ -435,7 +435,7 @@
 &lt;meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"&gt;
 &lt;meta name="referrer" content="no-referrer"&gt;
 &lt;meta name="application-name" content="LifeOS"&gt;
-&lt;title&gt;LifeOS V48 - The Final Sentinel&lt;/title&gt;
+&lt;title&gt;LifeOS V49 - Cảnh Giới Tối Cao&lt;/title&gt;
 
 &lt;link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json"&gt;
 
@@ -544,7 +544,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     &lt;/div&gt;
 
     &lt;div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50"&gt;
-        &lt;!-- V47/48 FIX: Gỡ bỏ hidden md:flex để hiện nút trên Mobile --&gt;
         &lt;div class="flex items-center gap-1.5 sm:gap-2"&gt;
             &lt;a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"&gt;&lt;i class="ph-bold ph-house text-sm sm:text-base"&gt;&lt;/i&gt; &lt;span class="hidden md:inline"&gt;Trang chủ&lt;/span&gt;&lt;/a&gt;
             &lt;a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"&gt;&lt;i class="ph-bold ph-book-open text-sm sm:text-base"&gt;&lt;/i&gt; &lt;span class="hidden md:inline"&gt;Hướng dẫn&lt;/span&gt;&lt;/a&gt;
@@ -817,7 +816,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 &lt;/button&gt;
 
 &lt;div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity"&gt;
-    &lt;!-- V48 FIX: Khống chế tối đa chiều cao để content cuộn được --&gt;
     &lt;div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]"&gt;
         &lt;div class="bg-primary p-5 text-white text-center flex-shrink-0"&gt;
             &lt;div class="font-black text-xl mb-1 uppercase tracking-wide"&gt;Cài đặt LifeOS&lt;/div&gt;
@@ -1124,7 +1122,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) =&gt; {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=&gt;{}); }
         if(ttsAudio) {
             ttsAudio.muted = false; ttsAudio.currentTime = 0;
-            // V47 FIX: Nối vòng lặp TTS báo thức vĩnh cửu
             ttsAudio.onended = () =&gt; {
                 if (window.isAlarmRinging) {
                     setTimeout(() =&gt; {
@@ -1157,7 +1154,13 @@ window.stopGlobalAlarm = (actionType) =&gt; {
             const t = (window.todos||[]).find(x =&gt; String(x.id) === String(id));
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
-                else if (actionType === 'snooze') { t.alarmTime = Date.now() + 5 * 60000; t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; }
+                else if (actionType === 'snooze') { 
+                    // V49 FIX: Cập nhật DOM (timeStr) để số hiển thị thay đổi ngay lập tức
+                    const newAlarm = new Date(Date.now() + 5 * 60000);
+                    t.alarmTime = newAlarm.getTime(); 
+                    t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
+                    t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
+                }
                 else if (actionType === 'dismiss' &amp;&amp; t.isDaily) { t.alarmTime += 86400000; t.alerted = false; needsSync = true; }
             }
         });
@@ -1367,7 +1370,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 5. FIREBASE SYNC (V47 THE FINAL TRUTH)
+// 5. FIREBASE SYNC 
 // ==============================================================================
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
@@ -1390,7 +1393,6 @@ window.FirebaseSync={
             
             if(c.data &amp;&amp; Array.isArray(c.data)){ 
                 const clean = c.data.map(t=&gt;({...t,id:String(t.id)}));
-                // V47 FIX: Ưu tiên dữ liệu mới nhưng ÉP VẼ LẠI trong mọi trường hợp (Self-Healing)
                 if (cloudTime &gt; localTime || localTime === 0) {
                     window.todos = clean;
                     localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(clean));
@@ -1417,12 +1419,13 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM
+// 6. MUSIC SYSTEM (V49 THE FLAWLESS ENGINE)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
-    visibleCount: 50, timerInterval: null, timerEnd: null,
+    visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
+    
     initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=&gt;el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
@@ -1461,35 +1464,88 @@ window.MusicApp = {
         });
         this.updateMiniPlayer();
     },
+    
+    // V49 FIX: Restore Mỏ neo, Tối ưu RAM &amp; MediaSession
     updateMiniPlayer() {
         const s = this.playlist[this.currentIndex]; if(!s)return;
         el('music-title').textContent=s.title; el('music-status').textContent=this.playing?"Đang phát...":"Tạm dừng";
         el('btn-play-pause').innerHTML=this.playing?'&lt;i class="ph-fill ph-pause text-3xl"&gt;&lt;/i&gt;':'&lt;i class="ph-fill ph-play text-3xl"&gt;&lt;/i&gt;';
         el('btn-shuffle').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.shuffle?'music-btn-active':'text-slate-400'}`;
         el('btn-repeat').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.repeat!=='off'?'music-btn-active':'text-slate-400'}`;
+        if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
     },
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
-        this.currentIndex=idx; this.playing=true; a.src=this.playlist[idx].stream_url; a.play(); this.renderList();
-        // V48 FIX: Trả lại hiệu ứng trồi lên cho Player khi ấn Play
+        
+        // V49 FIX: Kích hoạt mỏ neo tĩnh lặng để chống ngủ gật
+        const anchor = el('mstq-silence'); if (anchor &amp;&amp; anchor.paused) anchor.play().catch(()=&gt;{});
+        
+        this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
+        a.src=this.playlist[idx].stream_url; 
+        
+        // V49 FIX: Tránh xung đột DOM play ngầm
+        a.play().catch(()=&gt;{ a.load(); a.play().catch(()=&gt;{}); }); 
+        
+        this.renderList();
         el('mini-player').style.display='block'; setTimeout(()=&gt;{el('mini-player').style.transform='translateY(0)'},50);
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     },
     togglePlay() { 
         const a=el('mstq-player'); if(!a)return; 
-        if(this.playing){ a.pause(); this.playing=false; } else { a.play(); this.playing=true; } 
+        
+        // V49 FIX: Kích hoạt mỏ neo khi thao tác
+        const anchor = el('mstq-silence'); if (anchor &amp;&amp; anchor.paused) anchor.play().catch(()=&gt;{});
+        
+        if(this.playing){ 
+            a.pause(); this.playing=false; 
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; 
+        } else { 
+            a.play().catch(()=&gt;{ a.load(); a.play().catch(()=&gt;{}); }); this.playing=true; 
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; 
+        } 
         this.updateMiniPlayer(); 
-        // V48 FIX: Đảm bảo Toggle Play cũng gọi Player lên nếu nó đang ẩn
         el('mini-player').style.display='block'; setTimeout(()=&gt;{el('mini-player').style.transform='translateY(0)'},50);
     },
-    playNext() { this.play((this.currentIndex+1)%this.playlist.length); },
-    playPrev() { this.play((this.currentIndex-1+this.playlist.length)%this.playlist.length); },
-    toggleShuffle() { this.shuffle=!this.shuffle; this.updateMiniPlayer(); },
-    toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); this.updateMiniPlayer(); },
+    getNextIndex() { if(this.shuffle &amp;&amp; this.playlist.length &gt; 1) { let n = Math.floor(Math.random() * this.playlist.length); return n === this.currentIndex ? (n + 1) % this.playlist.length : n; } return (this.currentIndex + 1) % this.playlist.length; },
+    getPrevIndex() { return (this.currentIndex - 1 + this.playlist.length) % this.playlist.length; },
+    playNext() { this.play(this.getNextIndex()); },
+    playPrev() { this.play(this.getPrevIndex()); },
+    toggleShuffle() { this.shuffle=!this.shuffle; localStorage.setItem('xs_shuffle', this.shuffle); this.updateMiniPlayer(); },
+    toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); if(a.duration) a.currentTime=((e.clientX-rect.left)/rect.width)*a.duration; },
+    
+    // V49 FIX: Lõi Zero-CPU &amp; Kéo mạng Tàng hình (Network Prefetch 30s)
     setupListeners() {
         const a=el('mstq-player');
-        a.addEventListener('timeupdate',()=&gt;{ if(a.duration) el('music-progress').style.width=(a.currentTime/a.duration)*100+'%'; });
-        a.addEventListener('ended',()=&gt;{ if(this.repeat==='one'){ a.currentTime=0; a.play(); } else this.playNext(); });
+        a.addEventListener('timeupdate',()=&gt;{ 
+            if(!a.duration) return;
+            
+            // Tối ưu Zero-CPU: Chỉ vẽ lại thanh progress khi màn hình đang bật
+            if (document.visibilityState === 'visible') {
+                el('music-progress').style.width=(a.currentTime/a.duration)*100+'%'; 
+            }
+            
+            // Kéo Mạng Tàng Hình: Tải trước bài tiếp theo vào Force-cache khi còn 30s
+            if(a.duration &gt; 40 &amp;&amp; a.currentTime &gt;= a.duration - 30 &amp;&amp; !this.prefetchDone) {
+                this.prefetchDone = true;
+                const nextS = this.playlist[this.getNextIndex()];
+                if(nextS) fetch(nextS.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=&gt;{});
+            }
+        });
+        
+        a.addEventListener('ended',()=&gt;{ 
+            this.prefetchDone = false;
+            if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=&gt;{}); } 
+            else this.playNext(); 
+        });
+        
+        // V49 FIX: Ép hệ điều hành giữ phím bấm media ngoài màn hình khóa
+        if('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () =&gt; this.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () =&gt; this.togglePlay());
+            navigator.mediaSession.setActionHandler('nexttrack', () =&gt; this.playNext());
+            navigator.mediaSession.setActionHandler('previoustrack', () =&gt; this.playPrev());
+        }
     }
 };
 
@@ -1501,10 +1557,8 @@ document.addEventListener('DOMContentLoaded', () =&gt; {
     else window.pwaEngine.init();
     setTimeout(()=&gt;{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
     
-    // V48 FIX: Tự động đánh thức Audio Engine trên giao diện Desktop (PC)
     if(window.innerWidth &gt;= 1024) { setTimeout(() =&gt; { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
 
-    // V47 FIX: Self-Healing Sync khi quay lại app từ nền
     document.addEventListener('visibilitychange', () =&gt; {
         if (document.visibilityState === 'visible' &amp;&amp; window.cloudSyncCompleted) {
             window.renderTasksOnly();
