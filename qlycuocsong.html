@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V48 - The Final Sentinel</title>
+<title>LifeOS V49 - Cảnh Giới Tối Cao</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -118,7 +118,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     </div>
 
     <div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
-        <!-- V47/48 FIX: Gỡ bỏ hidden md:flex để hiện nút trên Mobile -->
         <div class="flex items-center gap-1.5 sm:gap-2">
             <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i> <span class="hidden md:inline">Trang chủ</span></a>
             <a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
@@ -391,7 +390,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </button>
 
 <div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <!-- V48 FIX: Khống chế tối đa chiều cao để content cuộn được -->
     <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
         <div class="bg-primary p-5 text-white text-center flex-shrink-0">
             <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
@@ -698,7 +696,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         if(ttsAudio) {
             ttsAudio.muted = false; ttsAudio.currentTime = 0;
-            // V47 FIX: Nối vòng lặp TTS báo thức vĩnh cửu
             ttsAudio.onended = () => {
                 if (window.isAlarmRinging) {
                     setTimeout(() => {
@@ -731,7 +728,13 @@ window.stopGlobalAlarm = (actionType) => {
             const t = (window.todos||[]).find(x => String(x.id) === String(id));
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
-                else if (actionType === 'snooze') { t.alarmTime = Date.now() + 5 * 60000; t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; }
+                else if (actionType === 'snooze') { 
+                    // V49 FIX: Cập nhật DOM (timeStr) để số hiển thị thay đổi ngay lập tức
+                    const newAlarm = new Date(Date.now() + 5 * 60000);
+                    t.alarmTime = newAlarm.getTime(); 
+                    t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
+                    t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
+                }
                 else if (actionType === 'dismiss' && t.isDaily) { t.alarmTime += 86400000; t.alerted = false; needsSync = true; }
             }
         });
@@ -941,7 +944,7 @@ window.VaultApp={
 };
 
 // ==============================================================================
-// 5. FIREBASE SYNC (V47 THE FINAL TRUTH)
+// 5. FIREBASE SYNC 
 // ==============================================================================
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
@@ -964,7 +967,6 @@ window.FirebaseSync={
             
             if(c.data && Array.isArray(c.data)){ 
                 const clean = c.data.map(t=>({...t,id:String(t.id)}));
-                // V47 FIX: Ưu tiên dữ liệu mới nhưng ÉP VẼ LẠI trong mọi trường hợp (Self-Healing)
                 if (cloudTime > localTime || localTime === 0) {
                     window.todos = clean;
                     localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(clean));
@@ -991,12 +993,13 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM
+// 6. MUSIC SYSTEM (V49 THE FLAWLESS ENGINE)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
-    visibleCount: 50, timerInterval: null, timerEnd: null,
+    visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
+    
     initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=>el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
@@ -1035,35 +1038,88 @@ window.MusicApp = {
         });
         this.updateMiniPlayer();
     },
+    
+    // V49 FIX: Restore Mỏ neo, Tối ưu RAM & MediaSession
     updateMiniPlayer() {
         const s = this.playlist[this.currentIndex]; if(!s)return;
         el('music-title').textContent=s.title; el('music-status').textContent=this.playing?"Đang phát...":"Tạm dừng";
         el('btn-play-pause').innerHTML=this.playing?'<i class="ph-fill ph-pause text-3xl"></i>':'<i class="ph-fill ph-play text-3xl"></i>';
         el('btn-shuffle').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.shuffle?'music-btn-active':'text-slate-400'}`;
         el('btn-repeat').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.repeat!=='off'?'music-btn-active':'text-slate-400'}`;
+        if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
     },
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
-        this.currentIndex=idx; this.playing=true; a.src=this.playlist[idx].stream_url; a.play(); this.renderList();
-        // V48 FIX: Trả lại hiệu ứng trồi lên cho Player khi ấn Play
+        
+        // V49 FIX: Kích hoạt mỏ neo tĩnh lặng để chống ngủ gật
+        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
+        
+        this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
+        a.src=this.playlist[idx].stream_url; 
+        
+        // V49 FIX: Tránh xung đột DOM play ngầm
+        a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); }); 
+        
+        this.renderList();
         el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     },
     togglePlay() { 
         const a=el('mstq-player'); if(!a)return; 
-        if(this.playing){ a.pause(); this.playing=false; } else { a.play(); this.playing=true; } 
+        
+        // V49 FIX: Kích hoạt mỏ neo khi thao tác
+        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
+        
+        if(this.playing){ 
+            a.pause(); this.playing=false; 
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; 
+        } else { 
+            a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); }); this.playing=true; 
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; 
+        } 
         this.updateMiniPlayer(); 
-        // V48 FIX: Đảm bảo Toggle Play cũng gọi Player lên nếu nó đang ẩn
         el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
     },
-    playNext() { this.play((this.currentIndex+1)%this.playlist.length); },
-    playPrev() { this.play((this.currentIndex-1+this.playlist.length)%this.playlist.length); },
-    toggleShuffle() { this.shuffle=!this.shuffle; this.updateMiniPlayer(); },
-    toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); this.updateMiniPlayer(); },
+    getNextIndex() { if(this.shuffle && this.playlist.length > 1) { let n = Math.floor(Math.random() * this.playlist.length); return n === this.currentIndex ? (n + 1) % this.playlist.length : n; } return (this.currentIndex + 1) % this.playlist.length; },
+    getPrevIndex() { return (this.currentIndex - 1 + this.playlist.length) % this.playlist.length; },
+    playNext() { this.play(this.getNextIndex()); },
+    playPrev() { this.play(this.getPrevIndex()); },
+    toggleShuffle() { this.shuffle=!this.shuffle; localStorage.setItem('xs_shuffle', this.shuffle); this.updateMiniPlayer(); },
+    toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); if(a.duration) a.currentTime=((e.clientX-rect.left)/rect.width)*a.duration; },
+    
+    // V49 FIX: Lõi Zero-CPU & Kéo mạng Tàng hình (Network Prefetch 30s)
     setupListeners() {
         const a=el('mstq-player');
-        a.addEventListener('timeupdate',()=>{ if(a.duration) el('music-progress').style.width=(a.currentTime/a.duration)*100+'%'; });
-        a.addEventListener('ended',()=>{ if(this.repeat==='one'){ a.currentTime=0; a.play(); } else this.playNext(); });
+        a.addEventListener('timeupdate',()=>{ 
+            if(!a.duration) return;
+            
+            // Tối ưu Zero-CPU: Chỉ vẽ lại thanh progress khi màn hình đang bật
+            if (document.visibilityState === 'visible') {
+                el('music-progress').style.width=(a.currentTime/a.duration)*100+'%'; 
+            }
+            
+            // Kéo Mạng Tàng Hình: Tải trước bài tiếp theo vào Force-cache khi còn 30s
+            if(a.duration > 40 && a.currentTime >= a.duration - 30 && !this.prefetchDone) {
+                this.prefetchDone = true;
+                const nextS = this.playlist[this.getNextIndex()];
+                if(nextS) fetch(nextS.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=>{});
+            }
+        });
+        
+        a.addEventListener('ended',()=>{ 
+            this.prefetchDone = false;
+            if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
+            else this.playNext(); 
+        });
+        
+        // V49 FIX: Ép hệ điều hành giữ phím bấm media ngoài màn hình khóa
+        if('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext());
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
+        }
     }
 };
 
@@ -1075,10 +1131,8 @@ document.addEventListener('DOMContentLoaded', () => {
     else window.pwaEngine.init();
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
     
-    // V48 FIX: Tự động đánh thức Audio Engine trên giao diện Desktop (PC)
     if(window.innerWidth >= 1024) { setTimeout(() => { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
 
-    // V47 FIX: Self-Healing Sync khi quay lại app từ nền
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && window.cloudSyncCompleted) {
             window.renderTasksOnly();
