@@ -47,6 +47,8 @@
             100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); background-color: #4f46e5; }
         }
         .glow-sync { animation: tabGlow 1s ease-out; }
+
+        .table-borders th, .table-borders td { border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
     </style>
 </head>
 <body class="relative min-h-screen pb-12 selection:bg-indigo-500/30 selection:text-indigo-200">
@@ -79,48 +81,119 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Hồ sơ Kiến trúc Đóng gói
             </div>
             <h2 class="text-3xl md:text-5xl font-black mb-4 tracking-tight leading-tight">Master Blueprint V47</h2>
-            <p class="text-slate-400 font-medium leading-relaxed">
-                Đúc kết từ xương máu của QA Automation. Nguyên tắc tối thượng: <strong>"If it ain't broke, don't fix it"</strong> và <strong>"Slow but sure"</strong>. Lỗi ở đâu vá chính xác ở đó, không bao giờ đập đi xây lại làm vỡ luồng DOM.
+            <p class="text-slate-400 font-medium leading-relaxed text-sm md:text-base">
+                Bảng tổng hợp mọi di sản dự án, đúc kết từ xương máu của QA Automation. Nguyên tắc tối thượng: <strong>"If it ain't broke, don't fix it"</strong> và <strong>"Slow but sure"</strong>. Lỗi ở đâu vá chính xác ở đó, không bao giờ đập đi xây lại làm vỡ luồng DOM.
             </p>
         </div>
 
-        <!-- DOCUMENTATION SECTION -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- NLP & Vault -->
-            <section class="glass-card p-5 border-l-4 border-sky-500">
-                <h3 class="text-base font-black text-sky-400 mb-3 flex items-center gap-2"><i data-lucide="brain-circuit" class="w-4 h-4"></i> 1. NLP & Smart Vault</h3>
-                <ul class="space-y-2 text-xs text-slate-300 font-medium">
-                    <li><b class="text-slate-100">Hẹn giờ:</b> Dùng <code>lúc [giờ]h[phút]</code>.</li>
-                    <li><b class="text-slate-100">Lặp lại:</b> Thêm <code>mỗi ngày / hằng ngày</code>.</li>
-                    <li><b class="text-slate-100">Khẩn cấp:</b> Thêm <code>!gấp</code> để lên top.</li>
-                    <li><b class="text-slate-100">Vault 2FA:</b> Nhập <code>Tài khoản:</code>, <code>Mật khẩu:</code>, <code>2FA:</code> ở đầu mỗi dòng để tự động bóc tách.</li>
-                </ul>
-            </section>
+        <!-- ========================================== -->
+        <!-- THE MASTER DOCUMENTATION (TỪ FILE A.TXT)   -->
+        <!-- ========================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- Bảng Phong Thần -->
-            <section class="glass-card p-5 border-l-4 border-rose-500">
-                <h3 class="text-base font-black text-rose-400 mb-3 flex items-center gap-2"><i data-lucide="skull" class="w-4 h-4"></i> 2. Bảng Phong Thần</h3>
-                <ul class="space-y-2 text-xs text-slate-300 font-medium">
-                    <li><b class="text-rose-300">Form Reload:</b> Bấm Enter bị mất dữ liệu do quên lệnh <code>e.preventDefault()</code>.</li>
-                    <li><b class="text-rose-300">Bom Cache PWA:</b> Dùng <code>localStorage.clear()</code> quét sạch cả Task. Phải dùng <code>caches.delete()</code>.</li>
-                    <li><b class="text-rose-300">Định Vị Ảo Playwright:</b> Lỗi khi check DOM Firebase chưa về kịp. Phải dùng <code>wait_for_selector()</code>.</li>
-                </ul>
+            <!-- 7 QUY TẮC VÀNG -->
+            <section class="glass-card p-6 lg:col-span-2 border-l-4 border-emerald-500 bg-gradient-to-r from-emerald-500/5 to-transparent">
+                <h3 class="text-xl font-black text-emerald-400 mb-4 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-6 h-6"></i> 7 Quy Tắc Vàng (Tuyệt đối không vi phạm)
+                </h3>
+                <p class="text-sm text-slate-300 mb-4 italic">Bất kỳ ai chạm vào mã nguồn đều phải thuộc lòng 7 nguyên tắc sống còn sau đây. Đây là kết quả của hàng chục giờ debug các lỗi chết ngầm nguy hiểm nhất.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">1. Pháo Đài Offline (Chống ORB/404)</strong>
+                        CDN dễ bị chặn bởi Tường lửa. Đường dẫn tương đối <code>./</code> gây lỗi tải nhầm HTML 404 thành JS. <b>Bắt buộc dùng đường dẫn tuyệt đối <code>/tool/...js</code></b> và đặt 4 file Firebase SDK cùng cấp.
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">2. Thanh trừng "Undefined" (Chống Crash)</strong>
+                        Firestore sẽ từ chối lưu và ném lỗi nếu có giá trị <code>undefined</code>. Bắt buộc chạy vòng lặp <b>delete cleanT[key]</b> để tẩy rửa toàn bộ object trước khi <code>set()</code>.
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">3. Cấm Push Lúc Khởi Động (Anti-Race)</strong>
+                        Tuyệt đối KHÔNG ĐƯỢC gọi <code>pushAll()</code> trong hàm <code>init()</code>. Thiết bị vừa mở sẽ lấy dữ liệu cũ đè bẹp dữ liệu mới trên Cloud, gây mất dữ liệu vĩnh viễn.
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">4. Đồng Hồ Vector & toMillis()</strong>
+                        Giải quyết tranh chấp 100% bằng thời gian. Firebase trả về Object Timestamp, <b>bắt buộc dùng <code>c.updatedAt.toMillis()</code></b> để ép về Integer trước khi so sánh.
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">5. Kén Âm Thanh 3 Ống Tủy</strong>
+                        Duy trì 3 thẻ Audio: <code>mstq-silence</code> (giữ mạng/CPU), <code>mstq-alarm</code> (chuông vật lý), và <code>tts-audio</code> (ép luồng Google). Kết hợp Web Worker để đếm giờ ngầm.
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">6. Ép kiểu ID (String Casting)</strong>
+                        Luôn bọc <code>String(t.id)</code> khi tìm kiếm hoặc map mảng để tránh lỗi Javascript không so sánh được Number (LocalStorage) và String (Firebase).
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 md:col-span-2">
+                        <strong class="text-emerald-300 block mb-1">7. Tránh Tử Huyệt Visibility Deadlock</strong>
+                        Tuyệt đối không chặn hàm <code>renderTasksOnly()</code> bằng điều kiện <code>document.visibilityState === 'hidden'</code>. Nếu chặn, màn hình PC sẽ mù dữ liệu vĩnh viễn khi tab chạy ngầm.
+                    </div>
+                </div>
             </section>
 
-            <!-- 7 Quy Tắc Vàng -->
-            <section class="glass-card p-5 border-l-4 border-emerald-500">
-                <h3 class="text-base font-black text-emerald-400 mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4"></i> 3. Kỷ Luật Thép</h3>
-                <ul class="space-y-2 text-xs text-slate-300 font-medium">
-                    <li><b class="text-emerald-300">Chống ORB:</b> Tuyệt đối dùng đường dẫn <code>/tool/...js</code>.</li>
-                    <li><b class="text-emerald-300">Thanh trừng:</b> Xóa key <code>undefined</code> trước khi Push.</li>
-                    <li><b class="text-emerald-300">Vector Clock:</b> So sánh <code>updatedAt.toMillis()</code>.</li>
-                    <li><b class="text-emerald-300">Anti-Deadlock:</b> Không dùng <code>hidden</code> chặn Render.</li>
-                </ul>
+            <!-- LÕI KIẾN TRÚC & ĐỒNG BỘ -->
+            <section class="glass-card p-6 border-l-4 border-indigo-500">
+                <h3 class="text-lg font-black text-indigo-400 mb-4 flex items-center gap-2"><i data-lucide="cpu" class="w-5 h-5"></i> Lõi Kỹ Thuật (The Iron Lock)</h3>
+                <div class="space-y-4 text-sm text-slate-300">
+                    <div>
+                        <strong class="text-white">Cơ Sở Dữ Liệu 2 Lớp Hybrid:</strong>
+                        <ul class="list-disc pl-5 mt-1 space-y-1">
+                            <li><b class="text-indigo-300">Offline (Lớp 1):</b> localStorage - Nạp siêu tốc.</li>
+                            <li><b class="text-indigo-300">Cloud (Lớp 2):</b> Firestore Real-time.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                        <strong class="text-white block mb-1">Đồng Bộ Vector Clock (Push & Pull):</strong>
+                        <p class="mb-1"><b>Push:</b> Lấy <code>Date.now()</code> lưu Local, thanh trừng <code>undefined</code>, ném nguyên khối lên Cloud.</p>
+                        <p><b>Pull:</b> Kéo Snapshot. Nếu <code>cloudTime > localTime</code> ➔ Cập nhật DOM. Nếu <code>localTime > cloudTime</code> (Firebase dội lại Snapshot cũ) ➔ Bỏ qua, lập tức gọi lại <code>pushAll()</code> để đè ngược bản Local lên bảo vệ dữ liệu!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB NGHE NHẠC & BÁO THỨC -->
+            <section class="glass-card p-6 border-l-4 border-pink-500">
+                <h3 class="text-lg font-black text-pink-400 mb-4 flex items-center gap-2"><i data-lucide="headphones" class="w-5 h-5"></i> Tab Nghe Nhạc & Báo Thức</h3>
+                <div class="space-y-3 text-sm text-slate-300">
+                    <p><strong class="text-pink-300">Tử huyệt PWA Cache:</strong> Lệnh <code>localStorage.clear()</code> không đủ làm sạch nhạc và có thể xóa nhầm Task. Phải dùng "Chén Thánh": chọc thủng <code>caches.delete()</code> và hủy Service Worker.</p>
+                    <p><strong class="text-pink-300">Event Bubbling & Share:</strong> Share/Download phải bọc <code>event.stopPropagation()</code>. API Share trên Mobile không được truyền thuộc tính <code>text</code>.</p>
+                    <p><strong class="text-pink-300">Ducking & JIT Caching:</strong> Khi báo thức nổ, bóp cổ nhạc nền xuống 20%. Nạp trước link Google TTS vào RAM 30s trước khi nổ. Bypass lỗi 403 bằng <code>meta referrer="no-referrer"</code>.</p>
+                </div>
+            </section>
+
+            <!-- CẢNH BÁO JS CRASH -->
+            <section class="glass-card p-6 border-l-4 border-rose-500">
+                <h3 class="text-lg font-black text-rose-400 mb-4 flex items-center gap-2"><i data-lucide="skull" class="w-5 h-5"></i> Cảnh Báo JS Silent Crash</h3>
+                <div class="space-y-3 text-sm text-slate-300">
+                    <p><strong class="text-rose-300">Lỗi Form Reload:</strong> Quên <code>e.preventDefault()</code> khi ấn Enter sẽ làm load lại trang, bay hơi mọi kết nối Firebase.</p>
+                    <p><strong class="text-rose-300">Đứt Gãy Dây Chuyền (N/A Profile):</strong> Tuyệt đối không bọc <code>try/catch</code> tổng vào các hàm khởi tạo Global. Nếu 1 hàm chết, biến <code>PROFILES</code> không được nạp gây treo vĩnh viễn hệ thống.</p>
+                    <p><strong class="text-rose-300">Định Vị Ảo Playwright:</strong> Firebase có độ trễ ~250ms. Phải dùng <code>wait_for_selector()</code> thay vì kiểm tra DOM tức thời.</p>
+                </div>
+            </section>
+
+            <!-- STORAGE MAP -->
+            <section class="glass-card p-6 border-l-4 border-cyan-500">
+                <h3 class="text-lg font-black text-cyan-400 mb-4 flex items-center gap-2"><i data-lucide="hard-drive" class="w-5 h-5"></i> Cấu trúc Lưu trữ (Storage Map)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300 table-borders">
+                        <thead>
+                            <tr>
+                                <th class="pb-2 font-bold text-white w-1/2">LocalStorage Key / Cloud Field</th>
+                                <th class="pb-2 font-bold text-white">Mô tả cấu trúc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="py-2 font-mono text-cyan-300">lifeos_v8_data_[tên]</td><td class="py-2">Mảng Nhiệm vụ (todos). Đã bọc bộ lọc tẩy rửa undefined.</td></tr>
+                            <tr><td class="py-2 font-mono text-cyan-300">lifeos_stats_v8_[tên]</td><td class="py-2">Object stats đếm Chuỗi kỷ luật (streak).</td></tr>
+                            <tr><td class="py-2 font-mono text-cyan-300">lifeos_v8_time_[tên]</td><td class="py-2">Timestamp (Integer) đồng bộ. Chống Race Condition.</td></tr>
+                            <tr><td class="py-2 font-mono text-cyan-300">lifeos_v8_vault_[tên]</td><td class="py-2">Mảng Kho lưu trữ (2FA, Password).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </div>
 
-        <!-- KHU VỰC META-EDITOR V47 CHUẨN XÁC -->
-        <section class="glass-card p-1 mt-8 bg-gradient-to-b from-slate-800/50 to-transparent">
+        <!-- ========================================== -->
+        <!-- KHU VỰC META-EDITOR V47 CHUẨN XÁC          -->
+        <!-- ========================================== -->
+        <section class="glass-card p-1 mt-12 bg-gradient-to-b from-slate-800/50 to-transparent shadow-2xl">
             <div class="p-5 md:p-8">
                 <h2 class="text-2xl font-black mb-2 flex items-center gap-3 text-white">
                     <div class="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-500/30"><i data-lucide="terminal-square" class="w-5 h-5 text-indigo-400"></i></div>
@@ -159,7 +232,7 @@
                     <div class="flex flex-wrap gap-2" id="action-buttons-container"></div>
                 </div>
                 
-                <!-- TEXTAREAS CHỨA MÃ NGUỒN -->
+                <!-- TEXTAREAS CHỨA MÃ NGUỒN GỐC -->
                 <div class="bg-[#020617] p-2 rounded-xl border border-slate-700 shadow-2xl relative min-h-[500px]">
                     
                     <!-- LỚP PHỦ HƯỚNG DẪN KHI CHƯA LOAD FILE -->
@@ -177,11 +250,11 @@
                         <textarea id="liveEditor" class="code-editor text-slate-300" spellcheck="false" placeholder="Nội dung mã nguồn tổng..."></textarea>
                     </div>
                     
-                    <!-- MÃ NHÁP ĐƯỢC RÚT GỌN CHỐNG TRÀN BỘ NHỚ -->
+                    <!-- MÃ NHÁP ĐƯỢC SIÊU NÉN CHỐNG TRÀN BỘ NHỚ -->
                     <div id="tab-manifest" class="workspace-content hidden">
                         <textarea id="code-manifest" class="code-editor text-amber-200" spellcheck="false" placeholder="Nội dung manifest...">{
-  "name": "Qlycuocsong LifeOS",
-  "short_name": "LifeOS V47",
+  "name": "LifeOS V47",
+  "short_name": "LifeOS",
   "start_url": "/tool/qlycuocsong.html",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -192,24 +265,17 @@
                     <div id="tab-core" class="workspace-content hidden">
                         <textarea id="code-core" class="code-editor text-emerald-300" spellcheck="false" placeholder="Nội dung HTML Core...">&lt;!DOCTYPE html&gt;
 &lt;html lang="vi"&gt;
-&lt;head&gt;
-&lt;meta charset="UTF-8"&gt;
-&lt;title&gt;LifeOS V47 - Cốt Lõi HTML&lt;/title&gt;
-&lt;!-- BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN MÃ NGUỒN VÀ BẮT ĐẦU SỬA --&gt;
-&lt;/head&gt;
+&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;title&gt;LifeOS V47&lt;/title&gt;&lt;/head&gt;
 &lt;body&gt;
-    &lt;div id="app"&gt;Đang tải hệ thống...&lt;/div&gt;
+    &lt;div id="app"&gt;BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ LẤY SOURCE GỐC!&lt;/div&gt;
 &lt;/body&gt;
 &lt;/html&gt;</textarea>
                     </div>
                     
                     <div id="tab-test" class="workspace-content hidden">
                         <textarea id="code-test" class="code-editor text-blue-300" spellcheck="false" placeholder="Nội dung Python Test..."># -*- coding: utf-8 -*-
-"""
-SENTINEL MASTER SUITE V17.1 - ENTERPRISE ALL-IN-ONE
-"""
-import os, time
-print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN MÃ NGUỒN VÀ BẮT ĐẦU SỬA")</textarea>
+# SENTINEL MASTER SUITE V17.1
+print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ LẤY SOURCE GỐC!")</textarea>
                     </div>
                 </div>
             </div>
@@ -230,11 +296,8 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
     <script>
         // Hàm bọc an toàn để chống lỗi khi Lucide CDN bị chặn
         function renderIcons() {
-            try {
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            } catch (e) { console.warn("Lucide Icons chưa tải xong."); }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } 
+            catch (e) { console.warn("Lucide Icons chưa tải xong."); }
         }
         
         renderIcons();
@@ -591,6 +654,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                 
                 if (putRes.ok) {
                     showToast(`Đã ghi đè lên Cloud: ${filePath} thành công!`, "success");
+                    setTimeout(() => { document.getElementById('githubFileSelect').dispatchEvent(new Event('change')); }, 1000);
                 } else {
                     const errObj = await putRes.json(); throw new Error("Lỗi API GitHub: " + errObj.message);
                 }
