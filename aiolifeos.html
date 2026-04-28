@@ -24,8 +24,6 @@
         
         /* Highlight Rules */
         .rule-card-red { border-left: 4px solid #ef4444; background: linear-gradient(90deg, rgba(239,68,68,0.1) 0%, rgba(30,41,59,0) 100%); }
-        .rule-card-amber { border-left: 4px solid #f59e0b; background: linear-gradient(90deg, rgba(245,158,11,0.1) 0%, rgba(30,41,59,0) 100%); }
-        .rule-card-emerald { border-left: 4px solid #10b981; background: linear-gradient(90deg, rgba(16,185,129,0.1) 0%, rgba(30,41,59,0) 100%); }
         .rule-card-cyan { border-left: 4px solid #06b6d4; background: linear-gradient(90deg, rgba(6,182,212,0.1) 0%, rgba(30,41,59,0) 100%); }
 
         /* IDE Textarea Styling */
@@ -55,6 +53,8 @@
             100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); background-color: #4f46e5; }
         }
         .glow-sync { animation: tabGlow 1s ease-out; }
+
+        .table-borders th, .table-borders td { border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
     </style>
 </head>
 <body class="selection:bg-indigo-500/30 selection:text-indigo-200 pb-20">
@@ -184,15 +184,15 @@
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
-                    <div class="glass-card p-6">
+                    <div class="glass-card p-6 border-t-2 border-indigo-500/50">
                         <h3 class="font-bold text-indigo-400 text-lg mb-3">The Iron Lock (Chống Data Race)</h3>
                         <p class="text-sm text-slate-300 leading-relaxed">Khi thiết bị đang Push dữ liệu lên Cloud, bật cờ <code>window._pendingPush = true</code>. Trạng thái này sẽ như một tấm khiên, <strong>từ chối mọi Snapshot cũ</strong> dội về từ Firebase trong lúc mạng đang truyền tải, ngăn chặn việc dữ liệu cũ đè lên dữ liệu mới.</p>
                     </div>
 
-                    <div class="glass-card p-6">
+                    <div class="glass-card p-6 border-t-2 border-emerald-500/50">
                         <h3 class="font-bold text-emerald-400 text-lg mb-3">Đồng bộ Vector Clock</h3>
-                        <p class="text-sm text-slate-300 leading-relaxed mb-2"><b>Push Flow:</b> Lấy <code>Date.now()</code> lưu Local. Tẩy sạch <code>undefined</code>. Ném nguyên khối lên Firebase cùng <code>updatedAt</code>.</p>
-                        <p class="text-sm text-slate-300 leading-relaxed"><b>Pull Flow:</b> Kéo Snapshot, ép kiểu <code>cloudTime = c.updatedAt.toMillis()</code>. Nếu <code>cloudTime > localTime</code> ➔ Cập nhật DOM. Nếu <code>localTime > cloudTime</code> (Firebase dội lại Snapshot chậm) ➔ Bỏ qua, lập tức gọi lại <code>pushAll()</code> đè ngược bản Local lên Cloud bảo vệ dữ liệu!</p>
+                        <p class="text-sm text-slate-300 leading-relaxed mb-2"><b>Push Flow:</b> Lấy <code>Date.now()</code> lưu Local, tẩy sạch undefined, ném lên Cloud.</p>
+                        <p class="text-sm text-slate-300 leading-relaxed"><b>Pull Flow:</b> Firebase Snapshot trả về Timestamp, dùng <code>c.updatedAt.toMillis()</code>. Nếu <code>localTime > cloudTime</code> ➔ Bỏ qua, lập tức gọi <code>pushAll()</code> đè ngược bản Local lên Cloud bảo vệ dữ liệu!</p>
                     </div>
 
                     <div class="glass-card p-6 md:col-span-2 border border-amber-500/30">
@@ -237,34 +237,34 @@
                     <h2 class="text-3xl font-black text-white">7 Quy Tắc Vàng Sinh Tử (Tuyệt đối tuân thủ)</h2>
                 </div>
                 <p class="text-slate-400 mb-6 text-sm italic">Bất kỳ ai chạm vào mã nguồn V29 đều phải thuộc lòng 7 nguyên tắc sống còn sau đây. Cấm vi phạm!</p>
-                <div class="space-y-4">
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">1. Pháo Đài Offline (Chống ORB/404)</h4>
-                        <p class="text-sm text-slate-400">Đường dẫn tương đối <code>./</code> trên GitHub Pages gây lỗi tải nhầm trang 404 HTML thành file JS gây crash toàn bộ hệ thống. Bắt buộc dùng đường dẫn tuyệt đối <code>/tool/filename.js</code>.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">1. Pháo Đài Offline (Chống ORB/404)</strong>
+                        CDN dễ bị chặn bởi Tường lửa. Đường dẫn tương đối <code>./</code> gây lỗi tải nhầm HTML 404 thành JS. <b>Bắt buộc dùng đường dẫn tuyệt đối <code>/tool/...js</code></b> và đặt 4 file Firebase SDK cùng cấp.
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">2. Thanh trừng "Undefined"</h4>
-                        <p class="text-sm text-slate-400">Firestore sẽ ném lỗi <code>Unsupported field value: undefined</code> và từ chối lưu. Bắt buộc phải chạy vòng lặp <code>delete cleanT[key]</code> trước khi <code>set()</code>.</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">2. Thanh trừng "Undefined"</strong>
+                        Firestore sẽ từ chối lưu và ném lỗi nếu có giá trị <code>undefined</code>. Bắt buộc chạy vòng lặp <b>delete cleanT[key]</b> để tẩy rửa toàn bộ object trước khi <code>set()</code>.
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">3. Cấm Push Lúc Khởi Động</h4>
-                        <p class="text-sm text-slate-400">Tuyệt đối KHÔNG ĐƯỢC gọi <code>this.pushAll()</code> trong hàm <code>init()</code> để tránh thiết bị mới mở đè bẹp dữ liệu của thiết bị khác trên Cloud.</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">3. Cấm Push Lúc Khởi Động</strong>
+                        Tuyệt đối KHÔNG ĐƯỢC gọi <code>pushAll()</code> trong hàm <code>init()</code> để tránh thiết bị mới mở đè bẹp dữ liệu của thiết bị khác trên Cloud.
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">4. Đồng Hồ Vector & toMillis()</h4>
-                        <p class="text-sm text-slate-400">Xóa bỏ hoàn toàn cờ `cloudSyncCompleted` cũ. Tranh chấp giải quyết 100% bằng thời gian. Firebase trả về Object Timestamp, phải dùng <code>c.updatedAt.toMillis()</code> để ép về số nguyên.</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">4. Đồng Hồ Vector & toMillis()</strong>
+                        Xóa bỏ hoàn toàn cờ `cloudSyncCompleted` cũ. Tranh chấp giải quyết 100% bằng thời gian. Firebase trả về Object Timestamp, phải dùng <code>c.updatedAt.toMillis()</code> để ép về số nguyên.
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">5. Kén Âm Thanh 3 Ống Tủy & Web Worker</h4>
-                        <p class="text-sm text-slate-400">Duy trì 3 thẻ Audio: <code>mstq-silence</code> (giữ mạng), <code>mstq-alarm</code> (chuông vật lý), và <code>tts-audio</code> (ép luồng Google) + Web Worker để đếm giờ ngầm xuyên qua Doze Mode.</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">5. Kén Âm Thanh 3 Ống Tủy</strong>
+                        Duy trì 3 thẻ Audio: <code>mstq-silence</code> (giữ mạng), <code>mstq-alarm</code> (chuông vật lý), và <code>tts-audio</code> (ép luồng Google) + Web Worker để đếm giờ ngầm.
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-emerald-500/50">
-                        <h4 class="font-bold text-white mb-1">6. Ép kiểu ID thành Chuỗi (String Casting)</h4>
-                        <p class="text-sm text-slate-400">Luôn bọc <code>String(t.id)</code> khi map/tìm kiếm mảng dữ liệu để tránh lỗi Javascript không so sánh được ID dạng Number (từ Local) và String (từ Firebase).</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <strong class="text-emerald-300 block mb-1">6. Ép kiểu ID (String Casting)</strong>
+                        Luôn bọc <code>String(t.id)</code> khi map mảng dữ liệu để tránh lỗi Javascript không so sánh được Number (từ Local) và String (từ Firebase).
                     </div>
-                    <div class="glass-card p-5 border-l-2 border-rose-500/50">
-                        <h4 class="font-bold text-white mb-1">7. Tránh Tử Huyệt Visibility Deadlock</h4>
-                        <p class="text-sm text-slate-400">Tuyệt đối KHÔNG chặn hàm <code>renderTasksOnly()</code> bằng <code>if (document.visibilityState === 'hidden')</code>. Màn hình PC sẽ mù dữ liệu vĩnh viễn khi tab chạy ngầm.</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 md:col-span-2">
+                        <strong class="text-emerald-300 block mb-1">7. Tránh Tử Huyệt Visibility Deadlock</strong>
+                        Tuyệt đối KHÔNG chặn hàm <code>renderTasksOnly()</code> bằng <code>if (document.visibilityState === 'hidden')</code>. Màn hình PC sẽ mù dữ liệu vĩnh viễn khi tab chạy ngầm.
                     </div>
                 </div>
             </section>
@@ -303,7 +303,7 @@
                         <div class="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-500/30"><i data-lucide="terminal-square" class="w-5 h-5 text-indigo-400"></i></div>
                         Kho Mã Nguồn Bảo Mật (Meta-Workspace)
                     </h2>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-8 ml-14">Flow: Kéo Live ➔ Sửa Tab Con ➔ Đồng bộ ➔ Lưu Cloud</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-8 ml-14">Hệ Thống Tự Động Định Tuyến: Chỉnh sửa trực tiếp App hoặc Meta-Editor</p>
 
                     <!-- FILE MANAGER -->
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-6 shadow-inner">
@@ -345,8 +345,8 @@
                                 <i data-lucide="github" class="w-10 h-10 text-slate-400"></i>
                             </div>
                             <h3 class="text-lg font-black text-white mb-2">Trình Soạn Thảo Live</h3>
-                            <p class="text-slate-400 text-sm font-medium text-center max-w-sm">
-                                Vui lòng <b class="text-indigo-400">Quét</b> và <b class="text-indigo-400">Tải dữ liệu</b> tệp <code class="bg-slate-800 px-1 py-0.5 rounded text-sky-300">readqlycs.html</code> từ máy chủ GitHub để bắt đầu Meta-Editor.
+                            <p class="text-slate-400 text-sm font-medium text-center max-w-md px-4 leading-relaxed">
+                                Vui lòng <b class="text-indigo-400">Quét Cấu Trúc</b> ➔ Chọn file ➔ Bấm <b class="text-indigo-400">Tải Dữ Liệu Live</b> từ GitHub để kéo Full Code về bắt đầu sửa!
                             </p>
                         </div>
 
@@ -354,27 +354,16 @@
                             <textarea id="liveEditor" class="code-editor text-slate-300" spellcheck="false" placeholder="Nội dung mã nguồn tổng..."></textarea>
                         </div>
                         
-                        <!-- 
-                            QA NOTE: CÁC KHỐI TEXTAREA DƯỚI ĐÂY ĐÃ ĐƯỢC RÚT GỌN (MINIFIED) ĐỂ BẢO VỆ CHỐNG TRÀN BỘ NHỚ AI.
-                            BẠN BẤM "TẢI DỮ LIỆU LIVE" ĐỂ KÉO MÃ CHUẨN TỪ GITHUB ĐIỀN VÀO ĐÂY LÀ ĐƯỢC!
-                        -->
                         <div id="tab-manifest" class="workspace-content hidden">
-                            <textarea id="code-manifest" class="code-editor text-amber-200" spellcheck="false" placeholder="Nội dung manifest...">{
-  "name": "LifeOS V47",
-  "short_name": "LifeOS",
-  "start_url": "/tool/lifeos.html",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1"
-}</textarea>
+                            <textarea id="code-manifest" class="code-editor text-amber-200" spellcheck="false" placeholder="Nội dung manifest...">{ "message": "Bấm TẢI DỮ LIỆU LIVE để kéo Manifest từ GitHub" }</textarea>
                         </div>
                         
                         <div id="tab-core" class="workspace-content hidden">
-                            <textarea id="code-core" class="code-editor text-emerald-300" spellcheck="false" placeholder="Nội dung HTML Core...">&lt;!-- BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN MÃ NGUỒN VÀ BẮT ĐẦU SỬA --&gt;</textarea>
+                            <textarea id="code-core" class="code-editor text-emerald-300" spellcheck="false" placeholder="Nội dung HTML Core...">&lt;!-- Bấm TẢI DỮ LIỆU LIVE để kéo mã nguồn LifeOS chuẩn từ GitHub --&gt;</textarea>
                         </div>
                         
                         <div id="tab-test" class="workspace-content hidden">
-                            <textarea id="code-test" class="code-editor text-blue-300" spellcheck="false" placeholder="Nội dung Python Test..."># BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN MÃ NGUỒN VÀ BẮT ĐẦU SỬA</textarea>
+                            <textarea id="code-test" class="code-editor text-blue-300" spellcheck="false" placeholder="Nội dung Python Test..."># Bấm TẢI DỮ LIỆU LIVE để kéo mã nguồn Python Test từ GitHub</textarea>
                         </div>
                     </div>
                 </div>
@@ -394,26 +383,23 @@
 
     <!-- META-EDITOR JAVASCRIPT & FIREBASE KEY VAULT -->
     <script>
-        // Hàm bọc an toàn để chống lỗi khi Lucide CDN bị chặn
+        // Bọc lỗi Lucide Icon
         function renderIcons() {
             try {
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
+                if (typeof lucide !== 'undefined') { lucide.createIcons(); }
             } catch (e) { console.warn("Lucide Icons chưa tải xong."); }
         }
-        
         renderIcons();
 
         let activeEditorId = 'liveEditor';
+        window.currentMode = 'META_EDITOR';
 
-        // Tự động nhảy Tab Tổng lúc load web
         document.addEventListener('DOMContentLoaded', () => { 
             switchWorkspaceTab('tab-tong'); 
         });
 
         // =====================================================================
-        // 1. UI & TABS LOGIC
+        // 1. UI & TABS SMART ROUTING
         // =====================================================================
         function switchWorkspaceTab(tabId) {
             document.querySelectorAll('.workspace-content').forEach(el => el.classList.replace('block', 'hidden'));
@@ -431,35 +417,40 @@
             const label = document.getElementById('active-editor-label');
             const actionContainer = document.getElementById('action-buttons-container');
 
-            if(tabId === 'tab-tong') { 
-                activeEditorId = 'liveEditor'; 
-                label.innerHTML = '<i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-400"></i> Editing: Khung Tổng (Raw)'; 
-                actionContainer.innerHTML = `
-                    <button onclick="handleLiveSaveClick(this)" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-lg hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold shadow-lg shadow-emerald-900/20 flex">
-                        <i data-lucide="cloud-upload" class="w-4 h-4"></i> Lưu Đè Lên Cloud
-                    </button>
-                    <button onclick="resetGitHubToken()" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-rose-600/20 text-rose-400 px-4 py-2 rounded-lg hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold flex" title="Xóa Token trên Firestore">
-                        <i data-lucide="key-round" class="w-4 h-4"></i> Đổi Khóa
-                    </button>
-                    <button onclick="copyCurrentTabCode()" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-slate-800 px-4 py-2 rounded-lg hover:text-indigo-400 hover:bg-slate-700 border border-slate-600 transition active:scale-95 font-bold text-white flex">
-                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+            let subId = tabId === 'tab-manifest' ? 'code-manifest' : tabId === 'tab-core' ? 'code-core' : tabId === 'tab-test' ? 'code-test' : 'liveEditor';
+            let tabName = tabId === 'tab-manifest' ? 'manifest_lifeos.json' : tabId === 'tab-core' ? 'lifeos.html' : tabId === 'tab-test' ? 'Test_LifeOS_v17.2.py' : 'Khung Tổng (Raw)';
+            
+            activeEditorId = subId; 
+            label.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-indigo-400"></i> Editing: ${tabName}`;
+            
+            let buttonsHTML = '';
+            
+            // SMART ROUTING: Chỉ hiện Đồng Bộ nếu đang ở chế độ Meta-Editor và nằm trong Tab con.
+            if (window.currentMode === 'META_EDITOR' && tabId !== 'tab-tong') {
+                buttonsHTML += `
+                    <button onclick="syncToMain('${subId}', '${tabName}')" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-indigo-600/20 text-indigo-400 px-5 py-2.5 rounded-xl hover:bg-indigo-600 hover:text-white border border-indigo-600/30 transition active:scale-95 font-bold shadow-lg shadow-indigo-900/20 flex" style="animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
+                        <i data-lucide="git-merge" class="w-4 h-4"></i> Đồng Bộ Khung Tổng
                     </button>
                 `;
             } else {
-                let subId = tabId === 'tab-manifest' ? 'code-manifest' : tabId === 'tab-core' ? 'code-core' : 'code-test';
-                let tabName = tabId === 'tab-manifest' ? 'manifest_lifeos.json' : tabId === 'tab-core' ? 'lifeos.html (Final)' : 'Test_LifeOS_v17.2.py';
-                activeEditorId = subId; 
-                label.innerHTML = `<i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-400"></i> Editing: ${tabName}`;
-                
-                actionContainer.innerHTML = `
-                    <button onclick="syncToMain('${subId}', '${tabName}')" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-indigo-600/20 text-indigo-400 px-4 py-2 rounded-lg hover:bg-indigo-600 hover:text-white border border-indigo-600/30 transition active:scale-95 font-bold shadow-lg shadow-indigo-900/20 flex" style="animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
-                        <i data-lucide="git-merge" class="w-4 h-4"></i> Đồng Bộ Khung Tổng
-                    </button>
-                    <button onclick="copyCurrentTabCode()" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-slate-800 px-4 py-2 rounded-lg hover:text-indigo-400 hover:bg-slate-700 border border-slate-600 transition active:scale-95 font-bold text-white flex">
-                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                // Nếu ở chế độ Edit Trực tiếp HOẶC đang ở Khung Tổng -> Lưu Cloud thẳng tay.
+                buttonsHTML += `
+                    <button onclick="handleLiveSaveClick(this, '${subId}')" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-emerald-600/20 text-emerald-400 px-5 py-2.5 rounded-xl hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold shadow-lg shadow-emerald-900/20 flex">
+                        <i data-lucide="cloud-upload" class="w-4 h-4"></i> Lưu Đè Lên Cloud
                     </button>
                 `;
             }
+            
+            buttonsHTML += `
+                <button onclick="resetGitHubToken()" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-rose-600/20 text-rose-400 px-5 py-2.5 rounded-xl hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold flex" title="Xóa Token trên Firestore">
+                    <i data-lucide="key-round" class="w-4 h-4"></i> Đổi Khóa
+                </button>
+                <button onclick="copyCurrentTabCode()" class="flex-1 sm:flex-none items-center justify-center gap-1.5 text-xs bg-slate-800 px-5 py-2.5 rounded-xl hover:text-indigo-400 hover:bg-slate-700 border border-slate-600 transition active:scale-95 font-bold text-white flex">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Code
+                </button>
+            `;
+            
+            actionContainer.innerHTML = buttonsHTML;
             renderIcons();
         }
 
@@ -513,6 +504,7 @@
         function decodeHTMLEntities(text) { const txt = document.createElement("textarea"); txt.innerHTML = text; return txt.value; }
 
         function extractBlock(raw, id) {
+            // Hỗ trợ quét cả textarea và code để tương thích ngược mọi phiên bản
             const regex = new RegExp(`(<(?:textarea|code)[^>]*id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/(?:textarea|code)>)`, 'i');
             const match = raw.match(regex); return match ? decodeHTMLEntities(match[2].trim()) : "";
         }
@@ -538,17 +530,15 @@
             
             showToast(`Đã đồng bộ ${label} vào Khung Tổng! 🚀`, 'success');
             
-            // Glow Effect
             const btnTong = document.getElementById('w-btn-tong');
             btnTong.classList.remove('glow-sync');
-            void btnTong.offsetWidth; // trigger reflow
+            void btnTong.offsetWidth; 
             btnTong.classList.add('glow-sync');
         }
 
         // =====================================================================
         // 4. FIREBASE KEY VAULT & GITHUB API 
         // =====================================================================
-        // Khởi tạo Firebase 
         let db = null;
         try {
             if (typeof firebase !== 'undefined') {
@@ -567,32 +557,28 @@
         
         const OWNER = 'mimihoalua'; const REPO = 'tool';
 
-        // Lấy Token cực thông minh: LocalStorage -> Firestore -> Prompt
         async function getGitHubToken() {
             let token = localStorage.getItem('lifeos_github_pat');
             if (token) return token;
 
             if (db) {
                 try {
-                    // Thử chọc xuống Firebase lấy Token
                     const doc = await db.collection('LifeOS_Admin').doc('GitHub_Token').get();
                     if (doc.exists && doc.data().token) {
                         token = doc.data().token;
-                        localStorage.setItem('lifeos_github_pat', token); // Lưu đệm lại máy
+                        localStorage.setItem('lifeos_github_pat', token);
                         showToast('Đã đồng bộ Token từ Firestore!', 'info');
                         return token;
                     }
                 } catch (e) { console.error("Lỗi đọc Firestore:", e); }
             }
 
-            // Lần đầu tiên tinh khôi mới bật bảng hỏi
-            token = prompt("BẢO MẬT GITHUB API:\n\nVui lòng nhập mã Token (ghp_...) của bạn.\nMã sẽ được LƯU VĨNH VIỄN lên Két sắt Firestore và tự đồng bộ các máy khác:");
+            token = prompt("BẢO MẬT GITHUB API:\n\nLần đầu thiết lập, vui lòng nhập mã Token (ghp_...) của bạn.\nMã sẽ được LƯU VĨNH VIỄN lên Két sắt Firestore và tự đồng bộ các máy khác:");
             if (token) {
                 token = token.trim();
                 localStorage.setItem('lifeos_github_pat', token);
                 if (db) {
                     try {
-                        // Đẩy Token lên Két sắt Firestore
                         await db.collection('LifeOS_Admin').doc('GitHub_Token').set({ 
                             token: token, 
                             updatedAt: Date.now() 
@@ -604,7 +590,6 @@
             return token;
         }
 
-        // Hủy Token
         async function resetGitHubToken() {
             localStorage.removeItem('lifeos_github_pat');
             if (db) {
@@ -617,7 +602,6 @@
             showToast('Đã xóa Token trên máy Local!', 'info');
         }
 
-        // Decode Base64 chống lỗi khoảng trắng / xuống dòng của GitHub API
         function b64DecodeUnicode(str) {
             try {
                 const cleanStr = str.replace(/\s/g, '');
@@ -683,20 +667,49 @@
                 if (!res.ok) throw new Error("Không thể đọc nội dung tệp");
                 
                 const data = await res.json();
-                editor.value = b64DecodeUnicode(data.content); 
+                const decodedContent = b64DecodeUnicode(data.content); 
+                const fileName = filePath.toLowerCase();
                 
-                // Mở khóa rèm che Editor
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 
-                // Phân tích thông minh: Bóc tách nếu là file tổng
-                if(filePath.includes('read') || filePath.includes('lifeos.html') || filePath.includes('qlycuocsong.html')) { 
-                    extractFromTotal(); 
-                    switchWorkspaceTab('tab-core'); 
-                    showToast("Đã tải Live và bóc tách thành công 3 Tab con!", "success"); 
-                } else { 
+                // ==========================================
+                // PHÂN TÍCH ĐỊNH TUYẾN THÔNG MINH
+                // ==========================================
+                if (fileName.includes('manifest')) {
+                    window.currentMode = 'DIRECT_EDIT';
+                    document.getElementById('code-manifest').value = decodedContent;
+                    switchWorkspaceTab('tab-manifest');
+                    showToast("Đã tải trực tiếp file Manifest!", "success");
+                } 
+                else if (fileName.includes('lifeos.html') || fileName.includes('qlycuocsong.html')) {
+                    // Nếu là File Blueprint Meta-Editor (có chứa aio, read)
+                    if (fileName.includes('read') || fileName.includes('aio')) {
+                        window.currentMode = 'META_EDITOR';
+                        document.getElementById('liveEditor').value = decodedContent;
+                        extractFromTotal(); 
+                        switchWorkspaceTab('tab-core'); 
+                        showToast("Đã tải Blueprint và bóc tách thành công 3 Tab con!", "success"); 
+                    } else {
+                        // Nếu là File App HTML thông thường
+                        window.currentMode = 'DIRECT_EDIT';
+                        document.getElementById('code-core').value = decodedContent;
+                        switchWorkspaceTab('tab-core');
+                        showToast("Đã tải trực tiếp mã nguồn HTML Core!", "success");
+                    }
+                } 
+                else if (fileName.endsWith('.py')) {
+                    window.currentMode = 'DIRECT_EDIT';
+                    document.getElementById('code-test').value = decodedContent;
+                    switchWorkspaceTab('tab-test');
+                    showToast("Đã tải trực tiếp script Python!", "success");
+                } 
+                else {
+                    window.currentMode = 'META_EDITOR';
+                    document.getElementById('liveEditor').value = decodedContent;
+                    extractFromTotal();
                     switchWorkspaceTab('tab-tong'); 
-                    showToast("Đã tải dữ liệu Live thành công!", "success"); 
+                    showToast("Đã tải dữ liệu vào Khung Tổng!", "success"); 
                 }
                 
                 statusObj.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5 inline"></i> Đã kéo bản gốc an toàn: ${filePath}`; 
@@ -709,22 +722,23 @@
             }
         }
 
-        async function handleLiveSaveClick(btnEl) {
+        async function handleLiveSaveClick(btnEl, sourceEditorId) {
             const filePath = document.getElementById('githubFileSelect').value;
-            if (!filePath) { showToast("Vui lòng chọn file cần lưu (Ví dụ: readqlycs.html)!", "error"); return; }
+            if (!filePath) { showToast("Vui lòng chọn file cần lưu ở ô Quản lý tệp!", "error"); return; }
             
             const token = await getGitHubToken(); if (!token) return;
             
             const originalHTML = btnEl.innerHTML; 
             btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Commit...'; renderIcons(); btnEl.disabled = true;
 
-            const newContent = document.getElementById('liveEditor').value;
+            // Rút dữ liệu trực tiếp từ Editor Đang Active
+            const newContent = document.getElementById(sourceEditorId).value;
+            
             const cleanUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath}`;
             const getUrl = `${cleanUrl}?nocache=${Date.now()}`;
             const base64Content = btoa(unescape(encodeURIComponent(newContent)));
 
             try {
-                // 1. Chọc GitHub lấy SHA hiện tại
                 const getRes = await fetch(getUrl, { method: 'GET', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
                 let currentSha = null;
                 
@@ -736,14 +750,12 @@
                     throw new Error(`Lỗi kiểm tra file ${filePath}`); 
                 }
 
-                // 2. Đóng gói dữ liệu Commit
                 const bodyData = { 
-                    message: `Admin Update: ${filePath} (Live Meta-Editor V47)`, 
+                    message: `Admin Update: ${filePath} (Live Editor V47)`, 
                     content: base64Content 
                 };
                 if (currentSha) bodyData.sha = currentSha;
 
-                // 3. Đẩy đè (PUT API)
                 const putRes = await fetch(cleanUrl, { 
                     method: 'PUT', 
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, 
@@ -752,6 +764,7 @@
                 
                 if (putRes.ok) {
                     showToast(`Đã ghi đè lên Cloud: ${filePath} thành công!`, "success");
+                    setTimeout(() => { document.getElementById('githubFileSelect').dispatchEvent(new Event('change')); }, 1000);
                 } else {
                     const errObj = await putRes.json(); throw new Error("Lỗi API GitHub: " + errObj.message);
                 }
