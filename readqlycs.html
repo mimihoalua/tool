@@ -142,6 +142,9 @@
                         <button onclick="handleSaveClick(this, 'code-manifest', 'manifest_qlycuocsong.json')" class="flex items-center gap-1 text-[10px] bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-cloud-arrow-up"></i> Lưu Lên Cloud
                         </button>
+                        <button onclick="resetGitHubToken()" class="flex items-center gap-1 text-[10px] bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold" title="Nhập lại Token mới">
+                            <i class="ph-bold ph-key"></i> Đổi Khóa
+                        </button>
                         <button onclick="copyCode('code-manifest')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-copy"></i> Copy
                         </button>
@@ -179,6 +182,9 @@
                     <div class="flex gap-2">
                         <button onclick="handleSaveClick(this, 'code-core', 'qlycuocsong.html')" class="flex items-center gap-1 text-[10px] bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-cloud-arrow-up"></i> Lưu Lên Cloud
+                        </button>
+                        <button onclick="resetGitHubToken()" class="flex items-center gap-1 text-[10px] bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold" title="Nhập lại Token mới">
+                            <i class="ph-bold ph-key"></i> Đổi Khóa
                         </button>
                         <button onclick="copyCode('code-core')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-copy"></i> Copy
@@ -443,6 +449,9 @@ window.FirebaseSync={
                     <div class="flex gap-2">
                         <button onclick="handleSaveClick(this, 'code-test', 'Test_LifeOS_Final.py')" class="flex items-center gap-1 text-[10px] bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded hover:bg-emerald-600 hover:text-white border border-emerald-600/30 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-cloud-arrow-up"></i> Lưu Lên Cloud
+                        </button>
+                        <button onclick="resetGitHubToken()" class="flex items-center gap-1 text-[10px] bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded hover:bg-rose-600 hover:text-white border border-rose-600/30 transition active:scale-95 font-bold" title="Nhập lại Token mới">
+                            <i class="ph-bold ph-key"></i> Đổi Khóa
                         </button>
                         <button onclick="copyCode('code-test')" class="flex items-center gap-1 text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:text-indigo-400 hover:bg-slate-700 border border-slate-700 transition active:scale-95 font-bold">
                             <i class="ph-bold ph-copy"></i> Copy
@@ -1042,30 +1051,47 @@ if __name__ == "__main__":
         // =====================================================================
         // HỆ THỐNG PUSH COMMIT TRỰC TIẾP LÊN GITHUB (ADMIN OVERRIDE)
         // =====================================================================
+        
+        // [QA UPGRADE] Quản lý Token An Toàn (Tránh bị GitHub Revoke)
+        function getGitHubToken() {
+            let token = localStorage.getItem('lifeos_github_pat');
+            if (!token) {
+                token = prompt("BẢO MẬT: Để tránh bị GitHub tự động khóa mã, vui lòng nhập Token (ghp_...) của bạn vào đây.\n\nNó sẽ được lưu an toàn trong trình duyệt của máy bạn, KHÔNG bao giờ bị đẩy lên web:");
+                if (token) {
+                    localStorage.setItem('lifeos_github_pat', token.trim());
+                }
+            }
+            return token;
+        }
+
+        // Nút reset token (Dành cho trường hợp nhập sai hoặc token hết hạn)
+        function resetGitHubToken() {
+            localStorage.removeItem('lifeos_github_pat');
+            showToast('Đã xóa Token cũ. Lần lưu tới sẽ yêu cầu nhập lại.', 'success');
+        }
+
         async function saveToGitHub(newContent, filePath) {
-            // [QA PATCH]: Kỹ thuật Obfuscation để lách bot quét Secret của GitHub
-            const _p1 = 'ghp_';
-            const _p2 = '5P3IueuU8nMAo8CBrn1yW5zFk9IhTa4BO4OK';
-            const token = _p1 + _p2;
+            const token = getGitHubToken();
+            if (!token) {
+                showToast("Bạn chưa nhập Token, không thể lưu!", "error");
+                return false;
+            }
             
             const owner = 'mimihoalua';
             const repo = 'tool';
             
-            // [TỬ HUYỆT ĐÃ ĐƯỢC VÁ]: Tách bạch 2 đường dẫn để tránh lỗi CORS Network
-            // Đường dẫn sạch dùng để ghi file (lệnh PUT ghét tham số lạ)
             const cleanUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
-            // Đường dẫn chống Cache dùng để đọc file SHA (lệnh GET)
             const getUrl = `${cleanUrl}?nocache=${Date.now()}`;
 
-            // Mã hóa nội dung Unicode để tránh lỗi tiếng Việt
             const base64Content = btoa(unescape(encodeURIComponent(newContent)));
 
             try {
-                // 1. Đọc mã băm (SHA) hiện tại bằng URL có đuôi chống Cache
+                // 1. Đọc mã băm (SHA) hiện tại
                 const getRes = await fetch(getUrl, {
+                    method: 'GET',
                     headers: { 
                         'Authorization': `token ${token}`,
-                        'Cache-Control': 'no-cache'
+                        'Accept': 'application/vnd.github.v3+json'
                     }
                 });
 
@@ -1073,6 +1099,11 @@ if __name__ == "__main__":
                 if (getRes.ok) {
                     const fileData = await getRes.json();
                     currentSha = fileData.sha;
+                } else if (getRes.status === 401 || getRes.status === 403) {
+                     // Token sai hoặc bị hủy
+                     resetGitHubToken();
+                     showToast(`Token đã bị GitHub hủy hoặc sai! Đã reset, vui lòng thử lại.`, "error");
+                     return false;
                 } else if (getRes.status !== 404) {
                     console.error("Lỗi lấy SHA:", await getRes.json());
                     showToast(`Lỗi kiểm tra file ${filePath} trên GitHub!`, "error");
@@ -1085,11 +1116,12 @@ if __name__ == "__main__":
                 };
                 if (currentSha) bodyData.sha = currentSha;
 
-                // 2. Ghi đè (Tạo Commit) - BẮT BUỘC DÙNG CLEAN URL
+                // 2. Ghi đè (Tạo Commit)
                 const putRes = await fetch(cleanUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(bodyData)
@@ -1105,7 +1137,13 @@ if __name__ == "__main__":
                 }
             } catch (err) {
                 console.error("Fetch Error:", err);
-                showToast("Lỗi mạng (CORS) khi kết nối GitHub API", "error");
+                // Nếu dính lỗi mạng CORS do token sai, hệ thống ngầm reset token
+                if(err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+                    showToast("Lỗi CORS: Token có thể đã bị khóa. Vui lòng check Console.", "error");
+                    resetGitHubToken();
+                } else {
+                    showToast("Lỗi mạng khi kết nối GitHub API", "error");
+                }
                 return false;
             }
         }
