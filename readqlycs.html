@@ -84,7 +84,7 @@
             </p>
         </div>
 
-        <!-- DOCUMENTATION SECTION (Nén gọn để tối ưu bộ nhớ) -->
+        <!-- DOCUMENTATION SECTION -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- NLP & Vault -->
             <section class="glass-card p-5 border-l-4 border-sky-500">
@@ -159,7 +159,7 @@
                     <div class="flex flex-wrap gap-2" id="action-buttons-container"></div>
                 </div>
                 
-                <!-- TEXTAREAS CHỨA MÃ NGUỒN GỐC -->
+                <!-- TEXTAREAS CHỨA MÃ NGUỒN -->
                 <div class="bg-[#020617] p-2 rounded-xl border border-slate-700 shadow-2xl relative min-h-[500px]">
                     
                     <!-- LỚP PHỦ HƯỚNG DẪN KHI CHƯA LOAD FILE -->
@@ -177,10 +177,7 @@
                         <textarea id="liveEditor" class="code-editor text-slate-300" spellcheck="false" placeholder="Nội dung mã nguồn tổng..."></textarea>
                     </div>
                     
-                    <!-- 
-                        QA NOTE: CÁC KHỐI TEXTAREA DƯỚI ĐÂY ĐÃ ĐƯỢC RÚT GỌN (MINIFIED) ĐỂ BẢO VỆ CHỐNG TRÀN BỘ NHỚ AI.
-                        BẠN BẤM "TẢI DỮ LIỆU LIVE" ĐỂ KÉO MÃ CHUẨN TỪ GITHUB ĐIỀN VÀO ĐÂY LÀ ĐƯỢC!
-                    -->
+                    <!-- MÃ NHÁP ĐƯỢC RÚT GỌN CHỐNG TRÀN BỘ NHỚ -->
                     <div id="tab-manifest" class="workspace-content hidden">
                         <textarea id="code-manifest" class="code-editor text-amber-200" spellcheck="false" placeholder="Nội dung manifest...">{
   "name": "Qlycuocsong LifeOS",
@@ -231,12 +228,19 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
 
     <!-- META-EDITOR JAVASCRIPT & FIREBASE KEY VAULT -->
     <script>
-        // Khởi tạo Icon
-        lucide.createIcons();
+        // Hàm bọc an toàn để chống lỗi khi Lucide CDN bị chặn
+        function renderIcons() {
+            try {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            } catch (e) { console.warn("Lucide Icons chưa tải xong."); }
+        }
+        
+        renderIcons();
 
         let activeEditorId = 'liveEditor';
 
-        // Tự động nhảy Tab Tổng lúc load web
         document.addEventListener('DOMContentLoaded', () => { 
             switchWorkspaceTab('tab-tong'); 
         });
@@ -289,7 +293,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                     </button>
                 `;
             }
-            lucide.createIcons();
+            renderIcons();
         }
 
         // =====================================================================
@@ -330,7 +334,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                 toast.classList.add('bg-emerald-600', 'border-emerald-500'); 
                 icon.setAttribute('data-lucide', 'check-circle-2'); 
             }
-            lucide.createIcons();
+            renderIcons();
             text.innerText = message; toast.classList.add('show');
             clearTimeout(toastTimeout); toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
@@ -375,19 +379,27 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
         }
 
         // =====================================================================
-        // 4. FIREBASE KEY VAULT & GITHUB API
+        // 4. FIREBASE KEY VAULT & GITHUB API (CHỐNG LỖI HOÀN TOÀN)
         // =====================================================================
-        // Khởi tạo Firebase 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
-            authDomain: "tool-mimishop.firebaseapp.com",
-            projectId: "tool-mimishop",
-            storageBucket: "tool-mimishop.firebasestorage.app",
-            messagingSenderId: "536814109954",
-            appId: "1:536814109954:web:b1be76d22957de4b75ee1b"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.firestore();
+        let db = null;
+        try {
+            if (typeof firebase !== 'undefined') {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
+                    authDomain: "tool-mimishop.firebaseapp.com",
+                    projectId: "tool-mimishop",
+                    storageBucket: "tool-mimishop.firebasestorage.app",
+                    messagingSenderId: "536814109954",
+                    appId: "1:536814109954:web:b1be76d22957de4b75ee1b"
+                };
+                if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+                db = firebase.firestore();
+            } else {
+                console.warn("Firebase SDK bị chặn hoặc chưa tải xong.");
+            }
+        } catch(e) {
+            console.error("Lỗi khởi tạo Firebase Key Vault:", e);
+        }
         
         const OWNER = 'mimihoalua'; const REPO = 'tool';
 
@@ -396,30 +408,37 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
             let token = localStorage.getItem('lifeos_github_pat');
             if (token) return token;
 
-            try {
-                // Thử chọc xuống Firebase lấy Token
-                const doc = await db.collection('LifeOS_Admin').doc('GitHub_Token').get();
-                if (doc.exists && doc.data().token) {
-                    token = doc.data().token;
-                    localStorage.setItem('lifeos_github_pat', token); // Lưu đệm lại máy
-                    showToast('Đã đồng bộ Token từ Firestore!', 'info');
-                    return token;
-                }
-            } catch (e) { console.error("Lỗi đọc Firestore:", e); }
+            if (db) {
+                try {
+                    // Thử chọc xuống Firebase lấy Token
+                    const doc = await db.collection('LifeOS_Admin').doc('GitHub_Token').get();
+                    if (doc.exists && doc.data().token) {
+                        token = doc.data().token;
+                        localStorage.setItem('lifeos_github_pat', token); // Lưu đệm lại máy
+                        showToast('Đã đồng bộ Token từ Firestore!', 'info');
+                        return token;
+                    }
+                } catch (e) { console.error("Lỗi đọc Firestore:", e); }
+            }
 
             // Lần đầu tiên tinh khôi mới bật bảng hỏi
-            token = prompt("BẢO MẬT GITHUB API:\n\nVui lòng nhập mã Token (ghp_...) của bạn.\nMã sẽ được LƯU VĨNH VIỄN lên Két sắt Firestore và tự đồng bộ các máy khác:");
+            token = prompt("BẢO MẬT GITHUB API:\n\nLần đầu thiết lập, vui lòng nhập mã Token (ghp_...) của bạn.\nMã sẽ được LƯU VĨNH VIỄN lên Két sắt Firestore và tự đồng bộ các máy khác:");
             if (token) {
                 token = token.trim();
                 localStorage.setItem('lifeos_github_pat', token);
-                try {
-                    // Đẩy Token lên Két sắt Firestore
-                    await db.collection('LifeOS_Admin').doc('GitHub_Token').set({ 
-                        token: token, 
-                        updatedAt: Date.now() 
-                    }, { merge: true });
-                    showToast('Đã cất Token an toàn lên Cloud Firestore!', 'success');
-                } catch (e) { showToast('Cất Token lên Firebase thất bại!', 'error'); }
+                if (db) {
+                    try {
+                        // Đẩy Token lên Két sắt Firestore
+                        await db.collection('LifeOS_Admin').doc('GitHub_Token').set({ 
+                            token: token, 
+                            updatedAt: Date.now() 
+                        }, { merge: true });
+                        showToast('Đã cất Token an toàn lên Cloud Firestore!', 'success');
+                    } catch (e) { 
+                        showToast('Lỗi cất Token lên Cloud! Kiểm tra Rule Firestore.', 'error'); 
+                        console.error(e);
+                    }
+                }
             }
             return token;
         }
@@ -427,21 +446,32 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
         // Hủy Token
         async function resetGitHubToken() {
             localStorage.removeItem('lifeos_github_pat');
-            try {
-                await db.collection('LifeOS_Admin').doc('GitHub_Token').delete();
-                showToast('Đã XÓA SẠCH Token trên máy và Cloud Firestore!', 'success');
-            } catch (e) { showToast('Chỉ xóa được Token trên máy Local!', 'info'); }
+            if (db) {
+                try {
+                    await db.collection('LifeOS_Admin').doc('GitHub_Token').delete();
+                    showToast('Đã XÓA SẠCH Token trên máy và Cloud Firestore!', 'success');
+                    return;
+                } catch (e) { console.error(e); }
+            }
+            showToast('Đã xóa Token trên máy Local!', 'info');
         }
 
+        // Decode Base64 chống lỗi khoảng trắng / xuống dòng của GitHub API
         function b64DecodeUnicode(str) {
-            return decodeURIComponent(atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            try {
+                const cleanStr = str.replace(/\s/g, '');
+                return decodeURIComponent(atob(cleanStr).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            } catch (e) {
+                console.error("Decode error, fallback to normal atob:", e);
+                return atob(str.replace(/\s/g, ''));
+            }
         }
 
         async function fetchRepoFiles(btnEl) {
             const token = await getGitHubToken(); if (!token) { showToast("Cần cấp Token để chạy API!", "error"); return; }
             
             const originalHTML = btnEl.innerHTML; 
-            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang quét...'; lucide.createIcons(); btnEl.disabled = true;
+            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang quét...'; renderIcons(); btnEl.disabled = true;
             
             const selectEl = document.getElementById('githubFileSelect'); 
             selectEl.innerHTML = '<option value="">-- Đang lấy danh sách --</option>'; selectEl.disabled = true;
@@ -468,7 +498,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                 showToast(err.message, "error"); 
                 selectEl.innerHTML = '<option value="">❌ Lỗi kết nối API</option>';
             } finally { 
-                btnEl.innerHTML = originalHTML; btnEl.disabled = false; lucide.createIcons(); 
+                btnEl.innerHTML = originalHTML; btnEl.disabled = false; renderIcons(); 
             }
         }
 
@@ -479,7 +509,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
             const token = await getGitHubToken(); if (!token) return;
             
             const originalHTML = btnEl.innerHTML; 
-            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tải...'; lucide.createIcons(); btnEl.disabled = true;
+            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tải...'; renderIcons(); btnEl.disabled = true;
             
             const editor = document.getElementById('liveEditor'); 
             const overlay = document.getElementById('editorOverlay'); 
@@ -514,7 +544,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                 editor.value = "Lỗi tải dữ liệu máy chủ."; 
                 showToast(err.message, "error");
             } finally { 
-                btnEl.innerHTML = originalHTML; btnEl.disabled = false; lucide.createIcons(); 
+                btnEl.innerHTML = originalHTML; btnEl.disabled = false; renderIcons(); 
             }
         }
 
@@ -525,7 +555,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
             const token = await getGitHubToken(); if (!token) return;
             
             const originalHTML = btnEl.innerHTML; 
-            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Commit...'; lucide.createIcons(); btnEl.disabled = true;
+            btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Commit...'; renderIcons(); btnEl.disabled = true;
 
             const newContent = document.getElementById('liveEditor').value;
             const cleanUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath}`;
@@ -571,7 +601,7 @@ print("BẤM TẢI DỮ LIỆU LIVE TỪ GITHUB ĐỂ HIỂN THỊ TRỌN VẸN 
                     showToast(err.message, "error"); 
                 }
             } finally { 
-                btnEl.innerHTML = originalHTML; btnEl.disabled = false; lucide.createIcons(); 
+                btnEl.innerHTML = originalHTML; btnEl.disabled = false; renderIcons(); 
             }
         }
     </script>
