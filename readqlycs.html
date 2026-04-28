@@ -541,9 +541,10 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     &lt;/div&gt;
 
     &lt;div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50"&gt;
-        &lt;div class="flex items-center gap-1.5 sm:gap-2 hidden md:flex"&gt;
+        &lt;div class="flex items-center gap-1.5 sm:gap-2"&gt;
             &lt;a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"&gt;&lt;i class="ph-bold ph-house text-sm sm:text-base"&gt;&lt;/i&gt; &lt;span class="hidden md:inline"&gt;Trang chủ&lt;/span&gt;&lt;/a&gt;
-            &lt;a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"&gt;&lt;i class="ph-bold ph-book-open text-sm sm:text-base"&gt;&lt;/i&gt; &lt;span class="hidden md:inline"&gt;Hướng dẫn&lt;/span&gt;&lt;/a&gt;
+      
+             &lt;a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"&gt;&lt;i class="ph-bold ph-book-open text-sm sm:text-base"&gt;&lt;/i&gt; &lt;span class="hidden md:inline"&gt;Hướng dẫn&lt;/span&gt;&lt;/a&gt;
         &lt;/div&gt;
 
         &lt;span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"&gt;&lt;/span&gt;
@@ -811,15 +812,17 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     &lt;span class="font-bold uppercase tracking-wide"&gt;Cài App&lt;/span&gt;
 &lt;/button&gt;
 
-&lt;div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity"&gt;
-    &lt;div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary"&gt;
-        &lt;div class="bg-primary p-5 text-white text-center"&gt;
+&lt;div id="pwaHealthModal" 
+class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity"&gt;
+    &lt;div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]"&gt;
+        &lt;div class="bg-primary p-5 text-white text-center flex-shrink-0"&gt;
             &lt;div class="font-black text-xl mb-1 uppercase tracking-wide"&gt;Cài đặt LifeOS&lt;/div&gt;
             &lt;div class="text-xs font-medium opacity-90"&gt;Truy cập nhanh hơn - Trải nghiệm mượt mà&lt;/div&gt;
         &lt;/div&gt;
-        &lt;div id="smartGuideContent" class="p-6"&gt;&lt;/div&gt;
-        &lt;div class="p-4 bg-slate-50 text-center border-t border-slate-100"&gt;
-            &lt;button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors"&gt;Đóng lại&lt;/button&gt;
+        &lt;div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area"&gt;&lt;/div&gt;
+  
+         &lt;div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0"&gt;
+            &lt;button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2"&gt;Đóng lại&lt;/button&gt;
         &lt;/div&gt;
     &lt;/div&gt;
 &lt;/div&gt;
@@ -1768,17 +1771,16 @@ window.FirebaseSync={
                     const cleanCloudTodos = c.data.map(t =&gt; ({...t, id: String(t.id)}));
                     
                     if (cloudTime &gt; localTime || localTime === 0) {
-                        console.log(`🔥 [FIREBASE] Cloud (${cloudTime}) &gt; Local (${localTime}). CẬP NHẬT DOM!`);
                         window.todos = cleanCloudTodos;
                         localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(cleanCloudTodos));
                         localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
-                        window.renderTasksOnly(); // Bỏ block Visibility theo Quy tắc 7
                     } else if (localTime &gt; cloudTime) {
-                        console.log(`🔥 [FIREBASE] Local (${localTime}) &gt; Cloud (${cloudTime}). PUSH NGƯỢC LÊN CLOUD!`);
                         this.pushAll();
-                    } else {
-                        console.log(`🔥 [FIREBASE] Đồng bộ 100%. Bỏ qua Snapshot. (${cloudTime})`);
+                        return; // Đợi lượt push lên xong rồi render sau
                     }
+                    
+                    // Nhát cắt quyết định: Ép render trong mọi trường hợp (Trừ khi đang push ngược)
+                    window.renderTasksOnly();
                 }
                 
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
@@ -2007,7 +2009,14 @@ window.MusicApp = {
 // ==============================================================================
 // 8. KHỞI ĐỘNG VÀ PWA ENGINE (V46 THE FLAWLESS INSTALLER)
 // ==============================================================================
-document.addEventListener('DOMContentLoaded', () =&gt; {
+// Nhát cắt Self-Healing: Khi người dùng quay lại app, ép vẽ lại dữ liệu mới nhất
+    document.addEventListener('visibilitychange', () =&gt; {
+        if (document.visibilityState === 'visible' &amp;&amp; window.cloudSyncCompleted) {
+            console.log("🚀 [SENTINEL] Quay lại app - Kích hoạt vẽ lại dữ liệu.");
+            window.renderTasksOnly();
+            if (window.VaultUI) window.VaultUI.renderVaultCards();
+        }
+    });
     // V46 FIX: Đăng ký Service Worker và Mồi PWA Engine
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/mimihoalua/sw.js')
