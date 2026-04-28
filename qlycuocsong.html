@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V47 - The Master Blueprint</title>
+<title>LifeOS V48 - The Final Sentinel</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -118,7 +118,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     </div>
 
     <div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
-        <!-- V47 FIX: Gỡ bỏ hidden md:flex để hiện nút trên Mobile -->
+        <!-- V47/48 FIX: Gỡ bỏ hidden md:flex để hiện nút trên Mobile -->
         <div class="flex items-center gap-1.5 sm:gap-2">
             <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i> <span class="hidden md:inline">Trang chủ</span></a>
             <a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
@@ -391,7 +391,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </button>
 
 <div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <!-- V47 FIX: Thêm flex-col và max-h cho Modal PWA, ép scroll nội bộ cho content -->
+    <!-- V48 FIX: Khống chế tối đa chiều cao để content cuộn được -->
     <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
         <div class="bg-primary p-5 text-white text-center flex-shrink-0">
             <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
@@ -698,13 +698,12 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         if(ttsAudio) {
             ttsAudio.muted = false; ttsAudio.currentTime = 0;
-            // V47 FIX: Nối vòng lặp TTS báo thức vĩnh cửu sau mỗi 1.5s
+            // V47 FIX: Nối vòng lặp TTS báo thức vĩnh cửu
             ttsAudio.onended = () => {
                 if (window.isAlarmRinging) {
                     setTimeout(() => {
                         if (window.isAlarmRinging && ttsAudio) {
-                            ttsAudio.currentTime = 0;
-                            ttsAudio.play().catch(()=>{});
+                            ttsAudio.currentTime = 0; ttsAudio.play().catch(()=>{});
                             window.lastSpeechTime = Date.now();
                         }
                     }, 1500);
@@ -834,7 +833,7 @@ window.saveEditTask=id=>{
 
 window.syncManualDateToInput = (inputEl, targetId) => {
     if(!inputEl.value) return; const d = new Date(inputEl.value), target = el(targetId);
-    if(target) { target.value = `${target.value.replace(/\bngày.*$/i,'').trim()} ngày ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`; }
+    if(target) { target.value = `${target.value.replace(/ngày.*$/i,'').trim()} ngày ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`; }
     inputEl.value = '';
 };
 
@@ -922,8 +921,8 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
         c.innerHTML=d.map(e=>{
             const p=window.VaultUtils.parseSmartContent(e.content),ci=window.VaultUtils.getCategoryIcon(e.category),cl=window.VaultUtils.getCategoryLabel(e.category),sn=window.escapeHTML(e.name);
             let f='';
-            if(p.account) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-user text-cyan-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow">${window.escapeHTML(p.account)}</span><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.account).replace(/'/g,"\\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
-            if(p.password) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-key text-rose-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow font-mono vault-pw-field" data-pw="${window.escapeHTML(p.password).replace(/"/g,'&quot;')}">••••••••</span><button onclick="event.stopPropagation();window.VaultUI.togglePwVisibility(this)" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-eye text-sm"></i></button><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.password).replace(/'/g,"\\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
+            if(p.account) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-user text-cyan-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow">${window.escapeHTML(p.account)}</span><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.account).replace(/'/g,"\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
+            if(p.password) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-key text-rose-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow font-mono vault-pw-field" data-pw="${window.escapeHTML(p.password).replace(/"/g,'&quot;')}">••••••••</span><button onclick="event.stopPropagation();window.VaultUI.togglePwVisibility(this)" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-eye text-sm"></i></button><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.password).replace(/'/g,"\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
             if(p.totp) f+=`<div class="p-3 bg-amber-50 rounded-xl border border-amber-200 mb-2"><div class="font-mono text-2xl font-black text-slate-800 tracking-widest text-center vault-totp-code" data-secret="${window.escapeHTML(p.totp)}">------</div><div class="w-full bg-amber-200 rounded-full h-1.5 mt-2"><div class="bg-amber-500 h-1.5 rounded-full totp-progress"></div></div></div>`;
             if(p.link) f+=`<div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 mb-2"><i class="ph-bold ph-link text-emerald-500 text-lg flex-shrink-0"></i><a href="${window.escapeHTML(p.link)}" target="_blank" onclick="event.stopPropagation()" class="text-sm text-emerald-600 truncate flex-grow hover:underline">${window.escapeHTML(p.link)}</a></div>`;
             if(p.rawNotes) f+=`<div class="text-sm text-slate-600 mt-3 border-t border-slate-100 pt-2 whitespace-pre-wrap">${window.escapeHTML(p.rawNotes)}</div>`;
@@ -1046,8 +1045,16 @@ window.MusicApp = {
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         this.currentIndex=idx; this.playing=true; a.src=this.playlist[idx].stream_url; a.play(); this.renderList();
+        // V48 FIX: Trả lại hiệu ứng trồi lên cho Player khi ấn Play
+        el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
     },
-    togglePlay() { const a=el('mstq-player'); if(!a)return; if(this.playing){ a.pause(); this.playing=false; } else { a.play(); this.playing=true; } this.updateMiniPlayer(); },
+    togglePlay() { 
+        const a=el('mstq-player'); if(!a)return; 
+        if(this.playing){ a.pause(); this.playing=false; } else { a.play(); this.playing=true; } 
+        this.updateMiniPlayer(); 
+        // V48 FIX: Đảm bảo Toggle Play cũng gọi Player lên nếu nó đang ẩn
+        el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
+    },
     playNext() { this.play((this.currentIndex+1)%this.playlist.length); },
     playPrev() { this.play((this.currentIndex-1+this.playlist.length)%this.playlist.length); },
     toggleShuffle() { this.shuffle=!this.shuffle; this.updateMiniPlayer(); },
@@ -1068,6 +1075,9 @@ document.addEventListener('DOMContentLoaded', () => {
     else window.pwaEngine.init();
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
     
+    // V48 FIX: Tự động đánh thức Audio Engine trên giao diện Desktop (PC)
+    if(window.innerWidth >= 1024) { setTimeout(() => { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
+
     // V47 FIX: Self-Healing Sync khi quay lại app từ nền
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && window.cloudSyncCompleted) {
