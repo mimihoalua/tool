@@ -975,7 +975,7 @@ if __name__ == "__main__":
     </footer>
 
     <!-- Khối Toast Message -->
-    <div id="toast-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-xl z-[9999]">
+    <div id="toast-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-xl z-[9999]">
         <i class="ph-bold ph-check-circle" id="toast-icon"></i> <span id="toast-text">Đã sao chép!</span>
     </div>
 
@@ -996,7 +996,7 @@ if __name__ == "__main__":
             
             if(navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    showToast('Đã copy mã nguồn vào bộ nhớ tạm!', 'ph-copy');
+                    showToast('Đã copy mã nguồn vào bộ nhớ tạm!', 'success');
                 }).catch(err => { fallbackCopy(textarea); });
             } else {
                 fallbackCopy(textarea);
@@ -1008,22 +1008,33 @@ if __name__ == "__main__":
             textarea.setSelectionRange(0, 999999);
             try {
                 document.execCommand('copy');
-                showToast('Đã copy mã nguồn (Chế độ Fallback)!', 'ph-copy');
+                showToast('Đã copy mã nguồn (Chế độ Fallback)!', 'success');
             } catch (err) { alert('Trình duyệt của bạn chặn chức năng copy.'); }
             window.getSelection().removeAllRanges(); 
         }
 
-        // TOAST NOTIFICATION
+        // TOAST NOTIFICATION ĐƯỢC NÂNG CẤP ĐỂ HIỂN THỊ MÀU THEO TRẠNG THÁI
         let toastTimeout;
-        function showToast(message, iconClass = 'ph-check-circle') {
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast-msg');
             const text = document.getElementById('toast-text');
             const icon = document.getElementById('toast-icon');
             
-            text.innerText = message;
-            icon.className = `ph-bold ${iconClass}`;
+            // Xóa màu nền cũ
+            toast.classList.remove('bg-emerald-600', 'bg-rose-600');
             
+            // Set màu và icon dựa trên loại thông báo
+            if (type === 'error') {
+                toast.classList.add('bg-rose-600');
+                icon.className = `ph-bold ph-warning-circle`;
+            } else {
+                toast.classList.add('bg-emerald-600');
+                icon.className = `ph-bold ph-check-circle`;
+            }
+            
+            text.innerText = message;
             toast.classList.add('show');
+            
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
@@ -1033,22 +1044,24 @@ if __name__ == "__main__":
         // =====================================================================
         async function saveToGitHub(newContent, filePath) {
             // [QA PATCH]: Kỹ thuật Obfuscation để lách bot quét Secret của GitHub
-            // Lưu ý: Nếu lưu bị lỗi, token cũ có thể đã bị GitHub hủy. Bạn hãy tạo mã mới thay vào _p2
             const _p1 = 'ghp_';
             const _p2 = '5P3IueuU8nMAo8CBrn1yW5zFk9IhTa4BO4OK';
             const token = _p1 + _p2;
             
             const owner = 'mimihoalua';
             const repo = 'tool';
-            const path = filePath;
+            
+            // [TỬ HUYỆT ĐÃ ĐƯỢC VÁ]: Tách bạch 2 đường dẫn để tránh lỗi CORS Network
+            // Đường dẫn sạch dùng để ghi file (lệnh PUT ghét tham số lạ)
+            const cleanUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+            // Đường dẫn chống Cache dùng để đọc file SHA (lệnh GET)
+            const getUrl = `${cleanUrl}?nocache=${Date.now()}`;
 
             // Mã hóa nội dung Unicode để tránh lỗi tiếng Việt
             const base64Content = btoa(unescape(encodeURIComponent(newContent)));
 
             try {
-                // Lấy SHA của file hiện tại để GitHub cho phép ghi đè 
-                // [QA UPGRADE] Thêm timestamp ?t=Date.now() để chống trình duyệt cache lại SHA cũ
-                const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?t=${Date.now()}`;
+                // 1. Đọc mã băm (SHA) hiện tại bằng URL có đuôi chống Cache
                 const getRes = await fetch(getUrl, {
                     headers: { 
                         'Authorization': `token ${token}`,
@@ -1062,7 +1075,7 @@ if __name__ == "__main__":
                     currentSha = fileData.sha;
                 } else if (getRes.status !== 404) {
                     console.error("Lỗi lấy SHA:", await getRes.json());
-                    showToast(`Lỗi kiểm tra file ${filePath} trên GitHub!`, "ph-warning-circle");
+                    showToast(`Lỗi kiểm tra file ${filePath} trên GitHub!`, "error");
                     return false;
                 }
 
@@ -1072,8 +1085,8 @@ if __name__ == "__main__":
                 };
                 if (currentSha) bodyData.sha = currentSha;
 
-                // Ghi đè (Tạo Commit)
-                const putRes = await fetch(getUrl, {
+                // 2. Ghi đè (Tạo Commit) - BẮT BUỘC DÙNG CLEAN URL
+                const putRes = await fetch(cleanUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${token}`,
@@ -1083,16 +1096,16 @@ if __name__ == "__main__":
                 });
 
                 if (putRes.ok) {
-                    showToast(`Đã Push Commit thành công: ${filePath}`, "ph-cloud-check");
+                    showToast(`Đã Push Commit thành công: ${filePath}`, "success");
                     return true;
                 } else {
                     console.error("Lỗi ghi đè:", await putRes.json());
-                    showToast(`Lỗi khi Commit ${filePath}`, "ph-warning-circle");
+                    showToast(`Lỗi khi Commit ${filePath}`, "error");
                     return false;
                 }
             } catch (err) {
                 console.error("Fetch Error:", err);
-                showToast("Lỗi mạng khi kết nối GitHub API", "ph-wifi-slash");
+                showToast("Lỗi mạng (CORS) khi kết nối GitHub API", "error");
                 return false;
             }
         }
