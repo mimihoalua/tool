@@ -68,7 +68,7 @@
                 </div>
                 <div class="hidden sm:block">
                     <span class="text-lg font-black text-white tracking-tight">LifeOS</span>
-                    <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md ml-1 border border-indigo-500/20">The Master Blueprint</span>
+                    <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md ml-1 border border-indigo-500/20">The Master Blueprint V47</span>
                 </div>
             </div>
             
@@ -346,7 +346,7 @@
                             </div>
                             <h3 class="text-lg font-black text-white mb-2">Trình Soạn Thảo Live</h3>
                             <p class="text-slate-400 text-sm font-medium text-center max-w-md px-4 leading-relaxed">
-                                Vui lòng <b class="text-indigo-400">Quét Cấu Trúc</b> ➔ Chọn file ➔ Bấm <b class="text-indigo-400">Tải Dữ Liệu Live</b> từ GitHub để kéo Full Code về bắt đầu sửa!
+                                Vui lòng <b class="text-indigo-400">Quét Cấu Trúc</b> ➔ Chọn file ➔ Bấm <b class="text-indigo-400">Tải Dữ Liệu Live</b> từ máy chủ GitHub để kéo Full Code về bắt đầu sửa!
                             </p>
                         </div>
 
@@ -498,34 +498,57 @@
         }
 
         // =====================================================================
-        // 3. META-EDITOR ENGINE (EXTRACT & INJECT)
+        // 3. META-EDITOR ENGINE (EXTRACT & INJECT THÔNG MINH MỌI CHUẨN)
         // =====================================================================
         function encodeHTMLEntities(text) { return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
         function decodeHTMLEntities(text) { const txt = document.createElement("textarea"); txt.innerHTML = text; return txt.value; }
 
-        function extractBlock(raw, id) {
-            // Hỗ trợ quét cả textarea và code để tương thích ngược mọi phiên bản
-            const regex = new RegExp(`(<(?:textarea|code)[^>]*id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/(?:textarea|code)>)`, 'i');
-            const match = raw.match(regex); return match ? decodeHTMLEntities(match[2].trim()) : "";
+        function extractBlockSmart(raw, id1, id2) {
+            let regex1 = new RegExp(`(<(?:textarea|code|pre)[^>]*id=["']${id1}["'][^>]*>(?:\\s*<code[^>]*>)?)([\\s\\S]*?)((?:<\\/code>\\s*)?<\\/(?:textarea|code|pre)>)`, 'i');
+            let m1 = raw.match(regex1);
+            if (m1) return decodeHTMLEntities(m1[2].trim());
+            
+            let regex2 = new RegExp(`(<(?:textarea|code|pre)[^>]*id=["']${id2}["'][^>]*>(?:\\s*<code[^>]*>)?)([\\s\\S]*?)((?:<\\/code>\\s*)?<\\/(?:textarea|code|pre)>)`, 'i');
+            let m2 = raw.match(regex2);
+            if (m2) return decodeHTMLEntities(m2[2].trim());
+            
+            return null;
         }
 
         function extractFromTotal() {
             const raw = document.getElementById('liveEditor').value;
-            const m = extractBlock(raw, 'code-manifest'); if (m) document.getElementById('code-manifest').value = m;
-            const c = extractBlock(raw, 'code-core'); if (c) document.getElementById('code-core').value = c;
-            const t = extractBlock(raw, 'code-test'); if (t) document.getElementById('code-test').value = t;
+            
+            const m = extractBlockSmart(raw, 'code-manifest', 'manifest-content');
+            document.getElementById('code-manifest').value = m !== null ? m : "⚠️ KHÔNG TÌM THẤY MÃ NGUỒN MANIFEST TRONG FILE GỐC!";
+            
+            const c = extractBlockSmart(raw, 'code-core', 'html-content');
+            document.getElementById('code-core').value = c !== null ? c : "⚠️ KHÔNG TÌM THẤY MÃ NGUỒN HTML CORE TRONG FILE GỐC!";
+            
+            const t = extractBlockSmart(raw, 'code-test', 'py-content');
+            document.getElementById('code-test').value = t !== null ? t : "⚠️ KHÔNG TÌM THẤY MÃ NGUỒN PYTHON TRONG FILE GỐC!";
         }
 
-        function injectBlock(raw, id, newValue) {
-            const regex = new RegExp(`(<(?:textarea|code)[^>]*id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/(?:textarea|code)>)`, 'i');
-            if(!raw.match(regex)) return raw;
-            return raw.replace(regex, (m, p1, p2, p3) => p1 + "\n" + encodeHTMLEntities(newValue).trim() + "\n" + p3);
+        function injectBlockSmart(raw, id1, id2, newValue) {
+            let regex1 = new RegExp(`(<(?:textarea|code|pre)[^>]*id=["']${id1}["'][^>]*>(?:\\s*<code[^>]*>)?)([\\s\\S]*?)((?:<\\/code>\\s*)?<\\/(?:textarea|code|pre)>)`, 'i');
+            if (raw.match(regex1)) {
+                return raw.replace(regex1, (m, p1, p2, p3) => p1 + "\n" + encodeHTMLEntities(newValue).trim() + "\n" + p3);
+            }
+            
+            let regex2 = new RegExp(`(<(?:textarea|code|pre)[^>]*id=["']${id2}["'][^>]*>(?:\\s*<code[^>]*>)?)([\\s\\S]*?)((?:<\\/code>\\s*)?<\\/(?:textarea|code|pre)>)`, 'i');
+            if (raw.match(regex2)) {
+                return raw.replace(regex2, (m, p1, p2, p3) => p1 + "\n" + encodeHTMLEntities(newValue).trim() + "\n" + p3);
+            }
+            
+            return raw; 
         }
 
         function syncToMain(subId, label) {
             let raw = document.getElementById('liveEditor').value;
             const newVal = document.getElementById(subId).value;
-            raw = injectBlock(raw, subId, newVal);
+            
+            let altId = subId === 'code-manifest' ? 'manifest-content' : subId === 'code-core' ? 'html-content' : 'py-content';
+            
+            raw = injectBlockSmart(raw, subId, altId, newVal);
             document.getElementById('liveEditor').value = raw;
             
             showToast(`Đã đồng bộ ${label} vào Khung Tổng! 🚀`, 'success');
@@ -682,7 +705,7 @@
                     switchWorkspaceTab('tab-manifest');
                     showToast("Đã tải trực tiếp file Manifest!", "success");
                 } 
-                else if (fileName.includes('lifeos.html') || fileName.includes('qlycuocsong.html')) {
+                else if (fileName.includes('lifeos.html') || fileName.includes('qlycuocsong.html') || fileName.includes('aiolifeos.html')) {
                     // Nếu là File Blueprint Meta-Editor (có chứa aio, read)
                     if (fileName.includes('read') || fileName.includes('aio')) {
                         window.currentMode = 'META_EDITOR';
