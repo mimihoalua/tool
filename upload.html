@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V35 - CONTROL MASTER</title>
+    <title>Archive Manager V36 - ULTRA DEBUG</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -93,7 +93,6 @@
         
         #offline-banner { display: none; background: #dc2626; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* BUTTON LAYOUT CHO ĐIỀU KHIỂN UPLOAD */
         .upload-controls { display: flex; gap: 10px; }
         .upload-controls .btn { margin-bottom: 0; }
         #stopBtn { display: none; flex: 1; }
@@ -123,7 +122,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu - V35 CÓ NÚT DỪNG KHẨN CẤP</h2>
+        <h2>🚀 Tải lên Dữ liệu - V36 ULTRA DEBUG</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -169,7 +168,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Nút dừng khẩn cấp.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp ULTRA DEBUG (Bắt mọi Event).</span></div>
         </div>
     </div>
 
@@ -183,9 +182,6 @@
     </button>
 
     <script>
-        // ==========================================
-        // SMART FALLBACK: TỰ PHỤC HỒI KHI RỚT MẠNG
-        // ==========================================
         window.isNetworkOnline = navigator.onLine;
 
         window.addEventListener('offline', () => {
@@ -208,9 +204,6 @@
             }
         }
 
-        // ==========================================
-        // PWA ENGINE
-        // ==========================================
         const logicCore = {
             deferredPrompt: null,
             state: {
@@ -284,9 +277,6 @@
         
         document.addEventListener('DOMContentLoaded', () => logicCore.init());
 
-        // ==========================================
-        // CẤU HÌNH API & TRẠNG THÁI TIẾN TRÌNH
-        // ==========================================
         const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
         const SECRET_KEY = "4mXmgt0qKjZOi2g2";
         const ACCOUNT_QUERY = "xiemsansang";
@@ -294,9 +284,8 @@
         window.serverCache = new Set();
         window.isCacheLoaded = false; 
         
-        // CỜ KIỂM SOÁT DỪNG KHẨN CẤP
         window.isUploading = false;
-        window.activeXHRs = new Set(); // Mảng chứa các kết nối mạng đang sống
+        window.activeXHRs = new Set(); 
 
         let wakeLockObj = null;
 
@@ -414,11 +403,11 @@
             s = s.replace(/[^a-zA-Z0-9\.\-\_]/g, "_"); 
             s = s.replace(/_+/g, "_").replace(/^_|_$/g, ""); 
             
-            // CẤP CỨU: Nếu tên file bị gọt sạch sẽ do toàn tiếng Trung/ký tự lạ
+            // DAO MỔ V36: Ráp cứng tên an toàn nếu tên bị nát bét để file KHÔNG THỂ LỖI do tên
             const nameWithoutExt = s.replace(/\.[^/.]+$/, "");
             if (nameWithoutExt.length < 2 || !/[a-zA-Z0-9]/.test(nameWithoutExt)) {
                 const safeName = `Audio_An_Toan_${Date.now()}_${Math.floor(Math.random() * 1000)}${originalExtension}`;
-                addLog(`[CẤP CỨU] Ký tự lạ đã bị bộ lọc xóa. Tự động sinh tên: ${safeName}`, "warn");
+                addLog(`[ULTRA DEBUG] Bộ lọc đã ép tên an toàn: ${safeName}`, "warn");
                 return safeName;
             }
             return s; 
@@ -592,9 +581,6 @@
             } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
         }
 
-        // ==========================================
-        // KHỐI XỬ LÝ UPLOAD CHÍNH CÓ NÚT DỪNG KHẨN CẤP
-        // ==========================================
         const elProgressUI = document.getElementById('progressUI');
         const elProgressName = document.getElementById('progressName');
         const elProgressPercent = document.getElementById('progressPercent');
@@ -624,18 +610,15 @@
             });
         }
 
-        // 🔪 HÀM DỪNG TẢI LÊN KHẨN CẤP
         function stopUpload() {
             if (!window.isUploading) return;
             
-            window.isUploading = false; // Ngắt cờ vòng lặp Queue
+            window.isUploading = false; 
             addLog("ĐANG HỦY CÁC LUỒNG TẢI LÊN...", "warn", true);
             
-            // Giết chết toàn bộ các kết nối mạng đang mở
             window.activeXHRs.forEach(xhr => xhr.abort());
             window.activeXHRs.clear();
             
-            // Khôi phục nút bấm giao diện
             document.getElementById('uploadBtn').style.display = 'block';
             document.getElementById('uploadBtn').disabled = false;
             document.getElementById('stopBtn').style.display = 'none';
@@ -651,7 +634,7 @@
                 const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                 
                 let safeUrlName = toAscii(baseName, trueExtension);
-                if (!safeUrlName.endsWith(trueExtension)) safeUrlName += trueExtension; // Bọc lỗi
+                if (!safeUrlName.endsWith(trueExtension)) safeUrlName += trueExtension; 
                 
                 if (window.serverCache.has(safeUrlName)) {
                     addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
@@ -659,21 +642,30 @@
                 }
 
                 const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeUrlName)}`;
-                addLog(`Đang tải lên ${safeUrlName}`, "info"); 
+                addLog(`[ULTRA DEBUG] Gọi lệnh Tải lên URL: ${safeUrlName}`, "info"); 
 
                 for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                    // Nếu user đã ấn STOP, thoát khỏi vòng lặp ngay lập tức
                     if (!window.isUploading) return resolve(false);
 
                     await waitForNetwork(); 
                     try {
                         const success = await new Promise((innerResolve, innerReject) => {
                             const jsTimeout = setTimeout(() => {
+                                addLog(`[ULTRA DEBUG] Timeout kích hoạt do XHR treo cứng 3.5 phút. Cưỡng chế ngắt luồng.`, "error");
                                 innerReject(new Error("Timeout JS"));
                             }, 210000); 
 
                             const xhr = new XMLHttpRequest();
-                            window.activeXHRs.add(xhr); // Nạp mạng sống của XHR vào mảng quản lý
+                            window.activeXHRs.add(xhr); 
+                            
+                            // ULTRA DEBUG: Bắt mọi nhịp đập của XHR
+                            xhr.addEventListener('loadstart', () => addLog(`[ULTRA DEBUG] XHR LoadStart...`, "event"));
+                            xhr.addEventListener('progress', (e) => {
+                                if (e.lengthComputable) {
+                                    // addLog(`[ULTRA DEBUG] XHR Progress: ${Math.floor((e.loaded / e.total) * 100)}%`, "event");
+                                    updateOverallProgress(window.completedFilesCount, window.totalFilesCount); // Giữ nguyên hàm cập nhật gốc
+                                }
+                            });
                             
                             xhr.open('PUT', url, true);
                             xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
@@ -683,7 +675,8 @@
                             
                             xhr.onload = () => {
                                 clearTimeout(jsTimeout);
-                                window.activeXHRs.delete(xhr); // Sống sót thì xóa khỏi mảng
+                                window.activeXHRs.delete(xhr);
+                                addLog(`[ULTRA DEBUG] XHR OnLoad (HTTP ${xhr.status})`, "event");
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     innerResolve(true);
                                 } else {
@@ -697,16 +690,17 @@
                                 }
                             };
                             
-                            xhr.onerror = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Mất kết nối mạng")); };
-                            // Khi bị Cầu dao (abort) cắt đứt:
-                            xhr.onabort = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Tiến trình bị hủy bởi người dùng")); };
-                            xhr.ontimeout = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Timeout Archive")); };
+                            xhr.onerror = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnError: Lỗi mạng chặn kết nối`, "error"); innerReject(new Error("Mất kết nối mạng")); };
+                            xhr.onabort = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnAbort: Bị người dùng hủy`, "warn"); innerReject(new Error("Tiến trình bị hủy bởi người dùng")); };
+                            xhr.ontimeout = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnTimeout: Máy chủ Archive ngâm kết nối quá 3 phút`, "error"); innerReject(new Error("Timeout Archive")); };
                             
                             try {
+                                addLog(`[ULTRA DEBUG] Gửi Dữ liệu XHR.send()...`, "event");
                                 xhr.send(file);
                             } catch(err) {
                                 clearTimeout(jsTimeout);
                                 window.activeXHRs.delete(xhr);
+                                addLog(`[ULTRA DEBUG] Lỗi Crash khi Send XHR: ${err.message}`, "error");
                                 innerReject(err);
                             }
                         });
@@ -718,17 +712,17 @@
                         }
                         
                     } catch (error) {
-                        if (error.message.includes("bị hủy")) return resolve(false); // Tránh rác log khi bị user ấn STOP
+                        if (error.message.includes("bị hủy")) return resolve(false); 
 
                         if (attempt === maxRetries) { 
-                            addLog(`Tải thất bại hoàn toàn file: ${safeUrlName} - Lý do: ${error.message}`, "error", true); 
+                            addLog(`[ULTRA DEBUG] Tải thất bại hoàn toàn file: ${safeUrlName} - Lý do: ${error.message}`, "error", true); 
                             return resolve(false); 
                         }
                         
                         const baseDelay = 3000 * Math.pow(2, attempt - 1); 
                         const jitter = Math.random() * 1000; 
                         const finalDelay = baseDelay + jitter;
-                        addLog(`Nghẽn mạng luồng này. Thử lại sau ${(finalDelay/1000).toFixed(1)}s`, "warn"); 
+                        addLog(`[ULTRA DEBUG] Nghẽn mạng. Đang lùi bước... Thử lại sau ${(finalDelay/1000).toFixed(1)}s`, "warn"); 
                         await new Promise(r => setTimeout(r, finalDelay));
                     }
                 }
@@ -749,7 +743,6 @@
                 await loadServerFiles();
             }
 
-            // GIAO DIỆN NÚT BẤM (Ẩn Bắt đầu, Hiện Dừng)
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
             elProgressUI.style.display = 'block';
@@ -757,17 +750,17 @@
             window.isUploading = true;
             addLog(`Bắt đầu tải lên ĐA LUỒNG (${files.length} files)`, "api", true);
 
-            let completedFilesCount = 0;
-            const totalFilesCount = files.length;
+            // Gán ra Window để hàm progress bên trong XHR truy cập được
+            window.completedFilesCount = 0;
+            window.totalFilesCount = files.length;
             const queue = Array.from(files);
             let activeUploads = 0;
             const MAX_CONCURRENT = 3; 
 
-            updateOverallProgress(0, totalFilesCount);
+            updateOverallProgress(0, window.totalFilesCount);
 
             await new Promise((resolve) => {
                 const processNext = async () => {
-                    // Nếu user ấn STOP, isUploading sẽ false. Vòng lặp dừng lại.
                     if ((queue.length === 0 || !window.isUploading) && activeUploads === 0) {
                         resolve();
                         return;
@@ -778,10 +771,9 @@
                         
                         uploadSingleFileWithXHR(identifier, file).finally(() => {
                             activeUploads--;
-                            // Chỉ đếm % nếu không phải bị user Hủy
                             if (window.isUploading) {
-                                completedFilesCount++;
-                                updateOverallProgress(completedFilesCount, totalFilesCount);
+                                window.completedFilesCount++;
+                                updateOverallProgress(window.completedFilesCount, window.totalFilesCount);
                             }
                             processNext();
                         });
@@ -790,13 +782,11 @@
                 processNext();
             });
 
-            // Nếu vòng lặp kết thúc do tải xong (Không phải do ấn Nút Dừng)
             if (window.isUploading) {
                 addLog("Tuyệt vời. Toàn bộ tiến trình đa luồng đã hoàn tất.", "success", true);
-                updateOverallProgress(totalFilesCount, totalFilesCount);
+                updateOverallProgress(window.totalFilesCount, window.totalFilesCount);
                 elProgressBar.style.background = '#10b981';
                 
-                // Trả lại nút Bắt đầu
                 document.getElementById('uploadBtn').style.display = 'block';
                 document.getElementById('uploadBtn').disabled = false;
                 document.getElementById('stopBtn').style.display = 'none';
