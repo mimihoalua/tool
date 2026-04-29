@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V38 - ULTRA DEBUG</title>
+    <title>Archive Manager V39 - LOGIC MASTER</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -122,7 +122,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu - V38 ULTRA DEBUG</h2>
+        <h2>🚀 Tải lên Dữ liệu - V39 LOGIC MASTER</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -168,7 +168,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V38 khởi động. Đã cấy ULTRA DEBUG & PRE-WATCHDOG.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V39 khởi động. Đã tích hợp Định Danh Bất Biến (Hash) & Watchdog 180s.</span></div>
         </div>
     </div>
 
@@ -396,20 +396,36 @@
             }, duration);
         }
 
-        function toAscii(str, originalExtension = "") {
+        // ==========================================
+        // V39: ĐỊNH DANH BẤT BIẾN (DETERMINISTIC HASH)
+        // ==========================================
+        // Hàm băm tên gốc thành một mã HEX cố định (Cùng 1 tên file luôn ra đúng 1 mã)
+        function generateFixedHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; 
+            }
+            return Math.abs(hash).toString(36); // Chuyển thành chuỗi chữ/số ngắn
+        }
+
+        function toAscii(str, originalExtension = "", rawOriginalName = "") {
             let s = str.normalize("NFD").replace(/[̀-ͯ]/g, ""); 
             s = s.replace(/đ/g, "d").replace(/Đ/g, "D"); 
             s = s.replace(/[^a-zA-Z0-9\.\-\_]/g, "_"); 
             s = s.replace(/_+/g, "_").replace(/^_|_$/g, ""); 
             
             let nameWithoutExt = s.replace(/\.[^/.]+$/, "");
+            const fixedHash = generateFixedHash(rawOriginalName || str);
             
+            // Cấp cứu nếu rỗng do rặt tiếng Trung: Ghép chữ Audio + Mã Hash bất biến
             if (nameWithoutExt.length < 2 || !/[a-zA-Z0-9]/.test(nameWithoutExt)) {
-                return `Audio_${Date.now()}_${Math.floor(Math.random() * 1000)}${originalExtension}`;
+                return `Audio_An_Toan_${fixedHash}${originalExtension}`;
             }
             
+            // Cắt gọt nếu dài quá: Lấy 40 ký tự đầu + Mã Hash bất biến
             if (nameWithoutExt.length > 50) {
-                nameWithoutExt = nameWithoutExt.substring(0, 45) + `_${Math.floor(Math.random()*100)}`;
+                nameWithoutExt = nameWithoutExt.substring(0, 40) + `_${fixedHash}`;
             }
             
             return nameWithoutExt + originalExtension; 
@@ -565,7 +581,8 @@
 
             await waitForNetwork();
 
-            const safeNewName = toAscii(newName, newName.substring(newName.lastIndexOf('.')));
+            // Vẫn dùng Hash để đảm bảo tên an toàn
+            const safeNewName = toAscii(newName, newName.substring(newName.lastIndexOf('.')), newName);
             addLog(`Đang đổi tên file`, "api", true);
 
             const sourcePath = `/${identifier}/${encodeURIComponent(oldName)}`;
@@ -630,15 +647,13 @@
             releaseWakeLock();
         }
 
-        // ==========================================
-        // V38 ULTRA DEBUG & PRE-WATCHDOG
-        // ==========================================
         function uploadSingleFileWithXHR(identifier, file, maxRetries = 3) {
             return new Promise(async (resolve) => {
                 const trueExtension = await probeFileInnerData(file);
                 const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                 
-                let safeUrlName = toAscii(baseName, trueExtension);
+                // V39: TRUYỀN VÀO TÊN GỐC (file.name) ĐỂ BĂM MÃ HASH
+                let safeUrlName = toAscii(baseName, trueExtension, file.name);
                 
                 if (window.serverCache.has(safeUrlName)) {
                     addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
@@ -657,30 +672,20 @@
                             const xhr = new XMLHttpRequest();
                             window.activeXHRs.add(xhr); 
                             
-                            // 🔪 V38 PRE-WATCHDOG: Kích hoạt CHÓ SĂN NGAY BÂY GIỜ (Khỏi đợi LoadStart)
+                            // V39: NỚI LỎNG CHÓ SĂN LÊN 3 PHÚT (180s) CHO MẠNG YẾU/FILE LỚN
                             let idleWatchdog;
                             const resetWatchdog = () => {
                                 clearTimeout(idleWatchdog);
                                 idleWatchdog = setTimeout(() => {
-                                    addLog(`[ULTRA DEBUG] Trình duyệt đơ/Mất mạng câm 60s. Chém đứt luồng!`, "error");
+                                    addLog(`[ULTRA DEBUG] Trình duyệt đơ/Mất mạng câm 180s. Chém đứt luồng!`, "error");
                                     xhr.abort();
                                     innerReject(new Error("Idle Timeout"));
-                                }, 60000); 
+                                }, 180000); 
                             };
-                            resetWatchdog(); // Bật chó săn ngay lập tức trước khi Send!
-
-                            // ULTRA DEBUG EVENTS
-                            xhr.onreadystatechange = () => {
-                                addLog(`[ULTRA DEBUG] XHR ReadyState đổi thành: ${xhr.readyState}`, "event");
-                            };
-                            
-                            xhr.upload.addEventListener('loadstart', () => {
-                                addLog(`[ULTRA DEBUG] XHR Bắt đầu truyền dữ liệu (LoadStart)`, "event");
-                                resetWatchdog();
-                            });
+                            resetWatchdog(); 
                             
                             xhr.upload.addEventListener('progress', (e) => {
-                                resetWatchdog(); // Có tiến độ -> Cho sống tiếp
+                                resetWatchdog(); 
                             });
                             
                             xhr.open('PUT', url, true);
@@ -690,7 +695,6 @@
                             xhr.onload = () => {
                                 clearTimeout(idleWatchdog);
                                 window.activeXHRs.delete(xhr);
-                                addLog(`[ULTRA DEBUG] XHR OnLoad hoàn tất (HTTP ${xhr.status})`, "event");
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     innerResolve(true);
                                 } else {
@@ -704,16 +708,14 @@
                                 }
                             };
                             
-                            xhr.onerror = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnError`, "error"); innerReject(new Error("Mất kết nối mạng")); };
-                            xhr.onabort = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnAbort`, "warn"); innerReject(new Error("Bị hủy")); };
+                            xhr.onerror = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Mất kết nối mạng")); };
+                            xhr.onabort = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Bị hủy")); };
                             
                             try {
-                                addLog(`[ULTRA DEBUG] Đẩy lệnh xhr.send()`, "event");
                                 xhr.send(file);
                             } catch(err) {
                                 clearTimeout(idleWatchdog);
                                 window.activeXHRs.delete(xhr);
-                                addLog(`[ULTRA DEBUG] JS Exception lúc Send: ${err.message}`, "error");
                                 innerReject(err);
                             }
                         });
