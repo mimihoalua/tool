@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V37 - WATCHDOG MASTER</title>
+    <title>Archive Manager V38 - ULTRA DEBUG</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -122,7 +122,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu - V37 WATCHDOG</h2>
+        <h2>🚀 Tải lên Dữ liệu - V38 ULTRA DEBUG</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -168,7 +168,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V37 khởi động. Đã cấy Chó Săn Sinh Tồn (Idle Watchdog). Hỗ trợ tải file > 100MB.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V38 khởi động. Đã cấy ULTRA DEBUG & PRE-WATCHDOG.</span></div>
         </div>
     </div>
 
@@ -396,9 +396,6 @@
             }, duration);
         }
 
-        // ==========================================
-        // V37 SMART NAMING (CẮT GỌT TÊN QUÁ DÀI)
-        // ==========================================
         function toAscii(str, originalExtension = "") {
             let s = str.normalize("NFD").replace(/[̀-ͯ]/g, ""); 
             s = s.replace(/đ/g, "d").replace(/Đ/g, "D"); 
@@ -407,15 +404,12 @@
             
             let nameWithoutExt = s.replace(/\.[^/.]+$/, "");
             
-            // Cấp cứu nếu rỗng
             if (nameWithoutExt.length < 2 || !/[a-zA-Z0-9]/.test(nameWithoutExt)) {
                 return `Audio_${Date.now()}_${Math.floor(Math.random() * 1000)}${originalExtension}`;
             }
             
-            // V37 DAO MỔ: Chặt đứt tên nếu quá dài (Archive.org giới hạn độ dài Key S3)
             if (nameWithoutExt.length > 50) {
                 nameWithoutExt = nameWithoutExt.substring(0, 45) + `_${Math.floor(Math.random()*100)}`;
-                addLog(`[HỆ THỐNG] Đã tự động cắt ngắn tên file để chống lỗi máy chủ.`, "event");
             }
             
             return nameWithoutExt + originalExtension; 
@@ -631,13 +625,13 @@
             document.getElementById('uploadBtn').disabled = false;
             document.getElementById('stopBtn').style.display = 'none';
             
-            addLog("Đã chủ động Dừng tiến trình. Bấm Upload lại để tải tiếp các file còn sót.", "error", true);
+            addLog("Đã chủ động Dừng tiến trình.", "error", true);
             showToast("Đã dừng tải lên!", "error");
             releaseWakeLock();
         }
 
         // ==========================================
-        // V37 CHÓ SĂN SINH TỒN (IDLE WATCHDOG)
+        // V38 ULTRA DEBUG & PRE-WATCHDOG
         // ==========================================
         function uploadSingleFileWithXHR(identifier, file, maxRetries = 3) {
             return new Promise(async (resolve) => {
@@ -663,23 +657,31 @@
                             const xhr = new XMLHttpRequest();
                             window.activeXHRs.add(xhr); 
                             
-                            // 🔪 V37: IDLE WATCHDOG
+                            // 🔪 V38 PRE-WATCHDOG: Kích hoạt CHÓ SĂN NGAY BÂY GIỜ (Khỏi đợi LoadStart)
                             let idleWatchdog;
                             const resetWatchdog = () => {
                                 clearTimeout(idleWatchdog);
                                 idleWatchdog = setTimeout(() => {
-                                    addLog(`[WATCHDOG] Luồng bị treo (60s không có dữ liệu tải lên). Tự động chém đứt!`, "error");
+                                    addLog(`[ULTRA DEBUG] Trình duyệt đơ/Mất mạng câm 60s. Chém đứt luồng!`, "error");
                                     xhr.abort();
                                     innerReject(new Error("Idle Timeout"));
-                                }, 60000); // Đơ 60 giây mới chém
+                                }, 60000); 
+                            };
+                            resetWatchdog(); // Bật chó săn ngay lập tức trước khi Send!
+
+                            // ULTRA DEBUG EVENTS
+                            xhr.onreadystatechange = () => {
+                                addLog(`[ULTRA DEBUG] XHR ReadyState đổi thành: ${xhr.readyState}`, "event");
                             };
                             
-                            xhr.upload.addEventListener('loadstart', resetWatchdog);
+                            xhr.upload.addEventListener('loadstart', () => {
+                                addLog(`[ULTRA DEBUG] XHR Bắt đầu truyền dữ liệu (LoadStart)`, "event");
+                                resetWatchdog();
+                            });
+                            
                             xhr.upload.addEventListener('progress', (e) => {
                                 resetWatchdog(); // Có tiến độ -> Cho sống tiếp
                             });
-                            
-                            // ĐÃ GỠ BỎ xhr.timeout VÀ jsTimeout 3 PHÚT
                             
                             xhr.open('PUT', url, true);
                             xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
@@ -688,11 +690,13 @@
                             xhr.onload = () => {
                                 clearTimeout(idleWatchdog);
                                 window.activeXHRs.delete(xhr);
+                                addLog(`[ULTRA DEBUG] XHR OnLoad hoàn tất (HTTP ${xhr.status})`, "event");
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     innerResolve(true);
                                 } else {
                                     let errorDetail = `Lỗi HTTP ${xhr.status}`;
                                     if(xhr.responseText) {
+                                        addLog(`[S3 RAW] ${xhr.responseText}`, "error");
                                         const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/);
                                         if(match) errorDetail = `S3: ${match[1]}`;
                                     }
@@ -700,14 +704,16 @@
                                 }
                             };
                             
-                            xhr.onerror = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Mất kết nối mạng")); };
-                            xhr.onabort = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Bị hủy")); };
+                            xhr.onerror = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnError`, "error"); innerReject(new Error("Mất kết nối mạng")); };
+                            xhr.onabort = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); addLog(`[ULTRA DEBUG] XHR OnAbort`, "warn"); innerReject(new Error("Bị hủy")); };
                             
                             try {
+                                addLog(`[ULTRA DEBUG] Đẩy lệnh xhr.send()`, "event");
                                 xhr.send(file);
                             } catch(err) {
                                 clearTimeout(idleWatchdog);
                                 window.activeXHRs.delete(xhr);
+                                addLog(`[ULTRA DEBUG] JS Exception lúc Send: ${err.message}`, "error");
                                 innerReject(err);
                             }
                         });
