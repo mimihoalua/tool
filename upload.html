@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
     
-    <!-- KHAI BÁO PWA LIÊN KẾT ĐẾN FILE MANIFEST THẬT TRÊN GITHUB -->
     <link id="manifest-link" rel="manifest" href="/tool/manifest_upload.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V30 - SMART PWA</title>
+    <title>Archive Manager V31 - MASTER PWA</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -77,9 +76,7 @@
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-        /* ==========================================
-           PWA SMART INSTALLER UI
-           ========================================== */
+        /* PWA SMART INSTALLER UI */
         .pwa-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box; backdrop-filter: blur(4px); }
         .pwa-modal-overlay.active { display: flex; animation: slideDown 0.3s ease-out; }
         .pwa-modal-content { width: 100%; max-width: 360px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 2px solid #ee4d2d; }
@@ -99,17 +96,20 @@
         /* Bắn cảnh báo Zalo / Messenger */
         .in-app-blocker { display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         .in-app-blocker.active { display: flex; }
+        
+        /* Offline Indicator */
+        #offline-banner { display: none; background: #dc2626; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <!-- IN-APP BROWSER BLOCKER -->
+    <div id="offline-banner">MẤT KẾT NỐI MẠNG. ỨNG DỤNG ĐANG NGỦ ĐÔNG...</div>
+
     <div id="inAppBlocker" class="in-app-blocker">
         <h1 style="color: #f87171; font-size: 24px; margin-bottom: 10px;">⚠️ CẢNH BÁO</h1>
         <p style="font-size: 16px; line-height: 1.5; color: #cbd5e1;">Hệ thống không thể hoạt động trong trình duyệt nhúng của Zalo/Facebook/TikTok.</p>
         <p style="margin-top: 20px; font-weight: bold; color: white;">Vui lòng bấm vào Menu (⋮) góc phải và chọn<br><br><span style="background: #2563eb; padding: 8px 16px; border-radius: 6px;">Mở bằng trình duyệt (Chrome/Safari)</span></p>
     </div>
 
-    <!-- PWA HEALTH MODAL (SMART GUIDE) -->
     <div id="pwaHealthModal" class="pwa-modal-overlay">
         <div class="pwa-modal-content">
             <div class="pwa-modal-header">
@@ -124,7 +124,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu (Upload) - PWA V30</h2>
+        <h2>🚀 Tải lên Dữ liệu (Upload) - PWA V31</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -161,14 +161,13 @@
         </div>
     </div>
 
-    <!-- ACCORDION X-RAY LOG -->
     <div class="card" style="background: #0f172a; padding: 15px 20px;">
         <h2 class="xray-header" onclick="toggleXRay()">
             <span>📡 Trạm Giám Sát (X-Ray)</span>
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp PWA V30.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Smart Fallback & Atomic Cleanup.</span></div>
         </div>
     </div>
 
@@ -176,7 +175,6 @@
     <audio id="debug-audio-player" style="display: none;" playsinline preload="auto"></audio>
     <audio id="tts-player" style="display: none;" playsinline autoplay></audio>
 
-    <!-- NÚT FAB CÀI ĐẶT -->
     <button id="btnInstall" class="install-fab" onclick="logicCore.handleInstallClick()">
         <span style="font-size: 24px;">📲</span>
         <span>TẢI APP PWA</span>
@@ -184,7 +182,32 @@
 
     <script>
         // ==========================================
-        // PWA ENGINE V30 (SMART INSTALLER LOGIC)
+        // SMART FALLBACK: TỰ PHỤC HỒI KHI RỚT MẠNG
+        // ==========================================
+        window.isNetworkOnline = navigator.onLine;
+
+        window.addEventListener('offline', () => {
+            window.isNetworkOnline = false;
+            document.getElementById('offline-banner').style.display = 'block';
+            addLog("MẤT KẾT NỐI MẠNG. Hệ thống chuyển sang trạng thái ngủ đông chờ khôi phục...", "error", true);
+            showToast("Mất mạng! Tạm dừng...", "error");
+        });
+
+        window.addEventListener('online', () => {
+            window.isNetworkOnline = true;
+            document.getElementById('offline-banner').style.display = 'none';
+            addLog("ĐÃ KHÔI PHỤC KẾT NỐI MẠNG. Hệ thống tự động thức giấc và tiếp tục tiến trình.", "success", true);
+            showToast("Đã có mạng! Tiếp tục...", "success");
+        });
+
+        async function waitForNetwork() {
+            while (!window.isNetworkOnline) {
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+
+        // ==========================================
+        // PWA ENGINE V31 (SMART INSTALLER)
         // ==========================================
         const logicCore = {
             deferredPrompt: null,
@@ -196,19 +219,15 @@
                 isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
             },
             init: function() {
-                // 1. Chặn trình duyệt nhúng Zalo/Facebook
                 if (this.state.isInApp) {
                     document.getElementById('inAppBlocker').classList.add('active');
                     return;
                 }
 
-                // 2. Cài đặt App
                 if (!this.state.isStandalone) {
                     if (this.state.isIOS) {
-                        // IOS thì mặc định hiện nút FAB ảo để hướng dẫn
                         document.getElementById('btnInstall').style.display = 'flex';
                     } else {
-                        // Chrome Android/PC: Chờ API trước khi hiện
                         window.addEventListener('beforeinstallprompt', (e) => {
                             e.preventDefault();
                             this.deferredPrompt = e;
@@ -217,7 +236,6 @@
                     }
                 }
 
-                // 3. Đăng ký SW thật trên Github Pages
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register(`/tool/sw_upload.js?v=${Date.now()}`)
                         .then(() => console.log("✅ PWA Engine: SW Registered"))
@@ -266,21 +284,14 @@
             }
         };
         
-        // Khởi động PWA Engine
         document.addEventListener('DOMContentLoaded', () => logicCore.init());
 
-        // ==========================================
-        // CẤU HÌNH API & CACHE CỦA ARCHIVE UPLOADER
-        // ==========================================
         const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
         const SECRET_KEY = "4mXmgt0qKjZOi2g2";
         const ACCOUNT_QUERY = "xiemsansang";
         window.serverCache = new Set();
         window.isCacheLoaded = false; 
 
-        // ==========================================
-        // MÁY CẢM BIẾN VẬT LÝ & WAKELOCK
-        // ==========================================
         let wakeLockObj = null;
 
         function fireHaptic(type) {
@@ -305,9 +316,6 @@
             if (wakeLockObj) wakeLockObj.release().then(() => { wakeLockObj = null; });
         }
 
-        // ==========================================
-        // HỆ THỐNG TRỢ LÝ ẢO TTS (CHỊ GOOGLE)
-        // ==========================================
         const ttsPlayer = document.getElementById('tts-player');
         let ttsQueue = [];
         let isTTSPlaying = false;
@@ -332,9 +340,6 @@
             ttsPlayer.play().catch(() => { isTTSPlaying = false; });
         }
 
-        // ==========================================
-        // X-RAY LOG ACCORDION
-        // ==========================================
         function toggleXRay() {
             const panel = document.getElementById('log-panel');
             const icon = document.getElementById('xray-icon');
@@ -346,6 +351,11 @@
                 icon.innerText = '🔽 Đóng';
             }
         }
+
+        // ==========================================
+        // ATOMIC CLEANUP: CHỐNG TRÀN RAM MOBILE
+        // ==========================================
+        const MAX_LOG_LINES = 100;
 
         function addLog(msg, type = 'info', speak = false) {
             const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
@@ -366,6 +376,12 @@
 
             div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${msg}</span>`;
             logPanel.appendChild(div);
+            
+            // Atomic Cleanup (Dọn rác DOM tự động)
+            while (logPanel.children.length > MAX_LOG_LINES + 1) { // +1 để chừa lại cái [System] Header
+                logPanel.removeChild(logPanel.children[1]);
+            }
+            
             logPanel.scrollTop = logPanel.scrollHeight; 
             
             if(speak) playTTS(msg);
@@ -398,9 +414,6 @@
             return s.replace(/_+/g, "_"); 
         }
 
-        // ==========================================
-        // AUTO-DISCOVERY & FETCH
-        // ==========================================
         function toggleCustomInput() {
             const select = document.getElementById('idSelect');
             const input = document.getElementById('idInput');
@@ -415,6 +428,7 @@
         }
 
         async function scanUserIdentifiers() {
+            await waitForNetwork();
             addLog("Đang quét mã Identifier...", "api", false);
             try {
                 const url = `https://archive.org/advancedsearch.php?q=uploader:(${ACCOUNT_QUERY}) OR creator:(${ACCOUNT_QUERY})&fl[]=identifier,title&sort[]=publicdate+desc&output=json&rows=100`;
@@ -453,12 +467,13 @@
             document.body.removeEventListener('click', initAudio);
         }, { once: true });
 
-        // KHỞI CHẠY QUÉT NGAY
         scanUserIdentifiers();
 
         async function loadServerFiles() {
             const identifier = getActiveIdentifier();
             if (!identifier) { showToast("Xác định Identifier!", "error"); return; }
+
+            await waitForNetwork();
 
             addLog(`Đang đồng bộ dữ liệu...`, "api", true);
             const listEl = document.getElementById('serverList');
@@ -521,12 +536,11 @@
             }
         }
 
-        // ==========================================
-        // RENAME / DELETE
-        // ==========================================
         async function deleteFile(filename) {
             const identifier = getActiveIdentifier();
             if (!confirm(`⚠️ XÓA VĨNH VIỄN: ${filename} ?`)) return;
+
+            await waitForNetwork();
 
             addLog(`Đang xóa file`, "warn", true);
             const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(filename)}`;
@@ -548,6 +562,8 @@
             const newName = prompt(`Nhập tên file mới (Bao gồm đuôi):`, oldName);
             if (!newName || newName === oldName) return;
 
+            await waitForNetwork();
+
             const safeNewName = toAscii(newName);
             addLog(`Đang đổi tên file`, "api", true);
 
@@ -566,9 +582,6 @@
             } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
         }
 
-        // ==========================================
-        // PROBE & UPLOAD
-        // ==========================================
         const elProgressUI = document.getElementById('progressUI');
         const elProgressName = document.getElementById('progressName');
         const elProgressPercent = document.getElementById('progressPercent');
@@ -613,6 +626,7 @@
                 addLog(`Đang tải lên ${safeUrlName}`, "info", true);
 
                 for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    await waitForNetwork(); // Smart Fallback: Chờ mạng trước khi fetch
                     try {
                         const success = await new Promise((innerResolve, innerReject) => {
                             const xhr = new XMLHttpRequest();
@@ -679,6 +693,7 @@
             addLog(`Bắt đầu tiến trình tải lên`, "api", true);
 
             for (let i = 0; i < files.length; i++) {
+                await waitForNetwork(); // Smart Fallback: Kiểm tra trước mỗi file
                 updateProgress(files[i].name, 0);
                 await uploadSingleFileWithXHR(identifier, files[i]);
                 if (i < files.length - 1) await new Promise(r => setTimeout(r, 500)); 
