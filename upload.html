@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V31 - MASTER PWA</title>
+    <title>Archive Manager V33 - ANTI-DEADLOCK</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -52,11 +52,9 @@
         .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
         .progress-fill { background: linear-gradient(90deg, #3b82f6, #2563eb); width: 0%; height: 100%; transition: width 0.1s linear; }
 
-        /* TTS TOGGLE */
         .tts-toggle { display: flex; align-items: center; gap: 10px; background: #e2e8f0; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
         .tts-toggle input { width: 20px; height: 20px; margin: 0; }
 
-        /* ACCORDION X-RAY LOG */
         .xray-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: white; margin-bottom: 0; border-bottom: none; padding-bottom: 0;}
         #log-panel { display: flex; background: #1e293b; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; height: 250px; overflow-y: auto; color: #a7f3d0; margin-top: 15px; border: 1px solid #475569; flex-direction: column; gap: 4px; }
         .log-time { color: #94a3b8; margin-right: 6px; }
@@ -68,7 +66,6 @@
         .log-event { color: #f472b6; }
         .log-hardware { color: #facc15; font-weight: bold; }
 
-        /* TOAST */
         #toast-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px;}
         .toast { background: white; color: #333; padding: 14px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; border-left: 5px solid; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); word-wrap: break-word; line-height: 1.4; }
         .toast.success { border-color: var(--success); } .toast.error { border-color: var(--danger); } .toast.info { border-color: var(--primary); } .toast.warning { border-color: var(--warning); }
@@ -76,7 +73,6 @@
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-        /* PWA SMART INSTALLER UI */
         .pwa-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box; backdrop-filter: blur(4px); }
         .pwa-modal-overlay.active { display: flex; animation: slideDown 0.3s ease-out; }
         .pwa-modal-content { width: 100%; max-width: 360px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 2px solid #ee4d2d; }
@@ -90,14 +86,11 @@
         
         .install-fab { position: fixed; bottom: 20px; right: 20px; background: #ee4d2d; color: white; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 4px solid white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.4); display: none; align-items: center; gap: 8px; cursor: pointer; z-index: 9999; animation: animate-pop-in 0.5s ease-out; }
         .install-fab:active { transform: scale(0.95); }
-        
         @keyframes animate-pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
         
-        /* Bắn cảnh báo Zalo / Messenger */
         .in-app-blocker { display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         .in-app-blocker.active { display: flex; }
         
-        /* Offline Indicator */
         #offline-banner { display: none; background: #dc2626; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
@@ -124,7 +117,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu (Upload) - PWA V31</h2>
+        <h2>🚀 Tải lên Dữ liệu - V33 CHỐNG TREO LUỒNG</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -151,7 +144,7 @@
             <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
         </div>
 
-        <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload</button>
+        <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload Đa Luồng</button>
     </div>
 
     <div class="card">
@@ -167,7 +160,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Smart Fallback & Atomic Cleanup.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Timeout chống treo luồng.</span></div>
         </div>
     </div>
 
@@ -207,7 +200,7 @@
         }
 
         // ==========================================
-        // PWA ENGINE V31 (SMART INSTALLER)
+        // PWA ENGINE
         // ==========================================
         const logicCore = {
             deferredPrompt: null,
@@ -223,7 +216,6 @@
                     document.getElementById('inAppBlocker').classList.add('active');
                     return;
                 }
-
                 if (!this.state.isStandalone) {
                     if (this.state.isIOS) {
                         document.getElementById('btnInstall').style.display = 'flex';
@@ -235,11 +227,8 @@
                         });
                     }
                 }
-
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register(`/tool/sw_upload.js?v=${Date.now()}`)
-                        .then(() => console.log("✅ PWA Engine: SW Registered"))
-                        .catch(err => console.warn("❌ PWA Engine: SW Fail", err));
+                    navigator.serviceWorker.register(`/tool/sw_upload.js?v=${Date.now()}`).catch(()=>{});
                 }
             },
             handleInstallClick: async function() {
@@ -278,7 +267,7 @@
                     return;
                 }
                 if (this.state.isPC) {
-                    content.innerHTML = `<div style="font-weight: bold; margin-bottom: 15px;">Cài đặt trên Máy tính</div><div class="guide-step"><div class="step-num">+</div><div>Bấm biểu tượng <b>Cài đặt (Màn hình có dấu mũi tên)</b> ở góc phải thanh địa chỉ.</div></div>`;
+                    content.innerHTML = `<div style="font-weight: bold; margin-bottom: 15px;">Cài đặt trên Máy tính</div><div class="guide-step"><div class="step-num">+</div><div>Bấm biểu tượng <b>Cài đặt</b> ở góc phải thanh địa chỉ.</div></div>`;
                     return;
                 }
             }
@@ -352,9 +341,6 @@
             }
         }
 
-        // ==========================================
-        // ATOMIC CLEANUP: CHỐNG TRÀN RAM MOBILE
-        // ==========================================
         const MAX_LOG_LINES = 100;
 
         function addLog(msg, type = 'info', speak = false) {
@@ -377,13 +363,11 @@
             div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${msg}</span>`;
             logPanel.appendChild(div);
             
-            // Atomic Cleanup (Dọn rác DOM tự động)
-            while (logPanel.children.length > MAX_LOG_LINES + 1) { // +1 để chừa lại cái [System] Header
+            while (logPanel.children.length > MAX_LOG_LINES + 1) { 
                 logPanel.removeChild(logPanel.children[1]);
             }
             
             logPanel.scrollTop = logPanel.scrollHeight; 
-            
             if(speak) playTTS(msg);
         }
 
@@ -587,12 +571,14 @@
         const elProgressPercent = document.getElementById('progressPercent');
         const elProgressBar = document.getElementById('progressBar');
 
-        function updateProgress(name, percent) {
-            elProgressName.innerText = `Đang tải: ${name}`;
-            elProgressPercent.innerText = `${percent}%`;
-            elProgressBar.style.width = `${percent}%`;
+        function updateOverallProgress(completed, total) {
+            const pct = Math.floor((completed / total) * 100);
+            elProgressName.innerText = `Đang xử lý ${completed}/${total} tệp...`;
+            elProgressPercent.innerText = `${pct}%`;
+            elProgressBar.style.width = `${pct}%`;
         }
 
+        // ĐÃ VÁ LỖI HANGING FILEREADER
         function probeFileInnerData(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -605,6 +591,7 @@
                     if(hex.includes("00 00 00")) resolve('.mp4'); 
                     else resolve('.mp3'); 
                 };
+                reader.onerror = () => resolve('.mp3'); // Bọc giáp an toàn
                 reader.readAsArrayBuffer(file.slice(0, 4));
             });
         }
@@ -617,16 +604,14 @@
                 
                 if (window.serverCache.has(safeUrlName)) {
                     addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
-                    showToast(`Bỏ qua: ${safeUrlName}`, "warning");
-                    updateProgress(file.name, 100); 
                     return resolve(true); 
                 }
 
                 const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeUrlName)}`;
-                addLog(`Đang tải lên ${safeUrlName}`, "info", true);
+                addLog(`Đang tải lên ${safeUrlName}`, "info"); 
 
                 for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                    await waitForNetwork(); // Smart Fallback: Chờ mạng trước khi fetch
+                    await waitForNetwork(); 
                     try {
                         const success = await new Promise((innerResolve, innerReject) => {
                             const xhr = new XMLHttpRequest();
@@ -634,7 +619,9 @@
                             xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
                             xhr.setRequestHeader('x-amz-auto-make-bucket', '1');
                             
-                            xhr.upload.onprogress = e => { if (e.lengthComputable) updateProgress(file.name, Math.floor((e.loaded / e.total) * 100)); };
+                            // 🔪 ĐỒNG HỒ TỬ THẦN (TIMEOUT 3 PHÚT)
+                            xhr.timeout = 180000;
+                            xhr.ontimeout = () => innerReject(new Error("Timeout: Máy chủ Archive bị treo kết nối"));
                             
                             xhr.onload = () => {
                                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -650,12 +637,13 @@
                                 }
                             };
                             
-                            xhr.onerror = () => innerReject(new Error("Mất mạng"));
+                            xhr.onerror = () => innerReject(new Error("Mất kết nối mạng"));
+                            xhr.onabort = () => innerReject(new Error("Kết nối bị ngắt"));
                             xhr.send(file);
                         });
 
                         if (success) { 
-                            showToast(`Tải xong: ${file.name}`, "success");
+                            addLog(`Tải xong: ${safeUrlName}`, "success");
                             window.serverCache.add(safeUrlName); 
                             return resolve(true); 
                         }
@@ -663,11 +651,15 @@
                     } catch (error) {
                         if (attempt === maxRetries) { 
                             addLog(`Tải thất bại file ${safeUrlName}`, "error", true); 
-                            showToast(`Lỗi: ${error.message}`, "error");
                             return resolve(false); 
                         }
-                        showToast(`Đang thử lại...`, "warning"); 
-                        await new Promise(r => setTimeout(r, 3000));
+                        
+                        const baseDelay = 3000 * Math.pow(2, attempt - 1); 
+                        const jitter = Math.random() * 1000; 
+                        const finalDelay = baseDelay + jitter;
+                        
+                        addLog(`Nghẽn mạng. Thử lại sau ${(finalDelay/1000).toFixed(1)}s...`, "warn"); 
+                        await new Promise(r => setTimeout(r, finalDelay));
                     }
                 }
             });
@@ -690,17 +682,39 @@
 
             btn.disabled = true;
             elProgressUI.style.display = 'block';
-            addLog(`Bắt đầu tiến trình tải lên`, "api", true);
+            addLog(`Bắt đầu tải lên ĐA LUỒNG (${files.length} files)`, "api", true);
 
-            for (let i = 0; i < files.length; i++) {
-                await waitForNetwork(); // Smart Fallback: Kiểm tra trước mỗi file
-                updateProgress(files[i].name, 0);
-                await uploadSingleFileWithXHR(identifier, files[i]);
-                if (i < files.length - 1) await new Promise(r => setTimeout(r, 500)); 
-            }
+            let completedFilesCount = 0;
+            const totalFilesCount = files.length;
+            const queue = Array.from(files);
+            let activeUploads = 0;
+            const MAX_CONCURRENT = 3; 
 
-            addLog("Tuyệt vời. Toàn bộ tiến trình đã hoàn tất.", "success", true);
-            updateProgress("Hoàn tất!", 100);
+            updateOverallProgress(0, totalFilesCount);
+
+            await new Promise((resolve) => {
+                const processNext = async () => {
+                    if (queue.length === 0 && activeUploads === 0) {
+                        resolve();
+                        return;
+                    }
+                    while (activeUploads < MAX_CONCURRENT && queue.length > 0) {
+                        const file = queue.shift();
+                        activeUploads++;
+                        
+                        uploadSingleFileWithXHR(identifier, file).finally(() => {
+                            activeUploads--;
+                            completedFilesCount++;
+                            updateOverallProgress(completedFilesCount, totalFilesCount);
+                            processNext();
+                        });
+                    }
+                };
+                processNext();
+            });
+
+            addLog("Tuyệt vời. Toàn bộ tiến trình đa luồng đã hoàn tất.", "success", true);
+            updateOverallProgress(totalFilesCount, totalFilesCount);
             elProgressBar.style.background = '#10b981';
             btn.disabled = false;
             document.getElementById('fileInput').value = ''; 
