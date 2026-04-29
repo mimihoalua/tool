@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="https://archive.org/favicon.ico">
+    <title>Archive Manager V29 - PWA ENGINE</title>
+    
+    <style>
+        :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 15px; background: #e2e8f0; color: #333; -webkit-tap-highlight-color: transparent; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 16px; }
+        h2 { margin-top: 0; font-weight: 800; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; font-size: 18px; }
+        label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-bottom: 6px; }
+        input[type="text"], input[type="file"], select { width: 100%; padding: 14px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: var(--bg); font-family: inherit; font-size: 15px; }
+        
+        .btn { border: none; padding: 14px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); } 
+        .btn-danger { background: var(--danger); width: auto; padding: 10px 14px;} 
+        .btn-warning { background: var(--warning); color: #000; width: auto; padding: 10px 14px;} 
+        .btn-dark { background: var(--dark); margin-bottom: 0; }
+
+        .identifier-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .identifier-group select { margin-bottom: 0; }
+        .identifier-group input { margin-bottom: 0; display: none; }
+
+        .server-list { max-height: 60vh; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 10px; background: #fff; }
+        .file-item { display: flex; flex-direction: column; padding: 16px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .file-item:last-child { border-bottom: none; }
+        
+        .file-header { display: flex; flex-direction: column; gap: 10px; }
+        .file-info { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
+        .file-index { background: var(--dark); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; font-family: monospace; margin-top: 2px;}
+        .file-name { font-weight: 700; font-size: 14px; color: var(--dark); word-break: break-all; }
+        .file-meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+        
+        .file-actions { display: flex; gap: 8px; width: 100%; justify-content: flex-end; }
+        .audio-player { width: 100%; height: 40px; outline: none; }
+        .empty-state { padding: 30px; text-align: center; color: #94a3b8; font-style: italic; font-size: 14px; }
+
+        .progress-wrapper { display: none; margin-bottom: 20px; padding: 15px; background: var(--bg); border: 1px solid #e2e8f0; border-radius: 8px; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: bold; color: #334155; }
+        .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #3b82f6, #2563eb); width: 0%; height: 100%; transition: width 0.1s linear; }
+
+        /* TTS TOGGLE */
+        .tts-toggle { display: flex; align-items: center; gap: 10px; background: #e2e8f0; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .tts-toggle input { width: 20px; height: 20px; margin: 0; }
+
+        /* ACCORDION X-RAY LOG */
+        .xray-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: white; margin-bottom: 0; border-bottom: none; padding-bottom: 0;}
+        #log-panel { display: none; background: #1e293b; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; height: 250px; overflow-y: auto; color: #a7f3d0; margin-top: 15px; border: 1px solid #475569; flex-direction: column; gap: 4px; }
+        .log-time { color: #94a3b8; margin-right: 6px; }
+        .log-info { color: #60a5fa; }
+        .log-success { color: #34d399; }
+        .log-warn { color: #fbbf24; }
+        .log-error { color: #f87171; font-weight: bold; }
+        .log-api { color: #c084fc; }
+        .log-event { color: #f472b6; }
+        .log-hardware { color: #facc15; font-weight: bold; }
+
+        #toast-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px;}
+        .toast { background: white; color: #333; padding: 14px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; border-left: 5px solid; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); word-wrap: break-word; line-height: 1.4; }
+        .toast.success { border-color: var(--success); } .toast.error { border-color: var(--danger); } .toast.info { border-color: var(--primary); } .toast.warning { border-color: var(--warning); }
+        
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+        
+        .security-warn { background: #fef2f2; color: #b91c1c; padding: 12px; border-left: 4px solid var(--danger); margin-bottom: 16px; font-size: 13px; border-radius: 8px; }
+
+        /* ==========================================
+           PWA ENGINE V29 STYLES
+           ========================================== */
+        #pwaPrompt { display: none; background: #fffbeb; color: #b45309; padding: 14px; margin-bottom: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; font-size: 13px; line-height: 1.5; }
+        
+        .in-app-blocker { display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .in-app-blocker h1 { color: #f87171; font-size: 24px; margin-bottom: 10px;}
+        .in-app-blocker p { font-size: 16px; line-height: 1.5; color: #cbd5e1; }
+        
+        .fab-install { position: fixed; bottom: 20px; right: 20px; background: #2563eb; color: white; padding: 12px 20px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: none; align-items: center; gap: 8px; z-index: 10000; cursor: pointer; border: none; font-size: 14px;}
+        
+        .ios-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; z-index: 10000; text-align: center; font-size: 14px; line-height: 1.5;}
+        .ios-prompt b { color: #2563eb; }
+        .ios-close { position: absolute; top: 5px; right: 10px; font-size: 18px; color: #94a3b8; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <!-- IN-APP BROWSER BLOCKER -->
+    <div id="inAppBlocker" class="in-app-blocker">
+        <h1>⚠️ CẢNH BÁO</h1>
+        <p>Hệ thống không thể hoạt động trong trình duyệt nhúng của Zalo/Facebook/TikTok.</p>
+        <p style="margin-top: 20px; font-weight: bold; color: white;">Vui lòng bấm vào Menu (⋮) góc phải và chọn<br><br><span style="background: #2563eb; padding: 8px 16px; border-radius: 6px;">Mở bằng trình duyệt (Chrome/Safari)</span></p>
+    </div>
+
+    <!-- PWA PROMPT AREA -->
+    <div id="pwaPrompt"></div>
+
+    <div class="security-warn">
+        <strong>⚠️ BẢO MẬT:</strong> Chứa API Key. Chỉ chạy trên trình duyệt tin cậy.
+    </div>
+
+    <div class="card">
+        <h2>🚀 Tải lên (Upload) - MOBILE TIER</h2>
+        
+        <label class="tts-toggle">
+            <input type="checkbox" id="ttsToggle" checked>
+            🎙️ Trợ lý ảo AI & Haptic Feedback
+        </label>
+
+        <label>Thư mục đích: <span id="scanStatus" style="font-weight:normal; color:#2563eb; font-size:12px;">Đang quét...</span></label>
+        <div class="identifier-group">
+            <select id="idSelect" onchange="toggleCustomInput(); window.isCacheLoaded = false;">
+                <option value="">-- Đang nạp danh sách... --</option>
+            </select>
+            <input type="text" id="idInput" placeholder="Nhập mã Identifier mới...">
+            <button class="btn btn-primary" onclick="loadServerFiles()" id="btnSync">🔄 Nạp Dữ Liệu</button>
+        </div>
+
+        <label style="margin-top: 10px;">Chọn file để tải lên:</label>
+        <input type="file" id="fileInput" multiple accept=".mp3,audio/mpeg,video/mp4,video/x-m4v,audio/mp4,audio/x-m4a">
+
+        <div id="progressUI" class="progress-wrapper">
+            <div class="progress-header">
+                <span id="progressName">Đang chuẩn bị...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+        </div>
+
+        <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload</button>
+    </div>
+
+    <div class="card">
+        <h2>🗂️ Server Storage</h2>
+        <div class="server-list" id="serverList">
+            <div class="empty-state">Bấm "Nạp Dữ Liệu" để xem.</div>
+        </div>
+    </div>
+
+    <!-- ACCORDION X-RAY LOG -->
+    <div class="card" style="background: #0f172a; padding: 15px 20px;">
+        <h2 class="xray-header" onclick="toggleXRay()">
+            <span>📡 Trạm Giám Sát (X-Ray)</span>
+            <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">▶️ Mở</span>
+        </h2>
+        <div id="log-panel">
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp PWA V29.</span></div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <audio id="debug-audio-player" style="display: none;" playsinline preload="auto"></audio>
+    <audio id="tts-player" style="display: none;" playsinline autoplay></audio>
+
+    <!-- PWA INSTALLERS -->
+    <button id="fabInstall" class="fab-install" onclick="installPWA()">📲 TẢI APP PWA</button>
+    <div id="iosPrompt" class="ios-prompt">
+        <span class="ios-close" onclick="document.getElementById('iosPrompt').style.display='none'">×</span>
+        🚀 <b>Cài đặt Ứng Dụng (iOS)</b><br>
+        Để chạy ngầm không bị tắt màn hình, hãy bấm nút <b>Chia sẻ (Share)</b> ở dưới cùng trình duyệt, sau đó chọn <b>Thêm vào MH chính (Add to Home Screen)</b>.
+    </div>
+
+    <script>
+        // ==========================================
+        // PWA ENGINE V29 (SMART INSTALLER)
+        // ==========================================
+        const PWAEngine = {
+            isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+            isFileProtocol: window.location.protocol === 'file:' || window.location.protocol === 'content:',
+            isInAppBrowser: /FBAN|FBAV|Line|Zalo|Instagram|TikTok|Messenger/i.test(navigator.userAgent),
+            deferredPrompt: null,
+
+            init: function() {
+                // 1. Chặn In-App Browser
+                if (this.isInAppBrowser) {
+                    document.getElementById('inAppBlocker').style.display = 'flex';
+                    return;
+                }
+
+                // 2. Xử lý File Protocol (Nguyên nhân đơ máy)
+                if (this.isFileProtocol) {
+                    document.getElementById('pwaPrompt').innerHTML = '⚠️ <strong>Môi trường bị giới hạn:</strong> Bạn đang mở file trực tiếp từ bộ nhớ điện thoại (file://). Hệ điều hành sẽ chặn kết nối mạng API và PWA. <b>Vui lòng upload file HTML này lên một Hosting (như GitHub Pages/Netlify) để có link HTTPS chạy full tính năng.</b>';
+                    document.getElementById('pwaPrompt').style.display = 'block';
+                    // Khóa các nút gọi API để tránh Crash
+                    document.getElementById('btnSync').disabled = true;
+                    document.getElementById('uploadBtn').disabled = true;
+                    return;
+                }
+
+                // 3. Xử lý logic Cài đặt App
+                if (!this.isStandalone) {
+                    if (this.isIOS) {
+                        // iOS Safari
+                        document.getElementById('iosPrompt').style.display = 'block';
+                    } else {
+                        // Android / PC
+                        window.addEventListener('beforeinstallprompt', (e) => {
+                            e.preventDefault();
+                            this.deferredPrompt = e;
+                            document.getElementById('fabInstall').style.display = 'flex';
+                        });
+                    }
+                }
+
+                // 4. Kích hoạt Service Worker siêu tốc (Tạo ảo nếu không có file thật)
+                if ('serviceWorker' in navigator && !this.isFileProtocol) {
+                    const swCode = `
+                        self.addEventListener('install', (e) => { self.skipWaiting(); });
+                        self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+                        self.addEventListener('fetch', (e) => { });
+                    `;
+                    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+                }
+            }
+        };
+
+        function installPWA() {
+            if (PWAEngine.deferredPrompt) {
+                PWAEngine.deferredPrompt.prompt();
+                PWAEngine.deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('fabInstall').style.display = 'none';
+                        showToast("Đang cài đặt ứng dụng...", "success");
+                    }
+                    PWAEngine.deferredPrompt = null;
+                });
+            }
+        }
+
+        // Kích hoạt Engine
+        PWAEngine.init();
+
+        // ==========================================
+        // CẤU HÌNH API & CACHE
+        // ==========================================
+        const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
+        const SECRET_KEY = "4mXmgt0qKjZOi2g2";
+        const ACCOUNT_QUERY = "xiemsansang";
+        
+        window.serverCache = new Set();
+        window.isCacheLoaded = false; 
+
+        // ==========================================
+        // MÁY CẢM BIẾN VẬT LÝ & WAKELOCK
+        // ==========================================
+        let wakeLockObj = null;
+
+        function fireHaptic(type) {
+            if (!document.getElementById('ttsToggle').checked) return;
+            if (!navigator.vibrate) return;
+            try {
+                if (type === 'success') navigator.vibrate(50);
+                else if (type === 'error') navigator.vibrate([200, 100, 200]);
+                else if (type === 'warn') navigator.vibrate([50, 50, 50]);
+            } catch(e){}
+        }
+
+        async function activateWakeLock() {
+            if(PWAEngine.isFileProtocol) return;
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLockObj = await navigator.wakeLock.request('screen');
+                    addLog("Đã khóa màn hình thức (WakeLock).", "hardware");
+                }
+            } catch (err) {}
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockObj) {
+                wakeLockObj.release().then(() => { wakeLockObj = null; });
+            }
+        }
+
+        // ==========================================
+        // HỆ THỐNG TRỢ LÝ ẢO TTS (CHỊ GOOGLE)
+        // ==========================================
+        const ttsPlayer = document.getElementById('tts-player');
+        let ttsQueue = [];
+        let isTTSPlaying = false;
+
+        function playTTS(text) {
+            if (!document.getElementById('ttsToggle').checked) return;
+            let cleanText = text.replace(/_/g, " ").replace(/.mp3|.mp4|.m4a/gi, "");
+            ttsQueue.push(cleanText);
+            if (!isTTSPlaying) processTTSQueue();
+        }
+
+        function processTTSQueue() {
+            if (ttsQueue.length === 0) {
+                isTTSPlaying = false; return;
+            }
+            isTTSPlaying = true;
+            const textToSpeak = ttsQueue.shift();
+            ttsPlayer.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(textToSpeak)}`;
+            
+            ttsPlayer.onended = () => processTTSQueue();
+            ttsPlayer.onerror = () => { 
+                ttsPlayer.src = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(textToSpeak)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                ttsPlayer.onended = () => processTTSQueue();
+            };
+            ttsPlayer.play().catch(() => { isTTSPlaying = false; });
+        }
+
+        // ==========================================
+        // X-RAY LOG ACCORDION & CORE LOGIC
+        // ==========================================
+        function toggleXRay() {
+            const panel = document.getElementById('log-panel');
+            const icon = document.getElementById('xray-icon');
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+                icon.innerText = '▶️ Mở';
+            } else {
+                panel.style.display = 'flex';
+                icon.innerText = '🔽 Đóng';
+            }
+        }
+
+        function addLog(msg, type = 'info', speak = false) {
+            const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            const logPanel = document.getElementById('log-panel');
+            const div = document.createElement('div');
+            
+            let colorClass = 'log-info';
+            if (type === 'success') colorClass = 'log-success';
+            if (type === 'warn') colorClass = 'log-warn';
+            if (type === 'error') {
+                colorClass = 'log-error';
+                document.getElementById('log-panel').style.display = 'flex';
+                document.getElementById('xray-icon').innerText = '🔽 Đóng';
+            }
+            if (type === 'api') colorClass = 'log-api';
+            if (type === 'event') colorClass = 'log-event';
+            if (type === 'hardware') colorClass = 'log-hardware';
+
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${msg}</span>`;
+            logPanel.appendChild(div);
+            logPanel.scrollTop = logPanel.scrollHeight; 
+            
+            if(speak) playTTS(msg);
+        }
+
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toast-container');
+            if(!container) return; 
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            if(type === 'error') fireHaptic('error');
+            else if(type === 'success') fireHaptic('success');
+            else if(type === 'warning') fireHaptic('warn');
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, duration);
+        }
+
+        function toAscii(str) {
+            let s = str.normalize("NFD").replace(/[̀-ͯ]/g, ""); 
+            s = s.replace(/đ/g, "d").replace(/Đ/g, "D"); 
+            s = s.replace(/[^a-zA-Z0-9\.\-\_]/g, "_"); 
+            return s.replace(/_+/g, "_"); 
+        }
+
+        // ==========================================
+        // AUTO-DISCOVERY & FETCH
+        // ==========================================
+        function toggleCustomInput() {
+            const select = document.getElementById('idSelect');
+            const input = document.getElementById('idInput');
+            if (select.value === "CUSTOM") {
+                input.style.display = "block"; input.focus();
+            } else { input.style.display = "none"; }
+        }
+
+        function getActiveIdentifier() {
+            const selectVal = document.getElementById('idSelect').value;
+            return selectVal === "CUSTOM" ? document.getElementById('idInput').value.trim() : selectVal;
+        }
+
+        async function scanUserIdentifiers() {
+            if(PWAEngine.isFileProtocol) return; // Chặn quét nếu chạy local để tránh đơ máy
+            
+            addLog("Đang quét mã Identifier...", "api", false);
+            try {
+                const url = `https://archive.org/advancedsearch.php?q=uploader:(${ACCOUNT_QUERY}) OR creator:(${ACCOUNT_QUERY})&fl[]=identifier,title&sort[]=publicdate+desc&output=json&rows=100`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const docs = data.response?.docs || [];
+                
+                const select = document.getElementById('idSelect');
+                select.innerHTML = '';
+                
+                if (docs.length > 0) {
+                    docs.forEach(doc => {
+                        const opt = document.createElement('option');
+                        opt.value = doc.identifier;
+                        opt.textContent = `${doc.title || doc.identifier} (${doc.identifier})`;
+                        select.appendChild(opt);
+                    });
+                }
+                
+                const optCustom = document.createElement('option');
+                optCustom.value = "CUSTOM";
+                optCustom.textContent = "➕ Nhập mã mới (Tạo Album)...";
+                select.appendChild(optCustom);
+
+                document.getElementById('scanStatus').innerText = `Đã tìm thấy ${docs.length} mục.`;
+                toggleCustomInput();
+            } catch (error) {
+                document.getElementById('scanStatus').innerText = `Lỗi mạng chặn quét API.`;
+                document.getElementById('idSelect').innerHTML = `<option value="CUSTOM">➕ Nhập tay Identifier...</option>`;
+                toggleCustomInput();
+            }
+        }
+
+        document.body.addEventListener('click', function initAudio() {
+            ttsPlayer.load();
+            document.body.removeEventListener('click', initAudio);
+        }, { once: true });
+
+        scanUserIdentifiers();
+
+        async function loadServerFiles() {
+            const identifier = getActiveIdentifier();
+            if (!identifier) { showToast("Xác định Identifier!", "error"); return; }
+
+            addLog(`Đang đồng bộ dữ liệu...`, "api", true);
+            const listEl = document.getElementById('serverList');
+            listEl.innerHTML = `<div class="empty-state">⏳ Đang lấy dữ liệu...</div>`;
+
+            try {
+                const url = `https://archive.org/metadata/${identifier}?t=${Date.now()}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                window.serverCache.clear();
+                window.isCacheLoaded = true; 
+
+                if (!data.files || data.files.length === 0) {
+                    listEl.innerHTML = `<div class="empty-state">Thư mục trống.</div>`;
+                    return;
+                }
+
+                const audioFiles = data.files.filter(f => f.name.endsWith('.mp3') || f.name.endsWith('.mp4') || f.name.endsWith('.m4a') || f.format.includes('Audio') || f.format.includes('Video'));
+
+                if (audioFiles.length === 0) {
+                    listEl.innerHTML = `<div class="empty-state">Không có file truyền thông nào.</div>`;
+                    return;
+                }
+
+                audioFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+                let html = '';
+                audioFiles.forEach((file, index) => {
+                    window.serverCache.add(file.name);
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    const fileUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(file.name)}`;
+                    const cleanTitle = file.title || file.name.replace(/\.[^/.]+$/, "");
+                    
+                    html += `
+                        <div class="file-item" id="item-${file.name}">
+                            <div class="file-header">
+                                <div class="file-info">
+                                    <span class="file-index">${index + 1}</span>
+                                    <div>
+                                        <div class="file-name">${cleanTitle}</div>
+                                        <div class="file-meta">${sizeMB} MB</div>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="btn btn-warning" onclick='renameFile(${JSON.stringify(file.name)})'>✏️ Đổi tên</button>
+                                    <button class="btn btn-danger" onclick='deleteFile(${JSON.stringify(file.name)})'>🗑️ Xóa</button>
+                                </div>
+                            </div>
+                            <audio class="audio-player" controls preload="none" src="${fileUrl}"></audio>
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+                addLog(`Đồng bộ xong ${audioFiles.length} file.`, "success", true);
+
+            } catch (error) {
+                addLog(`Lỗi mạng. Không thể gọi API.`, "error", true);
+                listEl.innerHTML = `<div class="empty-state" style="color: red;">❌ Lỗi kết nối</div>`;
+            }
+        }
+
+        // ==========================================
+        // PROBE & UPLOAD
+        // ==========================================
+        const elProgressUI = document.getElementById('progressUI');
+        const elProgressName = document.getElementById('progressName');
+        const elProgressPercent = document.getElementById('progressPercent');
+        const elProgressBar = document.getElementById('progressBar');
+
+        function updateProgress(name, percent) {
+            elProgressName.innerText = `Đang tải: ${name}`;
+            elProgressPercent.innerText = `${percent}%`;
+            elProgressBar.style.width = `${percent}%`;
+        }
+
+        function probeFileInnerData(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
+                    let hex = "";
+                    for(let i = 0; i < arr.length; i++) {
+                        hex += arr[i].toString(16).padStart(2, '0').toUpperCase() + " ";
+                    }
+                    if(hex.includes("00 00 00")) resolve('.mp4'); 
+                    else resolve('.mp3'); 
+                };
+                reader.readAsArrayBuffer(file.slice(0, 4));
+            });
+        }
+
+        function uploadSingleFileWithXHR(identifier, file, maxRetries = 3) {
+            return new Promise(async (resolve) => {
+                const trueExtension = await probeFileInnerData(file);
+                const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                const safeUrlName = toAscii(baseName) + trueExtension;
+                
+                if (window.serverCache.has(safeUrlName)) {
+                    addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
+                    showToast(`Bỏ qua: ${safeUrlName}`, "warning");
+                    updateProgress(file.name, 100); 
+                    return resolve(true); 
+                }
+
+                const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeUrlName)}`;
+                addLog(`Đang tải lên ${safeUrlName}`, "info", true);
+
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        const success = await new Promise((innerResolve, innerReject) => {
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('PUT', url, true);
+                            xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
+                            xhr.setRequestHeader('x-amz-auto-make-bucket', '1');
+                            
+                            xhr.upload.onprogress = e => { if (e.lengthComputable) updateProgress(file.name, Math.floor((e.loaded / e.total) * 100)); };
+                            
+                            xhr.onload = () => {
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    innerResolve(true);
+                                } else {
+                                    innerReject(new Error(`S3 Reject ${xhr.status}`));
+                                }
+                            };
+                            
+                            xhr.onerror = () => innerReject(new Error("Mất mạng"));
+                            xhr.send(file);
+                        });
+
+                        if (success) { 
+                            showToast(`Tải xong: ${file.name}`, "success");
+                            window.serverCache.add(safeUrlName); 
+                            return resolve(true); 
+                        }
+                        
+                    } catch (error) {
+                        if (attempt === maxRetries) { 
+                            addLog(`Tải thất bại file ${safeUrlName}`, "error", true); 
+                            showToast(`Lỗi: ${error.message}`, "error");
+                            return resolve(false); 
+                        }
+                        showToast(`Đang thử lại...`, "warning"); 
+                        await new Promise(r => setTimeout(r, 3000));
+                    }
+                }
+            });
+        }
+
+        async function startUpload() {
+            const identifier = getActiveIdentifier();
+            const files = document.getElementById('fileInput').files;
+            const btn = document.getElementById('uploadBtn');
+
+            if (!identifier) { showToast("Xác định Thư mục đích!", "error"); return; }
+            if (files.length === 0) { showToast("Chọn ít nhất 1 file!", "error"); return; }
+
+            await activateWakeLock();
+
+            if (!window.isCacheLoaded) {
+                addLog("Tự động đồng bộ dữ liệu.", "warn", true);
+                await loadServerFiles();
+            }
+
+            btn.disabled = true;
+            elProgressUI.style.display = 'block';
+            addLog(`Bắt đầu tiến trình tải lên`, "api", true);
+
+            for (let i = 0; i < files.length; i++) {
+                updateProgress(files[i].name, 0);
+                await uploadSingleFileWithXHR(identifier, files[i]);
+                if (i < files.length - 1) await new Promise(r => setTimeout(r, 500)); 
+            }
+
+            addLog("Tuyệt vời. Toàn bộ tiến trình đã hoàn tất.", "success", true);
+            updateProgress("Hoàn tất!", 100);
+            elProgressBar.style.background = '#10b981';
+            btn.disabled = false;
+            document.getElementById('fileInput').value = ''; 
+            
+            releaseWakeLock();
+            setTimeout(loadServerFiles, 1500);
+        }
+    </script>
+</body>
+</html>
