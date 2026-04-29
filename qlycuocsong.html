@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V50 - Cảnh Giới Tối Cao</title>
+<title>LifeOS V51 - Đột Phá Giới Hạn</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -83,7 +83,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
-<!-- V50 FIX: Mỏ neo tĩnh lặng bằng Base64 (Chống 404) & Thẻ Kéo mạng tàng hình -->
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
 <audio id="mstq-prefetch" preload="auto" muted></audio>
@@ -237,7 +236,9 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
             </div>
             
             <div class="px-2 mb-3 shrink-0"><input type="text" id="music-search" class="w-full bg-white shadow-inner border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-primary text-sm" placeholder="Tìm tên bài hát..." oninput="window.MusicApp.filterList(this.value)"></div>
-            <div class="flex-grow overflow-y-auto custom-scroll-area relative border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner mb-[100px]" id="music-list-container">
+            
+            <!-- V51 FIX: Tăng margin-bottom trên Mobile để không che bài cuối -->
+            <div class="flex-grow overflow-y-auto custom-scroll-area relative border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner mb-[140px] lg:mb-[100px]" id="music-list-container">
                 <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ...</div>
             </div>
             
@@ -406,7 +407,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC & AUDIO CONTEXT (V50 FIX)
+// 1. CORE LOGIC & AUDIO CONTEXT (V51 FIX)
 // ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
@@ -445,7 +446,8 @@ window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
 
 window.firePhysicalBeep = () => {
-    if (window.isMobile || !window.audioCtx) return; // V50: Né AudioContext trên Mobile để tránh rác luồng
+    // V51 FIX: Khôi phục tiếng Bíp vật lý trên Mobile (bỏ isMobile)
+    if (!window.audioCtx) return; 
     try {
         if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
         const osc = window.audioCtx.createOscillator();
@@ -470,7 +472,7 @@ window.initTTS=()=>{
 };
 
 window.playSpeechTTS = (text) => {
-    if (!window.soundEnabled || window.isAlarmRinging) return; // V50 FIX: Cấm đọc nhảm khi báo thức đang kêu
+    if (!window.soundEnabled || window.isAlarmRinging) return; 
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
@@ -501,7 +503,7 @@ window.notifiedTasks = new Set();
 
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
-    if(!window.isMobile && !window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
     
     const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio');
@@ -644,7 +646,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC (V50 FIX)
+// 2. NLP & ALARM LOGIC 
 // ==============================================================================
 window.parseTaskNLP = (rawText) => {
     let text = rawText;
@@ -694,7 +696,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         const alarmAudio = el('mstq-alarm'), ttsAudio = el('tts-audio');
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         
-        // V50 FIX: Ép chết SRC bằng text báo thức chuẩn, cấm đọc loạn các tab
         if(ttsAudio) {
             ttsAudio.muted = false;
             ttsAudio.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(window.alarmTextToSpeak)}`;
@@ -762,7 +763,6 @@ window.checkAlarms = () => {
             }
             needsSync = true;
         }
-        // V50 FIX: Gỡ bỏ việc Preload TTS dư thừa gây loạn ngầu chị Google
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             if (diff <= 0 && !window.notifiedTasks.has(String(t.id))) { 
@@ -995,7 +995,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V50 THE FLAWLESS ENGINE)
+// 6. MUSIC SYSTEM (V51 THE FLAWLESS ENGINE)
 // ==============================================================================
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
@@ -1050,14 +1050,10 @@ window.MusicApp = {
     },
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
-        
-        // V50 FIX: Khóa hãm Mỏ Neo (Bất tử hóa trên Background)
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
         a.src=this.playlist[idx].stream_url; 
-        
-        // V50 FIX: Tránh xung đột DOM play ngầm
         a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); }); 
         
         this.renderList();
@@ -1066,8 +1062,6 @@ window.MusicApp = {
     },
     togglePlay() { 
         const a=el('mstq-player'); if(!a)return; 
-        
-        // V50 FIX: Khóa hãm Mỏ Neo
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
         if(this.playing){ 
@@ -1088,19 +1082,22 @@ window.MusicApp = {
     toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); if(a.duration) a.currentTime=((e.clientX-rect.left)/rect.width)*a.duration; },
     
-    // V50 FIX: Tối ưu Zero-CPU & Kéo mạng Tàng hình vĩnh cửu
+    // V51 FIX: Sửa lỗi ProgressBar & Zero-CPU
     setupListeners() {
         const a=el('mstq-player');
         a.addEventListener('timeupdate',()=>{ 
-            if(!a.duration) return;
+            let d = a.duration;
+            // V51 FIX: Nếu stream trả về rác/NaN, lấy duration trực tiếp từ JSON gốc
+            if (!d || d === Infinity || isNaN(d)) {
+                d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
+            }
+            if(!d) return;
             
-            // V50 Zero-CPU: Chỉ tốn RAM vẽ thanh nhạc khi màn hình đang bật
             if (document.visibilityState === 'visible') {
-                el('music-progress').style.width=(a.currentTime/a.duration)*100+'%'; 
+                el('music-progress').style.width=(a.currentTime/d)*100+'%'; 
             }
             
-            // V50 Kéo Mạng: Ép tải bằng thẻ Audio ẩn khi còn đúng 20 giây cuối
-            if(a.duration > 40 && a.currentTime >= a.duration - 20 && !this.prefetchDone) {
+            if(d > 40 && a.currentTime >= d - 20 && !this.prefetchDone) {
                 this.prefetchDone = true;
                 const nextS = this.playlist[this.getNextIndex()];
                 if(nextS) {
