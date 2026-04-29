@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
     
-    <!-- PWA Meta Tags -->
+    <!-- KHAI BÁO PWA LIÊN KẾT ĐẾN FILE MANIFEST THẬT TRÊN GITHUB -->
+    <link id="manifest-link" rel="manifest" href="/tool/manifest_upload.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="https://archive.org/favicon.ico">
-    <title>Archive Manager V29 - PWA ENGINE</title>
+    
+    <title>Archive Manager V30 - SMART PWA</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -58,7 +59,7 @@
 
         /* ACCORDION X-RAY LOG */
         .xray-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: white; margin-bottom: 0; border-bottom: none; padding-bottom: 0;}
-        #log-panel { display: none; background: #1e293b; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; height: 250px; overflow-y: auto; color: #a7f3d0; margin-top: 15px; border: 1px solid #475569; flex-direction: column; gap: 4px; }
+        #log-panel { display: flex; background: #1e293b; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; height: 250px; overflow-y: auto; color: #a7f3d0; margin-top: 15px; border: 1px solid #475569; flex-direction: column; gap: 4px; }
         .log-time { color: #94a3b8; margin-right: 6px; }
         .log-info { color: #60a5fa; }
         .log-success { color: #34d399; }
@@ -68,48 +69,62 @@
         .log-event { color: #f472b6; }
         .log-hardware { color: #facc15; font-weight: bold; }
 
+        /* TOAST */
         #toast-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px;}
         .toast { background: white; color: #333; padding: 14px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; border-left: 5px solid; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); word-wrap: break-word; line-height: 1.4; }
         .toast.success { border-color: var(--success); } .toast.error { border-color: var(--danger); } .toast.info { border-color: var(--primary); } .toast.warning { border-color: var(--warning); }
         
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
-        
-        .security-warn { background: #fef2f2; color: #b91c1c; padding: 12px; border-left: 4px solid var(--danger); margin-bottom: 16px; font-size: 13px; border-radius: 8px; }
 
         /* ==========================================
-           PWA ENGINE V29 STYLES
+           PWA SMART INSTALLER UI
            ========================================== */
-        #pwaPrompt { display: none; background: #fffbeb; color: #b45309; padding: 14px; margin-bottom: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; font-size: 13px; line-height: 1.5; }
+        .pwa-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box; backdrop-filter: blur(4px); }
+        .pwa-modal-overlay.active { display: flex; animation: slideDown 0.3s ease-out; }
+        .pwa-modal-content { width: 100%; max-width: 360px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 2px solid #ee4d2d; }
+        .pwa-modal-header { background: #ee4d2d; padding: 20px; color: white; text-align: center; }
+        .pwa-modal-body { padding: 24px; color: #333; text-align: center;}
+        .pwa-modal-footer { padding: 16px; background: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb; }
+        .pwa-close-btn { color: #6b7280; font-weight: bold; font-size: 14px; background: none; border: none; cursor: pointer; padding: 8px 16px;}
         
+        .guide-step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; text-align: left; background: #fefce8; padding: 12px; border-radius: 8px; border: 1px solid #fef08a;}
+        .step-num { background: #ee4d2d; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+        
+        .install-fab { position: fixed; bottom: 20px; right: 20px; background: #ee4d2d; color: white; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 4px solid white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.4); display: none; align-items: center; gap: 8px; cursor: pointer; z-index: 9999; animation: animate-pop-in 0.5s ease-out; }
+        .install-fab:active { transform: scale(0.95); }
+        
+        @keyframes animate-pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+        
+        /* Bắn cảnh báo Zalo / Messenger */
         .in-app-blocker { display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .in-app-blocker h1 { color: #f87171; font-size: 24px; margin-bottom: 10px;}
-        .in-app-blocker p { font-size: 16px; line-height: 1.5; color: #cbd5e1; }
-        
-        .fab-install { position: fixed; bottom: 20px; right: 20px; background: #2563eb; color: white; padding: 12px 20px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: none; align-items: center; gap: 8px; z-index: 10000; cursor: pointer; border: none; font-size: 14px;}
-        
-        .ios-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; z-index: 10000; text-align: center; font-size: 14px; line-height: 1.5;}
-        .ios-prompt b { color: #2563eb; }
-        .ios-close { position: absolute; top: 5px; right: 10px; font-size: 18px; color: #94a3b8; cursor: pointer; }
+        .in-app-blocker.active { display: flex; }
     </style>
 </head>
 <body>
     <!-- IN-APP BROWSER BLOCKER -->
     <div id="inAppBlocker" class="in-app-blocker">
-        <h1>⚠️ CẢNH BÁO</h1>
-        <p>Hệ thống không thể hoạt động trong trình duyệt nhúng của Zalo/Facebook/TikTok.</p>
+        <h1 style="color: #f87171; font-size: 24px; margin-bottom: 10px;">⚠️ CẢNH BÁO</h1>
+        <p style="font-size: 16px; line-height: 1.5; color: #cbd5e1;">Hệ thống không thể hoạt động trong trình duyệt nhúng của Zalo/Facebook/TikTok.</p>
         <p style="margin-top: 20px; font-weight: bold; color: white;">Vui lòng bấm vào Menu (⋮) góc phải và chọn<br><br><span style="background: #2563eb; padding: 8px 16px; border-radius: 6px;">Mở bằng trình duyệt (Chrome/Safari)</span></p>
     </div>
 
-    <!-- PWA PROMPT AREA -->
-    <div id="pwaPrompt"></div>
-
-    <div class="security-warn">
-        <strong>⚠️ BẢO MẬT:</strong> Chứa API Key. Chỉ chạy trên trình duyệt tin cậy.
+    <!-- PWA HEALTH MODAL (SMART GUIDE) -->
+    <div id="pwaHealthModal" class="pwa-modal-overlay">
+        <div class="pwa-modal-content">
+            <div class="pwa-modal-header">
+                <div style="font-weight: bold; font-size: 20px; margin-bottom: 4px; text-transform: uppercase;">Cài đặt Ứng dụng</div>
+                <div style="font-size: 12px; opacity: 0.9;">Truy cập nhanh hơn - Mượt mà hơn</div>
+            </div>
+            <div id="smartGuideContent" class="pwa-modal-body"></div>
+            <div class="pwa-modal-footer">
+                <button onclick="document.getElementById('pwaHealthModal').classList.remove('active')" class="pwa-close-btn">Đóng lại</button>
+            </div>
+        </div>
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên (Upload) - MOBILE TIER</h2>
+        <h2>🚀 Tải lên Dữ liệu (Upload) - PWA V30</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -150,10 +165,10 @@
     <div class="card" style="background: #0f172a; padding: 15px 20px;">
         <h2 class="xray-header" onclick="toggleXRay()">
             <span>📡 Trạm Giám Sát (X-Ray)</span>
-            <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">▶️ Mở</span>
+            <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp PWA V29.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp PWA V30.</span></div>
         </div>
     </div>
 
@@ -161,93 +176,105 @@
     <audio id="debug-audio-player" style="display: none;" playsinline preload="auto"></audio>
     <audio id="tts-player" style="display: none;" playsinline autoplay></audio>
 
-    <!-- PWA INSTALLERS -->
-    <button id="fabInstall" class="fab-install" onclick="installPWA()">📲 TẢI APP PWA</button>
-    <div id="iosPrompt" class="ios-prompt">
-        <span class="ios-close" onclick="document.getElementById('iosPrompt').style.display='none'">×</span>
-        🚀 <b>Cài đặt Ứng Dụng (iOS)</b><br>
-        Để chạy ngầm không bị tắt màn hình, hãy bấm nút <b>Chia sẻ (Share)</b> ở dưới cùng trình duyệt, sau đó chọn <b>Thêm vào MH chính (Add to Home Screen)</b>.
-    </div>
+    <!-- NÚT FAB CÀI ĐẶT -->
+    <button id="btnInstall" class="install-fab" onclick="logicCore.handleInstallClick()">
+        <span style="font-size: 24px;">📲</span>
+        <span>TẢI APP PWA</span>
+    </button>
 
     <script>
         // ==========================================
-        // PWA ENGINE V29 (SMART INSTALLER)
+        // PWA ENGINE V30 (SMART INSTALLER LOGIC)
         // ==========================================
-        const PWAEngine = {
-            isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
-            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
-            isFileProtocol: window.location.protocol === 'file:' || window.location.protocol === 'content:',
-            isInAppBrowser: /FBAN|FBAV|Line|Zalo|Instagram|TikTok|Messenger/i.test(navigator.userAgent),
+        const logicCore = {
             deferredPrompt: null,
-
+            state: {
+                isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
+                isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
+                isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
+                isInApp: /FBAN|FBAV|Instagram|Zalo|TikTok|Messenger/i.test(navigator.userAgent),
+                isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+            },
             init: function() {
-                // 1. Chặn In-App Browser
-                if (this.isInAppBrowser) {
-                    document.getElementById('inAppBlocker').style.display = 'flex';
+                // 1. Chặn trình duyệt nhúng Zalo/Facebook
+                if (this.state.isInApp) {
+                    document.getElementById('inAppBlocker').classList.add('active');
                     return;
                 }
 
-                // 2. Xử lý File Protocol (Nguyên nhân đơ máy)
-                if (this.isFileProtocol) {
-                    document.getElementById('pwaPrompt').innerHTML = '⚠️ <strong>Môi trường bị giới hạn:</strong> Bạn đang mở file trực tiếp từ bộ nhớ điện thoại (file://). Hệ điều hành sẽ chặn kết nối mạng API và PWA. <b>Vui lòng upload file HTML này lên một Hosting (như GitHub Pages/Netlify) để có link HTTPS chạy full tính năng.</b>';
-                    document.getElementById('pwaPrompt').style.display = 'block';
-                    // Khóa các nút gọi API để tránh Crash
-                    document.getElementById('btnSync').disabled = true;
-                    document.getElementById('uploadBtn').disabled = true;
-                    return;
-                }
-
-                // 3. Xử lý logic Cài đặt App
-                if (!this.isStandalone) {
-                    if (this.isIOS) {
-                        // iOS Safari
-                        document.getElementById('iosPrompt').style.display = 'block';
+                // 2. Cài đặt App
+                if (!this.state.isStandalone) {
+                    if (this.state.isIOS) {
+                        // IOS thì mặc định hiện nút FAB ảo để hướng dẫn
+                        document.getElementById('btnInstall').style.display = 'flex';
                     } else {
-                        // Android / PC
+                        // Chrome Android/PC: Chờ API trước khi hiện
                         window.addEventListener('beforeinstallprompt', (e) => {
                             e.preventDefault();
                             this.deferredPrompt = e;
-                            document.getElementById('fabInstall').style.display = 'flex';
+                            document.getElementById('btnInstall').style.display = 'flex';
                         });
                     }
                 }
 
-                // 4. Kích hoạt Service Worker siêu tốc (Tạo ảo nếu không có file thật)
-                if ('serviceWorker' in navigator && !this.isFileProtocol) {
-                    const swCode = `
-                        self.addEventListener('install', (e) => { self.skipWaiting(); });
-                        self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
-                        self.addEventListener('fetch', (e) => { });
-                    `;
-                    const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+                // 3. Đăng ký SW thật trên Github Pages
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register(`/tool/sw_upload.js?v=${Date.now()}`)
+                        .then(() => console.log("✅ PWA Engine: SW Registered"))
+                        .catch(err => console.warn("❌ PWA Engine: SW Fail", err));
+                }
+            },
+            handleInstallClick: async function() {
+                const modal = document.getElementById('pwaHealthModal');
+                const content = document.getElementById('smartGuideContent');
+                
+                modal.classList.add('active');
+                
+                if (this.state.isStandalone) {
+                    content.innerHTML = `<div style="font-size: 40px; margin-bottom: 10px;">🎉</div><h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Đã cài đặt!</h3><p>Bạn đang sử dụng phiên bản Ứng dụng PWA Native.</p>`;
+                    return;
+                }
+                if (this.deferredPrompt) {
+                    modal.classList.remove('active');
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        this.deferredPrompt = null;
+                        document.getElementById('btnInstall').style.display = 'none';
+                    }
+                    return;
+                }
+                if (this.state.isIOS) {
+                    content.innerHTML = `
+                        <div style="font-weight: bold; color: #2563eb; margin-bottom: 15px;">Dành cho iPhone/iPad</div>
+                        <div class="guide-step"><div class="step-num">1</div><div>Bấm nút <b>Chia sẻ (Share)</b> ở mép dưới Safari.</div></div>
+                        <div class="guide-step"><div class="step-num">2</div><div>Kéo lên chọn <b>Thêm vào MH chính (Add to Home Screen)</b>.</div></div>
+                        <div class="guide-step"><div class="step-num">3</div><div>Bấm nút <b>Thêm</b> ở góc trên cùng.</div></div>`;
+                    return;
+                }
+                if (this.state.isAndroid) {
+                    content.innerHTML = `
+                        <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">Dành cho Android</div>
+                        <div class="guide-step"><div class="step-num">1</div><div>Bấm dấu <b>3 chấm</b> ở mép phải Chrome.</div></div>
+                        <div class="guide-step"><div class="step-num">2</div><div>Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
+                    return;
+                }
+                if (this.state.isPC) {
+                    content.innerHTML = `<div style="font-weight: bold; margin-bottom: 15px;">Cài đặt trên Máy tính</div><div class="guide-step"><div class="step-num">+</div><div>Bấm biểu tượng <b>Cài đặt (Màn hình có dấu mũi tên)</b> ở góc phải thanh địa chỉ.</div></div>`;
+                    return;
                 }
             }
         };
-
-        function installPWA() {
-            if (PWAEngine.deferredPrompt) {
-                PWAEngine.deferredPrompt.prompt();
-                PWAEngine.deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('fabInstall').style.display = 'none';
-                        showToast("Đang cài đặt ứng dụng...", "success");
-                    }
-                    PWAEngine.deferredPrompt = null;
-                });
-            }
-        }
-
-        // Kích hoạt Engine
-        PWAEngine.init();
+        
+        // Khởi động PWA Engine
+        document.addEventListener('DOMContentLoaded', () => logicCore.init());
 
         // ==========================================
-        // CẤU HÌNH API & CACHE
+        // CẤU HÌNH API & CACHE CỦA ARCHIVE UPLOADER
         // ==========================================
         const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
         const SECRET_KEY = "4mXmgt0qKjZOi2g2";
         const ACCOUNT_QUERY = "xiemsansang";
-        
         window.serverCache = new Set();
         window.isCacheLoaded = false; 
 
@@ -257,8 +284,7 @@
         let wakeLockObj = null;
 
         function fireHaptic(type) {
-            if (!document.getElementById('ttsToggle').checked) return;
-            if (!navigator.vibrate) return;
+            if (!document.getElementById('ttsToggle').checked || !navigator.vibrate) return;
             try {
                 if (type === 'success') navigator.vibrate(50);
                 else if (type === 'error') navigator.vibrate([200, 100, 200]);
@@ -267,7 +293,6 @@
         }
 
         async function activateWakeLock() {
-            if(PWAEngine.isFileProtocol) return;
             try {
                 if ('wakeLock' in navigator) {
                     wakeLockObj = await navigator.wakeLock.request('screen');
@@ -277,9 +302,7 @@
         }
 
         function releaseWakeLock() {
-            if (wakeLockObj) {
-                wakeLockObj.release().then(() => { wakeLockObj = null; });
-            }
+            if (wakeLockObj) wakeLockObj.release().then(() => { wakeLockObj = null; });
         }
 
         // ==========================================
@@ -297,13 +320,10 @@
         }
 
         function processTTSQueue() {
-            if (ttsQueue.length === 0) {
-                isTTSPlaying = false; return;
-            }
+            if (ttsQueue.length === 0) { isTTSPlaying = false; return; }
             isTTSPlaying = true;
             const textToSpeak = ttsQueue.shift();
             ttsPlayer.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(textToSpeak)}`;
-            
             ttsPlayer.onended = () => processTTSQueue();
             ttsPlayer.onerror = () => { 
                 ttsPlayer.src = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(textToSpeak)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
@@ -313,7 +333,7 @@
         }
 
         // ==========================================
-        // X-RAY LOG ACCORDION & CORE LOGIC
+        // X-RAY LOG ACCORDION
         // ==========================================
         function toggleXRay() {
             const panel = document.getElementById('log-panel');
@@ -395,8 +415,6 @@
         }
 
         async function scanUserIdentifiers() {
-            if(PWAEngine.isFileProtocol) return; // Chặn quét nếu chạy local để tránh đơ máy
-            
             addLog("Đang quét mã Identifier...", "api", false);
             try {
                 const url = `https://archive.org/advancedsearch.php?q=uploader:(${ACCOUNT_QUERY}) OR creator:(${ACCOUNT_QUERY})&fl[]=identifier,title&sort[]=publicdate+desc&output=json&rows=100`;
@@ -435,6 +453,7 @@
             document.body.removeEventListener('click', initAudio);
         }, { once: true });
 
+        // KHỞI CHẠY QUÉT NGAY
         scanUserIdentifiers();
 
         async function loadServerFiles() {
@@ -503,6 +522,51 @@
         }
 
         // ==========================================
+        // RENAME / DELETE
+        // ==========================================
+        async function deleteFile(filename) {
+            const identifier = getActiveIdentifier();
+            if (!confirm(`⚠️ XÓA VĨNH VIỄN: ${filename} ?`)) return;
+
+            addLog(`Đang xóa file`, "warn", true);
+            const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(filename)}`;
+
+            try {
+                const res = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
+                if (res.ok || res.status === 204) {
+                    showToast("Đã xóa vĩnh viễn", "success");
+                    document.getElementById(`item-${filename}`).style.display = 'none';
+                    window.serverCache.delete(filename); 
+                } else {
+                    showToast("Xóa thất bại", "error");
+                }
+            } catch (e) { showToast("Lỗi mạng", "error"); }
+        }
+
+        async function renameFile(oldName) {
+            const identifier = getActiveIdentifier();
+            const newName = prompt(`Nhập tên file mới (Bao gồm đuôi):`, oldName);
+            if (!newName || newName === oldName) return;
+
+            const safeNewName = toAscii(newName);
+            addLog(`Đang đổi tên file`, "api", true);
+
+            const sourcePath = `/${identifier}/${encodeURIComponent(oldName)}`;
+            const targetUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeNewName)}`;
+            const oldUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(oldName)}`;
+
+            try {
+                addLog("Đang sao chép...", "info");
+                const copyRes = await fetch(targetUrl, { method: 'PUT', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}`, 'x-amz-copy-source': sourcePath } });
+                if (!copyRes.ok) throw new Error();
+                await fetch(oldUrl, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
+
+                showToast("Đổi tên hoàn tất.", "success");
+                setTimeout(loadServerFiles, 1000); 
+            } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
+        }
+
+        // ==========================================
         // PROBE & UPLOAD
         // ==========================================
         const elProgressUI = document.getElementById('progressUI');
@@ -562,7 +626,13 @@
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     innerResolve(true);
                                 } else {
-                                    innerReject(new Error(`S3 Reject ${xhr.status}`));
+                                    let errorDetail = `Lỗi HTTP ${xhr.status}`;
+                                    if(xhr.responseText) {
+                                        addLog(`[S3 RAW] ${xhr.responseText}`, "error"); 
+                                        const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/);
+                                        if(match) errorDetail = `S3: ${match[1]}`;
+                                    }
+                                    innerReject(new Error(errorDetail));
                                 }
                             };
                             
