@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V34 - FAILSAFE MASTER</title>
+    <title>Archive Manager V35 - CONTROL MASTER</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -92,6 +92,12 @@
         .in-app-blocker.active { display: flex; }
         
         #offline-banner { display: none; background: #dc2626; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        /* BUTTON LAYOUT CHO ĐIỀU KHIỂN UPLOAD */
+        .upload-controls { display: flex; gap: 10px; }
+        .upload-controls .btn { margin-bottom: 0; }
+        #stopBtn { display: none; flex: 1; }
+        #uploadBtn { flex: 2; }
     </style>
 </head>
 <body>
@@ -117,7 +123,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu - V34 FAILSAFE</h2>
+        <h2>🚀 Tải lên Dữ liệu - V35 CÓ NÚT DỪNG KHẨN CẤP</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -144,7 +150,10 @@
             <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
         </div>
 
-        <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload Đa Luồng</button>
+        <div class="upload-controls">
+            <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload Đa Luồng</button>
+            <button id="stopBtn" class="btn btn-danger" onclick="stopUpload()">🛑 DỪNG</button>
+        </div>
     </div>
 
     <div class="card">
@@ -160,7 +169,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Failsafe chống kẹt XHR.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống X-Ray khởi động. Đã tích hợp Nút dừng khẩn cấp.</span></div>
         </div>
     </div>
 
@@ -275,11 +284,19 @@
         
         document.addEventListener('DOMContentLoaded', () => logicCore.init());
 
+        // ==========================================
+        // CẤU HÌNH API & TRẠNG THÁI TIẾN TRÌNH
+        // ==========================================
         const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
         const SECRET_KEY = "4mXmgt0qKjZOi2g2";
         const ACCOUNT_QUERY = "xiemsansang";
+        
         window.serverCache = new Set();
         window.isCacheLoaded = false; 
+        
+        // CỜ KIỂM SOÁT DỪNG KHẨN CẤP
+        window.isUploading = false;
+        window.activeXHRs = new Set(); // Mảng chứa các kết nối mạng đang sống
 
         let wakeLockObj = null;
 
@@ -391,23 +408,19 @@
             }, duration);
         }
 
-        // ==========================================
-        // SMART NAMING (VÁ LỖI XÓA CHỮ TRUNG QUỐC BỊ RỖNG FILE)
-        // ==========================================
         function toAscii(str, originalExtension = "") {
             let s = str.normalize("NFD").replace(/[̀-ͯ]/g, ""); 
             s = s.replace(/đ/g, "d").replace(/Đ/g, "D"); 
             s = s.replace(/[^a-zA-Z0-9\.\-\_]/g, "_"); 
-            s = s.replace(/_+/g, "_").replace(/^_|_$/g, ""); // Dọn gạch dưới thừa ở hai đầu
+            s = s.replace(/_+/g, "_").replace(/^_|_$/g, ""); 
             
-            // DAO MỔ V34: Nếu tên bị gọt sạch (do rặt tiếng Trung), cấp cứu bằng tên ngẫu nhiên
+            // CẤP CỨU: Nếu tên file bị gọt sạch sẽ do toàn tiếng Trung/ký tự lạ
             const nameWithoutExt = s.replace(/\.[^/.]+$/, "");
             if (nameWithoutExt.length < 2 || !/[a-zA-Z0-9]/.test(nameWithoutExt)) {
                 const safeName = `Audio_An_Toan_${Date.now()}_${Math.floor(Math.random() * 1000)}${originalExtension}`;
-                addLog(`[CẤP CỨU] Tên file không hợp lệ (tiếng Trung/Ký tự lạ). Tự động sinh tên: ${safeName}`, "warn");
+                addLog(`[CẤP CỨU] Ký tự lạ đã bị bộ lọc xóa. Tự động sinh tên: ${safeName}`, "warn");
                 return safeName;
             }
-            
             return s; 
         }
 
@@ -561,7 +574,6 @@
 
             await waitForNetwork();
 
-            // Chống lỗi khi user lỡ gõ tiếng trung vào prompt đổi tên
             const safeNewName = toAscii(newName, newName.substring(newName.lastIndexOf('.')));
             addLog(`Đang đổi tên file`, "api", true);
 
@@ -580,6 +592,9 @@
             } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
         }
 
+        // ==========================================
+        // KHỐI XỬ LÝ UPLOAD CHÍNH CÓ NÚT DỪNG KHẨN CẤP
+        // ==========================================
         const elProgressUI = document.getElementById('progressUI');
         const elProgressName = document.getElementById('progressName');
         const elProgressPercent = document.getElementById('progressPercent');
@@ -604,22 +619,39 @@
                     if(hex.includes("00 00 00")) resolve('.mp4'); 
                     else resolve('.mp3'); 
                 };
-                reader.onerror = () => resolve('.mp3'); // Bọc giáp an toàn
+                reader.onerror = () => resolve('.mp3'); 
                 reader.readAsArrayBuffer(file.slice(0, 4));
             });
         }
 
-        // ==========================================
-        // MÁY CHÉM JS GUILLOTINE CHỐNG ĐƠ TRÌNH DUYỆT
-        // ==========================================
+        // 🔪 HÀM DỪNG TẢI LÊN KHẨN CẤP
+        function stopUpload() {
+            if (!window.isUploading) return;
+            
+            window.isUploading = false; // Ngắt cờ vòng lặp Queue
+            addLog("ĐANG HỦY CÁC LUỒNG TẢI LÊN...", "warn", true);
+            
+            // Giết chết toàn bộ các kết nối mạng đang mở
+            window.activeXHRs.forEach(xhr => xhr.abort());
+            window.activeXHRs.clear();
+            
+            // Khôi phục nút bấm giao diện
+            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('stopBtn').style.display = 'none';
+            
+            addLog("Đã chủ động Dừng tiến trình. Bạn có thể Bấm Upload lại để tải tiếp các file còn sót.", "error", true);
+            showToast("Đã dừng tải lên!", "error");
+            releaseWakeLock();
+        }
+
         function uploadSingleFileWithXHR(identifier, file, maxRetries = 3) {
             return new Promise(async (resolve) => {
                 const trueExtension = await probeFileInnerData(file);
                 const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                 
-                // GỌI HÀM CẤP CỨU NẾU TÊN BỊ NÁT
                 let safeUrlName = toAscii(baseName, trueExtension);
-                if (!safeUrlName.endsWith(trueExtension)) safeUrlName += trueExtension;
+                if (!safeUrlName.endsWith(trueExtension)) safeUrlName += trueExtension; // Bọc lỗi
                 
                 if (window.serverCache.has(safeUrlName)) {
                     addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
@@ -630,16 +662,19 @@
                 addLog(`Đang tải lên ${safeUrlName}`, "info"); 
 
                 for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    // Nếu user đã ấn STOP, thoát khỏi vòng lặp ngay lập tức
+                    if (!window.isUploading) return resolve(false);
+
                     await waitForNetwork(); 
                     try {
                         const success = await new Promise((innerResolve, innerReject) => {
-                            
-                            // 🔪 MÁY CHÉM JS (JS GUILLOTINE): Ép chết Promise nếu quá 3.5 phút XHR không phản hồi
                             const jsTimeout = setTimeout(() => {
-                                innerReject(new Error("JS GUILLOTINE: Luồng tải lên bị đóng băng vô cớ. Bắt buộc chém đứt."));
+                                innerReject(new Error("Timeout JS"));
                             }, 210000); 
 
                             const xhr = new XMLHttpRequest();
+                            window.activeXHRs.add(xhr); // Nạp mạng sống của XHR vào mảng quản lý
+                            
                             xhr.open('PUT', url, true);
                             xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
                             xhr.setRequestHeader('x-amz-auto-make-bucket', '1');
@@ -647,7 +682,8 @@
                             xhr.timeout = 180000;
                             
                             xhr.onload = () => {
-                                clearTimeout(jsTimeout); // Gỡ máy chém
+                                clearTimeout(jsTimeout);
+                                window.activeXHRs.delete(xhr); // Sống sót thì xóa khỏi mảng
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     innerResolve(true);
                                 } else {
@@ -661,14 +697,16 @@
                                 }
                             };
                             
-                            xhr.onerror = () => { clearTimeout(jsTimeout); innerReject(new Error("Mất kết nối mạng hoặc CORS")); };
-                            xhr.onabort = () => { clearTimeout(jsTimeout); innerReject(new Error("Kết nối bị ngắt")); };
-                            xhr.ontimeout = () => { clearTimeout(jsTimeout); innerReject(new Error("Timeout: Máy chủ Archive ngâm kết nối quá lâu.")); };
+                            xhr.onerror = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Mất kết nối mạng")); };
+                            // Khi bị Cầu dao (abort) cắt đứt:
+                            xhr.onabort = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Tiến trình bị hủy bởi người dùng")); };
+                            xhr.ontimeout = () => { clearTimeout(jsTimeout); window.activeXHRs.delete(xhr); innerReject(new Error("Timeout Archive")); };
                             
                             try {
                                 xhr.send(file);
                             } catch(err) {
                                 clearTimeout(jsTimeout);
+                                window.activeXHRs.delete(xhr);
                                 innerReject(err);
                             }
                         });
@@ -680,17 +718,17 @@
                         }
                         
                     } catch (error) {
+                        if (error.message.includes("bị hủy")) return resolve(false); // Tránh rác log khi bị user ấn STOP
+
                         if (attempt === maxRetries) { 
                             addLog(`Tải thất bại hoàn toàn file: ${safeUrlName} - Lý do: ${error.message}`, "error", true); 
-                            showToast(`Tải thất bại file này!`, "error");
                             return resolve(false); 
                         }
                         
                         const baseDelay = 3000 * Math.pow(2, attempt - 1); 
                         const jitter = Math.random() * 1000; 
                         const finalDelay = baseDelay + jitter;
-                        
-                        addLog(`Nghẽn mạng luồng này. Đang lùi bước... Thử lại sau ${(finalDelay/1000).toFixed(1)}s`, "warn"); 
+                        addLog(`Nghẽn mạng luồng này. Thử lại sau ${(finalDelay/1000).toFixed(1)}s`, "warn"); 
                         await new Promise(r => setTimeout(r, finalDelay));
                     }
                 }
@@ -700,7 +738,6 @@
         async function startUpload() {
             const identifier = getActiveIdentifier();
             const files = document.getElementById('fileInput').files;
-            const btn = document.getElementById('uploadBtn');
 
             if (!identifier) { showToast("Xác định Thư mục đích!", "error"); return; }
             if (files.length === 0) { showToast("Chọn ít nhất 1 file!", "error"); return; }
@@ -712,8 +749,12 @@
                 await loadServerFiles();
             }
 
-            btn.disabled = true;
+            // GIAO DIỆN NÚT BẤM (Ẩn Bắt đầu, Hiện Dừng)
+            document.getElementById('uploadBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
             elProgressUI.style.display = 'block';
+            
+            window.isUploading = true;
             addLog(`Bắt đầu tải lên ĐA LUỒNG (${files.length} files)`, "api", true);
 
             let completedFilesCount = 0;
@@ -726,18 +767,22 @@
 
             await new Promise((resolve) => {
                 const processNext = async () => {
-                    if (queue.length === 0 && activeUploads === 0) {
+                    // Nếu user ấn STOP, isUploading sẽ false. Vòng lặp dừng lại.
+                    if ((queue.length === 0 || !window.isUploading) && activeUploads === 0) {
                         resolve();
                         return;
                     }
-                    while (activeUploads < MAX_CONCURRENT && queue.length > 0) {
+                    while (activeUploads < MAX_CONCURRENT && queue.length > 0 && window.isUploading) {
                         const file = queue.shift();
                         activeUploads++;
                         
                         uploadSingleFileWithXHR(identifier, file).finally(() => {
                             activeUploads--;
-                            completedFilesCount++;
-                            updateOverallProgress(completedFilesCount, totalFilesCount);
+                            // Chỉ đếm % nếu không phải bị user Hủy
+                            if (window.isUploading) {
+                                completedFilesCount++;
+                                updateOverallProgress(completedFilesCount, totalFilesCount);
+                            }
                             processNext();
                         });
                     }
@@ -745,14 +790,21 @@
                 processNext();
             });
 
-            addLog("Tuyệt vời. Toàn bộ tiến trình đa luồng đã hoàn tất.", "success", true);
-            updateOverallProgress(totalFilesCount, totalFilesCount);
-            elProgressBar.style.background = '#10b981';
-            btn.disabled = false;
-            document.getElementById('fileInput').value = ''; 
-            
-            releaseWakeLock();
-            setTimeout(loadServerFiles, 1500);
+            // Nếu vòng lặp kết thúc do tải xong (Không phải do ấn Nút Dừng)
+            if (window.isUploading) {
+                addLog("Tuyệt vời. Toàn bộ tiến trình đa luồng đã hoàn tất.", "success", true);
+                updateOverallProgress(totalFilesCount, totalFilesCount);
+                elProgressBar.style.background = '#10b981';
+                
+                // Trả lại nút Bắt đầu
+                document.getElementById('uploadBtn').style.display = 'block';
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('stopBtn').style.display = 'none';
+                
+                document.getElementById('fileInput').value = ''; 
+                releaseWakeLock();
+                setTimeout(loadServerFiles, 1500);
+            }
         }
     </script>
 </body>
