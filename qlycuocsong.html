@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V57 - The Ultimate Polish</title>
+<title>LifeOS V57 - Master Polish</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -641,7 +641,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC (V57 IMMORTAL ALARM LOOP)
+// 2. NLP & ALARM LOGIC 
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -704,7 +704,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V57 FIX: Tiền xử lý TTS Base64 ngay khi tạo
+// Tiền xử lý TTS Base64 ngay khi tạo
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + text)}`;
@@ -742,14 +742,14 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // V57 FIX: Dùng Worker để đập nhịp Bíp bất tử
+        // Dùng Worker để đập nhịp Bíp bất tử
         if (window.beepWorker) window.beepWorker.terminate();
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorker = new Worker(URL.createObjectURL(new Blob([bw], { type: 'application/javascript' })));
         window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
         window.beepWorker.postMessage('start');
         
-        // V57 FIX: Vòng lặp đan xen Bíp và Giọng nói (Endless Loop)
+        // Vòng lặp đan xen Bíp và Giọng nói (Endless Loop)
         const triggerTTS = () => {
             if (!window.isAlarmRinging) return;
             if(alarmAudio) alarmAudio.volume = 0.1;
@@ -1086,6 +1086,13 @@ window.MusicApp = {
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
     visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
     
+    // VÁ SẠN 1: Bơm hàm filterList bị khuyết để nút Search hoạt động và không treo RAM
+    filterList(val) { 
+        this.filterText = val; 
+        this.visibleCount = 50; // Reset lại view khi tìm kiếm
+        this.renderList(); 
+    },
+    
     initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=>el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
@@ -1123,7 +1130,6 @@ window.MusicApp = {
             c.appendChild(d);
         });
 
-        // V57 FIX: Nút tải thêm 100 bài
         if (this.visibleCount < list.length) {
             const btnWrap = document.createElement('div');
             btnWrap.className = 'px-4 pb-6 pt-2'; 
@@ -1170,6 +1176,9 @@ window.MusicApp = {
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
+        
+        // VÁ SẠN 2: Tự động bung rộng giao diện nếu thuật toán Shuffle chọc trúng bài nằm ngoài vùng hiển thị
+        if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
         a.src=this.playlist[idx].stream_url; 
@@ -1252,8 +1261,15 @@ window.MusicApp = {
 // 7. INITIALIZATION
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/tool/sw_qlycuocsong.js').catch(()=>{});
-    else window.pwaEngine.init();
+    // VÁ SẠN 3: Bật thêm Log thông báo để anh dễ dàng debug Network Offline trên trình duyệt PWA. 
+    // Chiến lược Network-first trong sw_qlycuocsong.js của anh viết hoàn toàn chuẩn xác.
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
+            .then(() => console.log('[LifeOS] Service Worker is active!'))
+            .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
+    } else {
+        window.pwaEngine.init();
+    }
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
