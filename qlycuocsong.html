@@ -499,7 +499,7 @@ window.playSpeechTTS = (text) => {
 
 window.audioInitialized = false;
 window.notifiedTasks = new Set();
-window.preloadedTTSData = {}; 
+window.preloadedTTSData = {};
 
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
@@ -513,15 +513,14 @@ window.unlockAudio=()=>{
     if(d) { d.muted = true; d.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; d.play().catch(()=>{}); }
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
     window.audioInitialized = true;
+    
     document.body.removeEventListener('touchstart', window.unlockAudio);
     document.body.removeEventListener('click', window.unlockAudio);
 };
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// ==============================================================================
-// 🌟 V57 THE IMMORTAL WORKER - LÕI ĐẾM GIỜ BẤT TỬ TRONG DOZE MODE
-// ==============================================================================
+// V57 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ ĐÃ ĐƯỢC BỌC AN TOÀN
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -548,7 +547,7 @@ window.startBackgroundWorker = () => {
         };
         window.bgWorker.postMessage('start');
     } catch(e) { 
-        console.warn("Worker Failed. Fallback to setInterval."); 
+        console.warn("Worker Fallback"); 
         setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
     }
 };
@@ -641,7 +640,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC 
+// 2. NLP & ALARM LOGIC (V57 IMMORTAL ALARM LOOP)
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -704,7 +703,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// Tiền xử lý TTS Base64 ngay khi tạo
+// V57 FIX: Tiền xử lý TTS Base64 ngay khi tạo
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + text)}`;
@@ -742,14 +741,14 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // Dùng Worker để đập nhịp Bíp bất tử
+        // V57 FIX: Dùng Worker để đập nhịp Bíp bất tử
         if (window.beepWorker) window.beepWorker.terminate();
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorker = new Worker(URL.createObjectURL(new Blob([bw], { type: 'application/javascript' })));
         window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
         window.beepWorker.postMessage('start');
         
-        // Vòng lặp đan xen Bíp và Giọng nói (Endless Loop)
+        // V57 FIX: Vòng lặp đan xen Bíp và Giọng nói (Endless Loop)
         const triggerTTS = () => {
             if (!window.isAlarmRinging) return;
             if(alarmAudio) alarmAudio.volume = 0.1;
@@ -1135,7 +1134,7 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm nhạc (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
@@ -1261,8 +1260,7 @@ window.MusicApp = {
 // 7. INITIALIZATION
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // VÁ SẠN 3: Bật thêm Log thông báo để anh dễ dàng debug Network Offline trên trình duyệt PWA. 
-    // Chiến lược Network-first trong sw_qlycuocsong.js của anh viết hoàn toàn chuẩn xác.
+    // VÁ SẠN 3: Bật thêm Log thông báo để dễ dàng debug Network Offline trên trình duyệt PWA. 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
             .then(() => console.log('[LifeOS] Service Worker is active!'))
