@@ -346,11 +346,70 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <div id="modal-container"></div>
 
+<div id="vaultFormModal" class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
+            <h2 id="vaultModalTitle" class="text-xl font-black text-slate-800 dark:text-white tracking-tight">Thêm Mục Mới</h2>
+            <button type="button" onclick="window.VaultUI.closeModal()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90"><i class="ph-bold ph-x text-xl"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
+            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
+                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
+            </div>
+            <form id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)" class="space-y-4">
+                <input type="hidden" id="vaultEntryId">
+                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
+                    <select id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white">
+                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
+                    </select>
+                    <div id="vaultCustomCatWrapper" class="hidden mt-3 px-2 pb-2">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
+                        <input type="text" id="vaultEntryCustomCategory" placeholder="VD: Server..." class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
+                    <input type="text" id="vaultEntryName" placeholder="Tên gợi nhớ..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
+                        <span>Nội dung</span>
+                        <button type="button" onclick="window.vibrate([15]);const t=document.getElementById('vaultEntryContent');if(t){const c=t.selectionStart;const v=t.value;const p=(v&&c>0?'\n':'')+'Mật khẩu: '+window.VaultUtils.generatePassword();t.value=v.substring(0,c)+p+v.substring(c);t.selectionStart=t.selectionEnd=c+p.length;t.focus();if(window.soundEnabled)window.playSpeechTTS('Đã tạo mật khẩu an toàn');}" class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
+                    </label>
+                    <textarea id="vaultEntryContent" rows="6" placeholder="Nhập tự do..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
+            <button type="button" onclick="window.vibrate(10); window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
+            <button type="submit" form="vaultForm" class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
+        </div>
+    </div>
+</div>
+
+<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
+    <i class="ph-bold ph-download-simple text-xl"></i>
+    <span class="font-bold uppercase tracking-wide">Cài App</span>
+</button>
+
+<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
+        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
+            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
+            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
+        </div>
+        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area"></div>
+        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
+            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // ==============================================================================
-// 1. CORE LOGIC & PWA ENGINE
+// 1. PWA ENGINE & CORE LOGIC
 // ==============================================================================
-
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -364,11 +423,15 @@ window.pwaEngine = {
         if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
     },
     showInstallButton() { 
-        const f = el('btnInstall'); 
-        if(f) { f.classList.add('visible'); f.onclick = () => this.handleInstallClick(); } 
+        const f = document.getElementById('btnInstall'); 
+        if(f) { 
+            f.classList.add('visible'); 
+            f.onclick = () => this.handleInstallClick(); 
+        } 
     },
     handleInstallClick() {
-        const m = el('pwaHealthModal'), c = el('smartGuideContent'); if(!m || !c) return; 
+        const m = document.getElementById('pwaHealthModal'), c = document.getElementById('smartGuideContent'); 
+        if(!m || !c) return; 
         m.classList.remove('hidden');
         if(this.deferredPrompt) { 
             this.deferredPrompt.prompt(); 
@@ -379,7 +442,6 @@ window.pwaEngine = {
         else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
-window.pwaEngine.init();
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
@@ -397,6 +459,7 @@ document.addEventListener('click', (e) => {
     const m = el('profile-menu'); const b = el('profile-btn');
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
+
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
@@ -457,7 +520,13 @@ window.playSpeechTTS = (text, bypassGuard = false) => {
         const c = document.getElementById('tts-audio');
         if (c) {
             c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-            c.onerror = () => { speakNative(); };
+            c.onerror = () => {
+                // Dao mổ 5: Bơm lại API Backup Mạng lưới 3 Lớp TTS (Triple Fallback)
+                if (c.src.includes('google')) {
+                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
+                } else { speakNative(); }
+            };
             const playPromise = c.play();
             if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
         } else { speakNative(); }
@@ -1091,7 +1160,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V64: HYBRID FETCH ENGINE - CHỐNG DDOS ARCHIVE API)
+// 6. MUSIC SYSTEM (V65 THE ABSOLUTE CORE: LAZY RENDERING & ANTI-FREEZE)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1123,29 +1192,43 @@ window.MusicApp = {
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
-            const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
+            const cached = await window.MusicDB.get(); 
+            if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             
-            // DAO MỔ V64: Lách luật Archive API. Chỉ xin tên Thư mục (Identifier) & Tác giả. 
-            // Tự động chế tạo link MP3 dựa trên quy tắc Đặt tên file = Tên thư mục của anh Xiêm.
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             
             if(r.ok){
-                const j = await r.json(), docs = j?.response?.docs || [], all = [];
+                const j = await r.json(), docs = j?.response?.docs || [];
+                const all = [];
+                // Dao mổ V65: Lazy Rendering. Bốc bài nào ném ra giao diện ngay bài đó.
                 for(const d of docs){
-                    if (d.identifier) {
-                        // Tự build tên file từ Identifier (Giả định đuôi .mp3)
-                        const fileName = `${d.identifier}.mp3`;
-                        all.push({ 
-                            id:`${d.identifier}/${fileName}`, 
-                            title:(d.title || d.identifier).replace(/_/g,' ').trim(), 
-                            artist:d.creator||'Xiemsansang', 
-                            stream_url:`https://archive.org/download/${d.identifier}/${fileName}`, 
-                            duration: 0 // Bỏ qua load Length để tăng tốc tuyệt đối
+                    try {
+                        const meta = await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(res=>res.json());
+                        let added = false;
+                        (meta.files||[]).forEach(f => { 
+                            if(String(f.format||'').toUpperCase().includes('MP3')) {
+                                all.push({ 
+                                    id:`${d.identifier}/${f.name}`, 
+                                    title:(f.title || f.name).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
+                                    artist:d.creator||'Xiemsansang', 
+                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`, 
+                                    duration:parseFloat(f.length||0) 
+                                });
+                                added = true;
+                            }
                         });
-                    }
+                        // Đổ dữ liệu ra màn hình NGAY LẬP TỨC để Playwright không bị Timeout
+                        if (added) {
+                            this.playlist = [...all]; 
+                            this.renderList(); 
+                            el('music-loading').style.display='none';
+                        }
+                    } catch(e){}
                 }
-                if(all.length){ this.playlist=all; window.MusicDB.set(all); this.renderList(); }
+                if(all.length){ 
+                    window.MusicDB.set(all); 
+                }
             }
         } catch(e){}
         el('music-loading').style.display='none';
@@ -1163,9 +1246,7 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            
-            // Xóa hiển thị Duration ảo
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div>`;
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
             c.appendChild(d);
         });
 
@@ -1191,7 +1272,9 @@ window.MusicApp = {
         if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
             const a = el('mstq-player');
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) d = 0;
+            if (!d || d === Infinity || isNaN(d)) {
+                d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
+            }
             if (d > 0) {
                 try {
                     navigator.mediaSession.setPositionState({ duration: d, playbackRate: a.playbackRate || 1, position: a.currentTime || 0 });
@@ -1254,7 +1337,7 @@ window.MusicApp = {
     toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
-        let d = a.duration;
+        let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
         if(d) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
@@ -1263,9 +1346,12 @@ window.MusicApp = {
     
     setupListeners() {
         const a=el('mstq-player');
+        let errorCount = 0; // Đếm số lần lỗi liên tục
+        
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) return; // Bỏ qua UI timeupdate nếu không lấy được duration gốc
+            if (!d || d === Infinity || isNaN(d)) { d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0; }
+            if(!d) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
             
@@ -1283,9 +1369,22 @@ window.MusicApp = {
             else this.playNext(); 
         });
         
+        a.addEventListener('playing', () => { errorCount = 0; }); // Chạm nhạc thành công -> Reset đếm lỗi
+        
         a.addEventListener('error', (e) => {
-            console.warn("Lỗi phát nhạc. Chuyển bài kế tiếp.");
-            this.playNext();
+            if(e) e.stopPropagation();
+            errorCount++;
+            console.warn(`Lỗi phát nhạc (Lần ${errorCount}). Chuyển bài kế tiếp.`);
+            
+            // Dao mổ V65: Phanh gấp CPU! Chặn đứng Vòng lặp Vô cực 404 làm sập Web
+            if (errorCount > 10) {
+                console.error("Lỗi liên tục quá nhiều. Dừng phát để bảo vệ hệ thống.");
+                this.playing = false;
+                this.updateMiniPlayer();
+                return;
+            }
+            this.prefetchDone = false;
+            setTimeout(() => { this.playNext(); }, 1500);
         });
         
         if('mediaSession' in navigator) {
@@ -1329,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newId = String(Date.now());
         window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
         
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) { window.preloadedTTSData[newId] = 'loading'; window.preloadTTS(newId, p.text); }
+        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
         if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
         
         window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
