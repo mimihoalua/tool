@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V64 - The Zenith</title>
+<title>LifeOS V65 - The Absolute Core (APK Ready)</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -412,7 +412,6 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// TTS & AUDIO CORE
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
@@ -1092,7 +1091,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V64 THE ZENITH: CHUẨN HÓA URL ARCHIVE API)
+// 6. MUSIC SYSTEM (V64: HYBRID FETCH ENGINE - CHỐNG DDOS ARCHIVE API)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1125,28 +1124,24 @@ window.MusicApp = {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
-            const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             
-            // DAO MỔ V64: Nối chuỗi URL chính xác để Archive.org không bị ngáo (fl[]=name&fl[]=format&fl[]=length)
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=name&fl[]=format&fl[]=length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            // DAO MỔ V64: Lách luật Archive API. Chỉ xin tên Thư mục (Identifier) & Tác giả. 
+            // Tự động chế tạo link MP3 dựa trên quy tắc Đặt tên file = Tên thư mục của anh Xiêm.
+            const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
                 for(const d of docs){
-                    if (d.name && d.format) {
-                        const names = Array.isArray(d.name) ? d.name : [d.name];
-                        const formats = Array.isArray(d.format) ? d.format : [d.format];
-                        const lengths = Array.isArray(d.length) ? d.length : [d.length];
-                        
-                        names.forEach((n, idx) => {
-                            if(String(formats[idx]||'').toUpperCase().includes('MP3')) {
-                                all.push({ 
-                                    id:`${d.identifier}/${n}`, 
-                                    title:(d.title || n).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
-                                    artist:d.creator||'Xiemsansang', 
-                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(n)}`, 
-                                    duration:parseFloat(lengths[idx]||0) 
-                                });
-                            }
+                    if (d.identifier) {
+                        // Tự build tên file từ Identifier (Giả định đuôi .mp3)
+                        const fileName = `${d.identifier}.mp3`;
+                        all.push({ 
+                            id:`${d.identifier}/${fileName}`, 
+                            title:(d.title || d.identifier).replace(/_/g,' ').trim(), 
+                            artist:d.creator||'Xiemsansang', 
+                            stream_url:`https://archive.org/download/${d.identifier}/${fileName}`, 
+                            duration: 0 // Bỏ qua load Length để tăng tốc tuyệt đối
                         });
                     }
                 }
@@ -1168,7 +1163,9 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
+            
+            // Xóa hiển thị Duration ảo
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div>`;
             c.appendChild(d);
         });
 
@@ -1194,9 +1191,7 @@ window.MusicApp = {
         if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
             const a = el('mstq-player');
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) {
-                d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
-            }
+            if (!d || d === Infinity || isNaN(d)) d = 0;
             if (d > 0) {
                 try {
                     navigator.mediaSession.setPositionState({ duration: d, playbackRate: a.playbackRate || 1, position: a.currentTime || 0 });
@@ -1259,7 +1254,7 @@ window.MusicApp = {
     toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
-        let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
+        let d = a.duration;
         if(d) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
@@ -1270,8 +1265,7 @@ window.MusicApp = {
         const a=el('mstq-player');
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) { d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0; }
-            if(!d) return;
+            if (!d || d === Infinity || isNaN(d)) return; // Bỏ qua UI timeupdate nếu không lấy được duration gốc
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
             
@@ -1287,6 +1281,11 @@ window.MusicApp = {
             this.prefetchDone = false;
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
             else this.playNext(); 
+        });
+        
+        a.addEventListener('error', (e) => {
+            console.warn("Lỗi phát nhạc. Chuyển bài kế tiếp.");
+            this.playNext();
         });
         
         if('mediaSession' in navigator) {
