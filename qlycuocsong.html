@@ -348,9 +348,10 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC & PWA ENGINE 
+// 1. CORE LOGIC & PWA ENGINE
 // ==============================================================================
 
+// DAO MỔ 5: Đưa PWA Engine ra Global Scope để hứng trọn sự kiện
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -364,7 +365,6 @@ window.pwaEngine = {
         if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
     },
     showInstallButton() { 
-        // V62 FIX: Phải dùng classList vì CSS ưu tiên cao
         const f = el('btnInstall'); 
         if(f) { f.classList.add('visible'); f.onclick = () => this.handleInstallClick(); } 
     },
@@ -380,7 +380,7 @@ window.pwaEngine = {
         else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
-// Kích hoạt PWA Engine song song, không chờ đợi DOM load
+// Kích hoạt PWA Engine ngay lập tức, không chờ đợi DOM load
 window.pwaEngine.init();
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
@@ -446,6 +446,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
+    // DAO MỔ 6: Cắt trĩ Text chống ngộ độc Base64
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
@@ -494,7 +495,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// WORKER BẤT TỬ
+// DAO MỔ 1: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ & AN TOÀN RAM
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -511,7 +512,8 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        if (window.bgWorker) { window.bgWorker.terminate(); if(window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
+        // Cầm máu RAM
+        if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
         
@@ -615,7 +617,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC 
+// 2. NLP & ALARM LOGIC
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -678,7 +680,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V62 FIX: Trị ngộ độc Base64
+// DAO MỔ 6: Chống ngộ độc Base64 bằng cách check res.ok và giới hạn 50 ký tự
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -697,7 +699,7 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
-    // V62 FIX: Chống Kẹt Xe Báo Thức - Nối chuỗi & xử lý mảng
+    // DAO MỔ 4: Chống Kẹt Xe Báo Thức - Nối chuỗi & xử lý mảng
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -725,7 +727,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // V62 FIX: Cầm máu RAM khi gọi lại Worker
+        // DAO MỔ 2: Dùng Worker để đập nhịp Bíp bất tử & Cầm máu RAM
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -744,7 +746,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
                 
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid]) {
+                if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData && window.preloadedTTSData[tid]) {
                     src = window.preloadedTTSData[tid];
                 }
 
@@ -805,7 +807,7 @@ window.stopGlobalAlarm = (actionType) => {
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // V62 FIX: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
+                    // DAO MỔ 3: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let h = parseInt(hStr, 10);
                         let m = mStr ? parseInt(mStr, 10) : 0;
@@ -857,7 +859,9 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
+            // Fix spam TTS preload
             if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
+                window.preloadedTTSData[t.id] = 'loading'; // Lock flag to prevent repeated fetching
                 window.preloadTTS(t.id, t.text);
             }
             
@@ -1098,7 +1102,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V62: SINGLE FETCH, INDEXEDDB, INFINITE SCROLL)
+// 6. MUSIC SYSTEM (V62 FIX: INDEXEDDB, 1-REQUEST FETCH)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1121,7 +1125,7 @@ window.MusicApp = {
     
     filterList(val) { 
         this.filterText = val; 
-        this.visibleCount = 50;
+        this.visibleCount = 50; 
         this.renderList(); 
     },
     
@@ -1132,7 +1136,8 @@ window.MusicApp = {
         try {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-            // V62 FIX: Trảm vòng lặp Request. Load toàn bộ thông tin bài hát trong 1 lần duy nhất!
+            
+            // DAO MỔ 2: Kéo 1 lần duy nhất toàn bộ Format và Length, không vòng lặp nã đạn Server
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
@@ -1182,7 +1187,7 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm bài hát (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
@@ -1224,7 +1229,7 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
-        // V62 FIX: Bóng ma UI - Tự động nới giới hạn hiển thị nếu Random rơi ra ngoài
+        // DAO MỔ: Bóng ma UI - Tự động nới giới hạn hiển thị nếu Random rơi ra ngoài 50 bài đầu
         if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
@@ -1289,7 +1294,7 @@ window.MusicApp = {
         });
         
         a.addEventListener('ended', (e) => { 
-            if(e) e.stopPropagation(); 
+            if(e) e.stopPropagation(); // Khóa bong bóng sự kiện gây crash Playwright Phase 7
             this.prefetchDone = false;
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
             else this.playNext(); 
@@ -1336,7 +1341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newId = String(Date.now());
         window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
         
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
+        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) { window.preloadedTTSData[newId] = 'loading'; window.preloadTTS(newId, p.text); }
         if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
         
         window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
