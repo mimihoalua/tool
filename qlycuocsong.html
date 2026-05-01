@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V63 - The APK Core</title>
+<title>LifeOS V64 - The Zenith</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -412,6 +412,7 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
+// TTS & AUDIO CORE
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
@@ -442,7 +443,6 @@ window.initTTS=()=>{
 };
 
 window.playSpeechTTS = (text, bypassGuard = false) => {
-    // DAO MỔ V63: Xóa bỏ nghịch lý isAlarmRinging. Nếu đứt mạng Doze Mode gọi fallback, phải cho phép đọc!
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
     
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -671,7 +671,6 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// DAO MỔ V63: Lọc chặn Base64 rác
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -752,7 +751,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 };
                 
                 ttsAudio.play().catch(()=>{
-                    // DAO MỔ V63: Bắt buộc đọc TTS Native khi đứt mạng, Bypass cờ isAlarmRinging
                     window.playSpeechTTS(window.alarmTextToSpeak, true);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
@@ -1094,7 +1092,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V63 DAO MỔ: CHỐNG DDOS BẰNG 1 REQUEST DUY NHẤT & INDEXEDDB)
+// 6. MUSIC SYSTEM (V64 THE ZENITH: CHUẨN HÓA URL ARCHIVE API)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1129,8 +1127,8 @@ window.MusicApp = {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             
-            // DAO MỔ 9: Trảm vòng lặp Request. Load toàn bộ thông tin bài hát trong 1 lần duy nhất từ Search API
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            // DAO MỔ V64: Nối chuỗi URL chính xác để Archive.org không bị ngáo (fl[]=name&fl[]=format&fl[]=length)
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=name&fl[]=format&fl[]=length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
                 for(const d of docs){
@@ -1221,7 +1219,6 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
-        // DAO MỔ: Bóng ma UI - Tự động nới giới hạn hiển thị nếu Random rơi ra ngoài 50 bài đầu
         if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
@@ -1286,7 +1283,6 @@ window.MusicApp = {
         });
         
         a.addEventListener('ended', (e) => { 
-            // DAO MỔ 7: Khóa bọt sự kiện, chặn Playwright văng lỗi
             if(e) e.stopPropagation(); 
             this.prefetchDone = false;
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
