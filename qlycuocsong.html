@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V62 - The Immortal Core</title>
+<title>LifeOS V63 - The APK Core</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -351,7 +351,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 // 1. CORE LOGIC & PWA ENGINE
 // ==============================================================================
 
-// DAO MỔ 5: Đưa PWA Engine ra Global Scope để hứng trọn sự kiện
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -380,7 +379,6 @@ window.pwaEngine = {
         else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
-// Kích hoạt PWA Engine ngay lập tức, không chờ đợi DOM load
 window.pwaEngine.init();
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
@@ -414,7 +412,6 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// TTS & AUDIO CORE
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
@@ -444,9 +441,10 @@ window.initTTS=()=>{
     window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
 };
 
-window.playSpeechTTS = (text) => {
-    if (!window.soundEnabled || window.isAlarmRinging) return; 
-    // DAO MỔ 6: Cắt trĩ Text chống ngộ độc Base64
+window.playSpeechTTS = (text, bypassGuard = false) => {
+    // DAO MỔ V63: Xóa bỏ nghịch lý isAlarmRinging. Nếu đứt mạng Doze Mode gọi fallback, phải cho phép đọc!
+    if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
+    
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
@@ -460,14 +458,9 @@ window.playSpeechTTS = (text) => {
         const c = document.getElementById('tts-audio');
         if (c) {
             c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-            c.onerror = () => {
-                if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
-                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
-                } else { speakNative(); }
-            };
+            c.onerror = () => { speakNative(); };
             const playPromise = c.play();
-            if (playPromise !== undefined) { playPromise.catch(error => { speakNative(); }); }
+            if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
         } else { speakNative(); }
     } catch (e) { speakNative(); }
 };
@@ -495,7 +488,6 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// DAO MỔ 1: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ & AN TOÀN RAM
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -512,7 +504,6 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        // Cầm máu RAM
         if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
@@ -592,7 +583,7 @@ window.switchTab=(id,b)=>{
     }
     if(window.soundEnabled && window.innerWidth < 1024 && !window.isAlarmRinging){
         const names = {'view-tasks':'Nhiệm vụ','view-focus':'Tập trung','view-vault':'Kho lưu trữ','view-music':'Nghe nhạc'};
-        window.playSpeechTTS(names[id] || '');
+        window.playSpeechTTS(names[id] || '', true);
     }
 };
 
@@ -680,7 +671,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// DAO MỔ 6: Chống ngộ độc Base64 bằng check res.ok
+// DAO MỔ V63: Lọc chặn Base64 rác
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -689,7 +680,11 @@ window.preloadTTS = (taskId, text) => {
         .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
         .then(blob => {
             const reader = new FileReader();
-            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
+            reader.onloadend = () => { 
+                const res = reader.result;
+                if(res.startsWith('data:audio')) window.preloadedTTSData[taskId] = res; 
+                else window.preloadedTTSData[taskId] = 'error';
+            };
             reader.readAsDataURL(blob);
         }).catch(() => { window.preloadedTTSData[taskId] = 'error'; });
 };
@@ -699,7 +694,6 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
-    // DAO MỔ 4: Chống Kẹt Xe Báo Thức - Nối chuỗi & xử lý mảng
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -727,7 +721,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // DAO MỔ 2: Dùng Worker để đập nhịp Bíp bất tử & Cầm máu RAM
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -746,7 +739,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
                 
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                // Chỉ nhai Base64 khi hợp lệ, không ăn chữ "loading" hoặc "error"
                 if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid] && window.preloadedTTSData[tid].startsWith('data:audio')) {
                     src = window.preloadedTTSData[tid];
                 }
@@ -760,7 +752,8 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 };
                 
                 ttsAudio.play().catch(()=>{
-                    window.playSpeechTTS(window.alarmTextToSpeak);
+                    // DAO MỔ V63: Bắt buộc đọc TTS Native khi đứt mạng, Bypass cờ isAlarmRinging
+                    window.playSpeechTTS(window.alarmTextToSpeak, true);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                         window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
@@ -808,7 +801,6 @@ window.stopGlobalAlarm = (actionType) => {
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // DAO MỔ 3: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let h = parseInt(hStr, 10);
                         let m = mStr ? parseInt(mStr, 10) : 0;
@@ -860,9 +852,8 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
-            // Fix spam TTS preload
             if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
-                window.preloadedTTSData[t.id] = 'loading'; // Lock flag to prevent repeated fetching
+                window.preloadedTTSData[t.id] = 'loading'; 
                 window.preloadTTS(t.id, t.text);
             }
             
@@ -1103,7 +1094,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V62 DAO MỔ: TRẢM VÒNG LẶP API & ĐẨY VÀO INDEXEDDB)
+// 6. MUSIC SYSTEM (V63 DAO MỔ: CHỐNG DDOS BẰNG 1 REQUEST DUY NHẤT & INDEXEDDB)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1126,7 +1117,7 @@ window.MusicApp = {
     
     filterList(val) { 
         this.filterText = val; 
-        this.visibleCount = 50;
+        this.visibleCount = 50; 
         this.renderList(); 
     },
     
@@ -1138,7 +1129,7 @@ window.MusicApp = {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             
-            // DAO MỔ 2: Kéo 1 lần duy nhất toàn bộ Format và Length. Trảm N+1 Requests.
+            // DAO MỔ 9: Trảm vòng lặp Request. Load toàn bộ thông tin bài hát trong 1 lần duy nhất từ Search API
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
@@ -1230,6 +1221,7 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
+        // DAO MỔ: Bóng ma UI - Tự động nới giới hạn hiển thị nếu Random rơi ra ngoài 50 bài đầu
         if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
@@ -1294,6 +1286,7 @@ window.MusicApp = {
         });
         
         a.addEventListener('ended', (e) => { 
+            // DAO MỔ 7: Khóa bọt sự kiện, chặn Playwright văng lỗi
             if(e) e.stopPropagation(); 
             this.prefetchDone = false;
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
