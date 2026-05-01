@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V59 - The Absolute Paradigm</title>
+<title>LifeOS V60 - Architectural Pinnacle</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -409,6 +409,29 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 // ==============================================================================
 // 1. CORE LOGIC 
 // ==============================================================================
+
+// V60 FIX: PWA ENGINE NÂNG CẤP LÊN GLOBAL SCOPE
+window.pwaEngine = {
+    deferredPrompt: null,
+    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
+    init() {
+        if(this.state.isStandalone) return;
+        window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); this.deferredPrompt=e; this.showInstallButton(); });
+        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
+    },
+    showInstallButton() { const f=el('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
+    handleInstallClick() {
+        const m=el('pwaHealthModal'),c=el('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
+        if(this.deferredPrompt){ this.deferredPrompt.prompt(); this.deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')this.deferredPrompt=null;}); }
+        else if(this.state.isIOS) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
+        else if(this.state.isAndroid) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
+        else c.innerHTML=`<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
+    }
+};
+// Kích hoạt ngay lập tức, không chờ đợi
+window.pwaEngine.init();
+
+
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
 
@@ -445,7 +468,6 @@ window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;win
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
 
-// Bíp phần cứng chống Doze Mode
 window.firePhysicalBeep = () => {
     if (!window.audioCtx) return; 
     try {
@@ -473,8 +495,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
-    // V58 FIX: Dao mổ 2 - Cắt trĩ URL Google
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
+    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text; // V60 Fix 2
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
@@ -522,7 +543,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ
+// WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -539,14 +560,14 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        // V58 FIX: Dao mổ 5 - Cầm máu RAM khi gọi lại hàm
+        // V60 Fix 5: Chống tràn RAM Worker
         if (window.bgWorker) { window.bgWorker.terminate(); if(window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
         
         window.bgWorker.onmessage = (e) => {
             if (e.data === 'tick') {
-                if (window.checkAlarms) window.checkAlarms(); // Gọi trực tiếp từ worker 1s/1 lần
+                if (window.checkAlarms) window.checkAlarms();
             }
         };
         window.bgWorker.postMessage('start');
@@ -663,7 +684,7 @@ window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
                     extra: null
                 }]
             });
-        } catch(e){ console.error("Lỗi Native Bridge:", e); }
+        } catch(e){}
     }
 };
 
@@ -673,7 +694,7 @@ window.cancelNativeAlarm = async (taskId) => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (!LocalNotifications) return;
             await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){ console.error("Lỗi Hủy Native Bridge:", e); }
+        } catch(e){}
     }
 };
 
@@ -707,7 +728,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V58 FIX: Dao mổ 3 - Chống ngộ độc Base64 bằng cách check res.ok
+// V60 FIX: Dao mổ 3 - Chống ngộ độc Base64 bằng cách check res.ok
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -726,7 +747,7 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
-    // V58 FIX: Dao mổ 4 - Chống Kẹt Xe Báo Thức
+    // V60 FIX: Dao mổ 4 - Chống Kẹt Xe Báo Thức
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -754,7 +775,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // Cầm máu RAM cho Worker bằng URL.revokeObjectURL
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -819,15 +839,35 @@ window.stopGlobalAlarm = (actionType) => {
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
                 else if (actionType === 'snooze') { 
+                    const oldAlarm = new Date(t.alarmTime);
+                    const oldH = oldAlarm.getHours();
+                    const oldM = oldAlarm.getMinutes();
+                    
                     const newAlarm = new Date(Date.now() + 5 * 60000);
                     t.alarmTime = newAlarm.getTime(); 
                     const newHStr = String(newAlarm.getHours()).padStart(2,'0');
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // V58 FIX: Nhát dao 3 - Regex cập nhật Text khi Snooze
-                    t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?/i, (match, p1, p2, p3) => {
-                        return `${newHStr}${p2}${newMStr}`;
+                    // V60 FIX: Nhát dao 3 - Regex cập nhật Text khi Snooze cực kỳ chính xác
+                    t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
+                        let h = parseInt(hStr, 10);
+                        let m = mStr ? parseInt(mStr, 10) : 0;
+                        let ap = ampm ? ampm.toLowerCase() : '';
+                        if ((ap === 'chiều' || ap === 'tối') && h < 12) h += 12;
+                        else if (ap === 'sáng' && h === 12) h = 0;
+                        
+                        if (h === oldH && m === oldM) {
+                            let outH = newAlarm.getHours();
+                            let outM = String(newAlarm.getMinutes()).padStart(2,'0');
+                            let outAP = ampm ? (' ' + ampm) : '';
+                            if(ampm) {
+                                if(outH >= 12) { outH = outH > 12 ? outH - 12 : 12; if(ap === 'sáng') outAP = ' chiều'; }
+                                else { outH = outH === 0 ? 12 : outH; if(ap === 'chiều' || ap === 'tối') outAP = ' sáng'; }
+                            }
+                            return `${outH}${sep}${outM}${outAP}`;
+                        }
+                        return match;
                     });
                     
                     t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
@@ -1102,8 +1142,22 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM 
+// 6. MUSIC SYSTEM (V60 INDEXEDDB UPGRADE)
 // ==============================================================================
+window.MusicDB = {
+    init() {
+        return new Promise((resolve) => {
+            const req = indexedDB.open('LifeOS_Music', 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore('cache');
+            req.onsuccess = e => resolve(e.target.result);
+            req.onerror = () => resolve(null);
+        });
+    },
+    async get() { try { const db=await this.init(); if(!db) return null; return new Promise(r=>{ const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result); req.onerror=()=>r(null); }); } catch(e){return null;} },
+    async set(data) { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').put(data,'playlist'); } catch(e){} },
+    async clear() { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').delete('playlist'); } catch(e){} }
+};
+
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
@@ -1119,10 +1173,8 @@ window.MusicApp = {
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
-            const cached = localStorage.getItem('xs_songs_v4'); if(cached){ this.playlist=JSON.parse(cached); this.renderList(); el('music-loading').style.display='none'; return; }
+            const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-            
-            // V58 FIX: Dao mổ 1 - Trảm vòng lặp API Archive. Lấy name/format/length ngay từ lượt Search
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
@@ -1145,12 +1197,12 @@ window.MusicApp = {
                         });
                     }
                 }
-                if(all.length){ this.playlist=all; localStorage.setItem('xs_songs_v4',JSON.stringify(all)); this.renderList(); }
+                if(all.length){ this.playlist=all; window.MusicDB.set(all); this.renderList(); }
             }
         } catch(e){}
         el('music-loading').style.display='none';
     },
-    clearCache() { if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { localStorage.removeItem('xs_songs_v4'); location.reload(); } },
+    clearCache() { if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { window.MusicDB.clear().then(() => location.reload()); } },
     handleTimerChange(v) {
         clearInterval(this.timerInterval); if(v==0){ this.timerEnd=null; hideEl('music-timer-display'); return; }
         this.timerEnd=Date.now()+v*60000; showFlex('music-timer-display');
@@ -1303,7 +1355,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
-    window.pwaEngine.init(); 
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
@@ -1352,24 +1403,6 @@ window.requestNativePermissions = async () => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (LocalNotifications) await LocalNotifications.requestPermissions();
         } catch(e) {}
-    }
-};
-
-window.pwaEngine = {
-    deferredPrompt: null,
-    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
-    init() {
-        if(this.state.isStandalone) return;
-        window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); this.deferredPrompt=e; this.showInstallButton(); });
-        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
-    },
-    showInstallButton() { const f=el('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
-    handleInstallClick() {
-        const m=el('pwaHealthModal'),c=el('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
-        if(this.deferredPrompt){ this.deferredPrompt.prompt(); this.deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')this.deferredPrompt=null;}); }
-        else if(this.state.isIOS) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
-        else if(this.state.isAndroid) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
-        else c.innerHTML=`<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
 </script>
