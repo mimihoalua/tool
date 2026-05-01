@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V60 - Architectural Pinnacle</title>
+<title>LifeOS V61 - The Final Redemption</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -407,10 +407,9 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC 
+// 1. CORE LOGIC & PWA ENGINE (V61 FIX 1: PWA Engine ở Global Scope)
 // ==============================================================================
 
-// V60 FIX: PWA ENGINE NÂNG CẤP LÊN GLOBAL SCOPE
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -419,16 +418,16 @@ window.pwaEngine = {
         window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); this.deferredPrompt=e; this.showInstallButton(); });
         if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
     },
-    showInstallButton() { const f=el('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
+    showInstallButton() { const f=document.getElementById('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
     handleInstallClick() {
-        const m=el('pwaHealthModal'),c=el('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
+        const m=document.getElementById('pwaHealthModal'),c=document.getElementById('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
         if(this.deferredPrompt){ this.deferredPrompt.prompt(); this.deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')this.deferredPrompt=null;}); }
         else if(this.state.isIOS) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
         else if(this.state.isAndroid) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
         else c.innerHTML=`<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
-// Kích hoạt ngay lập tức, không chờ đợi
+// Kích hoạt ngay lập tức để hứng trọn sự kiện
 window.pwaEngine.init();
 
 
@@ -495,7 +494,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text; // V60 Fix 2
+    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
@@ -543,7 +542,6 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -560,7 +558,7 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        // V60 Fix 5: Chống tràn RAM Worker
+        // V61 FIX: Dọn dẹp RAM triệt để
         if (window.bgWorker) { window.bgWorker.terminate(); if(window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
@@ -665,7 +663,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC 
+// 2. NLP & ALARM LOGIC (V61 FINAL REDEMPTION)
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -684,7 +682,7 @@ window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
                     extra: null
                 }]
             });
-        } catch(e){}
+        } catch(e){ console.error("Lỗi Native Bridge:", e); }
     }
 };
 
@@ -694,7 +692,7 @@ window.cancelNativeAlarm = async (taskId) => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (!LocalNotifications) return;
             await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){}
+        } catch(e){ console.error("Lỗi Hủy Native Bridge:", e); }
     }
 };
 
@@ -728,7 +726,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V60 FIX: Dao mổ 3 - Chống ngộ độc Base64 bằng cách check res.ok
+// V61 FIX: Trị ngộ độc Base64 (Fatal Flaw 2)
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -747,7 +745,7 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
-    // V60 FIX: Dao mổ 4 - Chống Kẹt Xe Báo Thức
+    // V61 FIX: Chống Kẹt Xe Báo Thức - Nối chuỗi (Fatal Flaw 1)
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -775,6 +773,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
+        // V61 FIX: Cầm máu RAM khi gọi lại Worker (Fatal Flaw 3)
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -789,9 +788,15 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             if(ttsAudio) {
                 ttsAudio.muted = false; ttsAudio.currentTime = 0;
                 
+                let safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
+                let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
+                
+                // V61 FIX: Chỉ dùng Base64 nếu có ĐÚNG 1 task. Nếu Kẹt xe (nhiều task), phải kéo lại API Google để đọc cho đủ Text
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                const safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
-                const src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
+                if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid]) {
+                    src = window.preloadedTTSData[tid];
+                }
+
                 ttsAudio.src = src;
 
                 ttsAudio.onended = () => {
@@ -849,7 +854,7 @@ window.stopGlobalAlarm = (actionType) => {
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // V60 FIX: Nhát dao 3 - Regex cập nhật Text khi Snooze cực kỳ chính xác
+                    // V61 FIX: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let h = parseInt(hStr, 10);
                         let m = mStr ? parseInt(mStr, 10) : 0;
@@ -1142,7 +1147,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V60 INDEXEDDB UPGRADE)
+// 6. MUSIC SYSTEM (V61 FIX 2: INDEXEDDB & 1-LẦN FETCH)
 // ==============================================================================
 window.MusicDB = {
     init() {
