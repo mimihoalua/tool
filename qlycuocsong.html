@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V61 - The Final Redemption</title>
+<title>LifeOS V62 - The Immortal Core</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -73,6 +73,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 /* PWA INSTALLER STYLES */
 .install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
+.install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
 .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
 .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
@@ -345,69 +346,9 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <div id="modal-container"></div>
 
-<div id="vaultFormModal" class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
-    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
-            <h2 id="vaultModalTitle" class="text-xl font-black text-slate-800 dark:text-white tracking-tight">Thêm Mục Mới</h2>
-            <button type="button" onclick="window.VaultUI.closeModal()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90"><i class="ph-bold ph-x text-xl"></i></button>
-        </div>
-        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
-            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
-                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
-            </div>
-            <form id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)" class="space-y-4">
-                <input type="hidden" id="vaultEntryId">
-                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
-                    <select id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white">
-                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
-                    </select>
-                    <div id="vaultCustomCatWrapper" class="hidden mt-3 px-2 pb-2">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
-                        <input type="text" id="vaultEntryCustomCategory" placeholder="VD: Server..." class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
-                    <input type="text" id="vaultEntryName" placeholder="Tên gợi nhớ..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
-                        <span>Nội dung</span>
-                        <button type="button" onclick="window.vibrate([15]);const t=document.getElementById('vaultEntryContent');if(t){const c=t.selectionStart;const v=t.value;const p=(v&&c>0?'\n':'')+'Mật khẩu: '+window.VaultUtils.generatePassword();t.value=v.substring(0,c)+p+v.substring(c);t.selectionStart=t.selectionEnd=c+p.length;t.focus();if(window.soundEnabled)window.playSpeechTTS('Đã tạo mật khẩu an toàn');}" class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
-                    </label>
-                    <textarea id="vaultEntryContent" rows="6" placeholder="Nhập tự do..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap"></textarea>
-                </div>
-            </form>
-        </div>
-        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
-            <button type="button" onclick="window.vibrate(10); window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
-            <button type="submit" form="vaultForm" class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
-        </div>
-    </div>
-</div>
-
-<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
-    <i class="ph-bold ph-download-simple text-xl"></i>
-    <span class="font-bold uppercase tracking-wide">Cài App</span>
-</button>
-
-<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
-        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
-            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
-            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
-        </div>
-        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area"></div>
-        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
-            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
-        </div>
-    </div>
-</div>
-
 <script>
 // ==============================================================================
-// 1. CORE LOGIC & PWA ENGINE (V61 FIX 1: PWA Engine ở Global Scope)
+// 1. CORE LOGIC & PWA ENGINE 
 // ==============================================================================
 
 window.pwaEngine = {
@@ -415,21 +356,32 @@ window.pwaEngine = {
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
     init() {
         if(this.state.isStandalone) return;
-        window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); this.deferredPrompt=e; this.showInstallButton(); });
+        window.addEventListener('beforeinstallprompt', e => { 
+            e.preventDefault(); 
+            this.deferredPrompt = e; 
+            this.showInstallButton(); 
+        });
         if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
     },
-    showInstallButton() { const f=document.getElementById('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
+    showInstallButton() { 
+        // V62 FIX: Phải dùng classList vì CSS ưu tiên cao
+        const f = el('btnInstall'); 
+        if(f) { f.classList.add('visible'); f.onclick = () => this.handleInstallClick(); } 
+    },
     handleInstallClick() {
-        const m=document.getElementById('pwaHealthModal'),c=document.getElementById('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
-        if(this.deferredPrompt){ this.deferredPrompt.prompt(); this.deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')this.deferredPrompt=null;}); }
-        else if(this.state.isIOS) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
-        else if(this.state.isAndroid) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
-        else c.innerHTML=`<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
+        const m = el('pwaHealthModal'), c = el('smartGuideContent'); if(!m || !c) return; 
+        m.classList.remove('hidden');
+        if(this.deferredPrompt) { 
+            this.deferredPrompt.prompt(); 
+            this.deferredPrompt.userChoice.then(r => { if(r.outcome === 'accepted') this.deferredPrompt = null; }); 
+        }
+        else if(this.state.isIOS) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
+        else if(this.state.isAndroid) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
+        else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
-// Kích hoạt ngay lập tức để hứng trọn sự kiện
+// Kích hoạt PWA Engine song song, không chờ đợi DOM load
 window.pwaEngine.init();
-
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
@@ -542,6 +494,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
+// WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -558,7 +511,6 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        // V61 FIX: Dọn dẹp RAM triệt để
         if (window.bgWorker) { window.bgWorker.terminate(); if(window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
@@ -663,7 +615,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC (V61 FINAL REDEMPTION)
+// 2. NLP & ALARM LOGIC 
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -726,7 +678,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V61 FIX: Trị ngộ độc Base64 (Fatal Flaw 2)
+// V62 FIX: Trị ngộ độc Base64
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -745,7 +697,7 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
-    // V61 FIX: Chống Kẹt Xe Báo Thức - Nối chuỗi (Fatal Flaw 1)
+    // V62 FIX: Chống Kẹt Xe Báo Thức - Nối chuỗi & xử lý mảng
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -773,7 +725,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // V61 FIX: Cầm máu RAM khi gọi lại Worker (Fatal Flaw 3)
+        // V62 FIX: Cầm máu RAM khi gọi lại Worker
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -791,7 +743,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 let safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
                 let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
                 
-                // V61 FIX: Chỉ dùng Base64 nếu có ĐÚNG 1 task. Nếu Kẹt xe (nhiều task), phải kéo lại API Google để đọc cho đủ Text
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
                 if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid]) {
                     src = window.preloadedTTSData[tid];
@@ -854,7 +805,7 @@ window.stopGlobalAlarm = (actionType) => {
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // V61 FIX: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
+                    // V62 FIX: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let h = parseInt(hStr, 10);
                         let m = mStr ? parseInt(mStr, 10) : 0;
@@ -1147,7 +1098,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V61 FIX 2: INDEXEDDB & 1-LẦN FETCH)
+// 6. MUSIC SYSTEM (V62: SINGLE FETCH, INDEXEDDB, INFINITE SCROLL)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1175,11 +1126,13 @@ window.MusicApp = {
     },
     
     initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=>el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
+    
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+            // V62 FIX: Trảm vòng lặp Request. Load toàn bộ thông tin bài hát trong 1 lần duy nhất!
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
@@ -1229,7 +1182,7 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm nhạc (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
@@ -1271,6 +1224,7 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
+        // V62 FIX: Bóng ma UI - Tự động nới giới hạn hiển thị nếu Random rơi ra ngoài
         if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
