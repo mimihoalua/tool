@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V57 - Master Polish</title>
+<title>LifeOS V58 - Ironclad Edition</title>
 
 <link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
@@ -473,10 +473,11 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
+    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
-            const u = new SpeechSynthesisUtterance(text); 
+            const u = new SpeechSynthesisUtterance(safeText); 
             if(window.voice) u.voice = window.voice; 
             u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
         }
@@ -484,10 +485,10 @@ window.playSpeechTTS = (text) => {
     try {
         const c = document.getElementById('tts-audio');
         if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
+            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
             c.onerror = () => {
                 if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(text)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
                     c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
                 } else { speakNative(); }
             };
@@ -499,7 +500,7 @@ window.playSpeechTTS = (text) => {
 
 window.audioInitialized = false;
 window.notifiedTasks = new Set();
-window.preloadedTTSData = {};
+window.preloadedTTSData = {}; 
 
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
@@ -513,14 +514,13 @@ window.unlockAudio=()=>{
     if(d) { d.muted = true; d.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; d.play().catch(()=>{}); }
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
     window.audioInitialized = true;
-    
     document.body.removeEventListener('touchstart', window.unlockAudio);
     document.body.removeEventListener('click', window.unlockAudio);
 };
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// V57 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ ĐÃ ĐƯỢC BỌC AN TOÀN
+// V58 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ & AN TOÀN RAM
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -537,12 +537,13 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
-        if (window.bgWorker) window.bgWorker.terminate();
-        window.bgWorker = new Worker(URL.createObjectURL(blob));
+        if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
+        window.bgWorkerUrl = URL.createObjectURL(blob);
+        window.bgWorker = new Worker(window.bgWorkerUrl);
         
         window.bgWorker.onmessage = (e) => {
             if (e.data === 'tick') {
-                if (window.checkAlarms) window.checkAlarms(); // Gọi trực tiếp từ worker 1s/1 lần
+                if (window.checkAlarms) window.checkAlarms();
             }
         };
         window.bgWorker.postMessage('start');
@@ -640,7 +641,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC (V57 IMMORTAL ALARM LOOP)
+// 2. NLP & ALARM LOGIC (V58 IRONCLAD)
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -703,12 +704,13 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V57 FIX: Tiền xử lý TTS Base64 ngay khi tạo
+// V58 FIX: Chống Ngộ độc Base64 (Fatal Flaw 2) & Cắt Trĩ URL Google
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
-    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + text)}`;
+    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
+    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
     fetch(url)
-        .then(res => res.blob())
+        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
         .then(blob => {
             const reader = new FileReader();
             reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
@@ -716,12 +718,20 @@ window.preloadTTS = (taskId, text) => {
         }).catch(() => console.warn("Lỗi Preload TTS. Sẽ dùng Fallback."));
 };
 
-
 window.alarmTTSInterval = null;
 
 window.triggerGlobalAlarm = (taskIds, taskText) => {
-    if(window.isAlarmRinging) return;
-    window.activeAlarmTaskIds = Array.isArray(taskIds) ? taskIds : [taskIds];
+    const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
+    
+    // V58 FIX: Chống Kẹt Xe Báo Thức (Concurrent Alarms Race Condition)
+    if(window.isAlarmRinging) {
+        arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
+        window.alarmTextToSpeak += " + " + taskText;
+        const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
+        return; 
+    }
+    
+    window.activeAlarmTaskIds = arrIds;
     window.alarmTextToSpeak = taskText ? `Báo động! Đã đến giờ: ${taskText}` : 'Đã hết thời gian!';
     window.isAlarmRinging = true; 
     
@@ -732,7 +742,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         const musicPlayer = el('mstq-player');
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
             window.previousMusicVolume = musicPlayer.volume; 
-            musicPlayer.volume = 0.1; // Bóp cổ nhạc nền
+            musicPlayer.volume = 0.1; 
         }
         
         const alarmAudio = el('mstq-alarm');
@@ -741,14 +751,14 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
-        // V57 FIX: Dùng Worker để đập nhịp Bíp bất tử
-        if (window.beepWorker) window.beepWorker.terminate();
+        // V58 FIX: Cầm máu RAM cho Worker (Fatal Flaw 3)
+        if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
-        window.beepWorker = new Worker(URL.createObjectURL(new Blob([bw], { type: 'application/javascript' })));
+        window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
+        window.beepWorker = new Worker(window.beepWorkerUrl);
         window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
         window.beepWorker.postMessage('start');
         
-        // V57 FIX: Vòng lặp đan xen Bíp và Giọng nói (Endless Loop)
         const triggerTTS = () => {
             if (!window.isAlarmRinging) return;
             if(alarmAudio) alarmAudio.volume = 0.1;
@@ -756,19 +766,18 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             if(ttsAudio) {
                 ttsAudio.muted = false; ttsAudio.currentTime = 0;
                 
-                // Lấy Base64 từ RAM nếu có, nếu không lấy link Google
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                const src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(window.alarmTextToSpeak)}`;
+                const safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
+                const src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
                 ttsAudio.src = src;
 
                 ttsAudio.onended = () => {
                     if (!window.isAlarmRinging) return;
                     if(alarmAudio) alarmAudio.volume = 1.0;
-                    window.alarmTTSInterval = setTimeout(triggerTTS, 5000); // 5s sau gọi lại
+                    window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
                 };
                 
                 ttsAudio.play().catch(()=>{
-                    // Fallback
                     window.playSpeechTTS(window.alarmTextToSpeak);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
@@ -783,7 +792,12 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
 
 window.stopGlobalAlarm = (actionType) => { 
     window.isAlarmRinging = false; 
-    if (window.beepWorker) { window.beepWorker.postMessage('stop'); window.beepWorker.terminate(); window.beepWorker = null; }
+    if (window.beepWorker) { 
+        window.beepWorker.postMessage('stop'); 
+        window.beepWorker.terminate(); 
+        if(window.beepWorkerUrl) { URL.revokeObjectURL(window.beepWorkerUrl); window.beepWorkerUrl = null; }
+        window.beepWorker = null; 
+    }
     clearTimeout(window.alarmTTSInterval);
     
     const musicPlayer = el('mstq-player');
@@ -836,8 +850,7 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
-            // Preload vào RAM ở 5 phút cuối
-            if (diff > 0 && diff <= 300000 && window.preloadedTTSData && !window.preloadedTTSData[t.id]) {
+            if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
                 window.preloadTTS(t.id, t.text);
             }
             
@@ -1085,10 +1098,9 @@ window.MusicApp = {
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
     visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
     
-    // VÁ SẠN 1: Bơm hàm filterList bị khuyết để nút Search hoạt động và không treo RAM
     filterList(val) { 
         this.filterText = val; 
-        this.visibleCount = 50; // Reset lại view khi tìm kiếm
+        this.visibleCount = 50;
         this.renderList(); 
     },
     
@@ -1134,7 +1146,7 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm nhạc (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
@@ -1176,7 +1188,6 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
-        // VÁ SẠN 2: Tự động bung rộng giao diện nếu thuật toán Shuffle chọc trúng bài nằm ngoài vùng hiển thị
         if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
@@ -1260,14 +1271,13 @@ window.MusicApp = {
 // 7. INITIALIZATION
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // VÁ SẠN 3: Bật thêm Log thông báo để dễ dàng debug Network Offline trên trình duyệt PWA. 
+    
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
-    } else {
-        window.pwaEngine.init();
     }
+    window.pwaEngine.init(); // V58 FIX: Nhấc PWA Engine ra chạy song song
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
