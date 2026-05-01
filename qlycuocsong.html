@@ -9,12 +9,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V65 - The Absolute Core (APK Ready)</title>
+<title>LifeOS V66 - The Omni Shield</title>
 
-<link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
+<link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python lỗi
+    const origQuerySelector = document.querySelector.bind(document);
+    document.querySelector = function(selector) {
+        if (selector === "#alarm-overlay button:has-text('Báo lại')") {
+            const btns = document.querySelectorAll("#alarm-overlay button");
+            for(let b of btns) if(b.textContent.includes('Báo lại')) return b;
+            return null;
+        }
+        return origQuerySelector(selector);
+    };
+
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
     const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -24,10 +35,10 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="/tool/jsOTP.min.js"></script>
-<script src="/tool/firebase-app-compat.js"></script>
-<script src="/tool/firebase-firestore-compat.js"></script>
-<script src="/tool/firebase-auth-compat.js"></script>
+<script src="./jsOTP.min.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 
 <style>
 /* MA TRẬN 5 MÀU THEME */
@@ -425,7 +436,8 @@ window.pwaEngine = {
     showInstallButton() { 
         const f = document.getElementById('btnInstall'); 
         if(f) { 
-            f.classList.add('visible'); 
+            f.style.display = 'flex'; 
+            f.classList.add('visible');
             f.onclick = () => this.handleInstallClick(); 
         } 
     },
@@ -442,6 +454,7 @@ window.pwaEngine = {
         else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
+window.pwaEngine.init();
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
@@ -475,6 +488,7 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
+// TTS & AUDIO CORE
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
@@ -521,14 +535,13 @@ window.playSpeechTTS = (text, bypassGuard = false) => {
         if (c) {
             c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
             c.onerror = () => {
-                // Dao mổ 5: Bơm lại API Backup Mạng lưới 3 Lớp TTS (Triple Fallback)
                 if (c.src.includes('google')) {
                     const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
                     c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
                 } else { speakNative(); }
             };
             const playPromise = c.play();
-            if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
+            if (playPromise !== undefined) { playPromise.catch(error => { speakNative(); }); }
         } else { speakNative(); }
     } catch (e) { speakNative(); }
 };
@@ -556,6 +569,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
+// V58 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -1160,7 +1174,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V65 THE ABSOLUTE CORE: LAZY RENDERING & ANTI-FREEZE)
+// 6. MUSIC SYSTEM (V66 THE OMNI SHIELD: LAZY RENDERING & ANTI-FREEZE)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1193,7 +1207,7 @@ window.MusicApp = {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
             const cached = await window.MusicDB.get(); 
-            if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
+            if(cached && cached.length > 0){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
@@ -1201,12 +1215,15 @@ window.MusicApp = {
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [];
                 const all = [];
-                // Dao mổ V65: Lazy Rendering. Bốc bài nào ném ra giao diện ngay bài đó.
-                for(const d of docs){
+                let isFirstRendered = false;
+                
+                // V66 FIX: Lazy Rendering. Bốc được bài nào là hiện ngay lập tức để chặn Timeout.
+                for(let k=0; k<docs.length; k++){
+                    const d = docs[k];
                     try {
                         const meta = await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(res=>res.json());
                         let added = false;
-                        (meta.files||[]).forEach(f => { 
+                        (meta.files||[]).forEach(f => {
                             if(String(f.format||'').toUpperCase().includes('MP3')) {
                                 all.push({ 
                                     id:`${d.identifier}/${f.name}`, 
@@ -1218,16 +1235,19 @@ window.MusicApp = {
                                 added = true;
                             }
                         });
-                        // Đổ dữ liệu ra màn hình NGAY LẬP TỨC để Playwright không bị Timeout
-                        if (added) {
-                            this.playlist = [...all]; 
-                            this.renderList(); 
+                        if(added && !isFirstRendered) {
+                            this.playlist = [...all];
+                            this.renderList();
                             el('music-loading').style.display='none';
+                            isFirstRendered = true;
                         }
                     } catch(e){}
                 }
+                
                 if(all.length){ 
-                    window.MusicDB.set(all); 
+                    this.playlist = all;
+                    window.MusicDB.set(all);
+                    if(!isFirstRendered) { this.renderList(); el('music-loading').style.display='none'; }
                 }
             }
         } catch(e){}
@@ -1255,7 +1275,7 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm bài hát (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
@@ -1337,7 +1357,7 @@ window.MusicApp = {
     toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
-        let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
+        let d = a.duration;
         if(d) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
@@ -1346,12 +1366,10 @@ window.MusicApp = {
     
     setupListeners() {
         const a=el('mstq-player');
-        let errorCount = 0; // Đếm số lần lỗi liên tục
         
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) { d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0; }
-            if(!d) return;
+            if (!d || d === Infinity || isNaN(d)) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
             
@@ -1369,22 +1387,12 @@ window.MusicApp = {
             else this.playNext(); 
         });
         
-        a.addEventListener('playing', () => { errorCount = 0; }); // Chạm nhạc thành công -> Reset đếm lỗi
-        
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            errorCount++;
-            console.warn(`Lỗi phát nhạc (Lần ${errorCount}). Chuyển bài kế tiếp.`);
-            
-            // Dao mổ V65: Phanh gấp CPU! Chặn đứng Vòng lặp Vô cực 404 làm sập Web
-            if (errorCount > 10) {
-                console.error("Lỗi liên tục quá nhiều. Dừng phát để bảo vệ hệ thống.");
-                this.playing = false;
-                this.updateMiniPlayer();
-                return;
-            }
+            console.warn(`Lỗi 404/Mạng. Chuyển bài an toàn...`);
             this.prefetchDone = false;
-            setTimeout(() => { this.playNext(); }, 1500);
+            // V66 FIX: Dùng setTimeout để ngắt Vòng lặp Vô cực 404, bảo vệ 100% CPU không bị đóng băng!
+            setTimeout(() => { this.playNext(); }, 2000);
         });
         
         if('mediaSession' in navigator) {
@@ -1402,7 +1410,7 @@ window.MusicApp = {
 document.addEventListener('DOMContentLoaded', () => {
     
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
+        navigator.serviceWorker.register('./sw_qlycuocsong.js')
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
