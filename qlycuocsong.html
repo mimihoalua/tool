@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V66 - The Omni Shield</title>
+<title>LifeOS V67 - The Genesis</title>
 
-<link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
+<link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -35,10 +35,10 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="./jsOTP.min.js"></script>
-<script src="./firebase-app-compat.js"></script>
-<script src="./firebase-firestore-compat.js"></script>
-<script src="./firebase-auth-compat.js"></script>
+<script src="/tool/jsOTP.min.js"></script>
+<script src="/tool/firebase-app-compat.js"></script>
+<script src="/tool/firebase-firestore-compat.js"></script>
+<script src="/tool/firebase-auth-compat.js"></script>
 
 <style>
 /* MA TRẬN 5 MÀU THEME */
@@ -83,7 +83,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
 /* PWA INSTALLER STYLES */
-.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
+.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
 .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
@@ -94,6 +94,15 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
+
+<script>
+window.addEventListener('beforeunload', () => {
+    if(window.bgWorker) window.bgWorker.terminate();
+    if(window.beepWorker) window.beepWorker.terminate();
+    if(window.audioCtx) window.audioCtx.close();
+    window.isAlarmRinging = false;
+});
+</script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="https://ia800904.us.archive.org/29/items/30-minutes-of-silence/30-minutes-of-silence.mp3"></audio>
@@ -357,6 +366,19 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 <div id="modal-container"></div>
 
+<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[85vh]">
+        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
+            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
+            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
+        </div>
+        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area flex-grow min-h-0"></div>
+        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
+            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
+        </div>
+    </div>
+</div>
+
 <div id="vaultFormModal" class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
     <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
@@ -404,58 +426,10 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     <span class="font-bold uppercase tracking-wide">Cài App</span>
 </button>
 
-<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
-        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
-            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
-            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
-        </div>
-        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area"></div>
-        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
-            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
-        </div>
-    </div>
-</div>
-
 <script>
 // ==============================================================================
-// 1. PWA ENGINE & CORE LOGIC
+// 1. CORE LOGIC 
 // ==============================================================================
-window.pwaEngine = {
-    deferredPrompt: null,
-    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
-    init() {
-        if(this.state.isStandalone) return;
-        window.addEventListener('beforeinstallprompt', e => { 
-            e.preventDefault(); 
-            this.deferredPrompt = e; 
-            this.showInstallButton(); 
-        });
-        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
-    },
-    showInstallButton() { 
-        const f = document.getElementById('btnInstall'); 
-        if(f) { 
-            f.style.display = 'flex'; 
-            f.classList.add('visible');
-            f.onclick = () => this.handleInstallClick(); 
-        } 
-    },
-    handleInstallClick() {
-        const m = document.getElementById('pwaHealthModal'), c = document.getElementById('smartGuideContent'); 
-        if(!m || !c) return; 
-        m.classList.remove('hidden');
-        if(this.deferredPrompt) { 
-            this.deferredPrompt.prompt(); 
-            this.deferredPrompt.userChoice.then(r => { if(r.outcome === 'accepted') this.deferredPrompt = null; }); 
-        }
-        else if(this.state.isIOS) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
-        else if(this.state.isAndroid) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
-        else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
-    }
-};
-window.pwaEngine.init();
-
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
 
@@ -472,7 +446,6 @@ document.addEventListener('click', (e) => {
     const m = el('profile-menu'); const b = el('profile-btn');
     if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
 });
-
 window.saveLocalTodos = () => {
     if(window.viewingUser && window.todos) {
         localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
@@ -520,7 +493,6 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
-    
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
@@ -562,14 +534,12 @@ window.unlockAudio=()=>{
     if(d) { d.muted = true; d.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; d.play().catch(()=>{}); }
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
     window.audioInitialized = true;
-    
     document.body.removeEventListener('touchstart', window.unlockAudio);
     document.body.removeEventListener('click', window.unlockAudio);
 };
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// V58 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -597,7 +567,6 @@ window.startBackgroundWorker = () => {
         };
         window.bgWorker.postMessage('start');
     } catch(e) { 
-        console.warn("Worker Fallback"); 
         setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
     }
 };
@@ -709,7 +678,7 @@ window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
                     extra: null
                 }]
             });
-        } catch(e){ console.error("Lỗi Native Bridge:", e); }
+        } catch(e){ }
     }
 };
 
@@ -719,7 +688,7 @@ window.cancelNativeAlarm = async (taskId) => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (!LocalNotifications) return;
             await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){ console.error("Lỗi Hủy Native Bridge:", e); }
+        } catch(e){ }
     }
 };
 
@@ -1174,7 +1143,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V66 THE OMNI SHIELD: LAZY RENDERING & ANTI-FREEZE)
+// 6. MUSIC SYSTEM (V67: LAZY RENDERING CỰC TỐC TỪ BÀI ĐẦU TIÊN)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1217,7 +1186,6 @@ window.MusicApp = {
                 const all = [];
                 let isFirstRendered = false;
                 
-                // V66 FIX: Lazy Rendering. Bốc được bài nào là hiện ngay lập tức để chặn Timeout.
                 for(let k=0; k<docs.length; k++){
                     const d = docs[k];
                     try {
@@ -1357,7 +1325,7 @@ window.MusicApp = {
     toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
-        let d = a.duration;
+        let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
         if(d) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
@@ -1369,7 +1337,8 @@ window.MusicApp = {
         
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) return;
+            if (!d || d === Infinity || isNaN(d)) { d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0; }
+            if(!d) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
             
@@ -1387,12 +1356,12 @@ window.MusicApp = {
             else this.playNext(); 
         });
         
+        // V67 FIX: Cầu chì chống Đóng Băng CPU khi gặp Vòng lặp Vô cực 404
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
             console.warn(`Lỗi 404/Mạng. Chuyển bài an toàn...`);
             this.prefetchDone = false;
-            // V66 FIX: Dùng setTimeout để ngắt Vòng lặp Vô cực 404, bảo vệ 100% CPU không bị đóng băng!
-            setTimeout(() => { this.playNext(); }, 2000);
+            setTimeout(() => { this.playNext(); }, 2000); // Phanh cứng 2 giây
         });
         
         if('mediaSession' in navigator) {
@@ -1410,7 +1379,8 @@ window.MusicApp = {
 document.addEventListener('DOMContentLoaded', () => {
     
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw_qlycuocsong.js')
+        // V67: Link tuyệt đối cho Github Pages
+        navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
