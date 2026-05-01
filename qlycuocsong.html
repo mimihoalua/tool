@@ -351,6 +351,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 // 1. CORE LOGIC & PWA ENGINE
 // ==============================================================================
 
+// DAO MỔ 5: Đưa PWA Engine ra Global Scope để hứng trọn sự kiện
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -365,7 +366,7 @@ window.pwaEngine = {
     },
     showInstallButton() { 
         const f = el('btnInstall'); 
-        if(f) { f.style.display = 'flex'; f.onclick = () => this.handleInstallClick(); } 
+        if(f) { f.classList.add('visible'); f.onclick = () => this.handleInstallClick(); } 
     },
     handleInstallClick() {
         const m = el('pwaHealthModal'), c = el('smartGuideContent'); if(!m || !c) return; 
@@ -445,6 +446,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
+    // DAO MỔ 6: Cắt trĩ Text chống ngộ độc Base64
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
@@ -493,7 +495,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// WORKER BẤT TỬ ĐẢM BẢO KHÔNG TRÀN RAM
+// DAO MỔ 1: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ & AN TOÀN RAM
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -510,6 +512,7 @@ window.startBackgroundWorker = () => {
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
+        // Cầm máu RAM
         if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
@@ -677,7 +680,7 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// DAO MỔ: Chống ngộ độc Base64 bằng check res.ok
+// DAO MỔ 6: Chống ngộ độc Base64 bằng check res.ok
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -696,6 +699,7 @@ window.alarmTTSInterval = null;
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
+    // DAO MỔ 4: Chống Kẹt Xe Báo Thức - Nối chuỗi & xử lý mảng
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
@@ -723,6 +727,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
         window.firePhysicalBeep(); 
         
+        // DAO MỔ 2: Dùng Worker để đập nhịp Bíp bất tử & Cầm máu RAM
         if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
         const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
         window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
@@ -803,7 +808,7 @@ window.stopGlobalAlarm = (actionType) => {
                     const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
                     t.timeStr = `${newHStr}:${newMStr}`;
                     
-                    // Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
+                    // DAO MỔ 3: Regex thay thế chính xác mục tiêu giờ báo thức cũ trong text
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let h = parseInt(hStr, 10);
                         let m = mStr ? parseInt(mStr, 10) : 0;
@@ -855,9 +860,9 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
-            // Lock cờ 'loading' để không nã đạn Spam liên tục lên Google khi chậm mạng
+            // Fix spam TTS preload
             if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
-                window.preloadedTTSData[t.id] = 'loading'; 
+                window.preloadedTTSData[t.id] = 'loading'; // Lock flag to prevent repeated fetching
                 window.preloadTTS(t.id, t.text);
             }
             
@@ -1098,7 +1103,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V62 DAO MỔ: BẤT ĐỒNG BỘ PROMISE.ALL & INDEXEDDB)
+// 6. MUSIC SYSTEM (V62 DAO MỔ: TRẢM VÒNG LẶP API & ĐẨY VÀO INDEXEDDB)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1133,31 +1138,29 @@ window.MusicApp = {
             const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
             
-            // Lấy ID Album
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            // DAO MỔ 2: Kéo 1 lần duy nhất toàn bộ Format và Length. Trảm N+1 Requests.
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator,name,format,length&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
-                
-                // DAO MỔ: Trảm vòng lặp tuần tự, thay bằng Promise.all bắn đồng loạt
-                const metaPromises = docs.map(d => fetch(`https://archive.org/metadata/${d.identifier}`, {cache:'no-store'}).then(res => res.json()).catch(() => null));
-                const metaResults = await Promise.all(metaPromises);
-                
-                metaResults.forEach((meta, idx) => {
-                    if (!meta || !meta.files) return;
-                    const d = docs[idx];
-                    meta.files.forEach(f => {
-                        if(String(f.format||'').toUpperCase().includes('MP3')) {
-                            all.push({ 
-                                id:`${d.identifier}/${f.name}`, 
-                                title:(f.title || f.name).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
-                                artist:d.creator||'Xiemsansang', 
-                                stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`, 
-                                duration:parseFloat(f.length||0) 
-                            });
-                        }
-                    });
-                });
-                
+                for(const d of docs){
+                    if (d.name && d.format) {
+                        const names = Array.isArray(d.name) ? d.name : [d.name];
+                        const formats = Array.isArray(d.format) ? d.format : [d.format];
+                        const lengths = Array.isArray(d.length) ? d.length : [d.length];
+                        
+                        names.forEach((n, idx) => {
+                            if(String(formats[idx]||'').toUpperCase().includes('MP3')) {
+                                all.push({ 
+                                    id:`${d.identifier}/${n}`, 
+                                    title:(d.title || n).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
+                                    artist:d.creator||'Xiemsansang', 
+                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(n)}`, 
+                                    duration:parseFloat(lengths[idx]||0) 
+                                });
+                            }
+                        });
+                    }
+                }
                 if(all.length){ this.playlist=all; window.MusicDB.set(all); this.renderList(); }
             }
         } catch(e){}
