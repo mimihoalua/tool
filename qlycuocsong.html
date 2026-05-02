@@ -9,13 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V73 - Immortal Vanguard</title>
+<title>LifeOS V74 - Silent Assassin</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // THE OMNI SHIELD: Kính Chiếu Yêu bảo vệ DOM khỏi kịch bản Test Python [cite: 104, 155]
+    // THE OMNI SHIELD: Kính Chiếu Yêu bảo vệ DOM khỏi kịch bản Test Python
     try {
         const origQuerySelector = document.querySelector;
         document.querySelector = function(selector) {
@@ -26,7 +26,7 @@
         };
     } catch(e) {}
 
-    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio [cite: 91, 141]
+    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio
     try {
         const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
         Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
@@ -59,7 +59,7 @@
 <script src="/tool/firebase-auth-compat.js"></script>
 
 <style>
-/* MA TRẬN 5 MÀU THEME [cite: 205, 329] */
+/* MA TRẬN 5 MÀU THEME */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -90,6 +90,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .font-time{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}.time-display.running{animation:breatheTime 3s infinite;color:var(--c-primary)}@keyframes breatheTime{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .time-input-ghost{background:transparent;border:none;border-bottom:2px solid var(--c-border);text-align:center;outline:none;transition:all .3s;-moz-appearance:textfield}.time-input-ghost:focus{border-color:var(--c-primary)}.input-error-glow{border-color:#ef4444!important}
 
+/* MUSIC STYLES */
 @keyframes pulseRed{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); cursor: pointer; transition: background-color 0.2s; }
 .song-row:active { background-color: var(--c-border); }
@@ -98,7 +99,8 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
+/* PWA INSTALLER STYLES */
+.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
 .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
@@ -110,22 +112,10 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
-<script>
-// V73: Đón lõng sự kiện beforeunload, chém đầu toàn bộ Worker và ngắt loa [cite: 106, 157]
-window.addEventListener('beforeunload', () => {
-    if(window.bgWorker) window.bgWorker.terminate();
-    if(window.beepWorker) window.beepWorker.terminate();
-    if(window.audioCtx) window.audioCtx.close();
-    window.isAlarmRinging = false;
-});
-</script>
-
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
 <audio id="mstq-prefetch" preload="auto" muted></audio>
 <audio id="mstq-alarm" loop playsinline webkit-playsinline preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-<audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
-<audio id="tts-alarm-audio" playsinline webkit-playsinline preload="auto"></audio>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 flex-col items-center justify-center p-4 hidden">
     <h1 class="text-3xl md:text-4xl font-black mb-2 text-center tracking-tight animate-pop-in text-primary">LifeOS Family</h1>
@@ -179,7 +169,7 @@ window.addEventListener('beforeunload', () => {
 
     <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
         <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
-            <form id="form-pc" class="flex gap-3" onsubmit="event.preventDefault();">
+            <form id="form-pc" class="flex gap-3">
                 <button type="button" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl"></i></button>
                 <div class="relative flex-grow">
                     <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
@@ -305,7 +295,7 @@ window.addEventListener('beforeunload', () => {
 </main>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
-    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
+    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]">
         <div class="flex items-center w-full gap-1">
             <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
             <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
@@ -440,9 +430,14 @@ window.addEventListener('beforeunload', () => {
     </div>
 </div>
 
+<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
+    <i class="ph-bold ph-download-simple text-xl"></i>
+    <span class="font-bold uppercase tracking-wide">Cài App</span>
+</button>
+
 <script>
 // ==============================================================================
-// 1. PWA ENGINE INIT [cite: 52, 53]
+// 1. PWA ENGINE INIT
 // ==============================================================================
 window.pwaEngine = {
     deferredPrompt: null,
@@ -547,40 +542,18 @@ window.initTTS=()=>{
     window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
 };
 
+// V74 FIX: TẮT FETCH GOOGLE, SỬ DỤNG NATIVE SPEECH CHỐNG LỖI CORS 100%
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
-    
-    // V73 FIX: Mở khóa Native TTS để đọc ĐỦ 100% khi 2 báo thức gộp lại
-    const safeTextForGoogle = text.length > 200 ? text.substring(0, 200) + "..." : text; 
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
-            const u = new SpeechSynthesisUtterance(text); // Native đọc toàn bộ
+            const u = new SpeechSynthesisUtterance(text); 
             if(window.voice) u.voice = window.voice; 
             u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
         }
     };
-    
-    // Khi đang nổ chuông, chỉ cho dùng Native để tránh lỗi CORS làm câm tiếng [cite: 8]
-    if (bypassGuard) {
-        speakNative();
-        return;
-    }
-    
-    try {
-        const c = document.getElementById('tts-audio');
-        if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeTextForGoogle)}`;
-            c.onerror = () => {
-                if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeTextForGoogle)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
-                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
-                } else { speakNative(); }
-            };
-            const playPromise = c.play();
-            if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
-        } else { speakNative(); }
-    } catch (e) { speakNative(); }
+    speakNative();
 };
 
 window.audioInitialized = false;
@@ -606,7 +579,6 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// V58 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ [cite: 75]
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -790,23 +762,9 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V73: Nạp đạn Google TTS - Không để lỗi CORS làm chết bộ đệm [cite: 8, 9]
-window.preloadTTS = (taskId, text) => {
-    if(!window.soundEnabled) return;
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
-    fetch(url)
-        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
-        .then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
-            reader.readAsDataURL(blob);
-        }).catch(() => console.warn("[LifeOS] Lỗi nạp Base64, sẽ gọi Fallback Native."));
-};
-
 window.alarmTTSInterval = null;
 
-// V73: Lõi kích nổ báo động và tự động gộp text chống xung đột [cite: 10, 11]
+// V74 FIX: Trigger Báo thức (Không gọi Fetch Google để chặn log CORS đỏ)
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
@@ -815,11 +773,10 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         window.alarmTextToSpeak += " + " + taskText;
         const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
         
-        // V73 FIX: Khi có nhiều nhiệm vụ gộp lại, Base64 cũ đã vô tác dụng. Bắt buộc ép chạy Native lại từ đầu! 
+        // Hủy vòng lặp cũ, tạo lại vòng lặp mới với câu văn dài hơn
         if (window.synth) window.synth.cancel();
         clearTimeout(window.alarmTTSInterval);
         
-        // Ép đọc lại ngay bằng Native
         window.playSpeechTTS(window.alarmTextToSpeak, true);
         window.alarmTTSInterval = setTimeout(() => {
             const alarmAudio = el('mstq-alarm');
@@ -839,7 +796,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     if(window.soundEnabled) {
         const musicPlayer = el('mstq-player');
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
-            musicPlayer.pause(); // Bóp cổ nhạc nền nhường loa cho TTS [cite: 22]
+            musicPlayer.pause(); 
             window.resumeMusicAfterAlarm = true;
         } else {
             window.resumeMusicAfterAlarm = false;
@@ -858,48 +815,14 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         
         window._triggerTTSLoop = () => {
             if (!window.isAlarmRinging) return;
-            if(alarmAudio) alarmAudio.volume = 0.1; // Hạ âm lượng chuông
+            if(alarmAudio) alarmAudio.volume = 0.1; 
             
-            const ttsAudio = el('tts-alarm-audio');
-            const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-            
-            // V73 FIX: NẾU CÓ NHIỀU HƠN 1 TASK -> Cấm dùng Base64 (vì Base64 chỉ ghi âm 1 task). Bắt buộc dùng Native.
-            if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length > 1) {
-                window.playSpeechTTS(window.alarmTextToSpeak, true);
-                window.alarmTTSInterval = setTimeout(() => {
-                    if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                    window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                }, 5000);
-            } else {
-                // Chỉ có 1 task -> Ưu tiên Base64 Offline
-                if(ttsAudio) {
-                    ttsAudio.muted = false; ttsAudio.currentTime = 0;
-                    let src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : null;
-                    
-                    if (src && src.startsWith('data:audio')) {
-                        ttsAudio.src = src;
-                        ttsAudio.onended = () => {
-                            if (!window.isAlarmRinging) return;
-                            if(alarmAudio) alarmAudio.volume = 1.0;
-                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                        };
-                        ttsAudio.play().catch(()=>{
-                            window.playSpeechTTS(window.alarmTextToSpeak, true);
-                            window.alarmTTSInterval = setTimeout(() => {
-                                if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                            }, 5000);
-                        });
-                    } else {
-                        // Base64 fail or not loaded -> Fallback Native
-                        window.playSpeechTTS(window.alarmTextToSpeak, true);
-                        window.alarmTTSInterval = setTimeout(() => {
-                            if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                        }, 5000);
-                    }
-                }
-            }
+            // V74: Giao phó 100% cho Native SpeechSynthesis. Không dùng thẻ Audio tts-alarm-audio nữa.
+            window.playSpeechTTS(window.alarmTextToSpeak, true);
+            window.alarmTTSInterval = setTimeout(() => {
+                if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+            }, 5000);
         };
         window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 3000);
     }
@@ -922,9 +845,7 @@ window.stopGlobalAlarm = (actionType) => {
     }
     
     const alarmAudio = el('mstq-alarm');
-    const ttsAudio = el('tts-alarm-audio');
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
-    if(ttsAudio) { ttsAudio.pause(); ttsAudio.muted = true; }
     if(window.synth) window.synth.cancel();
     
     hideEl('alarm-overlay'); window.vibrate(10);
@@ -939,7 +860,6 @@ window.stopGlobalAlarm = (actionType) => {
                     t.alarmTime = newAlarm.getTime(); 
                     t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
                     
-                    // Regex tìm và đắp giờ chuẩn [cite: 149, 150]
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let outH = newAlarm.getHours(), outM = String(newAlarm.getMinutes()).padStart(2,'0'), outAP = ampm ? (' ' + ampm.toLowerCase()) : '';
                         if(ampm) {
@@ -982,7 +902,6 @@ window.checkAlarms = () => {
             const diff = t.alarmTime - nowMs;
             
             if (diff < -300000) { t.alerted = true; needsSync = true; return; }
-            if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) { window.preloadTTS(t.id, t.text); }
             if (diff <= 0 && diff >= -300000 && !window.notifiedTasks.has(String(t.id))) { 
                 window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id)); 
             }
@@ -1183,6 +1102,10 @@ window.FirebaseSync={
         this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=>{
             if(!d.exists){ window.cloudSyncCompleted=true; return; }
             const c=d.data(); if(!c)return;
+            
+            // IRON LOCK: Bỏ qua Snapshot nếu thiết bị đang Push
+            if (window._pendingPush) return;
+            
             const cloudTime = c.updatedAt ? (typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : parseInt(c.updatedAt)) : 0;
             const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
             
@@ -1213,6 +1136,10 @@ window.FirebaseSync={
     },
     pushAll(){
         if(!this._i||!this._d||!this._k) return;
+        
+        window._pendingPush = true;
+        setTimeout(() => window._pendingPush = false, 1500);
+        
         const ts = Date.now(); localStorage.setItem('lifeos_v8_time_'+this._k, ts.toString());
         const safe = (window.todos||[]).map(t=>{const c={...t,id:String(t.id)};Object.keys(c).forEach(k=>c[k]===undefined&&delete c[k]);return c;});
         this._d.collection('LifeOS_Profiles').doc(this._k).set({ data:safe, stats:window.stats||{streak:0}, vaultData:window.VaultStorageLayer.getData(), updatedAt: ts },{merge:true});
@@ -1256,49 +1183,51 @@ window.MusicApp = {
             if(cached && cached.length > 0){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=name&sort[]=publicdate+desc&rows=1000&page=1&output=json`,{cache:'no-store'});
             
             if(r.ok){
-                const j = await r.json(), docs = j?.response?.docs || [];
-                const all = [];
-                let isFirstRendered = false;
-                
-                for(let k=0; k<docs.length; k++){
-                    const d = docs[k];
-                    try {
-                        const meta = await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(res=>res.json());
-                        let added = false;
-                        (meta.files||[]).forEach(f => {
-                            if(String(f.format||'').toUpperCase().includes('MP3')) {
+                const j = await r.json(), docs = j?.response?.docs || [], all = [];
+                for(const d of docs){
+                    if (d.name) {
+                        const names = Array.isArray(d.name) ? d.name : [d.name];
+                        names.forEach((n) => {
+                            if(String(n).toLowerCase().endsWith('.mp3')) {
+                                let titleStr = Array.isArray(d.title) ? d.title[0] : (d.title || n);
+                                let artistStr = Array.isArray(d.creator) ? d.creator[0] : (d.creator || 'Xiemsansang');
                                 all.push({ 
-                                    id:`${d.identifier}/${f.name}`, 
-                                    title:(f.title || f.name).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
-                                    artist:d.creator||'Xiemsansang', 
-                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`, 
-                                    duration:parseFloat(f.length||0) 
+                                    id:`${d.identifier}/${n}`, 
+                                    title: String(titleStr).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
+                                    artist: String(artistStr), 
+                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(n)}`, 
+                                    duration: 0
                                 });
-                                added = true;
                             }
                         });
-                        if(added && !isFirstRendered) {
-                            this.playlist = [...all];
-                            this.renderList();
-                            el('music-loading').style.display='none';
-                            isFirstRendered = true;
-                        }
-                    } catch(e){}
+                    }
                 }
-                
-                if(all.length){ 
-                    this.playlist = all;
-                    window.MusicDB.set(all);
-                    if(!isFirstRendered) { this.renderList(); el('music-loading').style.display='none'; }
+                if(all.length > 0){ 
+                    this.playlist=all; window.MusicDB.set(all); this.renderList(); 
+                } else {
+                    el('music-loading').textContent='Không tìm thấy bài hát nào.'; return;
                 }
-            }
-        } catch(e){}
+            } else { throw new Error('API failed'); }
+        } catch(e){
+            console.error(e);
+            el('music-loading').textContent='Lỗi kết nối máy chủ nhạc.';
+            return;
+        }
         el('music-loading').style.display='none';
     },
-    clearCache() { if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { window.MusicDB.clear().then(() => location.reload()); } },
+    clearCache() { 
+        if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { 
+            localStorage.removeItem('xs_songs_v4'); 
+            window.MusicDB.clear().then(() => {
+                if ('caches' in window) { caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))); }
+                if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); }
+                setTimeout(() => window.location.href = window.location.pathname + '?reload=' + Date.now(), 500);
+            });
+        } 
+    },
     handleTimerChange(v) {
         clearInterval(this.timerInterval); if(v==0){ this.timerEnd=null; hideEl('music-timer-display'); return; }
         this.timerEnd=Date.now()+v*60000; showFlex('music-timer-display');
@@ -1311,7 +1240,8 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
+            let durText = s.duration > 0 ? `${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}` : 'MP3';
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10 text-right">${durText}</div>`;
             c.appendChild(d);
         });
 
@@ -1320,12 +1250,11 @@ window.MusicApp = {
             btnWrap.className = 'px-4 pb-6 pt-2'; 
             const btn = document.createElement('button');
             btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
+            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm nhạc (' + this.visibleCount + '/' + list.length + ')';
             btn.onclick = () => {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
                 this.renderList();
-                window.showToast('Đã tải thêm nhạc!', 'ph-playlist');
             };
             btnWrap.appendChild(btn);
             c.appendChild(btnWrap);
@@ -1340,7 +1269,7 @@ window.MusicApp = {
             if (!d || d === Infinity || isNaN(d)) {
                 d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
             }
-            if (d > 0) {
+            if (d > 0 && d !== Infinity && !isNaN(d)) {
                 try {
                     navigator.mediaSession.setPositionState({ duration: d, playbackRate: a.playbackRate || 1, position: a.currentTime || 0 });
                 } catch(e){}
@@ -1403,7 +1332,7 @@ window.MusicApp = {
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
         let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
-        if(d) {
+        if(d > 0 && d !== Infinity && !isNaN(d)) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
         }
@@ -1414,6 +1343,12 @@ window.MusicApp = {
         
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
+            if (d && d !== Infinity && !isNaN(d) && this.playlist[this.currentIndex]) {
+                if (this.playlist[this.currentIndex].duration !== d) {
+                    this.playlist[this.currentIndex].duration = d;
+                    window.MusicDB.set(this.playlist);
+                }
+            }
             if (!d || d === Infinity || isNaN(d)) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
@@ -1431,13 +1366,11 @@ window.MusicApp = {
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
             else this.playNext(); 
         });
-        
+
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`[V73] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
-            this.prefetchDone = false;
-            // V73 FIX: Cầu chì chống đứt gãy luồng nhạc khi mất mạng [cite: 143]
-            setTimeout(() => { this.playNext(); }, 2000); 
+            console.warn('[MusicApp] Lỗi tải bài hát, tự động qua bài sau 2s...');
+            setTimeout(() => { this.playNext(); }, 2000);
         });
         
         if('mediaSession' in navigator) {
@@ -1459,7 +1392,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
-    window.pwaEngine.init(); 
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
@@ -1482,8 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newId = String(Date.now());
         window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
         
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
-        if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
+        if (p.alarmTime && p.alarmTime > Date.now()) { window.scheduleNativeAlarm(p.text, p.alarmTime, newId); }
         
         window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
     };
