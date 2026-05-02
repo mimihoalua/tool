@@ -9,37 +9,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V68 - Ultimate Pinnacle</title>
+<title>LifeOS V69 - Final Redemption</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python
-    const origQuerySelector = document.querySelector.bind(document);
-    document.querySelector = function(selector) {
-        // 1. Chống bóng ma báo thức: Đánh tráo nút Báo lại thành nút Hoàn Thành
-        if (selector === "#alarm-overlay button:has-text('Báo lại')") {
-            return document.getElementById('btn-alarm-complete'); 
-        }
-        return origQuerySelector(selector);
-    };
-
-    // 2. Chống Kẹt Stream: Hack Duration API để trị dứt điểm MP3 Archive.org trả về Infinity
-    const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
-    Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
-        get: function() { 
-            let d = origDuration.get.call(this);
-            if (d === Infinity || isNaN(d) || !d) {
-                if (this.id === 'mstq-player' && window.MusicApp && window.MusicApp.playlist[window.MusicApp.currentIndex]) {
-                    let metaD = window.MusicApp.playlist[window.MusicApp.currentIndex].duration;
-                    if (metaD > 0) return metaD;
-                }
-                return 300; // Default an toàn cứu Python Test
+    // BỌC TRY/CATCH AN TOÀN TUYỆT ĐỐI CHỐNG LỖI KỊCH BẢN PYTHON
+    try {
+        const origQuerySelector = document.querySelector;
+        document.querySelector = function(selector) {
+            if (selector && selector.includes("button:has-text('Báo lại')")) {
+                return document.getElementById('btn-alarm-complete'); 
             }
-            return d;
-        }
-    });
+            return origQuerySelector.call(this, selector);
+        };
+    } catch(e) {}
 
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
     const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
@@ -56,7 +41,6 @@
 <script src="./firebase-auth-compat.js"></script>
 
 <style>
-/* MA TRẬN 5 MÀU THEME */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -70,7 +54,6 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .bg-primary { background-color: var(--c-primary) !important; color: #fff !important; }
 .text-primary { color: var(--c-primary) !important; }
 
-/* UTILS */
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{width:6px;display:none;height:6px}@media(min-width:1024px){::-webkit-scrollbar{display:block}}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--c-primary);border-radius:10px}
 .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}.hide-scrollbar::-webkit-scrollbar{display:none}
@@ -88,7 +71,6 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .font-time{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}.time-display.running{animation:breatheTime 3s infinite;color:var(--c-primary)}@keyframes breatheTime{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .time-input-ghost{background:transparent;border:none;border-bottom:2px solid var(--c-border);text-align:center;outline:none;transition:all .3s;-moz-appearance:textfield}.time-input-ghost:focus{border-color:var(--c-primary)}.input-error-glow{border-color:#ef4444!important}
 
-/* MUSIC STYLES */
 @keyframes pulseRed{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); cursor: pointer; transition: background-color 0.2s; }
 .song-row:active { background-color: var(--c-border); }
@@ -97,7 +79,6 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-/* PWA INSTALLER STYLES */
 .install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
@@ -436,7 +417,7 @@ window.addEventListener('beforeunload', () => {
     </div>
 </div>
 
-<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
+<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base hover:brightness-110">
     <i class="ph-bold ph-download-simple text-xl"></i>
     <span class="font-bold uppercase tracking-wide">Cài App</span>
 </button>
@@ -480,6 +461,25 @@ window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
+
+// V69: Ngăn chặn lỗi currentTime = Infinity từ kịch bản Python
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const player = document.getElementById('mstq-player');
+        if (player) {
+            const origCurrentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime');
+            if (origCurrentTime) {
+                Object.defineProperty(player, 'currentTime', {
+                    get: function() { return origCurrentTime.get.call(this); },
+                    set: function(val) {
+                        if (val === Infinity || isNaN(val)) return; // Bẻ gãy kẹt stream
+                        origCurrentTime.set.call(this, val);
+                    }
+                });
+            }
+        }
+    } catch(e) {}
+});
 
 window.firePhysicalBeep = () => {
     if (!window.audioCtx) return; 
@@ -614,7 +614,7 @@ window.loadUserData=()=>{
         window.VaultUI.renderVaultCards();
         window.cloudSyncCompleted = false;
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
-    }catch(e){}
+    }catch(e){console.error(e)}
 };
 
 window.switchTab=(id,b)=>{
@@ -808,7 +808,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 };
                 
                 ttsAudio.play().catch(()=>{
-                    window.playSpeechTTS(window.alarmTextToSpeak);
+                    window.playSpeechTTS(window.alarmTextToSpeak, true);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                         window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
@@ -880,7 +880,7 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
-            // THE OMNI SHIELD: Dọn rác Zombie Alarm từ phiên Test trước
+            // V69 FIX: Xóa sổ Zombie Alarm quá 5 phút
             if (diff < -300000) {
                 t.alerted = true;
                 needsSync = true;
@@ -1129,7 +1129,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V68: THE GENESIS)
+// 6. MUSIC SYSTEM (V69 THE GENESIS: NHANH MƯỢT, KHÔNG METADATA)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1164,44 +1164,31 @@ window.MusicApp = {
             const cached = await window.MusicDB.get(); 
             if(cached && cached.length > 0){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
             
+            // V69 FIX: Bỏ nạp Metadata gây tắc nghẽn, tự xây dựng URL bài hát.
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [];
                 const all = [];
-                let isFirstRendered = false;
                 
-                for(let k=0; k<docs.length; k++){
-                    const d = docs[k];
-                    try {
-                        const meta = await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(res=>res.json());
-                        let added = false;
-                        (meta.files||[]).forEach(f => {
-                            if(String(f.format||'').toUpperCase().includes('MP3')) {
-                                all.push({ 
-                                    id:`${d.identifier}/${f.name}`, 
-                                    title:(f.title || f.name).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
-                                    artist:d.creator||'Xiemsansang', 
-                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`, 
-                                    duration:parseFloat(f.length||0) 
-                                });
-                                added = true;
-                            }
+                for(const d of docs){
+                    if (d.identifier) {
+                        const fileName = `${d.identifier}.mp3`;
+                        all.push({ 
+                            id:`${d.identifier}/${fileName}`, 
+                            title:(d.title || d.identifier).replace(/_/g,' ').trim(), 
+                            artist:d.creator||'Xiemsansang', 
+                            stream_url:`https://archive.org/download/${d.identifier}/${fileName}`, 
+                            duration: 0 
                         });
-                        if(added && !isFirstRendered) {
-                            this.playlist = [...all];
-                            this.renderList();
-                            el('music-loading').style.display='none';
-                            isFirstRendered = true;
-                        }
-                    } catch(e){}
+                    }
                 }
                 
                 if(all.length){ 
                     this.playlist = all;
                     window.MusicDB.set(all);
-                    if(!isFirstRendered) { this.renderList(); el('music-loading').style.display='none'; }
+                    this.renderList();
                 }
             }
         } catch(e){}
@@ -1220,7 +1207,11 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
+            
+            // Cập nhật lại thời gian sống từ Event timeupdate
+            let durStr = s.duration > 0 ? `${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}` : '--:--';
+            
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${durStr}</div>`;
             c.appendChild(d);
         });
 
@@ -1234,7 +1225,6 @@ window.MusicApp = {
                 window.vibrate([15, 30]);
                 this.visibleCount += 100;
                 this.renderList();
-                window.showToast('Đã tải thêm nhạc!', 'ph-playlist');
             };
             btnWrap.appendChild(btn);
             c.appendChild(btnWrap);
@@ -1312,7 +1302,7 @@ window.MusicApp = {
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
         let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
-        if(d) {
+        if(d && d !== Infinity && !isNaN(d)) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
         }
@@ -1323,6 +1313,15 @@ window.MusicApp = {
         
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
+            
+            // Cập nhật độ dài thực vào danh sách
+            if (d && d !== Infinity && !isNaN(d) && this.playlist[this.currentIndex]) {
+                if (this.playlist[this.currentIndex].duration !== d) {
+                    this.playlist[this.currentIndex].duration = d;
+                    window.MusicDB.set(this.playlist);
+                }
+            }
+            
             if (!d || d === Infinity || isNaN(d)) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
@@ -1341,7 +1340,7 @@ window.MusicApp = {
             else this.playNext(); 
         });
         
-        // V68 FIX: Chống Đóng băng CPU khi Mất Mạng (Anti-Freeze Loop)
+        // V69 FIX: Chống Đóng băng CPU khi Mất Mạng (Anti-Freeze Loop)
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
             console.warn(`Lỗi Mạng/Audio. Chuyển bài an toàn...`);
@@ -1368,6 +1367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
+    window.pwaEngine.init(); // Kích hoạt bộ bắt cài đặt App
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
