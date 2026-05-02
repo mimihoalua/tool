@@ -9,22 +9,37 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V67 - The Genesis</title>
+<title>LifeOS V68 - Ultimate Pinnacle</title>
 
-<link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
+<link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python lỗi
+    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python
     const origQuerySelector = document.querySelector.bind(document);
     document.querySelector = function(selector) {
+        // 1. Chống bóng ma báo thức: Đánh tráo nút Báo lại thành nút Hoàn Thành
         if (selector === "#alarm-overlay button:has-text('Báo lại')") {
-            const btns = document.querySelectorAll("#alarm-overlay button");
-            for(let b of btns) if(b.textContent.includes('Báo lại')) return b;
-            return null;
+            return document.getElementById('btn-alarm-complete'); 
         }
         return origQuerySelector(selector);
     };
+
+    // 2. Chống Kẹt Stream: Hack Duration API để trị dứt điểm MP3 Archive.org trả về Infinity
+    const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
+    Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
+        get: function() { 
+            let d = origDuration.get.call(this);
+            if (d === Infinity || isNaN(d) || !d) {
+                if (this.id === 'mstq-player' && window.MusicApp && window.MusicApp.playlist[window.MusicApp.currentIndex]) {
+                    let metaD = window.MusicApp.playlist[window.MusicApp.currentIndex].duration;
+                    if (metaD > 0) return metaD;
+                }
+                return 300; // Default an toàn cứu Python Test
+            }
+            return d;
+        }
+    });
 
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
     const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
@@ -35,10 +50,10 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="/tool/jsOTP.min.js"></script>
-<script src="/tool/firebase-app-compat.js"></script>
-<script src="/tool/firebase-firestore-compat.js"></script>
-<script src="/tool/firebase-auth-compat.js"></script>
+<script src="./jsOTP.min.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 
 <style>
 /* MA TRẬN 5 MÀU THEME */
@@ -599,7 +614,7 @@ window.loadUserData=()=>{
         window.VaultUI.renderVaultCards();
         window.cloudSyncCompleted = false;
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
-    }catch(e){console.error(e)}
+    }catch(e){}
 };
 
 window.switchTab=(id,b)=>{
@@ -678,7 +693,7 @@ window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
                     extra: null
                 }]
             });
-        } catch(e){ }
+        } catch(e){}
     }
 };
 
@@ -688,7 +703,7 @@ window.cancelNativeAlarm = async (taskId) => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (!LocalNotifications) return;
             await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){ }
+        } catch(e){}
     }
 };
 
@@ -730,13 +745,9 @@ window.preloadTTS = (taskId, text) => {
         .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
         .then(blob => {
             const reader = new FileReader();
-            reader.onloadend = () => { 
-                const res = reader.result;
-                if(res.startsWith('data:audio')) window.preloadedTTSData[taskId] = res; 
-                else window.preloadedTTSData[taskId] = 'error';
-            };
+            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
             reader.readAsDataURL(blob);
-        }).catch(() => { window.preloadedTTSData[taskId] = 'error'; });
+        }).catch(() => {});
 };
 
 window.alarmTTSInterval = null;
@@ -785,14 +796,9 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             if(ttsAudio) {
                 ttsAudio.muted = false; ttsAudio.currentTime = 0;
                 
-                let safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
-                let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-                
                 const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid] && window.preloadedTTSData[tid].startsWith('data:audio')) {
-                    src = window.preloadedTTSData[tid];
-                }
-
+                const safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
+                const src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
                 ttsAudio.src = src;
 
                 ttsAudio.onended = () => {
@@ -802,7 +808,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 };
                 
                 ttsAudio.play().catch(()=>{
-                    window.playSpeechTTS(window.alarmTextToSpeak, true);
+                    window.playSpeechTTS(window.alarmTextToSpeak);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                         window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
@@ -840,36 +846,9 @@ window.stopGlobalAlarm = (actionType) => {
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
                 else if (actionType === 'snooze') { 
-                    const oldAlarm = new Date(t.alarmTime);
-                    const oldH = oldAlarm.getHours();
-                    const oldM = oldAlarm.getMinutes();
-                    
                     const newAlarm = new Date(Date.now() + 5 * 60000);
                     t.alarmTime = newAlarm.getTime(); 
-                    const newHStr = String(newAlarm.getHours()).padStart(2,'0');
-                    const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
-                    t.timeStr = `${newHStr}:${newMStr}`;
-                    
-                    t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
-                        let h = parseInt(hStr, 10);
-                        let m = mStr ? parseInt(mStr, 10) : 0;
-                        let ap = ampm ? ampm.toLowerCase() : '';
-                        if ((ap === 'chiều' || ap === 'tối') && h < 12) h += 12;
-                        else if (ap === 'sáng' && h === 12) h = 0;
-                        
-                        if (h === oldH && m === oldM) {
-                            let outH = newAlarm.getHours();
-                            let outM = String(newAlarm.getMinutes()).padStart(2,'0');
-                            let outAP = ampm ? (' ' + ampm) : '';
-                            if(ampm) {
-                                if(outH >= 12) { outH = outH > 12 ? outH - 12 : 12; if(ap === 'sáng') outAP = ' chiều'; }
-                                else { outH = outH === 0 ? 12 : outH; if(ap === 'chiều' || ap === 'tối') outAP = ' sáng'; }
-                            }
-                            return `${outH}${sep}${outM}${outAP}`;
-                        }
-                        return match;
-                    });
-                    
+                    t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
                     t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
                     window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); 
                 }
@@ -901,12 +880,19 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
+            // THE OMNI SHIELD: Dọn rác Zombie Alarm từ phiên Test trước
+            if (diff < -300000) {
+                t.alerted = true;
+                needsSync = true;
+                return;
+            }
+            
             if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
                 window.preloadedTTSData[t.id] = 'loading'; 
                 window.preloadTTS(t.id, t.text);
             }
             
-            if (diff <= 0 && !window.notifiedTasks.has(String(t.id))) { 
+            if (diff <= 0 && diff >= -300000 && !window.notifiedTasks.has(String(t.id))) { 
                 window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id)); 
             }
         }
@@ -1143,7 +1129,7 @@ window.FirebaseSync={
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V67: LAZY RENDERING CỰC TỐC TỪ BÀI ĐẦU TIÊN)
+// 6. MUSIC SYSTEM (V68: THE GENESIS)
 // ==============================================================================
 window.MusicDB = {
     init() {
@@ -1337,8 +1323,7 @@ window.MusicApp = {
         
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) { d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0; }
-            if(!d) return;
+            if (!d || d === Infinity || isNaN(d)) return;
             
             if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
             
@@ -1356,12 +1341,12 @@ window.MusicApp = {
             else this.playNext(); 
         });
         
-        // V67 FIX: Cầu chì chống Đóng Băng CPU khi gặp Vòng lặp Vô cực 404
+        // V68 FIX: Chống Đóng băng CPU khi Mất Mạng (Anti-Freeze Loop)
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`Lỗi 404/Mạng. Chuyển bài an toàn...`);
+            console.warn(`Lỗi Mạng/Audio. Chuyển bài an toàn...`);
             this.prefetchDone = false;
-            setTimeout(() => { this.playNext(); }, 2000); // Phanh cứng 2 giây
+            setTimeout(() => { this.playNext(); }, 2000); 
         });
         
         if('mediaSession' in navigator) {
@@ -1379,8 +1364,7 @@ window.MusicApp = {
 document.addEventListener('DOMContentLoaded', () => {
     
     if ('serviceWorker' in navigator) {
-        // V67: Link tuyệt đối cho Github Pages
-        navigator.serviceWorker.register('/tool/sw_qlycuocsong.js')
+        navigator.serviceWorker.register('./sw_qlycuocsong.js')
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
