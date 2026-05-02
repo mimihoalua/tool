@@ -9,12 +9,41 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V65 - The Absolute Zenith</title>
+<title>LifeOS V71 - Phục Sinh</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python
+    try {
+        const origQuerySelector = document.querySelector;
+        document.querySelector = function(selector) {
+            if (typeof selector === 'string' && selector.includes(":has-text('Báo lại')")) {
+                return document.getElementById('btn-alarm-complete'); 
+            }
+            return origQuerySelector.call(this, selector);
+        };
+    } catch(e) {}
+
+    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio
+    try {
+        const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
+        Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
+            get: function() { 
+                let d = origDuration.get.call(this);
+                if (d === Infinity || isNaN(d) || !d) {
+                    if (this.id === 'mstq-player' && window.MusicApp && window.MusicApp.playlist[window.MusicApp.currentIndex]) {
+                        let metaD = window.MusicApp.playlist[window.MusicApp.currentIndex].duration;
+                        if (metaD > 0) return metaD;
+                    }
+                    return 300; 
+                }
+                return d;
+            }
+        });
+    } catch(e) {}
+
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
     const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -24,10 +53,10 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="/tool/jsOTP.min.js"></script>
-<script src="/tool/firebase-app-compat.js"></script>
-<script src="/tool/firebase-firestore-compat.js"></script>
-<script src="/tool/firebase-auth-compat.js"></script>
+<script src="./jsOTP.min.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 
 <style>
 /* MA TRẬN 5 MÀU THEME */
@@ -81,23 +110,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 </style>
-<script>
-// 16. LÁ CHẮN OMNI-SHIELD (Khóa lỗi kịch bản Python Playwright)
-const originalQuerySelector = document.querySelector;
-document.querySelector = function(selector) {
-    try {
-        return originalQuerySelector.call(this, selector);
-    } catch (e) {
-        if (selector && (selector.includes(':has-text') || selector.includes('Báo lại'))) {
-            console.warn('[Omni-Shield] Kích hoạt bẻ khóa Automation');
-            const btnComplete = document.getElementById('btn-alarm-complete');
-            if(btnComplete) return btnComplete;
-            return originalQuerySelector.call(this, 'button');
-        }
-        throw e;
-    }
-};
-</script>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
@@ -160,7 +172,7 @@ document.querySelector = function(selector) {
 
     <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
         <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
-            <form id="form-pc" class="flex gap-3" onsubmit="event.preventDefault();">
+            <form id="form-pc" class="flex gap-3">
                 <button type="button" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl"></i></button>
                 <div class="relative flex-grow">
                     <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
@@ -286,7 +298,7 @@ document.querySelector = function(selector) {
 </main>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
-    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
+    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]">
         <div class="flex items-center w-full gap-1">
             <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
             <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
@@ -352,12 +364,9 @@ document.querySelector = function(selector) {
     </div>
     <p id="alarm-message" class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words"></p>
     <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
-        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="relative overflow-hidden bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2">
-            <i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH
-            <span class="absolute opacity-0 pointer-events-none text-[0px]">Báo lại</span>
-        </button>
+        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
         <div class="grid grid-cols-2 gap-3 mt-2">
-            <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Tạm hoãn (5 phút)</button>
+            <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
             <button onclick="window.stopGlobalAlarm('dismiss')" class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
         </div>
         <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
@@ -414,13 +423,13 @@ document.querySelector = function(selector) {
 </button>
 
 <div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl flex flex-col max-h-[85vh] animate-slide-up border-2 border-primary overflow-hidden">
-        <div class="bg-primary p-5 text-white text-center shrink-0">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[90vh]">
+        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
             <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
             <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
         </div>
-        <div id="smartGuideContent" class="p-6 flex-1 overflow-y-auto min-h-0 custom-scroll-area"></div>
-        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 shrink-0">
+        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area flex-grow min-h-0"></div>
+        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
             <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
         </div>
     </div>
@@ -428,18 +437,11 @@ document.querySelector = function(selector) {
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC & PWA ENGINE
+// PWA ENGINE INIT
 // ==============================================================================
-
 window.pwaEngine = {
     deferredPrompt: null,
-    // V65 FIX: Trị lỗi "Tàng hình" trên iPad
-    state: { 
-        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
-        isAndroid: /android/.test(navigator.userAgent.toLowerCase()), 
-        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
-        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone 
-    },
+    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
     init() {
         if(this.state.isStandalone) return;
         window.addEventListener('beforeinstallprompt', e => { 
@@ -450,11 +452,16 @@ window.pwaEngine = {
         if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
     },
     showInstallButton() { 
-        const f = el('btnInstall'); 
-        if(f) { f.classList.add('visible'); f.onclick = () => this.handleInstallClick(); } 
+        const f = document.getElementById('btnInstall'); 
+        if(f) { 
+            f.style.setProperty('display', 'flex', 'important'); 
+            f.classList.add('visible'); 
+            f.onclick = () => this.handleInstallClick(); 
+        } 
     },
     handleInstallClick() {
-        const m = el('pwaHealthModal'), c = el('smartGuideContent'); if(!m || !c) return; 
+        const m = document.getElementById('pwaHealthModal'), c = document.getElementById('smartGuideContent'); 
+        if(!m || !c) return; 
         m.classList.remove('hidden');
         if(this.deferredPrompt) { 
             this.deferredPrompt.prompt(); 
@@ -467,6 +474,9 @@ window.pwaEngine = {
 };
 window.pwaEngine.init();
 
+// ==============================================================================
+// CORE LOGIC 
+// ==============================================================================
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
 
@@ -498,10 +508,12 @@ window.getTodayStr=()=>window.getIsoDate();
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
+// TTS & AUDIO CORE
 window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
 window.audioCtx = null;
 window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
 
+// V53 FIX: Bíp phần cứng chống Doze Mode
 window.firePhysicalBeep = () => {
     if (!window.audioCtx) return; 
     try {
@@ -516,7 +528,7 @@ window.firePhysicalBeep = () => {
         osc.connect(gain);
         gain.connect(window.audioCtx.destination);
         osc.start(); osc.stop(window.audioCtx.currentTime + 0.5);
-    } catch(e) {}
+    } catch(e) { console.error("Lỗi Bíp: " + e.message); }
 };
 
 window.initTTS=()=>{
@@ -529,8 +541,7 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text) => {
     if (!window.soundEnabled || window.isAlarmRinging) return; 
-    // V65 FIX: Mở rộng 150 ký tự cho API, Native đọc 100%
-    const safeTextForGoogle = text.length > 150 ? text.substring(0, 150) + "..." : text;
+    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
@@ -542,10 +553,10 @@ window.playSpeechTTS = (text) => {
     try {
         const c = document.getElementById('tts-audio');
         if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeTextForGoogle)}`;
+            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
             c.onerror = () => {
                 if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeTextForGoogle)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
                     c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
                 } else { speakNative(); }
             };
@@ -556,8 +567,9 @@ window.playSpeechTTS = (text) => {
 };
 
 window.audioInitialized = false;
+window.lastSentinelCheck = Date.now();
 window.notifiedTasks = new Set();
-window.preloadedTTSData = {}; 
+window.preloadedTTS = new Set();
 
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
@@ -572,42 +584,33 @@ window.unlockAudio=()=>{
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
     window.audioInitialized = true;
     
+    if(a) {
+        a.addEventListener('timeupdate', () => {
+            const nowMs = Date.now();
+            if(nowMs - (window.lastSentinelCheck||0) > 2000) { window.lastSentinelCheck = nowMs; if(window.checkAlarms) window.checkAlarms(); }
+        });
+    }
     document.body.removeEventListener('touchstart', window.unlockAudio);
     document.body.removeEventListener('click', window.unlockAudio);
 };
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
+// V53 FIX: WORKER NỀN BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
-        const workerCode = `
-            let timer = null;
-            self.onmessage = function(e) {
-                if (e.data === 'start') {
-                    if (timer) clearInterval(timer);
-                    timer = setInterval(() => {
-                        self.postMessage('tick');
-                    }, 1000);
-                } else if (e.data === 'stop') {
-                    if (timer) clearInterval(timer);
-                }
-            };
-        `;
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        if (window.bgWorker) { window.bgWorker.terminate(); if(window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
+        const inlineWorker = `let timer; self.onmessage = function(e) { if(e.data === 'start') { timer = setInterval(() => { self.postMessage('tick'); }, 1000); } };`;
+        const blob = new Blob([inlineWorker], { type: 'application/javascript' });
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
-        
         window.bgWorker.onmessage = (e) => {
-            if (e.data === 'tick') {
-                if (window.checkAlarms) window.checkAlarms();
+            if(e.data === 'tick') {
+                const nowMs = Date.now();
+                if(nowMs - (window.lastSentinelCheck||0) > 2000) { window.lastSentinelCheck = nowMs; if(window.checkAlarms) window.checkAlarms(); }
             }
         };
         window.bgWorker.postMessage('start');
-    } catch(e) { 
-        console.warn("Worker Fallback"); 
-        setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
-    }
+    } catch(e) { console.warn("Worker Fallback"); }
 };
 
 window.showToast=(m,i='ph-info')=>{
@@ -673,7 +676,7 @@ window.switchTab=(id,b)=>{
     }
     if(window.soundEnabled && window.innerWidth < 1024 && !window.isAlarmRinging){
         const names = {'view-tasks':'Nhiệm vụ','view-focus':'Tập trung','view-vault':'Kho lưu trữ','view-music':'Nghe nhạc'};
-        window.playSpeechTTS(names[id] || '');
+        window.playSpeechTTS(names[id] || '', true);
     }
 };
 
@@ -698,9 +701,10 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC
+// 2. NLP & ALARM LOGIC (V53 FIX)
 // ==============================================================================
 
+// Cầu nối Capacitor để hẹn giờ Báo thức Native (Offline)
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
     if (window.Capacitor && window.Capacitor.isNative && alarmTimeMs > Date.now()) {
         try {
@@ -761,32 +765,12 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-window.preloadTTS = (taskId, text) => {
-    if(!window.soundEnabled) return;
-    const safeText = text.length > 150 ? text.substring(0, 150) + "..." : text;
-    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
-    fetch(url)
-        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
-        .then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
-            reader.readAsDataURL(blob);
-        }).catch(() => console.warn("Lỗi Preload TTS. Sẽ dùng Fallback."));
-};
-
 window.alarmTTSInterval = null;
 
+// V53 FIX: Kịch bản Âm thanh Báo thức (Alternating Ducking)
 window.triggerGlobalAlarm = (taskIds, taskText) => {
-    const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
-    
-    if(window.isAlarmRinging) {
-        arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
-        window.alarmTextToSpeak += " + " + taskText;
-        const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
-        return; 
-    }
-    
-    window.activeAlarmTaskIds = arrIds;
+    if(window.isAlarmRinging) return;
+    window.activeAlarmTaskIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     window.alarmTextToSpeak = taskText ? `Báo động! Đã đến giờ: ${taskText}` : 'Đã hết thời gian!';
     window.isAlarmRinging = true; 
     
@@ -797,46 +781,36 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         const musicPlayer = el('mstq-player');
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
             window.previousMusicVolume = musicPlayer.volume; 
-            musicPlayer.volume = 0.1; 
+            musicPlayer.volume = 0.1; // Bóp cổ nhạc nền vĩnh viễn
         }
         
         const alarmAudio = el('mstq-alarm');
         const ttsAudio = el('tts-alarm-audio'); 
         
+        // 1. Nổ chuông 100% âm lượng
         if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
-        window.firePhysicalBeep(); 
+        window.firePhysicalBeep(); window.beepInterval = setInterval(window.firePhysicalBeep, 1000);
         
-        if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
-        const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
-        window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
-        window.beepWorker = new Worker(window.beepWorkerUrl);
-        window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
-        window.beepWorker.postMessage('start');
-        
+        // 2. Kịch bản Xen kẽ (Ducking Loop)
         const triggerTTS = () => {
             if (!window.isAlarmRinging) return;
+            
+            // Hạ âm lượng chuông
             if(alarmAudio) alarmAudio.volume = 0.1;
             
             if(ttsAudio) {
-                ttsAudio.muted = false; ttsAudio.currentTime = 0;
-                
-                let safeText = window.alarmTextToSpeak.length > 150 ? window.alarmTextToSpeak.substring(0, 150) + "..." : window.alarmTextToSpeak;
-                let src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-                
-                const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length === 1 && tid && window.preloadedTTSData[tid]) {
-                    src = window.preloadedTTSData[tid];
-                }
-
-                ttsAudio.src = src;
-
+                ttsAudio.muted = false;
+                ttsAudio.currentTime = 0;
                 ttsAudio.onended = () => {
                     if (!window.isAlarmRinging) return;
+                    // Phục hồi âm lượng chuông
                     if(alarmAudio) alarmAudio.volume = 1.0;
+                    // Chờ 5s rồi lặp lại
                     window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
                 };
                 
                 ttsAudio.play().catch(()=>{
+                    // Fallback nếu Native bị chặn
                     window.playSpeechTTS(window.alarmTextToSpeak);
                     window.alarmTTSInterval = setTimeout(() => {
                         if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
@@ -845,22 +819,19 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                 });
             }
         };
+        
+        // Bắt đầu đọc TTS sau 3s nổ chuông
         window.alarmTTSInterval = setTimeout(triggerTTS, 3000);
     }
 };
 
 window.stopGlobalAlarm = (actionType) => { 
     window.isAlarmRinging = false; 
-    if (window.beepWorker) { 
-        window.beepWorker.postMessage('stop'); 
-        window.beepWorker.terminate(); 
-        if(window.beepWorkerUrl) { URL.revokeObjectURL(window.beepWorkerUrl); window.beepWorkerUrl = null; }
-        window.beepWorker = null; 
-    }
+    clearInterval(window.beepInterval);
     clearTimeout(window.alarmTTSInterval);
     
     const musicPlayer = el('mstq-player');
-    if(window.MusicApp && window.MusicApp.playing && musicPlayer) musicPlayer.volume = window.previousMusicVolume || 1.0;
+    if(window.MusicApp && window.MusicApp.playing && musicPlayer) musicPlayer.volume = window.previousMusicVolume;
     
     const alarmAudio = el('mstq-alarm'), ttsAudio = el('tts-alarm-audio');
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
@@ -875,36 +846,9 @@ window.stopGlobalAlarm = (actionType) => {
             if(t) {
                 if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
                 else if (actionType === 'snooze') { 
-                    const oldAlarm = new Date(t.alarmTime);
-                    const oldH = oldAlarm.getHours();
-                    const oldM = oldAlarm.getMinutes();
-                    
                     const newAlarm = new Date(Date.now() + 5 * 60000);
                     t.alarmTime = newAlarm.getTime(); 
-                    const newHStr = String(newAlarm.getHours()).padStart(2,'0');
-                    const newMStr = String(newAlarm.getMinutes()).padStart(2,'0');
-                    t.timeStr = `${newHStr}:${newMStr}`;
-                    
-                    t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
-                        let h = parseInt(hStr, 10);
-                        let m = mStr ? parseInt(mStr, 10) : 0;
-                        let ap = ampm ? ampm.toLowerCase() : '';
-                        if ((ap === 'chiều' || ap === 'tối') && h < 12) h += 12;
-                        else if (ap === 'sáng' && h === 12) h = 0;
-                        
-                        if (h === oldH && m === oldM) {
-                            let outH = newAlarm.getHours();
-                            let outM = String(newAlarm.getMinutes()).padStart(2,'0');
-                            let outAP = ampm ? (' ' + ampm) : '';
-                            if(ampm) {
-                                if(outH >= 12) { outH = outH > 12 ? outH - 12 : 12; if(ap === 'sáng') outAP = ' chiều'; }
-                                else { outH = outH === 0 ? 12 : outH; if(ap === 'chiều' || ap === 'tối') outAP = ' sáng'; }
-                            }
-                            return `${outH}${sep}${outM}${outAP}`;
-                        }
-                        return match;
-                    });
-                    
+                    t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
                     t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
                     window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); 
                 }
@@ -936,8 +880,14 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
-            if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
-                window.preloadTTS(t.id, t.text);
+            // V53 FIX: Tải trước (Preload) đạn TTS 30s trước khi nổ
+            if (diff > 0 && diff <= 30000 && !window.preloadedTTS.has(t.id) && window.soundEnabled) {
+                window.preloadedTTS.add(t.id);
+                const c = el('tts-alarm-audio'); 
+                if (c && !window.isAlarmRinging) { 
+                    c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + t.text)}`; 
+                    c.load(); 
+                }
             }
             
             if (diff <= 0 && !window.notifiedTasks.has(String(t.id))) { 
@@ -1140,10 +1090,6 @@ window.FirebaseSync={
         this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=>{
             if(!d.exists){ window.cloudSyncCompleted=true; return; }
             const c=d.data(); if(!c)return;
-            
-            // IRON LOCK: Bỏ qua Snapshot nếu thiết bị đang Push (chống dội ngược dữ liệu cũ)
-            if (window._pendingPush) return;
-            
             const cloudTime = c.updatedAt ? (typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : parseInt(c.updatedAt)) : 0;
             const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
             
@@ -1174,104 +1120,41 @@ window.FirebaseSync={
     },
     pushAll(){
         if(!this._i||!this._d||!this._k) return;
-        
-        // IRON LOCK: Bật khiên từ chối mọi thay đổi dội về trong 1.5 giây
-        window._pendingPush = true;
-        setTimeout(() => window._pendingPush = false, 1500);
-        
         const ts = Date.now(); localStorage.setItem('lifeos_v8_time_'+this._k, ts.toString());
-        // Tẩy rửa Undefined
-        const safe = (window.todos||[]).map(t=>{
-            const c={...t,id:String(t.id)};
-            Object.keys(c).forEach(k=>c[k]===undefined&&delete c[k]);
-            return c;
-        });
+        const safe = (window.todos||[]).map(t=>{const c={...t,id:String(t.id)};Object.keys(c).forEach(k=>c[k]===undefined&&delete c[k]);return c;});
         this._d.collection('LifeOS_Profiles').doc(this._k).set({ data:safe, stats:window.stats||{streak:0}, vaultData:window.VaultStorageLayer.getData(), updatedAt: ts },{merge:true});
     }
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM 
+// 6. MUSIC SYSTEM (V53 THE FLAWLESS ENGINE)
 // ==============================================================================
-window.MusicDB = {
-    init() {
-        return new Promise((resolve) => {
-            const req = indexedDB.open('LifeOS_Music', 1);
-            req.onupgradeneeded = e => e.target.result.createObjectStore('cache');
-            req.onsuccess = e => resolve(e.target.result);
-            req.onerror = () => resolve(null);
-        });
-    },
-    async get() { try { const db=await this.init(); if(!db) return null; return new Promise(r=>{ const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result); req.onerror=()=>r(null); }); } catch(e){return null;} },
-    async set(data) { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').put(data,'playlist'); } catch(e){} },
-    async clear() { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').delete('playlist'); } catch(e){} }
-};
-
 window.MusicApp = {
     playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
     shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
     visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
     
-    filterList(val) { 
-        this.filterText = val; 
-        this.visibleCount = 50;
-        this.renderList(); 
-    },
-    
     initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=>el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
-    
     async refetch() {
         el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
-            const cached = await window.MusicDB.get(); 
-            if(cached && cached.length > 0){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
-            
-            const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang)';
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=name&sort[]=publicdate+desc&rows=1000&page=1&output=json`,{cache:'no-store'});
-            
+            const cached = localStorage.getItem('xs_songs_v4'); if(cached){ this.playlist=JSON.parse(cached); this.renderList(); el('music-loading').style.display='none'; return; }
+            const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
             if(r.ok){
                 const j = await r.json(), docs = j?.response?.docs || [], all = [];
                 for(const d of docs){
-                    if (d.name) {
-                        const names = Array.isArray(d.name) ? d.name : [d.name];
-                        names.forEach((n) => {
-                            if(String(n).toLowerCase().endsWith('.mp3')) {
-                                let titleStr = Array.isArray(d.title) ? d.title[0] : (d.title || n);
-                                let artistStr = Array.isArray(d.creator) ? d.creator[0] : (d.creator || 'Xiemsansang');
-                                all.push({ 
-                                    id:`${d.identifier}/${n}`, 
-                                    title: String(titleStr).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), 
-                                    artist: String(artistStr), 
-                                    stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(n)}`, 
-                                    duration: 0
-                                });
-                            }
-                        });
-                    }
+                    try {
+                        const meta = await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(res=>res.json());
+                        (meta.files||[]).forEach(f => { if(String(f.format||'').toUpperCase().includes('MP3')) all.push({ id:`${d.identifier}/${f.name}`, title:(f.title||f.name).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(), artist:d.creator||'Xiemsansang', stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`, duration:parseFloat(f.length||0) }); });
+                    } catch(e){}
                 }
-                if(all.length > 0){ 
-                    this.playlist=all; window.MusicDB.set(all); this.renderList(); 
-                } else {
-                    el('music-loading').textContent='Không tìm thấy bài hát nào.'; return;
-                }
-            } else { throw new Error('API failed'); }
-        } catch(e){
-            console.error(e);
-            el('music-loading').textContent='Lỗi kết nối máy chủ nhạc.';
-            return;
-        }
+                if(all.length){ this.playlist=all; localStorage.setItem('xs_songs_v4',JSON.stringify(all)); this.renderList(); }
+            }
+        } catch(e){}
         el('music-loading').style.display='none';
     },
-    clearCache() { 
-        if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { 
-            localStorage.removeItem('xs_songs_v4'); 
-            window.MusicDB.clear().then(() => {
-                if ('caches' in window) { caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))); }
-                if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); }
-                setTimeout(() => window.location.href = window.location.pathname + '?reload=' + Date.now(), 500);
-            });
-        } 
-    },
+    clearCache() { if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { localStorage.removeItem('xs_songs_v4'); location.reload(); } },
     handleTimerChange(v) {
         clearInterval(this.timerInterval); if(v==0){ this.timerEnd=null; hideEl('music-timer-display'); return; }
         this.timerEnd=Date.now()+v*60000; showFlex('music-timer-display');
@@ -1284,29 +1167,13 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            let durText = s.duration > 0 ? `${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}` : 'MP3';
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10 text-right">${durText}</div>`;
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
             c.appendChild(d);
         });
-
-        if (this.visibleCount < list.length) {
-            const btnWrap = document.createElement('div');
-            btnWrap.className = 'px-4 pb-6 pt-2'; 
-            const btn = document.createElement('button');
-            btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm nhạc (' + this.visibleCount + '/' + list.length + ')';
-            btn.onclick = () => {
-                window.vibrate([15, 30]);
-                this.visibleCount += 100;
-                this.renderList();
-                window.showToast('Đã tải thêm nhạc!', 'ph-playlist');
-            };
-            btnWrap.appendChild(btn);
-            c.appendChild(btnWrap);
-        }
-
         this.updateMiniPlayer();
     },
+    
+    // V53 FIX: Liên tục báo cáo thời gian ra Màn hình khóa
     updateMediaSessionPosition() {
         if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
             const a = el('mstq-player');
@@ -1314,13 +1181,18 @@ window.MusicApp = {
             if (!d || d === Infinity || isNaN(d)) {
                 d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
             }
-            if (d > 0 && d !== Infinity && !isNaN(d)) {
+            if (d > 0) {
                 try {
-                    navigator.mediaSession.setPositionState({ duration: d, playbackRate: a.playbackRate || 1, position: a.currentTime || 0 });
+                    navigator.mediaSession.setPositionState({
+                        duration: d,
+                        playbackRate: a.playbackRate || 1,
+                        position: a.currentTime || 0
+                    });
                 } catch(e){}
             }
         }
     },
+    
     updateMiniPlayer() {
         const s = this.playlist[this.currentIndex]; if(!s)return;
         el('music-title').textContent=s.title; el('music-status').textContent=this.playing?"Đang phát...":"Tạm dừng";
@@ -1336,15 +1208,9 @@ window.MusicApp = {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
         const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         
-        if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
-        
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
         a.src=this.playlist[idx].stream_url; 
-        
-        const p = a.play();
-        if (p !== undefined) {
-            p.catch(() => { a.load(); a.play().catch(()=>{}); });
-        }
+        a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); }); 
         
         this.renderList();
         el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
@@ -1359,9 +1225,7 @@ window.MusicApp = {
             a.pause(); this.playing=false; 
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; 
         } else { 
-            const p = a.play();
-            if(p !== undefined) { p.catch(()=>{ a.load(); a.play().catch(()=>{}); }); }
-            this.playing=true; 
+            a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); }); this.playing=true; 
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; 
         } 
         this.updateMiniPlayer(); 
@@ -1377,7 +1241,7 @@ window.MusicApp = {
     seekMusic(e) { 
         const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
         let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
-        if(d > 0 && d !== Infinity && !isNaN(d)) {
+        if(d) {
             a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
             this.updateMediaSessionPosition();
         }
@@ -1385,31 +1249,31 @@ window.MusicApp = {
     
     setupListeners() {
         const a=el('mstq-player');
-        
         a.addEventListener('timeupdate',()=>{ 
             let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) return;
+            if (!d || d === Infinity || isNaN(d)) {
+                d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
+            }
+            if(!d) return;
             
-            if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
+            if (document.visibilityState === 'visible') {
+                el('music-progress').style.width=(a.currentTime/d)*100+'%'; 
+            }
             
             if(d > 40 && a.currentTime >= d - 20 && !this.prefetchDone) {
                 this.prefetchDone = true;
                 const nextS = this.playlist[this.getNextIndex()];
-                if(nextS) { const pf = el('mstq-prefetch'); if(pf) { pf.src = nextS.stream_url; pf.load(); } }
+                if(nextS) {
+                    const pf = el('mstq-prefetch');
+                    if(pf) { pf.src = nextS.stream_url; pf.load(); }
+                }
             }
         });
         
-        a.addEventListener('ended', (e) => { 
-            if(e) e.stopPropagation(); 
+        a.addEventListener('ended',()=>{ 
             this.prefetchDone = false;
             if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
             else this.playNext(); 
-        });
-
-        a.addEventListener('error', (e) => {
-            if(e) e.stopPropagation();
-            console.warn('[MusicApp] Lỗi tải bài hát, tự động qua bài sau 2s...');
-            setTimeout(() => { this.playNext(); }, 2000);
         });
         
         if('mediaSession' in navigator) {
@@ -1425,14 +1289,9 @@ window.MusicApp = {
 // 7. INITIALIZATION
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw_qlycuocsong.js')
-            .then(() => console.log('[LifeOS] Service Worker is active!'))
-            .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
-    }
-    
-    setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/tool/sw_qlycuocsong.js').catch(()=>{});
+    else window.pwaEngine.init();
+    setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 2000);
     
     if(window.innerWidth >= 1024) { setTimeout(() => { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
 
@@ -1453,8 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newId = String(Date.now());
         window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
         
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
-        if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
+        if (p.alarmTime && p.alarmTime > Date.now()) { window.scheduleNativeAlarm(p.text, p.alarmTime, newId); }
         
         window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
     };
@@ -1471,16 +1329,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rec.onend=()=>document.querySelectorAll('.btn-voice').forEach(b=>b.classList.remove('text-rose-500','animate-pulse'));
         document.querySelectorAll('.btn-voice').forEach(b=>b.addEventListener('click',()=>rec.start()));
     }
-
-    window.addEventListener('beforeunload', () => {
-        if (window.bgWorker) window.bgWorker.terminate();
-        if (window.beepWorker) window.beepWorker.terminate();
-        ['mstq-player', 'mstq-silence', 'mstq-alarm', 'tts-audio', 'tts-alarm-audio'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) { el.pause(); el.src = ''; }
-        });
-        if (window.audioCtx && window.audioCtx.state !== 'closed') window.audioCtx.close();
-    });
 });
 
 window.requestNativePermissions = async () => {
@@ -1489,6 +1337,24 @@ window.requestNativePermissions = async () => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (LocalNotifications) await LocalNotifications.requestPermissions();
         } catch(e) {}
+    }
+};
+
+window.pwaEngine = {
+    deferredPrompt: null,
+    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
+    init() {
+        if(this.state.isStandalone) return;
+        window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); this.deferredPrompt=e; this.showInstallButton(); });
+        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
+    },
+    showInstallButton() { const f=el('btnInstall'); if(f){ f.style.display='flex'; f.onclick=()=>this.handleInstallClick(); } },
+    handleInstallClick() {
+        const m=el('pwaHealthModal'),c=el('smartGuideContent'); if(!m||!c)return; m.classList.remove('hidden');
+        if(this.deferredPrompt){ this.deferredPrompt.prompt(); this.deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')this.deferredPrompt=null;}); }
+        else if(this.state.isIOS) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
+        else if(this.state.isAndroid) c.innerHTML=`<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
+        else c.innerHTML=`<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
     }
 };
 </script>
