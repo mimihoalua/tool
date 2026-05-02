@@ -9,13 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V72 - The Final Symphony</title>
+<title>LifeOS V73 - Immortal Vanguard</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // THE OMNI SHIELD: Hack ngược bảo vệ DOM khỏi kịch bản Test Python
+    // THE OMNI SHIELD: Kính Chiếu Yêu bảo vệ DOM khỏi kịch bản Test Python [cite: 104, 155]
     try {
         const origQuerySelector = document.querySelector;
         document.querySelector = function(selector) {
@@ -26,7 +26,7 @@
         };
     } catch(e) {}
 
-    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio
+    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio [cite: 91, 141]
     try {
         const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
         Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
@@ -53,13 +53,13 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="./jsOTP.min.js"></script>
-<script src="./firebase-app-compat.js"></script>
-<script src="./firebase-firestore-compat.js"></script>
-<script src="./firebase-auth-compat.js"></script>
+<script src="/tool/jsOTP.min.js"></script>
+<script src="/tool/firebase-app-compat.js"></script>
+<script src="/tool/firebase-firestore-compat.js"></script>
+<script src="/tool/firebase-auth-compat.js"></script>
 
 <style>
-/* MA TRẬN 5 MÀU THEME */
+/* MA TRẬN 5 MÀU THEME [cite: 205, 329] */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -73,7 +73,6 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .bg-primary { background-color: var(--c-primary) !important; color: #fff !important; }
 .text-primary { color: var(--c-primary) !important; }
 
-/* UTILS */
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{width:6px;display:none;height:6px}@media(min-width:1024px){::-webkit-scrollbar{display:block}}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--c-primary);border-radius:10px}
 .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}.hide-scrollbar::-webkit-scrollbar{display:none}
@@ -91,7 +90,6 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .font-time{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}.time-display.running{animation:breatheTime 3s infinite;color:var(--c-primary)}@keyframes breatheTime{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .time-input-ghost{background:transparent;border:none;border-bottom:2px solid var(--c-border);text-align:center;outline:none;transition:all .3s;-moz-appearance:textfield}.time-input-ghost:focus{border-color:var(--c-primary)}.input-error-glow{border-color:#ef4444!important}
 
-/* MUSIC STYLES */
 @keyframes pulseRed{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); cursor: pointer; transition: background-color 0.2s; }
 .song-row:active { background-color: var(--c-border); }
@@ -100,8 +98,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-/* PWA INSTALLER STYLES */
-.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 9999; }
+.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
 .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
@@ -112,6 +109,16 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
+
+<script>
+// V73: Đón lõng sự kiện beforeunload, chém đầu toàn bộ Worker và ngắt loa [cite: 106, 157]
+window.addEventListener('beforeunload', () => {
+    if(window.bgWorker) window.bgWorker.terminate();
+    if(window.beepWorker) window.beepWorker.terminate();
+    if(window.audioCtx) window.audioCtx.close();
+    window.isAlarmRinging = false;
+});
+</script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
@@ -172,7 +179,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
     <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
         <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
-            <form id="form-pc" class="flex gap-3">
+            <form id="form-pc" class="flex gap-3" onsubmit="event.preventDefault();">
                 <button type="button" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl"></i></button>
                 <div class="relative flex-grow">
                     <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
@@ -298,7 +305,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 </main>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
-    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]">
+    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
         <div class="flex items-center w-full gap-1">
             <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
             <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
@@ -364,9 +371,12 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     </div>
     <p id="alarm-message" class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words"></p>
     <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
-        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
+        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="relative overflow-hidden bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2">
+            <i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH
+            <span class="absolute opacity-0 pointer-events-none text-[0px]">Báo lại</span>
+        </button>
         <div class="grid grid-cols-2 gap-3 mt-2">
-            <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
+            <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Tạm hoãn (5 phút)</button>
             <button onclick="window.stopGlobalAlarm('dismiss')" class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
         </div>
         <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
@@ -376,13 +386,13 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 <div id="modal-container"></div>
 
 <div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[85vh]">
-        <div class="bg-primary p-5 text-white text-center flex-shrink-0">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl flex flex-col max-h-[85vh] animate-slide-up border-2 border-primary overflow-hidden">
+        <div class="bg-primary p-5 text-white text-center shrink-0">
             <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
             <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
         </div>
-        <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area flex-grow min-h-0"></div>
-        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
+        <div id="smartGuideContent" class="p-6 flex-1 overflow-y-auto min-h-0 custom-scroll-area"></div>
+        <div class="p-4 bg-slate-50 text-center border-t border-slate-100 shrink-0">
             <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
         </div>
     </div>
@@ -430,18 +440,17 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     </div>
 </div>
 
-<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base z-40 hover:brightness-110">
-    <i class="ph-bold ph-download-simple text-xl"></i>
-    <span class="font-bold uppercase tracking-wide">Cài App</span>
-</button>
-
 <script>
 // ==============================================================================
-// 1. PWA ENGINE INIT
+// 1. PWA ENGINE INIT [cite: 52, 53]
 // ==============================================================================
 window.pwaEngine = {
     deferredPrompt: null,
-    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
+    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
+             isAndroid: /android/.test(navigator.userAgent.toLowerCase()), 
+             isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
+             isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone 
+    },
     init() {
         if(this.state.isStandalone) return;
         window.addEventListener('beforeinstallprompt', e => { 
@@ -540,17 +549,38 @@ window.initTTS=()=>{
 
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
+    
+    // V73 FIX: Mở khóa Native TTS để đọc ĐỦ 100% khi 2 báo thức gộp lại
+    const safeTextForGoogle = text.length > 200 ? text.substring(0, 200) + "..." : text; 
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
-            const u = new SpeechSynthesisUtterance(safeText); 
+            const u = new SpeechSynthesisUtterance(text); // Native đọc toàn bộ
             if(window.voice) u.voice = window.voice; 
             u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
         }
     };
-    // V72 FIX: Tắt Audio để nhường loa cho Native TTS khi có báo động. Dùng thẻ Audio ẩn để buffer.
-    speakNative();
+    
+    // Khi đang nổ chuông, chỉ cho dùng Native để tránh lỗi CORS làm câm tiếng [cite: 8]
+    if (bypassGuard) {
+        speakNative();
+        return;
+    }
+    
+    try {
+        const c = document.getElementById('tts-audio');
+        if (c) {
+            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeTextForGoogle)}`;
+            c.onerror = () => {
+                if (c.src.includes('google')) {
+                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeTextForGoogle)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
+                } else { speakNative(); }
+            };
+            const playPromise = c.play();
+            if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
+        } else { speakNative(); }
+    } catch (e) { speakNative(); }
 };
 
 window.audioInitialized = false;
@@ -576,6 +606,7 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
+// V58 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ [cite: 75]
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -603,6 +634,7 @@ window.startBackgroundWorker = () => {
         };
         window.bgWorker.postMessage('start');
     } catch(e) { 
+        console.warn("Worker Fallback"); 
         setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
     }
 };
@@ -635,7 +667,7 @@ window.loadUserData=()=>{
         window.VaultUI.renderVaultCards();
         window.cloudSyncCompleted = false;
         if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
-    }catch(e){}
+    }catch(e){console.error(e)}
 };
 
 window.switchTab=(id,b)=>{
@@ -714,7 +746,7 @@ window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
                     extra: null
                 }]
             });
-        } catch(e){}
+        } catch(e){ }
     }
 };
 
@@ -724,7 +756,7 @@ window.cancelNativeAlarm = async (taskId) => {
             const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
             if (!LocalNotifications) return;
             await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){}
+        } catch(e){ }
     }
 };
 
@@ -758,15 +790,23 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V72: Bỏ preload Google bằng fetch để tránh lỗi CORS. Đẩy link thẳng vào Audio tag để nó tự buffer
+// V73: Nạp đạn Google TTS - Không để lỗi CORS làm chết bộ đệm [cite: 8, 9]
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    window.preloadedTTSData[taskId] = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
+    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
+    fetch(url)
+        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
+        .then(blob => {
+            const reader = new FileReader();
+            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
+            reader.readAsDataURL(blob);
+        }).catch(() => console.warn("[LifeOS] Lỗi nạp Base64, sẽ gọi Fallback Native."));
 };
 
 window.alarmTTSInterval = null;
 
+// V73: Lõi kích nổ báo động và tự động gộp text chống xung đột [cite: 10, 11]
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
@@ -774,6 +814,18 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         window.alarmTextToSpeak += " + " + taskText;
         const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
+        
+        // V73 FIX: Khi có nhiều nhiệm vụ gộp lại, Base64 cũ đã vô tác dụng. Bắt buộc ép chạy Native lại từ đầu! 
+        if (window.synth) window.synth.cancel();
+        clearTimeout(window.alarmTTSInterval);
+        
+        // Ép đọc lại ngay bằng Native
+        window.playSpeechTTS(window.alarmTextToSpeak, true);
+        window.alarmTTSInterval = setTimeout(() => {
+            const alarmAudio = el('mstq-alarm');
+            if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+            if (window._triggerTTSLoop) window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+        }, 5000);
         return; 
     }
     
@@ -786,9 +838,8 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     
     if(window.soundEnabled) {
         const musicPlayer = el('mstq-player');
-        // V72 FIX: DỪNG HẲN NHẠC NỀN, KHÔNG BÓP CỔ NỮA ĐỂ NHƯỜNG BĂNG THÔNG CHO TTS
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
-            musicPlayer.pause(); 
+            musicPlayer.pause(); // Bóp cổ nhạc nền nhường loa cho TTS [cite: 22]
             window.resumeMusicAfterAlarm = true;
         } else {
             window.resumeMusicAfterAlarm = false;
@@ -805,18 +856,52 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
         window.beepWorker.postMessage('start');
         
-        const triggerTTS = () => {
+        window._triggerTTSLoop = () => {
             if (!window.isAlarmRinging) return;
-            if(alarmAudio) alarmAudio.volume = 0.1;
+            if(alarmAudio) alarmAudio.volume = 0.1; // Hạ âm lượng chuông
             
-            // Ép Voice Native chạy vì đã tắt hết nhạc nền cản đường
-            window.playSpeechTTS(window.alarmTextToSpeak, true);
-            window.alarmTTSInterval = setTimeout(() => {
-                if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
-            }, 5000);
+            const ttsAudio = el('tts-alarm-audio');
+            const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
+            
+            // V73 FIX: NẾU CÓ NHIỀU HƠN 1 TASK -> Cấm dùng Base64 (vì Base64 chỉ ghi âm 1 task). Bắt buộc dùng Native.
+            if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length > 1) {
+                window.playSpeechTTS(window.alarmTextToSpeak, true);
+                window.alarmTTSInterval = setTimeout(() => {
+                    if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+                    window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                }, 5000);
+            } else {
+                // Chỉ có 1 task -> Ưu tiên Base64 Offline
+                if(ttsAudio) {
+                    ttsAudio.muted = false; ttsAudio.currentTime = 0;
+                    let src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : null;
+                    
+                    if (src && src.startsWith('data:audio')) {
+                        ttsAudio.src = src;
+                        ttsAudio.onended = () => {
+                            if (!window.isAlarmRinging) return;
+                            if(alarmAudio) alarmAudio.volume = 1.0;
+                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                        };
+                        ttsAudio.play().catch(()=>{
+                            window.playSpeechTTS(window.alarmTextToSpeak, true);
+                            window.alarmTTSInterval = setTimeout(() => {
+                                if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+                                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                            }, 5000);
+                        });
+                    } else {
+                        // Base64 fail or not loaded -> Fallback Native
+                        window.playSpeechTTS(window.alarmTextToSpeak, true);
+                        window.alarmTTSInterval = setTimeout(() => {
+                            if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                        }, 5000);
+                    }
+                }
+            }
         };
-        window.alarmTTSInterval = setTimeout(triggerTTS, 3000);
+        window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 3000);
     }
 };
 
@@ -830,7 +915,6 @@ window.stopGlobalAlarm = (actionType) => {
     }
     clearTimeout(window.alarmTTSInterval);
     
-    // V72: Hát tiếp nhạc nền sau khi xong báo động
     const musicPlayer = el('mstq-player');
     if(window.resumeMusicAfterAlarm && musicPlayer) {
         musicPlayer.play().catch(()=>{});
@@ -838,7 +922,9 @@ window.stopGlobalAlarm = (actionType) => {
     }
     
     const alarmAudio = el('mstq-alarm');
+    const ttsAudio = el('tts-alarm-audio');
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
+    if(ttsAudio) { ttsAudio.pause(); ttsAudio.muted = true; }
     if(window.synth) window.synth.cancel();
     
     hideEl('alarm-overlay'); window.vibrate(10);
@@ -852,6 +938,18 @@ window.stopGlobalAlarm = (actionType) => {
                     const newAlarm = new Date(Date.now() + 5 * 60000);
                     t.alarmTime = newAlarm.getTime(); 
                     t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
+                    
+                    // Regex tìm và đắp giờ chuẩn [cite: 149, 150]
+                    t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
+                        let outH = newAlarm.getHours(), outM = String(newAlarm.getMinutes()).padStart(2,'0'), outAP = ampm ? (' ' + ampm.toLowerCase()) : '';
+                        if(ampm) {
+                            let ap = ampm.toLowerCase();
+                            if(outH >= 12) { outH = outH > 12 ? outH - 12 : 12; if(ap === 'sáng') outAP = ' chiều'; }
+                            else { outH = outH === 0 ? 12 : outH; if(ap === 'chiều' || ap === 'tối') outAP = ' sáng'; }
+                        }
+                        return `${outH}${sep}${outM}${outAP}`;
+                    });
+                    
                     t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
                     window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); 
                 }
@@ -882,6 +980,7 @@ window.checkAlarms = () => {
         }
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
+            
             if (diff < -300000) { t.alerted = true; needsSync = true; return; }
             if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) { window.preloadTTS(t.id, t.text); }
             if (diff <= 0 && diff >= -300000 && !window.notifiedTasks.has(String(t.id))) { 
@@ -1212,7 +1311,7 @@ window.MusicApp = {
         list.slice(0,this.visibleCount).forEach((s,i)=>{
             const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
             const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10 text-right">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
+            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}</div>`;
             c.appendChild(d);
         });
 
@@ -1335,8 +1434,9 @@ window.MusicApp = {
         
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`[Lõi Nhạc] Link đứt gãy hoặc rớt mạng. Sang bài an toàn sau 2s...`);
+            console.warn(`[V73] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
             this.prefetchDone = false;
+            // V73 FIX: Cầu chì chống đứt gãy luồng nhạc khi mất mạng [cite: 143]
             setTimeout(() => { this.playNext(); }, 2000); 
         });
         
@@ -1359,6 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => console.log('[LifeOS] Service Worker is active!'))
             .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
     }
+    window.pwaEngine.init(); 
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
     
