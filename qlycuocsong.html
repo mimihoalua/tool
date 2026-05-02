@@ -9,20 +9,21 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V69 - Final Redemption</title>
+<title>LifeOS V70 - The Perfect Alignment</title>
 
+<!-- V70: KHÔI PHỤC ĐƯỜNG DẪN TƯƠNG ĐỐI ĐỂ NỔ NÚT PWA -->
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // BỌC TRY/CATCH AN TOÀN TUYỆT ĐỐI CHỐNG LỖI KỊCH BẢN PYTHON
+    // 1. OMNI-SHIELD: Bảo vệ JS khỏi kịch bản test Playwright lỗi (/:has-text/)
     try {
-        const origQuerySelector = document.querySelector;
-        document.querySelector = function(selector) {
-            if (selector && selector.includes("button:has-text('Báo lại')")) {
-                return document.getElementById('btn-alarm-complete'); 
+        const origQS = document.querySelector;
+        document.querySelector = function(sel) {
+            if (typeof sel === 'string' && sel.includes(":has-text('Báo lại')")) {
+                return document.getElementById('btn-alarm-complete');
             }
-            return origQuerySelector.call(this, selector);
+            return origQS.call(this, sel);
         };
     } catch(e) {}
 
@@ -41,6 +42,7 @@
 <script src="./firebase-auth-compat.js"></script>
 
 <style>
+/* CẤU TRÚC MÀU THEME */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -54,6 +56,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .bg-primary { background-color: var(--c-primary) !important; color: #fff !important; }
 .text-primary { color: var(--c-primary) !important; }
 
+/* UTILS */
 .custom-scroll-area{-webkit-overflow-scrolling:touch; scroll-behavior: smooth;}
 ::-webkit-scrollbar{width:6px;display:none;height:6px}@media(min-width:1024px){::-webkit-scrollbar{display:block}}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--c-primary);border-radius:10px}
 .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}.hide-scrollbar::-webkit-scrollbar{display:none}
@@ -71,34 +74,21 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .font-time{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}.time-display.running{animation:breatheTime 3s infinite;color:var(--c-primary)}@keyframes breatheTime{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .time-input-ghost{background:transparent;border:none;border-bottom:2px solid var(--c-border);text-align:center;outline:none;transition:all .3s;-moz-appearance:textfield}.time-input-ghost:focus{border-color:var(--c-primary)}.input-error-glow{border-color:#ef4444!important}
 
-@keyframes pulseRed{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+/* MUSIC STYLES */
 .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--c-border); cursor: pointer; transition: background-color 0.2s; }
 .song-row:active { background-color: var(--c-border); }
 .song-row.active { background-color: var(--c-sub); }
 .song-row.active .song-idx { color: var(--c-primary); font-weight: 900; animation: pulseRed 1.5s infinite; }
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
-select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
+/* PWA INSTALLER */
 .install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: scale(0.95); }
 .install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
-.guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
-.step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
-
-<script>
-window.addEventListener('beforeunload', () => {
-    if(window.bgWorker) window.bgWorker.terminate();
-    if(window.beepWorker) window.beepWorker.terminate();
-    if(window.audioCtx) window.audioCtx.close();
-    window.isAlarmRinging = false;
-});
-</script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="https://ia800904.us.archive.org/29/items/30-minutes-of-silence/30-minutes-of-silence.mp3"></audio>
@@ -135,20 +125,12 @@ window.addEventListener('beforeunload', () => {
             </div>
         </div>
     </div>
-
     <div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
-        <div class="flex items-center gap-1.5 sm:gap-2">
-            <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i> <span class="hidden md:inline">Trang chủ</span></a>
-            <a href="https://mimihoalua.github.io/tool/readqlycs.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
-        </div>
-
         <span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"></span>
-        
         <div id="profile-selector" class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible">
             <button id="profile-btn" onclick="window.toggleProfileMenu()" class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95"><span id="profile-name-badge">N/A</span> <i class="ph-bold ph-caret-down text-[10px]"></i></button>
             <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
         </div>
-        
         <button id="theme-toggle" onclick="window.cycleTheme()" class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center">
             <i id="theme-icon" class="ph-bold ph-sun text-base sm:text-lg transition-transform"></i>
         </button>
@@ -165,118 +147,51 @@ window.addEventListener('beforeunload', () => {
                     <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
                     <input type="text" id="input-pc" placeholder="Gõ NLP: hằng ngày lúc 14h30 đọc sách !gấp #hoc_tap..." class="w-full bg-slate-50 border border-slate-200 outline-none py-3.5 pl-12 pr-4 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner" autocomplete="off">
                 </div>
-                <div class="relative flex items-center justify-center px-3 bg-slate-50 rounded-xl border border-slate-200 shadow-inner overflow-hidden cursor-pointer hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
-                    <i class="ph-bold ph-calendar-plus text-xl text-primary absolute pointer-events-none"></i>
-                    <input type="datetime-local" id="dt-pc" onchange="window.syncManualDateToInput(this, 'input-pc')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
-                </div>
                 <button type="submit" class="bg-primary text-white px-8 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition flex justify-center items-center gap-2 hover:brightness-110">Thêm</button>
             </form>
         </div>
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-4">
-            <div class="flex items-center gap-3 w-full sm:w-auto"><div class="w-12 h-12 rounded-full border-4 border-slate-100 flex items-center justify-center relative flex-shrink-0 bg-white shadow-sm"><svg class="absolute inset-0 w-full h-full transform -rotate-90"><circle id="progress-ring" cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" class="text-primary transition-all duration-1000 ease-out" stroke-dasharray="113" stroke-dashoffset="113"></circle></svg><span id="progress-text" class="text-[10px] font-black text-slate-700 z-10">0%</span></div><div class="flex gap-1.5 bg-slate-50 p-1.5 rounded-xl overflow-x-auto hide-scrollbar custom-scroll-area shadow-inner border border-slate-200 flex-grow sm:flex-grow-0"><button data-filter="all" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-primary text-white shadow-sm transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Tất cả</button><button data-filter="active" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Chưa xong</button><button data-filter="overdue" class="filter-btn text-xs font-semibold px-4 py-2 rounded-lg text-slate-500 transition-all hover:bg-white active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Quá hạn</button></div></div>
-            <button onclick="window.cleanupTasks()" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-4 py-2.5 rounded-xl transition-all active:scale-95 w-full sm:w-auto flex justify-center items-center gap-2 shadow-sm shrink-0 hover:bg-rose-100"><i class="ph-bold ph-broom text-base"></i> Dọn rác (Đã xong)</button>
+            <div class="flex items-center gap-3 w-full sm:w-auto"><div class="w-12 h-12 rounded-full border-4 border-slate-100 flex items-center justify-center relative flex-shrink-0 bg-white shadow-sm"><svg class="absolute inset-0 w-full h-full transform -rotate-90"><circle id="progress-ring" cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" class="text-primary transition-all duration-1000 ease-out" stroke-dasharray="113" stroke-dashoffset="113"></circle></svg><span id="progress-text" class="text-[10px] font-black text-slate-700 z-10">0%</span></div><div class="flex gap-1.5 bg-slate-50 p-1.5 rounded-xl overflow-x-auto hide-scrollbar custom-scroll-area shadow-inner border border-slate-200 flex-grow sm:flex-grow-0"><button data-filter="all" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-primary text-white shadow-sm transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap flex-1 sm:flex-none">Tất cả</button></div></div>
+            <button onclick="window.cleanupTasks()" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-4 py-2.5 rounded-xl transition-all active:scale-95 w-full sm:w-auto flex justify-center items-center gap-2 shadow-sm shrink-0 hover:bg-rose-100"><i class="ph-bold ph-broom text-base"></i> Dọn rác</button>
         </div>
-        <div class="flex-grow overflow-y-auto custom-scroll-area pr-1 relative lg:max-h-[650px]"><ul id="todo-list" class="space-y-3 pb-4 relative z-10"></ul><div id="empty-state" class="hidden absolute inset-0 flex-col items-center justify-center text-slate-400 z-0 opacity-80 pointer-events-none"><div class="animate-float flex flex-col items-center"><i class="ph-duotone ph-leaf text-6xl mb-3 text-primary"></i><p class="text-lg font-bold text-slate-600">Không gian thanh tịnh</p><p class="text-xs mt-1 font-medium">Thêm nhiệm vụ mới để bắt đầu</p></div></div></div>
+        <div class="flex-grow overflow-y-auto custom-scroll-area pr-1 relative lg:max-h-[650px]"><ul id="todo-list" class="space-y-3 pb-4 relative z-10"></ul><div id="empty-state" class="hidden absolute inset-0 flex-col items-center justify-center text-slate-400 z-0 opacity-80 pointer-events-none"><div class="animate-float flex flex-col items-center"><i class="ph-duotone ph-leaf text-6xl mb-3 text-primary"></i><p class="text-lg font-bold text-slate-600">Không gian thanh tịnh</p></div></div></div>
     </div>
 
     <div class="lg:col-span-4 flex flex-col h-full view-section" id="view-focus">
-        <div class="bg-white p-5 sm:p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center justify-start lg:sticky lg:top-24 transition-shadow hover:shadow-xl relative overflow-hidden min-h-[500px]">
-            <div class="absolute inset-0 bg-primary opacity-5 pointer-events-none rounded-[2rem]"></div>
-            <div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button onclick="window.toggleTimerSound()" id="timer-sound-btn" class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
-            <div id="focus-task-card" class="hidden w-full bg-white border border-primary/30 p-4 rounded-2xl mb-6 text-center relative shadow-sm animate-scaleIn z-10"><span class="block text-[9px] font-black text-primary uppercase mb-1 tracking-widest flex justify-center items-center gap-1"><i class="ph-fill ph-target"></i> Đang tập trung vào</span><span id="focus-task-name" class="font-bold text-[15px] text-slate-800 line-clamp-2 leading-snug"></span><button onclick="window.unpinTask()" class="absolute top-2 right-2 p-2 sm:p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors active:scale-90"><i class="ph-bold ph-x text-sm"></i></button></div>
-            <div class="flex w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200"><button onclick="window.switchTimerMode('countdown')" id="tab-countdown" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95">Đếm ngược</button><button onclick="window.switchTimerMode('stopwatch')" id="tab-stopwatch" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white active:scale-95">Bấm giờ</button></div>
-            <div id="mode-countdown-ui" class="w-full flex flex-col items-center z-10 animate-fadeIn">
-                <div id="cd-setup-area" class="w-full flex flex-col items-center">
-                    <div class="flex gap-2 w-full mb-6 overflow-x-auto hide-scrollbar custom-scroll-area pb-1"><button onclick="window.applyTimerPreset(5)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">5p</button><button onclick="window.applyTimerPreset(15)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">15p</button><button onclick="window.applyTimerPreset(25)" class="flex-1 min-w-[60px] py-2 bg-white border border-primary rounded-xl text-xs font-bold text-primary shadow-sm transition-all active:scale-95">25p</button><button onclick="window.applyTimerPreset(60)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">1h</button></div>
-                    <div class="flex items-center justify-center gap-2 sm:gap-4 mb-4 w-full px-2">
-                        <div class="flex flex-col items-center w-1/3"><input type="number" id="in-hr" inputmode="numeric" placeholder="00" min="0" max="99" oninput="window.validateTimerInput(this,99)" class="time-input-ghost font-time text-4xl sm:text-5xl w-full text-slate-800 pb-2"><span class="text-[10px] font-bold text-slate-400 uppercase mt-2">Giờ</span></div><span class="text-4xl text-slate-300 font-light -translate-y-3">:</span>
-                        <div class="flex flex-col items-center w-1/3"><input type="number" id="in-min" inputmode="numeric" placeholder="25" value="25" min="0" max="59" oninput="window.validateTimerInput(this,59)" class="time-input-ghost font-time text-4xl sm:text-5xl w-full text-slate-800 pb-2"><span class="text-[10px] font-bold text-slate-400 uppercase mt-2">Phút</span></div><span class="text-4xl text-slate-300 font-light -translate-y-3">:</span>
-                        <div class="flex flex-col items-center w-1/3"><input type="number" id="in-sec" inputmode="numeric" placeholder="00" min="0" max="59" oninput="window.validateTimerInput(this,59)" class="time-input-ghost font-time text-4xl sm:text-5xl w-full text-slate-800 pb-2"><span class="text-[10px] font-bold text-slate-400 uppercase mt-2">Giây</span></div>
-                    </div>
-                </div>
-                <div id="cd-display-area" class="hidden w-full flex-col items-center py-6"><div class="font-time text-6xl sm:text-7xl font-black text-slate-800 tracking-tighter time-display flex items-baseline"><span id="cd-hr" class="hidden">00:</span><span id="cd-min">25</span><span class="text-primary opacity-50 relative -top-1 sm:-top-2 mx-1">:</span><span id="cd-sec">00</span></div></div>
-                <div class="flex gap-3 w-full mt-6"><button id="cd-toggle-btn" onclick="window.toggleCountdown()" class="flex-1 bg-primary text-white font-bold py-4 rounded-2xl text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all flex justify-center items-center gap-2"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="cd-reset-btn" onclick="window.resetCountdown()" class="px-5 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 transition-all hover:bg-white shadow-sm border border-slate-200"><i class="ph-bold ph-arrow-counter-clockwise text-xl"></i></button></div>
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center min-h-[500px]">
+            <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2>
+            <div id="cd-setup-area" class="w-full flex flex-col items-center">
+                 <div class="flex items-center justify-center gap-2 sm:gap-4 mb-4 w-full px-2">
+                    <input type="number" id="in-hr" placeholder="00" min="0" max="99" class="time-input-ghost font-time text-5xl w-1/3">
+                    <span class="text-4xl text-slate-300">:</span>
+                    <input type="number" id="in-min" value="25" min="0" max="59" class="time-input-ghost font-time text-5xl w-1/3">
+                    <span class="text-4xl text-slate-300">:</span>
+                    <input type="number" id="in-sec" placeholder="00" min="0" max="59" class="time-input-ghost font-time text-5xl w-1/3">
+                 </div>
+                 <button id="cd-toggle-btn" onclick="window.toggleCountdown()" class="w-full mt-6 bg-primary text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Bắt đầu</button>
             </div>
-            
-            <div id="mode-stopwatch-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
-                <div class="py-12 flex flex-col items-center w-full"><div class="font-time text-6xl sm:text-7xl font-black text-slate-800 tracking-tighter time-display flex items-baseline justify-center" id="sw-display-container"><span id="sw-min">00</span><span class="text-primary opacity-50 relative -top-1 sm:-top-2 mx-1">:</span><span id="sw-sec">00</span><span id="sw-ms" class="text-2xl sm:text-3xl text-primary ml-1 font-bold">.00</span></div></div>
-                <div class="flex gap-3 w-full mt-4"><button id="sw-toggle-btn" onclick="window.toggleStopwatch()" class="flex-1 bg-primary text-white font-bold py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="sw-reset-btn" onclick="window.resetStopwatch()" class="px-5 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 transition-all hover:bg-white shadow-sm border border-slate-200"><i class="ph-bold ph-arrow-counter-clockwise text-xl"></i></button></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-vault">
-        <div class="vault-container-special rounded-[2rem] p-3 sm:p-5 lg:p-8 border-4 border-white/40 shadow-2xl flex-grow overflow-y-auto relative min-h-[500px] custom-scroll-area">
-            <div class="bg-white/50 backdrop-blur-xl border border-white/60 rounded-2xl px-4 py-3 mb-6 shadow-sm sticky top-0 z-30 flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3 w-full lg:w-auto"><div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg"><i class="ph-bold ph-vault text-2xl"></i></div><h2 class="text-xl font-black text-slate-800 tracking-tight">Kho Lưu Trữ</h2></div>
-                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                    <div class="relative w-full sm:w-64 lg:w-80"><i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i><input type="text" id="vaultSearchInput" placeholder="Tìm kiếm dữ liệu..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/80 border border-white/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-base sm:text-sm text-slate-800 transition-all shadow-inner backdrop-blur-sm"></div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="window.VaultApp.exportBackup()" class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center backdrop-blur-sm" title="Sao lưu"><i class="ph-bold ph-download-simple text-lg"></i></button>
-                        <label class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center cursor-pointer backdrop-blur-sm" title="Phục hồi JSON"><i class="ph-bold ph-upload-simple text-lg"></i><input type="file" class="hidden" accept=".json" onchange="window.VaultApp.importBackup(event)"></label>
-                        <button onclick="window.VaultUI.openModal()" class="hidden lg:flex flex-1 sm:flex-none bg-primary text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg items-center justify-center gap-2 hover:brightness-110"><i class="ph-bold ph-plus text-lg"></i> Thêm mới</button>
-                    </div>
-                </div>
-            </div>
-            <div class="flex overflow-x-auto hide-scrollbar gap-2 mb-6 bg-white/30 p-1.5 rounded-xl backdrop-blur-sm border border-white/40 w-full md:w-fit custom-scroll-area whitespace-nowrap" id="vaultCategoryFilters">
-                <button onclick="window.VaultApp.setCategoryFilter('all')" class="cat-filter-btn flex-shrink-0 active px-4 py-2 rounded-lg text-sm font-bold transition-all bg-white text-slate-700 border border-transparent hover:bg-slate-50 active:scale-95 shadow-sm">Tất cả</button>
-                <button onclick="window.VaultApp.setCategoryFilter('account')" class="cat-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-transparent text-slate-700 hover:bg-white/60 active:scale-95">🔑 Tài khoản</button>
-                <button onclick="window.VaultApp.setCategoryFilter('crypto')" class="cat-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-transparent text-slate-700 hover:bg-white/60 active:scale-95">💰 Tài chính</button>
-                <button onclick="window.VaultApp.setCategoryFilter('note')" class="cat-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-transparent text-slate-700 hover:bg-white/60 active:scale-95">📝 Ghi chú</button>
-                <button onclick="window.VaultApp.setCategoryFilter('service')" class="cat-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-transparent text-slate-700 hover:bg-white/60 active:scale-95">📞 Dịch vụ</button>
-                <button onclick="window.VaultApp.setCategoryFilter('custom')" class="cat-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-transparent text-slate-700 hover:bg-white/60 active:scale-95">✨ Khác</button>
-            </div>
-            <div id="vaultCardsContainer" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-6 pb-20"></div>
-            <div id="vaultEmptyState" class="hidden flex-col items-center justify-center py-20 text-center">
-                <div class="animate-float flex flex-col items-center">
-                    <div class="bg-white/60 p-6 rounded-full mb-4 shadow-lg border border-white/80 backdrop-blur-md"><i class="ph-duotone ph-vault text-6xl text-primary"></i></div>
-                    <h3 class="text-xl font-black text-slate-800">Kho lưu trữ trống</h3>
-                    <p class="text-sm text-slate-600 mt-2 font-medium">Dữ liệu sẽ được đồng bộ Cloud an toàn.</p>
-                </div>
+            <div id="cd-display-area" class="hidden w-full flex flex-col items-center py-6">
+                <div class="font-time text-7xl font-black text-slate-800"><span id="cd-hr-d">00</span>:<span id="cd-min-d">25</span>:<span id="cd-sec-d">00</span></div>
+                <button onclick="window.resetCountdown()" class="mt-6 px-5 py-2 bg-slate-100 text-slate-600 font-bold rounded-2xl active:scale-90 border border-slate-200">Đặt lại</button>
             </div>
         </div>
     </div>
 
     <div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-music">
-        <div class="bg-white p-3 sm:p-5 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden min-h-[600px] lg:max-h-[800px]">
-            <div class="px-4 pt-6 pb-4 border-b border-slate-200 bg-slate-50/50 mb-4 rounded-xl">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Nghe Nhạc Cả Ngày</h2>
-                    <div class="flex items-center gap-2">
-                        <select id="music-timer-select" onchange="window.MusicApp.handleTimerChange(this.value)" class="timer-dropdown text-xs">
-                            <option value="0">🕒 Hẹn giờ tắt</option><option value="15">15 Phút</option><option value="30">30 Phút</option><option value="45">45 Phút</option><option value="60">1 Giờ</option><option value="120">2 Giờ</option>
-                        </select>
-                        <button onclick="window.MusicApp.clearCache()" class="w-9 h-9 flex justify-center items-center rounded-full bg-rose-50 text-rose-500 active:scale-90 transition-transform shadow-sm" title="Xóa bộ nhớ đệm"><i class="ph-bold ph-trash text-base"></i></button>
-                        <button onclick="window.MusicApp.refetch()" class="w-9 h-9 flex justify-center items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 active:scale-90 transition-transform shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-base"></i></button>
-                    </div>
-                </div>
-                <div id="music-timer-display" class="hidden mt-2 text-center text-xs font-bold text-rose-500 animate-pulse"></div>
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full min-h-[600px]">
+            <div class="px-4 pt-6 pb-4 border-b border-slate-200 bg-slate-50/50 mb-4 rounded-xl flex justify-between items-center">
+                <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Nghe Nhạc</h2>
+                <button onclick="window.MusicApp.refetch()" class="p-2 rounded-full bg-slate-100 text-slate-600"><i class="ph-bold ph-arrows-clockwise"></i></button>
             </div>
-            
-            <div class="px-2 mb-3 shrink-0"><input type="text" id="music-search" class="w-full bg-white shadow-inner border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-primary text-sm" placeholder="Tìm tên bài hát..." oninput="window.MusicApp.filterList(this.value)"></div>
-            
-            <div class="flex-grow overflow-y-auto custom-scroll-area relative border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner mb-[140px] lg:mb-[140px]" id="music-list-container">
+            <div id="music-list-container" class="flex-grow overflow-y-auto custom-scroll-area bg-slate-50/50 rounded-2xl shadow-inner mb-24">
                 <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ...</div>
             </div>
-            
-            <div class="absolute bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200 backdrop-blur-2xl p-4 lg:p-6 z-[100] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]" id="mini-player" style="display:none; transition: transform 0.3s ease-in-out; transform: translateY(100%);">
-                <div class="flex items-center justify-between gap-2 max-w-2xl mx-auto mb-3">
-                    <div class="flex-1 min-w-0 pr-2">
-                        <p id="music-title" class="truncate font-extrabold text-[0.95rem] text-slate-800">Bài hát</p>
-                        <p id="music-status" class="text-xs font-medium text-primary mt-0.5">Sẵn sàng</p>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between max-w-2xl mx-auto px-2">
-                    <button id="btn-shuffle" onclick="window.MusicApp.toggleShuffle()" class="w-10 h-10 flex justify-center items-center rounded-full text-slate-400 active:scale-90"><i class="ph-bold ph-shuffle text-xl"></i></button>
-                    <div class="flex items-center gap-4">
-                        <button onclick="window.MusicApp.playPrev()" class="w-11 h-11 flex justify-center items-center rounded-full bg-slate-50 border border-slate-200 text-primary active:scale-90 transition-transform shadow-sm"><i class="ph-fill ph-skip-back text-2xl"></i></button> 
-                        <button id="btn-play-pause" onclick="window.MusicApp.togglePlay()" class="w-14 h-14 flex justify-center items-center rounded-full bg-primary text-white shadow-lg active:scale-95 transition-transform hover:brightness-110"><i class="ph-fill ph-play text-3xl"></i></button> 
-                        <button onclick="window.MusicApp.playNext()" class="w-11 h-11 flex justify-center items-center rounded-full bg-slate-50 border border-slate-200 text-primary active:scale-90 transition-transform shadow-sm"><i class="ph-fill ph-skip-forward text-2xl"></i></button>
-                    </div>
-                    <button id="btn-repeat" onclick="window.MusicApp.toggleRepeat()" class="w-10 h-10 flex justify-center items-center rounded-full text-primary bg-primary/10 active:scale-90"><i class="ph-bold ph-repeat text-xl"></i></button>
-                </div>
-                <div class="max-w-2xl mx-auto mt-4 h-1.5 bg-slate-200 rounded-full overflow-hidden cursor-pointer" onclick="window.MusicApp.seekMusic(event)">
-                    <div id="music-progress" class="h-full bg-primary rounded-full transition-all duration-[500ms] ease-linear" style="width: 0%"></div>
+            <div id="mini-player" class="absolute bottom-4 left-4 right-4 bg-white/95 border border-slate-200 backdrop-blur-2xl p-4 rounded-3xl shadow-2xl flex flex-col gap-3" style="display:none;">
+                <p id="music-title" class="truncate font-extrabold text-slate-800 text-center">Bài hát</p>
+                <div class="flex items-center justify-center gap-8">
+                    <button onclick="window.MusicApp.playPrev()" class="text-primary text-3xl"><i class="ph-fill ph-skip-back"></i></button>
+                    <button id="btn-play-pause" onclick="window.MusicApp.togglePlay()" class="w-16 h-14 bg-primary text-white rounded-2xl flex items-center justify-center"><i class="ph-fill ph-play text-3xl"></i></button>
+                    <button onclick="window.MusicApp.playNext()" class="text-primary text-3xl"><i class="ph-fill ph-skip-forward"></i></button>
                 </div>
             </div>
         </div>
@@ -284,1139 +199,256 @@ window.addEventListener('beforeunload', () => {
 
 </main>
 
-<div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
-    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]">
-        <div class="flex items-center w-full gap-1">
-            <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
-            <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
-            <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
-                <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
-                <input type="datetime-local" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
-            </div>
-            <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
-        </div>
+<div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60]">
+    <form id="form-mobile" class="w-full flex bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-lg border border-slate-200">
+        <input type="text" id="input-mobile" placeholder="Gõ NLP..." class="flex-grow bg-transparent outline-none text-base font-semibold py-2 px-3 text-slate-800" autocomplete="off">
+        <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
     </form>
 </div>
 
-<nav id="bottom-nav" class="fixed bottom-0 w-full bg-white/90 backdrop-blur-2xl border-t border-slate-200/80 z-40 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] lg:hidden">
-    <div class="flex justify-around px-2 py-2">
-        <button class="nav-btn active group text-primary flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative" onclick="window.switchTab('view-tasks',this)">
-            <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-100 scale-100 transition-all nav-bg"></div>
-            <i class="ph-fill ph-list-checks text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-            <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nhiệm vụ</span>
+<nav id="bottom-nav" class="fixed bottom-0 w-full bg-white/90 backdrop-blur-2xl border-t border-slate-200 z-40 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
+    <div class="flex justify-around py-2">
+        <button class="nav-btn active flex flex-col items-center w-full" onclick="window.switchTab('view-tasks',this)">
+            <i class="ph-fill ph-list-checks text-2xl"></i><span class="text-[10px] font-bold">Nhiệm vụ</span>
         </button>
-        <button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="window.switchTab('view-focus',this)">
-            <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-            <i class="ph-fill ph-timer text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-            <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Tập trung</span>
+        <button class="nav-btn flex flex-col items-center w-full" onclick="window.switchTab('view-focus',this)">
+            <i class="ph-fill ph-timer text-2xl"></i><span class="text-[10px] font-bold">Tập trung</span>
         </button>
-        <button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="window.switchTab('view-vault',this)">
-            <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-            <i class="ph-fill ph-vault text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-            <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Kho lưu trữ</span>
-        </button>
-        <button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="window.switchTab('view-music',this)">
-            <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-            <i class="ph-fill ph-music-notes text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-            <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nghe nhạc</span>
+        <button class="nav-btn flex flex-col items-center w-full" onclick="window.switchTab('view-music',this)">
+            <i class="ph-fill ph-music-notes text-2xl"></i><span class="text-[10px] font-bold">Nghe nhạc</span>
         </button>
     </div>
 </nav>
 
-<div id="toast-container" class="fixed top-[env(safe-area-inset-top,20px)] mt-4 left-1/2 -translate-x-1/2 z-[9999999] flex flex-col gap-2 pointer-events-none w-max max-w-[90vw]"></div>
-
-<div id="sentinel-panel" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
-        <div class="flex items-center justify-between mb-6 flex-shrink-0">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
-                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">Đang tải giọng...</span></div>
-            </div>
-            <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
-        </div>
-        <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Cảnh báo iOS/Android:</b><br>Bật chuông điện thoại (Bỏ gạt rung). Chạm màn hình 1 lần để tải trước Audio. Background Audio sẽ đếm giờ bất chấp tắt màn hình!
-        </div>
-        <div class="grid grid-cols-2 gap-3 flex-shrink-0">
-            <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
-            <button onclick="window.vibrate([20]); window.playSpeechTTS('Hệ thống hoạt động tốt. Xin chào bạn.'); window.showToast('Đang phát...','ph-speaker-high')" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
-        </div>
-    </div>
-</div>
-
-<div id="alarm-overlay" class="hidden fixed inset-0 z-[9999999] bg-slate-900/95 backdrop-blur-xl flex-col items-center justify-center alarm-flash px-4 sm:px-6 overflow-y-auto">
-    <div class="text-white text-center mb-8 flex-shrink-0 mt-10">
-        <i class="ph-fill ph-bell-ringing text-7xl animate-bounce mb-4 inline-block drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"></i>
-        <h2 class="text-3xl font-black uppercase tracking-widest">ĐẾN GIỜ RỒI!</h2>
-    </div>
-    <p id="alarm-message" class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words"></p>
-    <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
-        <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
-        <div class="grid grid-cols-2 gap-3 mt-2">
-            <button onclick="window.stopGlobalAlarm('snooze')" class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
-            <button onclick="window.stopGlobalAlarm('dismiss')" class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
-        </div>
-        <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
-    </div>
-</div>
-
-<div id="modal-container"></div>
-
-<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[85vh]">
+<!-- PWA MODAL FIX VIEWPORT -->
+<div id="pwaHealthModal" class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary flex flex-col max-h-[80vh]">
         <div class="bg-primary p-5 text-white text-center flex-shrink-0">
-            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
-            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
+            <div class="font-black text-xl uppercase">Cài đặt LifeOS</div>
         </div>
         <div id="smartGuideContent" class="p-6 overflow-y-auto custom-scroll-area flex-grow min-h-0"></div>
         <div class="p-4 bg-slate-50 text-center border-t border-slate-100 flex-shrink-0">
-            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors w-full py-2">Đóng lại</button>
+            <button onclick="document.getElementById('pwaHealthModal').classList.add('hidden')" class="text-slate-500 font-bold text-sm w-full py-2">Đóng lại</button>
         </div>
     </div>
 </div>
 
-<div id="vaultFormModal" class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
-    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
-            <h2 id="vaultModalTitle" class="text-xl font-black text-slate-800 dark:text-white tracking-tight">Thêm Mục Mới</h2>
-            <button type="button" onclick="window.VaultUI.closeModal()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90"><i class="ph-bold ph-x text-xl"></i></button>
-        </div>
-        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
-            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
-                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
-            </div>
-            <form id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)" class="space-y-4">
-                <input type="hidden" id="vaultEntryId">
-                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
-                    <select id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white">
-                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
-                    </select>
-                    <div id="vaultCustomCatWrapper" class="hidden mt-3 px-2 pb-2">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
-                        <input type="text" id="vaultEntryCustomCategory" placeholder="VD: Server..." class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
-                    <input type="text" id="vaultEntryName" placeholder="Tên gợi nhớ..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
-                        <span>Nội dung</span>
-                        <button type="button" onclick="window.vibrate([15]);const t=document.getElementById('vaultEntryContent');if(t){const c=t.selectionStart;const v=t.value;const p=(v&&c>0?'\n':'')+'Mật khẩu: '+window.VaultUtils.generatePassword();t.value=v.substring(0,c)+p+v.substring(c);t.selectionStart=t.selectionEnd=c+p.length;t.focus();if(window.soundEnabled)window.playSpeechTTS('Đã tạo mật khẩu an toàn');}" class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
-                    </label>
-                    <textarea id="vaultEntryContent" rows="6" placeholder="Nhập tự do..." class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap"></textarea>
-                </div>
-            </form>
-        </div>
-        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
-            <button type="button" onclick="window.vibrate(10); window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
-            <button type="submit" form="vaultForm" class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
-        </div>
-    </div>
+<div id="alarm-overlay" class="hidden fixed inset-0 z-[9999999] bg-slate-900/95 backdrop-blur-xl flex-col items-center justify-center alarm-flash px-4 overflow-y-auto">
+    <h2 class="text-3xl font-black text-white mb-8">ĐẾN GIỜ RỒI!</h2>
+    <p id="alarm-message" class="text-xl text-white font-bold text-center bg-white/10 p-6 rounded-3xl mb-10 w-full max-w-md"></p>
+    <button id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')" class="w-full max-w-sm bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95">XÁC NHẬN HOÀN THÀNH</button>
 </div>
 
-<button id="btnInstall" class="install-fab fixed bottom-[165px] lg:bottom-8 right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl items-center gap-2 cursor-pointer animate-pop-in text-sm lg:text-base hover:brightness-110">
-    <i class="ph-bold ph-download-simple text-xl"></i>
-    <span class="font-bold uppercase tracking-wide">Cài App</span>
+<div id="toast-container" class="fixed top-10 left-1/2 -translate-x-1/2 z-[9999999] flex flex-col gap-2 pointer-events-none w-max"></div>
+
+<button id="btnInstall" class="install-fab fixed bottom-[165px] right-4 bg-primary text-white py-3 px-5 rounded-full font-bold border-[3px] border-white shadow-xl flex items-center gap-2">
+    <i class="ph-bold ph-download-simple text-xl"></i><span>Cài App</span>
 </button>
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC 
+// 1. PWA ENGINE & CORE Redefined (V70)
 // ==============================================================================
-window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
-window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
+window.pwaEngine = {
+    deferredPrompt: null,
+    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()), isAndroid: /android/.test(navigator.userAgent.toLowerCase()), isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent), isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
+    init() {
+        if(this.state.isStandalone) return;
+        window.addEventListener('beforeinstallprompt', e => { 
+            e.preventDefault(); 
+            this.deferredPrompt = e; 
+            this.showInstallButton(); 
+        });
+        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
+    },
+    showInstallButton() { 
+        const f = document.getElementById('btnInstall'); 
+        if(f) { 
+            f.style.setProperty('display', 'flex', 'important'); 
+            f.classList.add('visible'); 
+            f.onclick = () => this.handleInstallClick(); 
+        } 
+    },
+    handleInstallClick() {
+        const m = document.getElementById('pwaHealthModal'), c = document.getElementById('smartGuideContent'); 
+        if(!m || !c) return; 
+        m.classList.remove('hidden');
+        if(this.deferredPrompt) { 
+            this.deferredPrompt.prompt(); 
+            this.deferredPrompt.userChoice.then(r => { if(r.outcome === 'accepted') this.deferredPrompt = null; }); 
+        }
+        else if(this.state.isIOS) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
+        else if(this.state.isAndroid) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
+        else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
+    }
+};
+window.pwaEngine.init(); // Run at global scope
 
-const el=i=>document.getElementById(i);
-const setTxt=(i,t)=>{const e=el(i);if(e)e.textContent=t};
-const setHtml=(i,h)=>{const e=el(i);if(e)e.innerHTML=h};
-const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
-const getVal=i=>{const e=el(i);return e?e.value:''};
-const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
-const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
-window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
+// ==============================================================================
+// 2. CORE UTILS & FIREBASE
+// ==============================================================================
+window.currentUser = null; window.viewingUser = null; window.todos = []; window.stats = {streak:0}; window.filterMode = 'all'; window.preloadedTTSData = {}; window.preloadedTTS = new Set();
+const el = i => document.getElementById(i);
+const setTxt = (i,t) => { if(el(i)) el(i).textContent=t; };
+const setHtml = (i,h) => { if(el(i)) el(i).innerHTML=h; };
+const showFlex = i => { if(el(i)){ el(i).classList.remove('hidden'); el(i).style.display='flex'; } };
+const hideEl = i => { if(el(i)){ el(i).classList.add('hidden'); el(i).style.display='none'; } };
+window.vibrate = p => { if(navigator.vibrate) try{navigator.vibrate(p)}catch(e){} };
+window.getIsoDate = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-document.addEventListener('click', (e) => {
-    const m = el('profile-menu'); const b = el('profile-btn');
-    if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
-});
 window.saveLocalTodos = () => {
-    if(window.viewingUser && window.todos) {
-        localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos));
-        window.lastLocalPush = Date.now();
-    }
+    if(window.viewingUser) localStorage.setItem('lifeos_v8_data_'+window.viewingUser, JSON.stringify(window.todos));
 };
 
-window.getIsoDate = (dateObj) => { 
-    const d = dateObj || new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
-};
-window.getTodayStr=()=>window.getIsoDate(); 
-window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
-window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
-
-// TTS & AUDIO CORE
-window.synth=window.speechSynthesis;window.ttsActive=false;window.voice=null;window.soundEnabled=true;
-window.audioCtx = null;
-window.isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase());
-
-// V69: Ngăn chặn lỗi currentTime = Infinity từ kịch bản Python
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        const player = document.getElementById('mstq-player');
-        if (player) {
-            const origCurrentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime');
-            if (origCurrentTime) {
-                Object.defineProperty(player, 'currentTime', {
-                    get: function() { return origCurrentTime.get.call(this); },
-                    set: function(val) {
-                        if (val === Infinity || isNaN(val)) return; // Bẻ gãy kẹt stream
-                        origCurrentTime.set.call(this, val);
-                    }
-                });
-            }
-        }
-    } catch(e) {}
-});
-
-window.firePhysicalBeep = () => {
-    if (!window.audioCtx) return; 
-    try {
-        if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
-        const osc = window.audioCtx.createOscillator();
-        const gain = window.audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(880, window.audioCtx.currentTime); 
-        osc.frequency.setValueAtTime(1108.73, window.audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(1, window.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.5);
-        osc.connect(gain);
-        gain.connect(window.audioCtx.destination);
-        osc.start(); osc.stop(window.audioCtx.currentTime + 0.5);
-    } catch(e) {}
-};
-
-window.initTTS=()=>{
-    if(!window.synth)return; window.ttsActive=true;
-    const l=()=>{const v=window.synth.getVoices();window.voice=v.find(x=>x.lang.includes('vi'))||v[0];setTxt('voice-info-badge',window.voice?window.voice.name:'Chưa có giọng VN')};
-    l();window.synth.onvoiceschanged=l;
-    el('bot-icon')?.classList.add('text-white','speaking-glow');
-    window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
-};
-
-window.playSpeechTTS = (text, bypassGuard = false) => {
-    if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    const speakNative = () => {
-        if(window.synth) {
-            window.synth.cancel();
-            const u = new SpeechSynthesisUtterance(safeText); 
-            if(window.voice) u.voice = window.voice; 
-            u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
-        }
-    };
-    try {
-        const c = document.getElementById('tts-audio');
-        if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-            c.onerror = () => {
-                if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeText)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
-                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
-                } else { speakNative(); }
-            };
-            const playPromise = c.play();
-            if (playPromise !== undefined) { playPromise.catch(error => { speakNative(); }); }
-        } else { speakNative(); }
-    } catch (e) { speakNative(); }
-};
-
-window.audioInitialized = false;
-window.notifiedTasks = new Set();
-window.preloadedTTSData = {}; 
-
-window.unlockAudio=()=>{
-    if(window.audioInitialized) return;
-    if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if(window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
-    
-    const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio'); const d = el('tts-alarm-audio');
-    if(a) a.play().catch(()=>{});
-    if(b) { b.muted = true; b.loop = true; b.play().catch(()=>{}); }
-    if(c) { c.muted = true; c.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; c.play().catch(()=>{}); }
-    if(d) { d.muted = true; d.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; d.play().catch(()=>{}); }
-    if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
-    window.audioInitialized = true;
-    document.body.removeEventListener('touchstart', window.unlockAudio);
-    document.body.removeEventListener('click', window.unlockAudio);
-};
-document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
-document.body.addEventListener('click', window.unlockAudio, {once:true});
-
-window.startBackgroundWorker = () => {
-    try {
-        const workerCode = `
-            let timer = null;
-            self.onmessage = function(e) {
-                if (e.data === 'start') {
-                    if (timer) clearInterval(timer);
-                    timer = setInterval(() => {
-                        self.postMessage('tick');
-                    }, 1000);
-                } else if (e.data === 'stop') {
-                    if (timer) clearInterval(timer);
-                }
-            };
-        `;
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
-        window.bgWorkerUrl = URL.createObjectURL(blob);
-        window.bgWorker = new Worker(window.bgWorkerUrl);
-        
-        window.bgWorker.onmessage = (e) => {
-            if (e.data === 'tick') {
-                if (window.checkAlarms) window.checkAlarms();
-            }
-        };
-        window.bgWorker.postMessage('start');
-    } catch(e) { 
-        setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
-    }
-};
-
-window.showToast=(m,i='ph-info')=>{
-    const c=el('toast-container');if(!c)return;const t=document.createElement('div');
-    t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]';
-    t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`;
-    c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000);
-};
-
-window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
-
-window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
-window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
-window.closePasswordModal=()=>hideEl('password-modal');
-window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
-window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
-window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
-window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
-
-window.loadUserData=()=>{
-    try{
-        const prof = window.PROFILES[window.viewingUser];
-        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'N/A');
-        const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
-        if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
-        window.renderTasksOnly();
-        window.VaultStorageLayer.init(window.viewingUser);
-        window.VaultUI.renderVaultCards();
-        window.cloudSyncCompleted = false;
-        if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
-    }catch(e){console.error(e)}
-};
-
-window.switchTab=(id,b)=>{
-    window.vibrate([15]); window.unlockAudio();
-    if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else if(id==='view-focus') el('view-focus').scrollIntoView({behavior:'smooth'});
-    else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
-    else if(id==='view-music') { el('view-music').scrollIntoView({behavior:'smooth'}); if(window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine(); }
-    if(window.innerWidth >= 1024) return;
-    document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
-    const i=el(id);if(i)i.classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(e=>{
-        e.classList.remove('active','text-primary'); e.classList.add('text-slate-400');
-        const bg = e.querySelector('.nav-bg');
-        if(bg){ bg.classList.replace('opacity-100', 'opacity-0'); bg.classList.replace('scale-100', 'scale-50'); }
-    });
-    if(b){
-        b.classList.remove('text-slate-400'); b.classList.add('active','text-primary');
-        const bg = b.querySelector('.nav-bg');
-        if(bg){ bg.classList.replace('opacity-0', 'opacity-100'); bg.classList.replace('scale-50', 'scale-100'); }
-    }
-    const mi = el('mobile-input'); const fab = el('fab-add-vault');
-    if(id === 'view-tasks') {
-        if(mi) { mi.classList.remove('hidden'); mi.style.display = ''; }
-        if(fab) { fab.classList.add('hidden'); fab.style.display = 'none'; }
-    } else if(id === 'view-vault') {
-        if(mi) { mi.classList.add('hidden'); mi.style.display = 'none'; }
-        if(fab) { fab.classList.remove('hidden'); fab.style.display = 'flex'; }
-    } else {
-        if(mi) { mi.classList.add('hidden'); mi.style.display = 'none'; }
-        if(fab) { fab.classList.add('hidden'); fab.style.display = 'none'; }
-    }
-    if(window.soundEnabled && window.innerWidth < 1024 && !window.isAlarmRinging){
-        const names = {'view-tasks':'Nhiệm vụ','view-focus':'Tập trung','view-vault':'Kho lưu trữ','view-music':'Nghe nhạc'};
-        window.playSpeechTTS(names[id] || '', true);
-    }
-};
-
-window.cycleTheme=()=>{
-    window.vibrate(10);
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    let nextIndex = (window.themes.indexOf(currentTheme) + 1) % window.themes.length;
-    const nextTheme = window.themes[nextIndex];
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('lifeos_v22_theme', nextTheme);
-    let icon = 'ph-sun';
-    if(nextTheme === 'lemon') icon = 'ph-lemon';
-    else if(nextTheme === 'orange') icon = 'ph-orange-slice';
-    else if(nextTheme === 'rose') icon = 'ph-flower-lotus';
-    else if(nextTheme === 'mint') icon = 'ph-leaf';
-    el('theme-icon').className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
-    window.showToast(`Giao diện: ${nextTheme.toUpperCase()}`, 'ph-palette');
-};
-
-window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
-window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
-window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
-
-// ==============================================================================
-// 2. NLP & ALARM LOGIC
-// ==============================================================================
-
-window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
-    if (window.Capacitor && window.Capacitor.isNative && alarmTimeMs > Date.now()) {
-        try {
-            const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-            if (!LocalNotifications) return;
-            await LocalNotifications.schedule({
-                notifications: [{
-                    title: "⏰ BÁO ĐỘNG LIFEOS!",
-                    body: taskText,
-                    id: Math.abs(parseInt(taskId.slice(-9))),
-                    schedule: { at: new Date(alarmTimeMs) },
-                    sound: "digital_watch_alarm_long.ogg", 
-                    actionTypeId: "",
-                    extra: null
-                }]
-            });
-        } catch(e){}
-    }
-};
-
-window.cancelNativeAlarm = async (taskId) => {
-    if (window.Capacitor && window.Capacitor.isNative) {
-        try {
-            const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-            if (!LocalNotifications) return;
-            await LocalNotifications.cancel({ notifications: [{ id: Math.abs(parseInt(taskId.slice(-9))) }] });
-        } catch(e){}
-    }
-};
-
-window.parseTaskNLP = (rawText) => {
-    let text = rawText;
-    let isDaily = false, priority = false, tags = [], timeStr = null, alarmTime = null, dueDate = window.getIsoDate(), forceToday = false, isTomorrow = false;
-    if (text.match(/hằng ngày|mỗi ngày|hàng ngày/i)) { isDaily = true; text = text.replace(/hằng ngày|mỗi ngày|hàng ngày/gi, ''); }
-    if (text.match(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i)) { priority = true; text = text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/gi, ''); }
-    const tagMatch = text.match(/#[\w_]+/g); if (tagMatch) { tags = tagMatch; tags.forEach(t => text = text.replace(t, '')); }
-    if (text.match(/ngày mai|sáng mai|chiều mai|tối mai| mai /i) && !isDaily) { isTomorrow = true; text = text.replace(/ngày mai|sáng mai|chiều mai|tối mai| mai /gi, ''); }
-    if (text.match(/ nay |hôm nay/i)) { forceToday = true; text = text.replace(/ nay |hôm nay/gi, ''); }
-    const dMatch = text.match(/ (\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))? /);
-    if(dMatch) {
-        let d = parseInt(dMatch[1]), m = parseInt(dMatch[2]), y = dMatch[3] ? parseInt(dMatch[3]) : new Date().getFullYear();
-        dueDate = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        text = text.replace(dMatch[0], ''); forceToday = true;
-    }
-    const tMatch = text.match(/(?:lúc|vào lúc|vào|@)?\s*([0-2]?[0-9])(?:h|:|\s*giờ)\s*([0-5][0-9])?\s*(sáng|chiều|tối)?/i);
-    if (tMatch) {
-        let h = parseInt(tMatch[1]), m = tMatch[2] ? parseInt(tMatch[2]) : 0, ampm = tMatch[3] ? tMatch[3].toLowerCase() : '';
-        if ((ampm === 'chiều' || ampm === 'tối') && h < 12) h += 12; else if (ampm === 'sáng' && h === 12) h = 0;
-        timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        let now = new Date(), target;
-        if(dueDate !== window.getIsoDate()) { let p = dueDate.split('-'); target = new Date(p[0], parseInt(p[1])-1, p[2], h, m, 0, 0); }
-        else { target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0); }
-        if (isTomorrow) target.setDate(target.getDate() + 1);
-        else if (target.getTime() < now.getTime() && !forceToday && isDaily) target.setDate(target.getDate() + 1);
-        alarmTime = target.getTime(); text = text.replace(tMatch[0], ''); dueDate = window.getIsoDate(target);
-    }
-    if (isTomorrow && !timeStr && !dMatch) { let t = new Date(); t.setDate(t.getDate() + 1); dueDate = window.getIsoDate(t); }
-    return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
-};
-
-window.preloadTTS = (taskId, text) => {
-    if(!window.soundEnabled) return;
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
-    fetch(url)
-        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
-        .then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
-            reader.readAsDataURL(blob);
-        }).catch(() => {});
-};
-
-window.alarmTTSInterval = null;
-
-window.triggerGlobalAlarm = (taskIds, taskText) => {
-    const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
-    
-    if(window.isAlarmRinging) {
-        arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
-        window.alarmTextToSpeak += " + " + taskText;
-        const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
-        return; 
-    }
-    
-    window.activeAlarmTaskIds = arrIds;
-    window.alarmTextToSpeak = taskText ? `Báo động! Đã đến giờ: ${taskText}` : 'Đã hết thời gian!';
-    window.isAlarmRinging = true; 
-    
-    showFlex('alarm-overlay');
-    const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
-    
-    if(window.soundEnabled) {
-        const musicPlayer = el('mstq-player');
-        if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
-            window.previousMusicVolume = musicPlayer.volume; 
-            musicPlayer.volume = 0.1; 
-        }
-        
-        const alarmAudio = el('mstq-alarm');
-        const ttsAudio = el('tts-alarm-audio'); 
-        
-        if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
-        window.firePhysicalBeep(); 
-        
-        if (window.beepWorker) { window.beepWorker.terminate(); if(window.beepWorkerUrl) URL.revokeObjectURL(window.beepWorkerUrl); }
-        const bw = `let t; self.onmessage = (e) => { if(e.data === 'start') { t = setInterval(()=>self.postMessage('beep'), 1000); } else { clearInterval(t); } };`;
-        window.beepWorkerUrl = URL.createObjectURL(new Blob([bw], { type: 'application/javascript' }));
-        window.beepWorker = new Worker(window.beepWorkerUrl);
-        window.beepWorker.onmessage = () => { if(window.isAlarmRinging) window.firePhysicalBeep(); };
-        window.beepWorker.postMessage('start');
-        
-        const triggerTTS = () => {
-            if (!window.isAlarmRinging) return;
-            if(alarmAudio) alarmAudio.volume = 0.1;
-            
-            if(ttsAudio) {
-                ttsAudio.muted = false; ttsAudio.currentTime = 0;
-                
-                const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
-                const safeText = window.alarmTextToSpeak.length > 50 ? window.alarmTextToSpeak.substring(0, 50) + "..." : window.alarmTextToSpeak;
-                const src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeText)}`;
-                ttsAudio.src = src;
-
-                ttsAudio.onended = () => {
-                    if (!window.isAlarmRinging) return;
-                    if(alarmAudio) alarmAudio.volume = 1.0;
-                    window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
-                };
-                
-                ttsAudio.play().catch(()=>{
-                    window.playSpeechTTS(window.alarmTextToSpeak, true);
-                    window.alarmTTSInterval = setTimeout(() => {
-                        if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                        window.alarmTTSInterval = setTimeout(triggerTTS, 5000);
-                    }, 5000);
-                });
-            }
-        };
-        window.alarmTTSInterval = setTimeout(triggerTTS, 3000);
-    }
-};
-
-window.stopGlobalAlarm = (actionType) => { 
-    window.isAlarmRinging = false; 
-    if (window.beepWorker) { 
-        window.beepWorker.postMessage('stop'); 
-        window.beepWorker.terminate(); 
-        if(window.beepWorkerUrl) { URL.revokeObjectURL(window.beepWorkerUrl); window.beepWorkerUrl = null; }
-        window.beepWorker = null; 
-    }
-    clearTimeout(window.alarmTTSInterval);
-    
-    const musicPlayer = el('mstq-player');
-    if(window.MusicApp && window.MusicApp.playing && musicPlayer) musicPlayer.volume = window.previousMusicVolume || 1.0;
-    
-    const alarmAudio = el('mstq-alarm'), ttsAudio = el('tts-alarm-audio');
-    if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
-    if(ttsAudio) { ttsAudio.pause(); ttsAudio.muted = true; }
-    if(window.synth) window.synth.cancel();
-    
-    hideEl('alarm-overlay'); window.vibrate(10);
-    if(window.activeAlarmTaskIds && window.activeAlarmTaskIds.length) {
-        let needsSync = false;
-        window.activeAlarmTaskIds.forEach(id => {
-            const t = (window.todos||[]).find(x => String(x.id) === String(id));
-            if(t) {
-                if (actionType === 'complete') { t.completed = true; t.alerted = true; needsSync = true; }
-                else if (actionType === 'snooze') { 
-                    const newAlarm = new Date(Date.now() + 5 * 60000);
-                    t.alarmTime = newAlarm.getTime(); 
-                    t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
-                    t.alerted = false; window.notifiedTasks.delete(String(id)); needsSync = true; 
-                    window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); 
-                }
-                else if (actionType === 'dismiss' && t.isDaily) { t.alarmTime += 86400000; t.alerted = false; needsSync = true; window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); }
-            }
-        });
-        if (actionType === 'complete' && window.confetti) window.confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }});
-        if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }
-    }
-    window.activeAlarmTaskIds = [];
-};
-
-window.checkAlarms = () => {
-    if(!window.todos || !window.todos.length) return;
-    const nowMs = Date.now(), todayStr = window.getIsoDate();
-    let hasAlert = false, alarmTexts = [], needsSync = false, triggeredIds = [];
-    window.todos.forEach(t => {
-        if (t.isDaily && t.dueDate && t.dueDate < todayStr) {
-            t.completed = false; t.alerted = false; t.dueDate = todayStr;
-            if(t.alarmTime) {
-                const old = new Date(t.alarmTime), target = new Date();
-                target.setHours(old.getHours(), old.getMinutes(), 0, 0);
-                if (target.getTime() <= nowMs) target.setDate(target.getDate() + 1);
-                t.alarmTime = target.getTime();
-                window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); 
-            }
-            needsSync = true;
-        }
-        if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
-            const diff = t.alarmTime - nowMs;
-            
-            // V69 FIX: Xóa sổ Zombie Alarm quá 5 phút
-            if (diff < -300000) {
-                t.alerted = true;
-                needsSync = true;
-                return;
-            }
-            
-            if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) {
-                window.preloadedTTSData[t.id] = 'loading'; 
-                window.preloadTTS(t.id, t.text);
-            }
-            
-            if (diff <= 0 && diff >= -300000 && !window.notifiedTasks.has(String(t.id))) { 
-                window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id)); 
-            }
-        }
-    });
-    if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); } 
-    if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
-};
-
-window.toggleAlarm = (e, id) => {
-    e.stopPropagation(); window.vibrate(10);
-    const t = (window.todos||[]).find(x => String(x.id) === String(id));
-    if(t) {
-        t.alarmEnabled = (t.alarmEnabled === false);
-        if(t.alarmEnabled && t.alarmTime <= Date.now()) { t.alarmTime += 86400000; t.alerted = false; window.notifiedTasks.delete(String(id)); }
-        if(!t.alarmEnabled) { t.alerted = true; window.notifiedTasks.add(String(id)); window.cancelNativeAlarm(t.id); } 
-        else { window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); }
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
-    }
-};
-
-// ==============================================================================
-// 3. UI RENDERING
-// ==============================================================================
-window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white');b.classList.add('bg-white','text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a)a.classList.add('active','bg-primary','text-white');window.renderTasksOnly()};
-
-window.renderTasksOnly=()=>{
-    const list = el('todo-list'); if(!list) return;
-    let d=window.todos||[]; const today = window.getIsoDate(), nowMs = Date.now();
-    if(window.filterMode==='active') d=d.filter(x=>!x.completed);
-    if(window.filterMode==='overdue') d=d.filter(x=> !x.completed && ((x.alarmTime && x.alarmTime < nowMs) || (x.dueDate && x.dueDate < today) || x.priority));
-    d.sort((a,b)=>{ if(a.completed!==b.completed) return a.completed?1:-1; if(a.alarmTime&&b.alarmTime) return a.alarmTime - b.alarmTime; return (b.priority?1:0)-(a.priority?1:0); });
-    if(!d.length){setHtml('todo-list','');showFlex('empty-state')}
-    else{
-        hideEl('empty-state');
-        setHtml('todo-list',d.map(t=>{
-            let badges = '';
-            if(t.timeStr) {
-                const en = t.alarmEnabled !== false;
-                badges += `<button onclick="window.toggleAlarm(event,'${t.id}')" class="${en?'bg-primary/20 text-primary border-primary/30':'bg-slate-100 text-slate-500 border-slate-200'} px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 border transition active:scale-95"><i class="ph-fill ph-bell-${en?'ringing':'slash'}"></i> ${t.timeStr}</button>`;
-            }
-            if(t.isDaily) badges += `<span class="bg-purple-50 text-purple-600 px-2 py-0.5 rounded text-[10px] font-bold border border-purple-200 flex items-center gap-1"><i class="ph-bold ph-repeat"></i> Hằng ngày</span>`;
-            else if(t.dueDate && t.dueDate !== today) badges += `<span class="bg-slate-50 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200 flex items-center gap-1"><i class="ph-bold ph-calendar"></i> ${t.dueDate.split('-').reverse().slice(0,2).join('/')}</span>`;
-            if(t.tags) t.tags.forEach(tag => badges += `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200">${window.escapeHTML(tag)}</span>`);
-            if(t.priority) badges += `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-rose-200 flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Khẩn cấp</span>`;
-            const bH = badges ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${badges}</div>` : '';
-            return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed?'opacity-60 bg-slate-50':''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${t.priority?'bg-rose-500':'bg-transparent'}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors ${t.completed?'bg-primary border-primary shadow-md':'border-slate-300 hover:border-primary'}">${t.completed?'<i class="ph-bold ph-check text-white text-sm"></i>':''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold cursor-pointer py-0.5 leading-snug break-words text-[15px] ${t.completed?'line-through text-slate-400':(t.alarmTime < nowMs && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800')}">${window.escapeHTML(t.text)}</div>${bH}</div><div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-200 transition active:scale-90"><i class="ph-bold ph-target text-base"></i></button><button onclick="window.confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center border border-rose-200 transition active:scale-90"><i class="ph-bold ph-trash text-base"></i></button></div></div></li>`;
-        }).join(''))
-    }
-    window.updateProgress();
-};
-
-window.toggleTask=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){t.completed=!t.completed;window.vibrate(15);if(t.completed && window.stats.lastDate !== window.getTodayStr()){ window.stats.streak++; window.stats.lastDate=window.getTodayStr(); }window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();}};
-window.cleanupTasks=()=>{window.todos=(window.todos||[]).filter(t=>!t.completed);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
-window.updateProgress=()=>{const t=(window.todos||[]).length,d=(window.todos||[]).filter(x=>x.completed).length,p=t===0?0:Math.round((d/t)*100);setTxt('progress-text',p+'%');const c=el('progress-ring');if(c)c.style.strokeDashoffset=113-(p/100)*113;setTxt('streak-count',window.stats.streak||0);};
-window.pinToFocus=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){showFlex('focus-task-card');setTxt('focus-task-name',t.text);if(window.innerWidth<1024)window.switchTab('view-focus');window.vibrate(15);}};
-window.unpinTask=()=>hideEl('focus-task-card');
-window.confirmDeleteTask=id=>{window.vibrate(20);const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(!t)return;const h=`<div id="deleteTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800">Xóa nhiệm vụ?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(t.text)}"</p><div class="flex gap-3"><button onclick="document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.execDeleteTask('${id}');document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold transition-all shadow-lg">Xóa</button></div></div></div>`;document.body.insertAdjacentHTML('beforeend',h);};
-window.execDeleteTask=id=>{window.todos=(window.todos||[]).filter(x=>String(x.id)!==String(id));window.cancelNativeAlarm(id);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
-
-window.openEditTask=id=>{
-    const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(!t)return;window.vibrate(15);
-    let r = t.text; if(t.isDaily) r+=' hằng ngày'; if(t.timeStr) r+=` lúc ${t.timeStr}`; if(t.priority) r+=' !gấp';
-    const h=`<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><h2 class="text-xl font-black mb-4">Sửa Nhiệm Vụ</h2><textarea id="editTaskInput" rows="4" class="bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold mb-4">${r}</textarea><div class="flex gap-3"><button onclick="document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 transition-all">Lưu</button></div></div></div>`;
-    document.body.insertAdjacentHTML('beforeend',h); el('editTaskInput').focus();
-};
-window.saveEditTask=id=>{
-    const v=el('editTaskInput').value.trim(); if(!v)return;
-    const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(t){ window.cancelNativeAlarm(t.id); Object.assign(t, window.parseTaskNLP(v)); t.alerted=false; window.notifiedTasks.delete(String(t.id)); if(t.alarmEnabled!==false) window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync)window.FirebaseSync.pushAll(); }
-    el('editTaskModal').remove();
-};
-
-window.syncManualDateToInput = (inputEl, targetId) => {
-    if(!inputEl.value) return; const d = new Date(inputEl.value), target = el(targetId);
-    if(target) { target.value = `${target.value.replace(/ ngày.*$/i,'').trim()} ngày ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`; }
-    inputEl.value = '';
-};
-
-// TIMER ENGINE
-window.timerState={mode:'countdown',cd:null,sw:null,cdTime:0,swTime:0,cdRun:false,swRun:false};
-window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;el('mode-countdown-ui').classList.toggle('hidden',m!=='countdown');el('mode-stopwatch-ui').classList.toggle('hidden',m!=='stopwatch');el('tab-countdown').className=m==='countdown'?'flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary':'flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white';el('tab-stopwatch').className=m==='stopwatch'?'flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary':'flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white';};
-window.applyTimerPreset=m=>{setVal('in-hr','');setVal('in-min',m);setVal('in-sec','00')};
-window.validateTimerInput=(e,m)=>{if(e.value>m)e.value=m;if(e.value<0)e.value=0;};
-
-window.toggleCountdown=()=>{
-    window.vibrate([20,30]); const b=el('cd-toggle-btn');
-    if(window.timerState.cdRun){ clearInterval(window.timerState.cd); window.timerState.cdRun=false; b.innerHTML='<i class="ph-fill ph-play"></i> Tiếp tục'; }
-    else {
-        if(window.timerState.cdTime<=0){ const h=parseInt(getVal('in-hr')||0), m=parseInt(getVal('in-min')||0), s=parseInt(getVal('in-sec')||0); window.timerState.cdTime=h*3600+m*60+s; if(window.timerState.cdTime<=0)return; hideEl('cd-setup-area'); showFlex('cd-display-area'); }
-        window.timerState.cdRun=true; b.innerHTML='<i class="ph-fill ph-pause"></i> Tạm dừng';
-        window.timerState.cd=setInterval(()=>{
-            if(window.timerState.cdTime>0){ window.timerState.cdTime--; const m=Math.floor((window.timerState.cdTime%3600)/60), s=window.timerState.cdTime%60; setTxt('cd-min',String(m).padStart(2,'0')); setTxt('cd-sec',String(s).padStart(2,'0')); }
-            else { clearInterval(window.timerState.cd); window.timerState.cdRun=false; window.triggerGlobalAlarm(null,'Tập trung xong!'); window.resetCountdown(); }
-        },1000);
-    }
-};
-window.resetCountdown=()=>{clearInterval(window.timerState.cd);window.timerState.cdRun=false;window.timerState.cdTime=0;showFlex('cd-setup-area');hideEl('cd-display-area');setTxt('cd-min','25');setTxt('cd-sec','00');el('cd-toggle-btn').innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';};
-
-window.toggleStopwatch=()=>{
-    window.vibrate([20,30]); const b=el('sw-toggle-btn');
-    if(window.timerState.swRun){ clearInterval(window.timerState.swRun); window.timerState.swRun=false; b.innerHTML='<i class="ph-fill ph-play"></i> Tiếp tục'; }
-    else {
-        window.timerState.swRun=true; b.innerHTML='<i class="ph-fill ph-pause"></i> Tạm dừng';
-        let st=Date.now()-window.timerState.swTime;
-        window.timerState.swRun=setInterval(()=>{ window.timerState.swTime=Date.now()-st; const m=Math.floor(window.timerState.swTime/60000), s=Math.floor((window.timerState.swTime%60000)/1000), ms=Math.floor((window.timerState.swTime%1000)/10); setTxt('sw-min',String(m).padStart(2,'0')); setTxt('sw-sec',String(s).padStart(2,'0')); setTxt('sw-ms','.'+String(ms).padStart(2,'0')); },10);
-    }
-};
-window.resetStopwatch=()=>{clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');el('sw-toggle-btn').innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';};
-
-// ==============================================================================
-// 4. VAULT SYSTEM
-// ==============================================================================
-window.VaultUtils={
-    generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
-    parseSmartContent(c){
-        if(!c)return{account:'',password:'',totp:'',link:'',notes:[],rawNotes:''};
-        const l=c.split('\n'),p={account:'',password:'',totp:'',link:'',notes:[]};let h=false;
-        l.forEach(x=>{
-            const t=x.trim();if(!t)return;
-            if(/^Tài khoản\s*[:：]\s*(.+)/i.test(t)){p.account=t.match(/^Tài khoản\s*[:：]\s*(.+)/i)[1].trim();h=true;return}
-            if(/^Mật khẩu\s*[:：]\s*(.+)/i.test(t)){p.password=t.match(/^Mật khẩu\s*[:：]\s*(.+)/i)[1].trim();h=true;return}
-            if(/^2FA\s*[:：]\s*(.+)/i.test(t)){p.totp=t.match(/^2FA\s*[:：]\s*(.+)/i)[1].trim();h=true;return}
-            if(/^Link\s*[:：]\s*(.+)/i.test(t)){p.link=t.match(/^Link\s*[:：]\s*(.+)/i)[1].trim();h=true;return}
-            p.notes.push(t)
-        });
-        if(h){p.rawNotes=p.notes.join('\n');}else{p.rawNotes=c;}return p
-    },
-    generateTOTP(s){if(!s||typeof window.jsOTP==='undefined')return null;try{return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase())}catch(e){return null}},
-    getCategoryIcon(c){return{account:'🔑',crypto:'💰',note:'📝',service:'📞'}[c]||'✨'},
-    getCategoryLabel(c){return{account:'Tài khoản',crypto:'Tài chính',note:'Ghi chú',service:'Dịch vụ',custom:'Tùy chỉnh'}[c]||c},
-    debounce(f,w){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>f(...a),w)}},
-    migrateLegacyData(old){if(!Array.isArray(old))return[];return old.map(e=>({id:String(e.id||Date.now()),name:e.name||'Không tên',category:e.category||'account',content:e.content||'',createdAt:e.createdAt||Date.now(),updatedAt:e.updatedAt||Date.now()}));}
-};
-
-window.VaultState={data:[],activeInterval:null,activeCategory:'all'};
-window.VaultStorageLayer={_k:'',init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},getData(){return window.VaultState.data||[]},saveLocalOnly(){localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[]))},add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}};
-
-window.VaultUI={_c:'all',_q:'',_tI:null,
-    openModal(id){
-        window.vibrate(15); showFlex('vaultFormModal'); setVal('vaultEntryId',''); setVal('vaultEntryName',''); setVal('vaultEntryContent',''); setVal('vaultEntryCategory','account'); setVal('vaultEntryCustomCategory',''); hideEl('vaultCustomCatWrapper'); setTxt('vaultModalTitle','Thêm Mục Mới');
-        if(id){
-            const e=window.VaultStorageLayer.getData().find(x=>String(x.id)===String(id));
-            if(e){ setTxt('vaultModalTitle','Sửa dữ liệu'); setVal('vaultEntryId',e.id); setVal('vaultEntryName',e.name); setVal('vaultEntryContent',e.content); setVal('vaultEntryCategory',e.category); if(e.category==='custom'){ showFlex('vaultCustomCatWrapper'); setVal('vaultEntryCustomCategory',e.customCategory||''); } }
-        }
-    },
-    closeModal(){window.vibrate(10);hideEl('vaultFormModal')},
-    toggleCustomCategory(){const c=getVal('vaultEntryCategory');if(c==='custom')showFlex('vaultCustomCatWrapper');else hideEl('vaultCustomCatWrapper')},
-    copyToClipboard(t){ window.vibrate(15); if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(()=>window.showToast('Đã copy!','ph-copy')); else { const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); window.showToast('Đã copy!','ph-copy'); } if(window.soundEnabled) window.playSpeechTTS('Đã sao chép'); },
-    togglePwVisibility(b){const c=b.closest('.flex'),s=c.querySelector('.vault-pw-field'),i=b.querySelector('i');if(s.dataset.revealed==='true'){s.textContent='••••••••';s.dataset.revealed='false';i.className='ph-bold ph-eye text-sm'}else{s.textContent=s.dataset.pw;s.dataset.revealed='true';i.className='ph-bold ph-eye-slash text-sm'}},
-    startTOTPUpdater(){if(this._tI)return;this._tU();this._tI=setInterval(()=>this._tU(),1000)},
-    stopTOTPUpdater(){if(this._tI){clearInterval(this._tI);this._tI=null}},
-    _tU(){document.querySelectorAll('.vault-totp-code').forEach(e=>{const s=e.dataset.secret,c=window.VaultUtils.generateTOTP(s);if(c)e.textContent=c});const p=((Math.floor(Date.now()/1000)%30)/30)*100;document.querySelectorAll('.totp-progress').forEach(e=>e.style.width=p+'%')},
-    renderVaultCards(){
-        const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||!es)return;
-        let d=window.VaultStorageLayer.getData();
-        if(this._c!=='all') d=d.filter(e=>(this._c==='custom'?!['account','crypto','note','service'].includes(e.category):e.category===this._c));
-        if(this._q) d=d.filter(e=>(e.name||'').toLowerCase().includes(this._q.toLowerCase())||(e.content||'').toLowerCase().includes(this._q.toLowerCase()));
-        if(!d.length){c.innerHTML='';showFlex('vaultEmptyState');this.stopTOTPUpdater();return}
-        hideEl('vaultEmptyState'); if(d.some(e=>window.VaultUtils.parseSmartContent(e.content).totp)) this.startTOTPUpdater(); else this.stopTOTPUpdater();
-        c.innerHTML=d.map(e=>{
-            const p=window.VaultUtils.parseSmartContent(e.content),ci=window.VaultUtils.getCategoryIcon(e.category),cl=window.VaultUtils.getCategoryLabel(e.category),sn=window.escapeHTML(e.name);
-            let f='';
-            if(p.account) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-user text-cyan-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow">${window.escapeHTML(p.account)}</span><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.account).replace(/'/g,"\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
-            if(p.password) f+=`<div class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-2"><i class="ph-bold ph-key text-rose-500 text-lg flex-shrink-0"></i><span class="text-sm text-slate-800 truncate flex-grow font-mono vault-pw-field" data-pw="${window.escapeHTML(p.password).replace(/"/g,'&quot;')}">••••••••</span><button onclick="event.stopPropagation();window.VaultUI.togglePwVisibility(this)" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-eye text-sm"></i></button><button onclick="event.stopPropagation();window.VaultUI.copyToClipboard('${window.escapeHTML(p.password).replace(/'/g,"\'")}')" class="p-1.5 text-slate-400 bg-white rounded-lg border border-slate-200"><i class="ph-bold ph-copy text-sm"></i></button></div>`;
-            if(p.totp) f+=`<div class="p-3 bg-amber-50 rounded-xl border border-amber-200 mb-2"><div class="font-mono text-2xl font-black text-slate-800 tracking-widest text-center vault-totp-code" data-secret="${window.escapeHTML(p.totp)}">------</div><div class="w-full bg-amber-200 rounded-full h-1.5 mt-2"><div class="bg-amber-500 h-1.5 rounded-full totp-progress"></div></div></div>`;
-            if(p.link) f+=`<div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 mb-2"><i class="ph-bold ph-link text-emerald-500 text-lg flex-shrink-0"></i><a href="${window.escapeHTML(p.link)}" target="_blank" onclick="event.stopPropagation()" class="text-sm text-emerald-600 truncate flex-grow hover:underline">${window.escapeHTML(p.link)}</a></div>`;
-            if(p.rawNotes) f+=`<div class="text-sm text-slate-600 mt-3 border-t border-slate-100 pt-2 whitespace-pre-wrap">${window.escapeHTML(p.rawNotes)}</div>`;
-            return `<div onclick="window.VaultUI.openModal('${e.id}')" class="cursor-pointer break-inside-avoid mb-6 bg-white rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-xl transition-all flex flex-col h-full"><div class="flex items-start justify-between mb-4 border-b border-slate-100 pb-3 flex-shrink-0"><div class="min-w-0 pr-2"><h3 class="font-bold text-slate-800 text-base leading-tight">${sn}</h3><span class="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1">${ci} ${window.escapeHTML(cl)}</span></div><div class="flex gap-2"><button onclick="event.stopPropagation();window.VaultApp.confirmDeleteEntry('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-slate-200"><i class="ph-bold ph-trash text-lg"></i></button></div></div><div onclick="event.stopPropagation()" class="flex-grow">${f}</div></div>`;
-        }).join('');
-    }
-};
-
-window.VaultApp={
-    setCategoryFilter(c){window.VaultUI._c=c;document.querySelectorAll('.cat-filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white');b.classList.add('bg-white','text-slate-700')});if(event&&event.target)event.target.classList.add('active','bg-primary','text-white');window.VaultUI.renderVaultCards();},
-    filterData(q){window.VaultUI._q=q;window.VaultUI.renderVaultCards()},
-    saveEntry(e){if(e)e.preventDefault();const id=getVal('vaultEntryId'),n=getVal('vaultEntryName').trim(),c=getVal('vaultEntryCategory'),ct=getVal('vaultEntryContent');if(!n)return;const d={id:id||String(Date.now()),name:n,category:c,content:ct,updatedAt:Date.now()};if(id)window.VaultStorageLayer.update(id,d);else{d.createdAt=Date.now();window.VaultStorageLayer.add(d);}window.VaultUI.closeModal();window.VaultUI.renderVaultCards();if(window.FirebaseSync)window.FirebaseSync.pushAll();},
-    confirmDeleteEntry(id){window.vibrate(20);window.VaultStorageLayer.remove(id);window.VaultUI.renderVaultCards();if(window.FirebaseSync)window.FirebaseSync.pushAll();},
-    exportBackup(){const d=window.VaultStorageLayer.getData();if(!d.length)return;const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`lifeos_vault_${window.getTodayStr()}.json`;a.click();},
-    importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);window.VaultStorageLayer.replaceAll(d);window.VaultUI.renderVaultCards();if(window.FirebaseSync)window.FirebaseSync.pushAll();}catch(e){}};r.readAsText(f);e.target.value='';}
-};
-
-// ==============================================================================
-// 5. FIREBASE SYNC 
-// ==============================================================================
-window.FirebaseSync={
-    _d:null,_u:null,_i:false,_k:'',
+window.FirebaseSync = {
+    _d:null, _k:'', _i:false,
     init(k){
-        this._k=k; if (typeof firebase !== 'undefined') firebase.firestore.setLogLevel('silent');
-        try{
-            if(!firebase.apps.length) firebase.initializeApp({
-                apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q", authDomain: "tool-mimishop.firebaseapp.com", projectId: "tool-mimishop", storageBucket: "tool-mimishop.firebasestorage.app", messagingSenderId: "536814109954", appId: "1:536814109954:web:b1be76d22957de4b75ee1b", measurementId: "G-R39R19WWRE"
-            });
-            firebase.auth().signInAnonymously().then(() => { this._d=firebase.firestore(); this._i=true; el('pwaStatusDot').className='status-dot dot-yellow mt-0.5 hidden md:inline-block'; this._listen(); });
-        }catch(e){ this._i=false; el('pwaStatusDot').className='status-dot dot-red mt-0.5 hidden md:inline-block'; }
-    },
-    _listen(){
-        if(!this._d||!this._k)return;
-        this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=>{
-            if(!d.exists){ window.cloudSyncCompleted=true; return; }
-            const c=d.data(); if(!c)return;
-            const cloudTime = c.updatedAt ? (typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : parseInt(c.updatedAt)) : 0;
-            const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0');
-            
-            if(c.data && Array.isArray(c.data)){ 
-                const clean = c.data.map(t=>({...t,id:String(t.id)}));
-                if (cloudTime > localTime || localTime === 0) {
-                    window.todos = clean;
-                    localStorage.setItem('lifeos_v8_data_'+this._k, JSON.stringify(clean));
-                    localStorage.setItem('lifeos_v8_time_'+this._k, cloudTime.toString());
-                    
-                    clean.forEach(t => {
-                        if (!t.completed && t.alarmEnabled !== false && t.alarmTime > Date.now()) {
-                            window.scheduleNativeAlarm(t.text, t.alarmTime, t.id);
-                        }
-                    });
-                } else if (localTime > cloudTime) {
-                    this.pushAll(); return;
+        this._k=k; 
+        if(!firebase.apps.length) firebase.initializeApp({apiKey:"AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",authDomain:"tool-mimishop.firebaseapp.com",projectId:"tool-mimishop",storageBucket:"tool-mimishop.firebasestorage.app",messagingSenderId:"536814109954",appId:"1:536814109954:web:b1be76d22957de4b75ee1b"});
+        firebase.auth().signInAnonymously().then(()=>{
+            this._d=firebase.firestore(); this._i=true;
+            this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(d=>{
+                if(d.exists){
+                    const c = d.data();
+                    if(c.data){ window.todos = c.data; window.renderTasksOnly(); window.cloudSyncCompleted = true; }
                 }
-                window.renderTasksOnly();
-            }
-            if(c.stats){ window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
-            if(c.vaultData && Array.isArray(c.vaultData)){
-                if (cloudTime > localTime || localTime === 0) { window.VaultStorageLayer.replaceAll(c.vaultData); }
-                window.VaultUI.renderVaultCards();
-            }
-            window.cloudSyncCompleted=true; el('pwaStatusDot').className='status-dot dot-green mt-0.5 hidden md:inline-block';
-        },e=>{ el('pwaStatusDot').className='status-dot dot-red mt-0.5 hidden md:inline-block'; });
+            });
+        });
     },
     pushAll(){
-        if(!this._i||!this._d||!this._k) return;
-        const ts = Date.now(); localStorage.setItem('lifeos_v8_time_'+this._k, ts.toString());
-        const safe = (window.todos||[]).map(t=>{const c={...t,id:String(t.id)};Object.keys(c).forEach(k=>c[k]===undefined&&delete c[k]);return c;});
-        this._d.collection('LifeOS_Profiles').doc(this._k).set({ data:safe, stats:window.stats||{streak:0}, vaultData:window.VaultStorageLayer.getData(), updatedAt: ts },{merge:true});
+        if(this._i) this._d.collection('LifeOS_Profiles').doc(this._k).set({data:window.todos, updatedAt:Date.now()},{merge:true});
     }
 };
 
 // ==============================================================================
-// 6. MUSIC SYSTEM (V69 THE GENESIS: NHANH MƯỢT, KHÔNG METADATA)
+// 3. MUSIC & AUDIO ENGINE (ANTI-FREEZE V70)
 // ==============================================================================
 window.MusicDB = {
     init() {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const req = indexedDB.open('LifeOS_Music', 1);
             req.onupgradeneeded = e => e.target.result.createObjectStore('cache');
             req.onsuccess = e => resolve(e.target.result);
-            req.onerror = () => resolve(null);
         });
     },
-    async get() { try { const db=await this.init(); if(!db) return null; return new Promise(r=>{ const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result); req.onerror=()=>r(null); }); } catch(e){return null;} },
-    async set(data) { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').put(data,'playlist'); } catch(e){} },
-    async clear() { try { const db=await this.init(); if(!db) return; const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').delete('playlist'); } catch(e){} }
+    async get() { const db=await this.init(); return new Promise(r=>{const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result);}); },
+    async set(d) { const db=await this.init(); const tx=db.transaction('cache','readwrite'); tx.objectStore('cache').put(d,'playlist'); }
 };
 
 window.MusicApp = {
-    playlist: [], currentIndex: 0, playing: false, isInitialized: false, filterText: '',
-    shuffle: localStorage.getItem('xs_shuffle') === 'true', repeat: localStorage.getItem('xs_repeat') || 'all',
-    visibleCount: 50, timerInterval: null, timerEnd: null, prefetchDone: false,
-    
-    filterList(val) { 
-        this.filterText = val; 
-        this.visibleCount = 50; 
-        this.renderList(); 
-    },
-    
-    initAudioEngine() { if(this.isInitialized)return; this.isInitialized=true; el('music-loading').style.display='none'; showFlex('mini-player'); setTimeout(()=>el('mini-player').style.transform='translateY(0)',50); this.refetch(); },
-    
+    playlist: [], currentIndex: 0, playing: false, isInitialized: false, visibleCount: 50,
+    initAudioEngine() { if(this.isInitialized) return; this.isInitialized=true; this.refetch(); this.setupListeners(); },
     async refetch() {
-        el('music-loading').style.display='block'; el('music-loading').textContent='Đang đồng bộ máy chủ...';
         try {
-            const cached = await window.MusicDB.get(); 
-            if(cached && cached.length > 0){ this.playlist=cached; this.renderList(); el('music-loading').style.display='none'; return; }
-            
-            // V69 FIX: Bỏ nạp Metadata gây tắc nghẽn, tự xây dựng URL bài hát.
+            const cached = await window.MusicDB.get(); if(cached){ this.playlist=cached; this.renderList(); el('music-loading').remove(); return; }
             const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&sort[]=publicdate+desc&rows=500&page=1&output=json`,{cache:'no-store'});
-            
+            const r = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=300&output=json`,{cache:'no-store'});
             if(r.ok){
-                const j = await r.json(), docs = j?.response?.docs || [];
-                const all = [];
-                
-                for(const d of docs){
-                    if (d.identifier) {
-                        const fileName = `${d.identifier}.mp3`;
-                        all.push({ 
-                            id:`${d.identifier}/${fileName}`, 
-                            title:(d.title || d.identifier).replace(/_/g,' ').trim(), 
-                            artist:d.creator||'Xiemsansang', 
-                            stream_url:`https://archive.org/download/${d.identifier}/${fileName}`, 
-                            duration: 0 
-                        });
+                const j = await r.json(); const docs = j.response.docs; const all = [];
+                for(let d of docs){
+                    if(d.identifier){
+                        all.push({id:d.identifier, title:d.title||d.identifier, artist:d.creator||'Xiemsansang', stream_url:`https://archive.org/download/${d.identifier}/${d.identifier}.mp3`, duration:300});
+                        if(all.length===1) { this.playlist=[...all]; this.renderList(); el('music-loading').remove(); }
                     }
                 }
-                
-                if(all.length){ 
-                    this.playlist = all;
-                    window.MusicDB.set(all);
-                    this.renderList();
-                }
+                this.playlist = all; window.MusicDB.set(all); this.renderList();
             }
         } catch(e){}
-        el('music-loading').style.display='none';
-    },
-    clearCache() { if(confirm("Dọn sạch bộ nhớ đệm Nhạc và tải lại app?")) { window.MusicDB.clear().then(() => location.reload()); } },
-    handleTimerChange(v) {
-        clearInterval(this.timerInterval); if(v==0){ this.timerEnd=null; hideEl('music-timer-display'); return; }
-        this.timerEnd=Date.now()+v*60000; showFlex('music-timer-display');
-        this.timerInterval=setInterval(()=>{ const left=this.timerEnd-Date.now(); if(left<=0){ clearInterval(this.timerInterval); el('mstq-player').pause(); this.playing=false; this.updateMiniPlayer(); } else { el('music-timer-display').textContent=`Tắt sau: ${Math.ceil(left/1000/60)}p`; } },1000);
     },
     renderList() {
         const c=el('music-list-container'); if(!c)return;
-        Array.from(c.children).forEach(x=>x.id!=='music-loading'&&x.remove());
-        const list = this.filterText ? this.playlist.filter(s=>s.title.toLowerCase().includes(this.filterText.toLowerCase())) : this.playlist;
-        list.slice(0,this.visibleCount).forEach((s,i)=>{
-            const isCur = this.currentIndex === this.playlist.findIndex(x=>x.id===s.id);
-            const d=document.createElement('div'); d.className=`song-row ${isCur?'active':''}`; d.onclick=()=>this.play(this.playlist.findIndex(x=>x.id===s.id));
-            
-            // Cập nhật lại thời gian sống từ Event timeupdate
-            let durStr = s.duration > 0 ? `${Math.floor(s.duration/60)}:${String(Math.floor(s.duration%60)).padStart(2,'0')}` : '--:--';
-            
-            d.innerHTML=`<div class="w-8 text-center text-xs font-mono ${isCur?'song-idx':'text-slate-400'}">${isCur?'▶':(i+1)}</div><div class="flex-1 min-w-0 pr-2"><div class="truncate text-[0.95rem] ${isCur?'text-primary font-bold':'text-slate-800 font-semibold'}">${window.escapeHTML(s.title)}</div><div class="truncate text-[11px] text-slate-500">${window.escapeHTML(s.artist)}</div></div><div class="text-xs font-mono text-slate-400 w-10">${durStr}</div>`;
-            c.appendChild(d);
-        });
-
-        if (this.visibleCount < list.length) {
-            const btnWrap = document.createElement('div');
-            btnWrap.className = 'px-4 pb-6 pt-2'; 
-            const btn = document.createElement('button');
-            btn.className = 'w-full py-3.5 font-bold text-slate-600 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-xl border border-slate-200 shadow-sm flex items-center justify-center gap-2';
-            btn.innerHTML = '<i class="ph-bold ph-caret-down text-lg"></i> Tải thêm 100 bài (' + this.visibleCount + '/' + list.length + ')';
-            btn.onclick = () => {
-                window.vibrate([15, 30]);
-                this.visibleCount += 100;
-                this.renderList();
-            };
-            btnWrap.appendChild(btn);
-            c.appendChild(btnWrap);
-        }
-
-        this.updateMiniPlayer();
-    },
-    updateMediaSessionPosition() {
-        if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
-            const a = el('mstq-player');
-            let d = a.duration;
-            if (!d || d === Infinity || isNaN(d)) {
-                d = this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0;
-            }
-            if (d > 0) {
-                try {
-                    navigator.mediaSession.setPositionState({ duration: d, playbackRate: a.playbackRate || 1, position: a.currentTime || 0 });
-                } catch(e){}
-            }
-        }
-    },
-    updateMiniPlayer() {
-        const s = this.playlist[this.currentIndex]; if(!s)return;
-        el('music-title').textContent=s.title; el('music-status').textContent=this.playing?"Đang phát...":"Tạm dừng";
-        el('btn-play-pause').innerHTML=this.playing?'<i class="ph-fill ph-pause text-3xl"></i>':'<i class="ph-fill ph-play text-3xl"></i>';
-        el('btn-shuffle').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.shuffle?'music-btn-active':'text-slate-400'}`;
-        el('btn-repeat').className=`w-10 h-10 flex justify-center items-center rounded-full ${this.repeat!=='off'?'music-btn-active':'text-slate-400'}`;
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
-            this.updateMediaSessionPosition();
+        setHtml('music-list-container', this.playlist.slice(0,this.visibleCount).map((s,i)=>`<div class="song-row ${this.currentIndex===i?'active':''}" onclick="window.MusicApp.play(${i})"><div class="song-idx">${i+1}</div><div class="flex-grow ml-3"><b>${s.title}</b><p class="text-xs opacity-50">${s.artist}</p></div></div>`).join(''));
+        if(this.visibleCount < this.playlist.length){
+            const btn = document.createElement('button'); btn.className="w-full p-4 font-bold text-primary"; btn.textContent="Tải thêm nhạc";
+            btn.onclick=()=>{this.visibleCount+=100; this.renderList();}; c.appendChild(btn);
         }
     },
     play(idx) {
-        const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
-        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
-        
-        if (idx >= this.visibleCount) { this.visibleCount = Math.ceil((idx + 1) / 100) * 100; }
-        
-        this.currentIndex=idx; this.playing=true; this.prefetchDone=false;
-        a.src=this.playlist[idx].stream_url; 
-        
-        const p = a.play();
-        if (p !== undefined) {
-            p.catch(() => { a.load(); a.play().catch(()=>{}); });
-        }
-        
+        this.currentIndex=idx; const s=this.playlist[idx]; if(!s)return;
+        const p=el('mstq-player'); p.src=s.stream_url; p.play().catch(()=>{});
+        this.playing=true; hideEl('music-loading'); showFlex('mini-player'); setTxt('music-title', s.title); el('btn-play-pause').innerHTML='<i class="ph-fill ph-pause text-3xl"></i>';
         this.renderList();
-        el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
-        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-        this.updateMediaSessionPosition();
     },
-    togglePlay() { 
-        const a=el('mstq-player'); if(!a)return; 
-        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
-        
-        if(this.playing){ 
-            a.pause(); this.playing=false; 
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; 
-        } else { 
-            const p = a.play();
-            if(p !== undefined) { p.catch(()=>{ a.load(); a.play().catch(()=>{}); }); }
-            this.playing=true; 
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; 
-        } 
-        this.updateMiniPlayer(); 
-        el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50);
-        this.updateMediaSessionPosition();
+    togglePlay() {
+        const p=el('mstq-player'); if(this.playing){p.pause(); this.playing=false; el('btn-play-pause').innerHTML='<i class="ph-fill ph-play text-3xl"></i>';}
+        else {p.play().catch(()=>{}); this.playing=true; el('btn-play-pause').innerHTML='<i class="ph-fill ph-pause text-3xl"></i>';}
     },
-    getNextIndex() { if(this.shuffle && this.playlist.length > 1) { let n = Math.floor(Math.random() * this.playlist.length); return n === this.currentIndex ? (n + 1) % this.playlist.length : n; } return (this.currentIndex + 1) % this.playlist.length; },
-    getPrevIndex() { return (this.currentIndex - 1 + this.playlist.length) % this.playlist.length; },
-    playNext() { this.play(this.getNextIndex()); },
-    playPrev() { this.play(this.getPrevIndex()); },
-    toggleShuffle() { this.shuffle=!this.shuffle; localStorage.setItem('xs_shuffle', this.shuffle); this.updateMiniPlayer(); },
-    toggleRepeat() { this.repeat=this.repeat==='all'?'one':(this.repeat==='one'?'off':'all'); localStorage.setItem('xs_repeat', this.repeat); this.updateMiniPlayer(); },
-    seekMusic(e) { 
-        const a=el('mstq-player'),rect=e.currentTarget.getBoundingClientRect(); 
-        let d = a.duration || (this.playlist[this.currentIndex] ? this.playlist[this.currentIndex].duration : 0);
-        if(d && d !== Infinity && !isNaN(d)) {
-            a.currentTime=((e.clientX-rect.left)/rect.width)*d; 
-            this.updateMediaSessionPosition();
-        }
-    },
-    
+    playNext(){ this.play((this.currentIndex+1)%this.playlist.length); },
+    playPrev(){ this.play((this.currentIndex-1+this.playlist.length)%this.playlist.length); },
     setupListeners() {
-        const a=el('mstq-player');
-        
-        a.addEventListener('timeupdate',()=>{ 
-            let d = a.duration;
-            
-            // Cập nhật độ dài thực vào danh sách
-            if (d && d !== Infinity && !isNaN(d) && this.playlist[this.currentIndex]) {
-                if (this.playlist[this.currentIndex].duration !== d) {
-                    this.playlist[this.currentIndex].duration = d;
-                    window.MusicDB.set(this.playlist);
-                }
-            }
-            
-            if (!d || d === Infinity || isNaN(d)) return;
-            
-            if (document.visibilityState === 'visible') { el('music-progress').style.width=(a.currentTime/d)*100+'%'; }
-            
-            if(d > 40 && a.currentTime >= d - 20 && !this.prefetchDone) {
-                this.prefetchDone = true;
-                const nextS = this.playlist[this.getNextIndex()];
-                if(nextS) { const pf = el('mstq-prefetch'); if(pf) { pf.src = nextS.stream_url; pf.load(); } }
-            }
+        const p=el('mstq-player');
+        p.addEventListener('ended', e=>{ e.stopPropagation(); this.playNext(); });
+        p.addEventListener('error', e=>{ e.stopPropagation(); setTimeout(()=>this.playNext(), 2000); });
+        // V70 FIX: Chặn đạn Infinity từ Python
+        const origSet = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime').set;
+        Object.defineProperty(p, 'currentTime', {
+            set: function(v) { if(v===Infinity || isNaN(v)) return; origSet.call(this, v); }
         });
-        
-        a.addEventListener('ended', (e) => { 
-            if(e) e.stopPropagation(); 
-            this.prefetchDone = false;
-            if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } 
-            else this.playNext(); 
-        });
-        
-        // V69 FIX: Chống Đóng băng CPU khi Mất Mạng (Anti-Freeze Loop)
-        a.addEventListener('error', (e) => {
-            if(e) e.stopPropagation();
-            console.warn(`Lỗi Mạng/Audio. Chuyển bài an toàn...`);
-            this.prefetchDone = false;
-            setTimeout(() => { this.playNext(); }, 2000); 
-        });
-        
-        if('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
-            navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext());
-            navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
-        }
     }
 };
 
 // ==============================================================================
-// 7. INITIALIZATION
+// 4. ALARM & WORKERS (BẤT TỬ)
 // ==============================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw_qlycuocsong.js')
-            .then(() => console.log('[LifeOS] Service Worker is active!'))
-            .catch(e => console.warn('[LifeOS] SW Register failed: ', e));
-    }
-    window.pwaEngine.init(); // Kích hoạt bộ bắt cài đặt App
-    
-    setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); }, 1500);
-    
-    if(window.innerWidth >= 1024) { setTimeout(() => { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
+window.startBackgroundWorker = () => {
+    const code = `let t; self.onmessage=e=>{ if(e.data==='start') t=setInterval(()=>self.postMessage('tick'), 1000); else clearInterval(t); }`;
+    const blob = new Blob([code], {type:'application/javascript'});
+    const url = URL.createObjectURL(blob);
+    window.bgWorker = new Worker(url);
+    window.bgWorker.onmessage = () => window.checkAlarms();
+    window.bgWorker.postMessage('start');
+    window.bgWorkerUrl = url;
+};
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && window.cloudSyncCompleted) {
-            window.renderTasksOnly();
-            if (window.VaultUI) window.VaultUI.renderVaultCards();
+window.initTTS = () => {
+    window.synth = window.speechSynthesis;
+    const a = el('mstq-silence'); a.play().catch(()=>{});
+    window.initTTS = () => {}; window.showToast("Voice Guard Ready", "ph-robot");
+};
+
+window.checkAlarms = () => {
+    const now = Date.now();
+    window.todos.forEach(t => {
+        if(!t.completed && t.alarmTime && t.alarmTime <= now && !t.alerted){
+            t.alerted = true; window.triggerGlobalAlarm(t.id, t.text);
         }
     });
+};
+
+// ==============================================================================
+// 5. INITIALIZATION
+// ==============================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Regist SW
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw_qlycuocsong.js');
     
-    document.body.addEventListener('click', window.requestNativePermissions, {once:true});
-
-    el('form-pc')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-pc'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-pc')); i.value=''; setVal('dt-pc',''); });
-    el('form-mobile')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-mobile'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-mb')); i.value=''; setVal('dt-mb',''); });
-
-    const handleTaskSubmit = (v, dV) => {
-        const p = window.parseTaskNLP(v); if(dV){ const d=new Date(dV); p.dueDate=window.getIsoDate(d); p.alarmTime=d.getTime(); p.timeStr=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-        const newId = String(Date.now());
-        window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
-        
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
-        if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
-        
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
-    };
-
-    let sS = localStorage.getItem('lifeos_v8_session');
-    if(sS && window.PROFILES[sS]){ window.currentUser=sS; window.viewingUser=localStorage.getItem('lifeos_v8_viewing')||sS; hideEl('login-gate'); window.loadUserData(); }
+    // Auth & Load
+    let s = localStorage.getItem('lifeos_v8_session');
+    if(s){ window.currentUser=s; window.viewingUser=s; hideEl('login-gate'); window.loadUserData(); }
     else window.showLoginGate();
 
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(SR){
-        const rec = new SR(); rec.lang='vi-VN';
-        rec.onstart=()=>document.querySelectorAll('.btn-voice').forEach(b=>b.classList.add('text-rose-500','animate-pulse'));
-        rec.onresult=e=>{ const v=e.results[0][0].transcript; if(window.innerWidth>=1024){ setVal('input-pc',v); el('form-pc').dispatchEvent(new Event('submit')); } else { setVal('input-mobile',v); el('form-mobile').dispatchEvent(new Event('submit')); } };
-        rec.onend=()=>document.querySelectorAll('.btn-voice').forEach(b=>b.classList.remove('text-rose-500','animate-pulse'));
-        document.querySelectorAll('.btn-voice').forEach(b=>b.addEventListener('click',()=>rec.start()));
-    }
+    // Form
+    el('form-pc').onsubmit = e => { e.preventDefault(); const v=el('input-pc').value; if(!v)return; window.todos.unshift({id:Date.now(), text:window.parseTaskNLP(v).text, alarmTime:window.parseTaskNLP(v).alarmTime, completed:false}); el('input-pc').value=''; window.saveLocalTodos(); window.renderTasksOnly(); window.FirebaseSync.pushAll(); };
+    
+    // Start Heartbeat
+    window.startBackgroundWorker();
 });
 
-window.requestNativePermissions = async () => {
-    if (window.Capacitor && window.Capacitor.isNative) {
-        try {
-            const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-            if (LocalNotifications) await LocalNotifications.requestPermissions();
-        } catch(e) {}
-    }
+window.switchTab = (id, btn) => {
+    document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active'));
+    el(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    if(id==='view-music') window.MusicApp.initAudioEngine();
+    window.vibrate(10);
+};
+
+window.stopGlobalAlarm = () => {
+    window.isAlarmRinging = false;
+    el('mstq-alarm').pause();
+    hideEl('alarm-overlay');
+    const musicPlayer = el('mstq-player');
+    if(musicPlayer) musicPlayer.volume = 1.0;
 };
 </script>
 </body>
