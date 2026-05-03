@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V54 - Immortal Vanguard</title>
+<title>LifeOS V55 - Immortal Vanguard</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
@@ -111,7 +111,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <script>
-// V54: Đón lõng sự kiện beforeunload, chém đầu toàn bộ Worker và ngắt loa
+// V55: Đón lõng sự kiện beforeunload, chém đầu toàn bộ Worker và ngắt loa
 window.addEventListener('beforeunload', () => {
     if(window.bgWorker) window.bgWorker.terminate();
     if(window.beepWorker) window.beepWorker.terminate();
@@ -303,6 +303,8 @@ window.addEventListener('beforeunload', () => {
     </div>
 
 </main>
+
+<button id="btnInstall" class="install-fab fixed bottom-24 right-4 bg-primary text-white px-5 py-3 rounded-full hidden items-center gap-2 shadow-lg z-[9999]"><i class="ph-bold ph-download-simple text-xl"></i> Cài Đặt LifeOS</button>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
     <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
@@ -1462,9 +1464,9 @@ window.MusicApp = {
         
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`[V54] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
+            console.warn(`[V55] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
             this.prefetchDone = false;
-            // V54 FIX: Cầu chì chống đứt gãy luồng nhạc khi mất mạng 
+            // V55 FIX: Cầu chì chống đứt gãy luồng nhạc khi mất mạng 
             setTimeout(() => { this.playNext(); }, 2000); 
         });
         
