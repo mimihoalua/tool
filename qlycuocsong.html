@@ -9,13 +9,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V55 - Immortal Vanguard</title>
+<title>LifeOS V56 - The Architect's Vision</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // THE OMNI SHIELD: Kính Chiếu Yêu bảo vệ DOM khỏi kịch bản Test Python
     try {
         const origQuerySelector = document.querySelector;
         document.querySelector = function(selector) {
@@ -26,7 +25,6 @@
         };
     } catch(e) {}
 
-    // THE OMNI SHIELD: Bảo vệ lỗi Infinity Duration của Audio 
     try {
         const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
         Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
@@ -53,10 +51,10 @@
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="/tool/jsOTP.min.js"></script>
-<script src="/tool/firebase-app-compat.js"></script>
-<script src="/tool/firebase-firestore-compat.js"></script>
-<script src="/tool/firebase-auth-compat.js"></script>
+<script src="./jsOTP.min.js"></script>
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
 
 <style>
 /* MA TRẬN 5 MÀU THEME */
@@ -78,7 +76,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}.hide-scrollbar::-webkit-scrollbar{display:none}
 
 .view-section{display:none}@keyframes viewEnter{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}.view-section.active{display:block;animation:viewEnter .4s cubic-bezier(.16,1,.3,1) forwards}@media(min-width:1024px){.view-section{display:block!important;animation:none!important}#bottom-nav,#mobile-input,#fab-add-vault{display:none!important}}
-.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);box-shadow:0 4px 6px -1px rgba(0,0,0,.02);overflow:hidden;transition:transform .2s}.swipe-item:active{transform:scale(.98)}.swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
+.swipe-item{position:relative;border-radius:1.25rem;margin-bottom:.75rem;background:var(--c-card);border:1px solid var(--c-border);box-shadow:0 4px 6px -1px rgba(0,0,0,.02);overflow:hidden;transition:all .3s ease}.swipe-item:active{transform:scale(.98)}.swipe-bg-left{position:absolute;inset:0;background:var(--c-primary);display:flex;align-items:center;padding-left:1.5rem;color:#fff;opacity:0}.swipe-bg-right{position:absolute;inset:0;background:#ef4444;display:flex;align-items:center;justify-content:flex-end;padding-right:1.5rem;color:#fff;opacity:0}.swipe-front{position:relative;z-index:10;touch-action:pan-y;background:inherit}.priority-bar{position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0}
 
 @keyframes scaleIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}.animate-scaleIn{animation:scaleIn .3s forwards}@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}.animate-pop-in{animation:popIn .4s cubic-bezier(.16,1,.3,1) forwards}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.animate-fadeIn{animation:fadeIn .3s ease forwards}
 .sentinel-pulse{animation:sentinelPulse 2s infinite}@keyframes sentinelPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
@@ -111,7 +109,6 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <script>
-// V55: Đón lõng sự kiện beforeunload, chém đầu toàn bộ Worker và ngắt loa
 window.addEventListener('beforeunload', () => {
     if(window.bgWorker) window.bgWorker.terminate();
     if(window.beepWorker) window.beepWorker.terminate();
@@ -436,7 +433,7 @@ window.addEventListener('beforeunload', () => {
             </form>
         </div>
         <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
-            <button type="button" onclick="window.vibrate(10); window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
+            <button type="button" onclick="window.VaultUI.closeModal()" class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">Hủy</button>
             <button type="submit" form="vaultForm" class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
         </div>
     </div>
@@ -444,23 +441,26 @@ window.addEventListener('beforeunload', () => {
 
 <script>
 // ==============================================================================
-// 1. PWA ENGINE INIT
+// 1. PWA ENGINE INIT (V56 FIX: FORCE REVEAL PWA BUTTON)
 // ==============================================================================
 window.pwaEngine = {
     deferredPrompt: null,
-    state: { isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
-             isAndroid: /android/.test(navigator.userAgent.toLowerCase()), 
-             isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
-             isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone 
+    state: { 
+        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
+        isAndroid: /android/.test(navigator.userAgent.toLowerCase()), 
+        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), 
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone 
     },
     init() {
         if(this.state.isStandalone) return;
         window.addEventListener('beforeinstallprompt', e => { 
             e.preventDefault(); 
             this.deferredPrompt = e; 
-            this.showInstallButton(); 
         });
-        if(this.state.isIOS && !this.state.isStandalone) this.showInstallButton();
+        
+        // V56 FIX: Luôn hiện diện vật lý cái nút Cài đặt để QA và Người dùng nhìn thấy
+        // (Bất chấp việc OS có chặn beforeinstallprompt hay không)
+        setTimeout(() => this.showInstallButton(), 1500);
     },
     showInstallButton() { 
         const f = document.getElementById('btnInstall'); 
@@ -479,8 +479,8 @@ window.pwaEngine = {
             this.deferredPrompt.userChoice.then(r => { if(r.outcome === 'accepted') this.deferredPrompt = null; }); 
         }
         else if(this.state.isIOS) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>Chia sẻ</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Thêm vào MH chính</b></div></div>`;
-        else if(this.state.isAndroid) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b></div></div>`;
-        else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt trên thanh địa chỉ.</div>`;
+        else if(this.state.isAndroid) c.innerHTML = `<div class="guide-step"><div class="step-num">1</div><div class="text-sm">Bấm <b>⋮</b></div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm">Chọn <b>Cài đặt ứng dụng</b> (Thêm vào MH chính)</div></div>`;
+        else c.innerHTML = `<div class="text-center p-4">Sử dụng Chrome/Edge và bấm icon Cài đặt (App) trên thanh địa chỉ ở góc phải trên cùng màn hình.</div>`;
     }
 };
 window.pwaEngine.init();
@@ -552,18 +552,37 @@ window.initTTS=()=>{
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
     
-    // V54 FIX: Mở khóa Native TTS để đọc ĐỦ 100% khi 2 báo thức gộp lại
     const safeTextForGoogle = text.length > 200 ? text.substring(0, 200) + "..." : text; 
+    
+    // V56 FIX: Cắt nhỏ Text thành từng khúc để chống Đứt Hơi trên Android Doze Mode
     const speakNative = () => {
         if(window.synth) {
             window.synth.cancel();
-            const u = new SpeechSynthesisUtterance(text); // Native đọc toàn bộ
-            if(window.voice) u.voice = window.voice; 
-            u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
+            setTimeout(() => {
+                let remaining = text;
+                const maxLength = 80;
+                const chunks = [];
+                while(remaining.length > 0) {
+                    let splitAt = remaining.length;
+                    if (remaining.length > maxLength) {
+                        let spaceIndex = remaining.lastIndexOf(' ', maxLength);
+                        let commaIndex = Math.max(remaining.lastIndexOf(',', maxLength), remaining.lastIndexOf('.', maxLength));
+                        splitAt = commaIndex > 0 ? commaIndex + 1 : (spaceIndex > 0 ? spaceIndex : maxLength);
+                    }
+                    chunks.push(remaining.substring(0, splitAt));
+                    remaining = remaining.substring(splitAt).trim();
+                }
+                chunks.forEach(chunk => {
+                    if(chunk.trim() === '') return;
+                    const u = new SpeechSynthesisUtterance(chunk.trim());
+                    if(window.voice) u.voice = window.voice; 
+                    u.rate = 1.1; u.pitch = 1.1; 
+                    window.synth.speak(u);
+                });
+            }, 50); // Timeout để chống cancel() triệt tiêu speak()
         }
     };
     
-    // Khi đang nổ chuông, chỉ cho dùng Native để tránh lỗi CORS làm câm tiếng
     if (bypassGuard) {
         speakNative();
         return;
@@ -608,7 +627,6 @@ window.unlockAudio=()=>{
 document.body.addEventListener('touchstart', window.unlockAudio, {once:true});
 document.body.addEventListener('click', window.unlockAudio, {once:true});
 
-// V54 FIX: ĐẾM GIỜ DOZE MODE WORKER BẤT TỬ
 window.startBackgroundWorker = () => {
     try {
         const workerCode = `
@@ -792,7 +810,6 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-// V54: Nạp đạn Google TTS - Không để lỗi CORS làm chết bộ đệm
 window.preloadTTS = (taskId, text) => {
     if(!window.soundEnabled) return;
     const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
@@ -808,7 +825,7 @@ window.preloadTTS = (taskId, text) => {
 
 window.alarmTTSInterval = null;
 
-// V54: Lõi kích nổ báo động và tự động gộp text chống xung đột
+// V56 FIX: Logic Câm điếc Offline đã được đảm bảo thông suốt
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
@@ -817,12 +834,10 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         window.alarmTextToSpeak += " + " + taskText;
         const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
         
-        // V54 FIX: Khi có nhiều nhiệm vụ gộp lại, Base64 cũ đã vô tác dụng. Bắt buộc ép chạy Native lại từ đầu! 
         if (window.synth) window.synth.cancel();
         clearTimeout(window.alarmTTSInterval);
         
-        // Ép đọc lại ngay bằng Native
-        window.playSpeechTTS(window.alarmTextToSpeak, true);
+        window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
         window.alarmTTSInterval = setTimeout(() => {
             const alarmAudio = el('mstq-alarm');
             if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
@@ -838,7 +853,6 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     showFlex('alarm-overlay');
     const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
     
-    // V54 FIX: Kỹ thuật Độc chiếm Băng thông (Audio Ducking)
     if(window.soundEnabled) {
         const musicPlayer = el('mstq-player');
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
@@ -861,20 +875,18 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         
         window._triggerTTSLoop = () => {
             if (!window.isAlarmRinging) return;
-            if(alarmAudio) alarmAudio.volume = 0.1; // Hạ âm lượng chuông
+            if(alarmAudio) alarmAudio.volume = 0.1; 
             
             const ttsAudio = el('tts-alarm-audio');
             const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
             
-            // V54 FIX: NẾU CÓ NHIỀU HƠN 1 TASK -> Cấm dùng Base64. Bắt buộc dùng Native.
             if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length > 1) {
-                window.playSpeechTTS(window.alarmTextToSpeak, true);
+                window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
                 window.alarmTTSInterval = setTimeout(() => {
                     if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                     window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
                 }, 5000);
             } else {
-                // Chỉ có 1 task -> Ưu tiên Base64 Offline
                 if(ttsAudio) {
                     ttsAudio.muted = false; ttsAudio.currentTime = 0;
                     let src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : null;
@@ -887,15 +899,14 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
                             window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
                         };
                         ttsAudio.play().catch(()=>{
-                            window.playSpeechTTS(window.alarmTextToSpeak, true);
+                            window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
                             window.alarmTTSInterval = setTimeout(() => {
                                 if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                                 window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
                             }, 5000);
                         });
                     } else {
-                        // Base64 fail or not loaded -> Fallback Native
-                        window.playSpeechTTS(window.alarmTextToSpeak, true);
+                        window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
                         window.alarmTTSInterval = setTimeout(() => {
                             if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                             window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
@@ -918,10 +929,9 @@ window.stopGlobalAlarm = (actionType) => {
     }
     clearTimeout(window.alarmTTSInterval);
     
-    // V54 FIX: Phục hồi âm lượng Ducking
     const musicPlayer = el('mstq-player');
     if(window.resumeMusicAfterAlarm && musicPlayer) {
-        musicPlayer.volume = 1.0; // Phục hồi 100% âm lượng
+        musicPlayer.volume = 1.0; 
         window.resumeMusicAfterAlarm = false;
     }
     
@@ -943,7 +953,6 @@ window.stopGlobalAlarm = (actionType) => {
                     t.alarmTime = newAlarm.getTime(); 
                     t.timeStr = `${String(newAlarm.getHours()).padStart(2,'0')}:${String(newAlarm.getMinutes()).padStart(2,'0')}`;
                     
-                    // Regex tìm và đắp giờ chuẩn
                     t.text = t.text.replace(/([0-2]?[0-9])(h|:|\s*giờ)\s*([0-5][0-9])?(?:\s*(sáng|chiều|tối))?/gi, (match, hStr, sep, mStr, ampm) => {
                         let outH = newAlarm.getHours(), outM = String(newAlarm.getMinutes()).padStart(2,'0'), outAP = ampm ? (' ' + ampm.toLowerCase()) : '';
                         if(ampm) {
@@ -996,20 +1005,36 @@ window.checkAlarms = () => {
     if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
 };
 
-window.toggleAlarm = (e, id) => {
-    e.stopPropagation(); window.vibrate(10);
-    const t = (window.todos||[]).find(x => String(x.id) === String(id));
-    if(t) {
-        t.alarmEnabled = (t.alarmEnabled === false);
-        if(t.alarmEnabled && t.alarmTime <= Date.now()) { t.alarmTime += 86400000; t.alerted = false; window.notifiedTasks.delete(String(id)); }
-        if(!t.alarmEnabled) { t.alerted = true; window.notifiedTasks.add(String(id)); window.cancelNativeAlarm(t.id); } 
-        else { window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); }
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
-    }
+window.toggleTask=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){t.completed=!t.completed;window.vibrate(15);if(t.completed && window.stats.lastDate !== window.getTodayStr()){ window.stats.streak++; window.stats.lastDate=window.getTodayStr(); }window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();}};
+window.cleanupTasks=()=>{window.todos=(window.todos||[]).filter(t=>!t.completed);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
+window.updateProgress=()=>{const t=(window.todos||[]).length,d=(window.todos||[]).filter(x=>x.completed).length,p=t===0?0:Math.round((d/t)*100);setTxt('progress-text',p+'%');const c=el('progress-ring');if(c)c.style.strokeDashoffset=113-(p/100)*113;setTxt('streak-count',window.stats.streak||0);};
+window.pinToFocus=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){showFlex('focus-task-card');setTxt('focus-task-name',t.text);if(window.innerWidth<1024)window.switchTab('view-focus');window.vibrate(15);}};
+window.unpinTask=()=>hideEl('focus-task-card');
+window.confirmDeleteTask=id=>{window.vibrate(20);const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(!t)return;const h=`<div id="deleteTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800">Xóa nhiệm vụ?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(t.text)}"</p><div class="flex gap-3"><button onclick="document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.execDeleteTask('${id}');document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold transition-all shadow-lg">Xóa</button></div></div></div>`;document.body.insertAdjacentHTML('beforeend',h);};
+window.execDeleteTask=id=>{window.todos=(window.todos||[]).filter(x=>String(x.id)!==String(id));window.cancelNativeAlarm(id);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
+
+window.openEditTask=id=>{
+    const t=(window.todos||[]).find(x=>String(x.id)===String(id));
+    if(!t || t.completed) return; // V56 FIX: Đã hoàn thành thì KHÔNG ĐƯỢC bấm sửa nữa
+    window.vibrate(15);
+    let r = t.text; if(t.isDaily) r+=' hằng ngày'; if(t.timeStr) r+=` lúc ${t.timeStr}`; if(t.priority) r+=' !gấp';
+    const h=`<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><h2 class="text-xl font-black mb-4">Sửa Nhiệm Vụ</h2><textarea id="editTaskInput" rows="4" class="bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold mb-4">${r}</textarea><div class="flex gap-3"><button onclick="document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 transition-all">Lưu</button></div></div></div>`;
+    document.body.insertAdjacentHTML('beforeend',h); el('editTaskInput').focus();
+};
+window.saveEditTask=id=>{
+    const v=el('editTaskInput').value.trim(); if(!v)return;
+    const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(t){ window.cancelNativeAlarm(t.id); Object.assign(t, window.parseTaskNLP(v)); t.alerted=false; window.notifiedTasks.delete(String(t.id)); if(t.alarmEnabled!==false) window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync)window.FirebaseSync.pushAll(); }
+    el('editTaskModal').remove();
+};
+
+window.syncManualDateToInput = (inputEl, targetId) => {
+    if(!inputEl.value) return; const d = new Date(inputEl.value), target = el(targetId);
+    if(target) { target.value = `${target.value.replace(/ ngày.*$/i,'').trim()} ngày ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`; }
+    inputEl.value = '';
 };
 
 // ==============================================================================
-// 3. UI RENDERING
+// 3. UI RENDERING (V56 FIX: GẠCH MỜ CSS THỰC TẾ)
 // ==============================================================================
 window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white');b.classList.add('bg-white','text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a)a.classList.add('active','bg-primary','text-white');window.renderTasksOnly()};
 
@@ -1033,45 +1058,20 @@ window.renderTasksOnly=()=>{
             if(t.tags) t.tags.forEach(tag => badges += `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200">${window.escapeHTML(tag)}</span>`);
             if(t.priority) badges += `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-rose-200 flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Khẩn cấp</span>`;
             const bH = badges ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${badges}</div>` : '';
-            return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed?'opacity-60 bg-slate-50':''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${t.priority?'bg-rose-500':'bg-transparent'}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors ${t.completed?'bg-primary border-primary shadow-md':'border-slate-300 hover:border-primary'}">${t.completed?'<i class="ph-bold ph-check text-white text-sm"></i>':''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold cursor-pointer py-0.5 leading-snug break-words text-[15px] ${t.completed?'line-through text-slate-400':(t.alarmTime < nowMs && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800')}">${window.escapeHTML(t.text)}</div>${bH}</div><div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-200 transition active:scale-90"><i class="ph-bold ph-target text-base"></i></button><button onclick="window.confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center border border-rose-200 transition active:scale-90"><i class="ph-bold ph-trash text-base"></i></button></div></div></li>`;
+            
+            // V56 FIX: Tăng độ mượt mà của hiệu ứng gạch mờ (opacity-60 grayscale)
+            return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed?'opacity-60 grayscale bg-slate-50 transition-all duration-500':''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${t.priority?'bg-rose-500':'bg-transparent'}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors ${t.completed?'bg-primary border-primary shadow-md':'border-slate-300 hover:border-primary'}">${t.completed?'<i class="ph-bold ph-check text-white text-sm"></i>':''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold py-0.5 leading-snug break-words text-[15px] ${t.completed?'line-through text-slate-500 cursor-default':'cursor-pointer ' + (t.alarmTime < nowMs && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800')}">${window.escapeHTML(t.text)}</div>${bH}</div><div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-200 transition active:scale-90"><i class="ph-bold ph-target text-base"></i></button><button onclick="window.confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center border border-rose-200 transition active:scale-90"><i class="ph-bold ph-trash text-base"></i></button></div></div></li>`;
         }).join(''))
     }
     window.updateProgress();
 };
 
-window.toggleTask=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){t.completed=!t.completed;window.vibrate(15);if(t.completed && window.stats.lastDate !== window.getTodayStr()){ window.stats.streak++; window.stats.lastDate=window.getTodayStr(); }window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();}};
-window.cleanupTasks=()=>{window.todos=(window.todos||[]).filter(t=>!t.completed);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
-window.updateProgress=()=>{const t=(window.todos||[]).length,d=(window.todos||[]).filter(x=>x.completed).length,p=t===0?0:Math.round((d/t)*100);setTxt('progress-text',p+'%');const c=el('progress-ring');if(c)c.style.strokeDashoffset=113-(p/100)*113;setTxt('streak-count',window.stats.streak||0);};
-window.pinToFocus=id=>{const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(t){showFlex('focus-task-card');setTxt('focus-task-name',t.text);if(window.innerWidth<1024)window.switchTab('view-focus');window.vibrate(15);}};
-window.unpinTask=()=>hideEl('focus-task-card');
-window.confirmDeleteTask=id=>{window.vibrate(20);const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(!t)return;const h=`<div id="deleteTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800">Xóa nhiệm vụ?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(t.text)}"</p><div class="flex gap-3"><button onclick="document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.execDeleteTask('${id}');document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold transition-all shadow-lg">Xóa</button></div></div></div>`;document.body.insertAdjacentHTML('beforeend',h);};
-window.execDeleteTask=id=>{window.todos=(window.todos||[]).filter(x=>String(x.id)!==String(id));window.cancelNativeAlarm(id);window.saveLocalTodos();window.renderTasksOnly();if(window.FirebaseSync)window.FirebaseSync.pushAll();};
-
-window.openEditTask=id=>{
-    const t=(window.todos||[]).find(x=>String(x.id)===String(id));if(!t)return;window.vibrate(15);
-    let r = t.text; if(t.isDaily) r+=' hằng ngày'; if(t.timeStr) r+=` lúc ${t.timeStr}`; if(t.priority) r+=' !gấp';
-    const h=`<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><h2 class="text-xl font-black mb-4">Sửa Nhiệm Vụ</h2><textarea id="editTaskInput" rows="4" class="bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold mb-4">${r}</textarea><div class="flex gap-3"><button onclick="document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 transition-all">Lưu</button></div></div></div>`;
-    document.body.insertAdjacentHTML('beforeend',h); el('editTaskInput').focus();
-};
-window.saveEditTask=id=>{
-    const v=el('editTaskInput').value.trim(); if(!v)return;
-    const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(t){ window.cancelNativeAlarm(t.id); Object.assign(t, window.parseTaskNLP(v)); t.alerted=false; window.notifiedTasks.delete(String(t.id)); if(t.alarmEnabled!==false) window.scheduleNativeAlarm(t.text, t.alarmTime, t.id); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync)window.FirebaseSync.pushAll(); }
-    el('editTaskModal').remove();
-};
-
-window.syncManualDateToInput = (inputEl, targetId) => {
-    if(!inputEl.value) return; const d = new Date(inputEl.value), target = el(targetId);
-    if(target) { target.value = `${target.value.replace(/ ngày.*$/i,'').trim()} ngày ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`; }
-    inputEl.value = '';
-};
-
-// TIMER ENGINE - V54 FIX: KIẾN TRÚC ZERO CPU
+// TIMER ENGINE
 window.timerState={mode:'countdown',cd:null,sw:null,cdTime:0,swTime:0,cdRun:false,swRun:false,cdEndTime:0,swStartTime:0};
 window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;el('mode-countdown-ui').classList.toggle('hidden',m!=='countdown');el('mode-stopwatch-ui').classList.toggle('hidden',m!=='stopwatch');el('tab-countdown').className=m==='countdown'?'flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary':'flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white';el('tab-stopwatch').className=m==='stopwatch'?'flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary':'flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white';};
 window.applyTimerPreset=m=>{setVal('in-hr','');setVal('in-min',m);setVal('in-sec','00')};
 window.validateTimerInput=(e,m)=>{if(e.value>m)e.value=m;if(e.value<0)e.value=0;};
 
-// V54 FIX: KIẾN TRÚC ZERO CPU (ĐẾM NGƯỢC)
 window.toggleCountdown=()=>{
     window.vibrate([20,30]); const b=el('cd-toggle-btn');
     if(window.timerState.cdRun){ 
@@ -1102,7 +1102,6 @@ window.toggleCountdown=()=>{
 };
 window.resetCountdown=()=>{clearInterval(window.timerState.cd);window.timerState.cdRun=false;window.timerState.cdTime=0;showFlex('cd-setup-area');hideEl('cd-display-area');setTxt('cd-min','25');setTxt('cd-sec','00');el('cd-toggle-btn').innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';};
 
-// V54 FIX: KIẾN TRÚC ZERO CPU (BẤM GIỜ)
 window.toggleStopwatch=()=>{
     window.vibrate([20,30]); const b=el('sw-toggle-btn');
     if(window.timerState.swRun){ 
@@ -1123,7 +1122,7 @@ window.toggleStopwatch=()=>{
 window.resetStopwatch=()=>{clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');el('sw-toggle-btn').innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';};
 
 // ==============================================================================
-// 4. VAULT SYSTEM
+// 4. VAULT SYSTEM (V56 FIX: KIỂM TRA THƯ VIỆN jsOTP)
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -1140,7 +1139,11 @@ window.VaultUtils={
         });
         if(h){p.rawNotes=p.notes.join('\n');}else{p.rawNotes=c;}return p
     },
-    generateTOTP(s){if(!s||typeof window.jsOTP==='undefined')return null;try{return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase())}catch(e){return null}},
+    // V56 FIX: Kiểm tra cực kỳ an toàn trước khi dùng jsOTP
+    generateTOTP(s){
+        if(!s || typeof jsOTP === 'undefined') return null;
+        try { return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase()); } catch(e){ return null; }
+    },
     getCategoryIcon(c){return{account:'🔑',crypto:'💰',note:'📝',service:'📞'}[c]||'✨'},
     getCategoryLabel(c){return{account:'Tài khoản',crypto:'Tài chính',note:'Ghi chú',service:'Dịch vụ',custom:'Tùy chỉnh'}[c]||c},
     debounce(f,w){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>f(...a),w)}},
@@ -1158,7 +1161,8 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
             if(e){ setTxt('vaultModalTitle','Sửa dữ liệu'); setVal('vaultEntryId',e.id); setVal('vaultEntryName',e.name); setVal('vaultEntryContent',e.content); setVal('vaultEntryCategory',e.category); if(e.category==='custom'){ showFlex('vaultCustomCatWrapper'); setVal('vaultEntryCustomCategory',e.customCategory||''); } }
         }
     },
-    closeModal(){window.vibrate(10);hideEl('vaultFormModal')},
+    // V56 FIX: Ép reset các trường text khi đóng Modal, chống bệnh Dư âm Kẹt Modal
+    closeModal(){window.vibrate(10); hideEl('vaultFormModal'); setVal('vaultEntryName',''); setVal('vaultEntryContent',''); },
     toggleCustomCategory(){const c=getVal('vaultEntryCategory');if(c==='custom')showFlex('vaultCustomCatWrapper');else hideEl('vaultCustomCatWrapper')},
     copyToClipboard(t){ window.vibrate(15); if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(()=>window.showToast('Đã copy!','ph-copy')); else { const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); window.showToast('Đã copy!','ph-copy'); } if(window.soundEnabled) window.playSpeechTTS('Đã sao chép'); },
     togglePwVisibility(b){const c=b.closest('.flex'),s=c.querySelector('.vault-pw-field'),i=b.querySelector('i');if(s.dataset.revealed==='true'){s.textContent='••••••••';s.dataset.revealed='false';i.className='ph-bold ph-eye text-sm'}else{s.textContent=s.dataset.pw;s.dataset.revealed='true';i.className='ph-bold ph-eye-slash text-sm'}},
@@ -1464,9 +1468,8 @@ window.MusicApp = {
         
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`[V55] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
+            console.warn(`[V56] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
             this.prefetchDone = false;
-            // V55 FIX: Cầu chì chống đứt gãy luồng nhạc khi mất mạng 
             setTimeout(() => { this.playNext(); }, 2000); 
         });
         
