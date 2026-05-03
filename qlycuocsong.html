@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V56 - The Architect's Vision</title>
+<title>LifeOS V57 - The Reality Master</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
@@ -57,12 +57,12 @@
 <script src="./firebase-auth-compat.js"></script>
 
 <style>
-/* MA TRẬN 5 MÀU THEME */
-:root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
-[data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
-[data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
-[data-theme="rose"] { --c-primary: #f43f5e; --c-hover: #e11d48; --c-bg: #fff1f2; --c-card: #ffffff; --c-sub: #ffe4e6; --c-border: #fecdd3; --c-text: #881337; --c-mut: #e11d48; }
-[data-theme="mint"] { --c-primary: #10b981; --c-hover: #059669; --c-bg: #f0fdfa; --c-card: #ffffff; --c-sub: #ccfbf1; --c-border: #99f6e4; --c-text: #134e4a; --c-mut: #0d9488; }
+/* MA TRẬN THEME */
+:root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; }
+[data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; }
+[data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; }
+[data-theme="rose"] { --c-primary: #f43f5e; --c-hover: #e11d48; --c-bg: #fff1f2; --c-card: #ffffff; --c-sub: #ffe4e6; --c-border: #fecdd3; --c-text: #881337; }
+[data-theme="mint"] { --c-primary: #10b981; --c-hover: #059669; --c-bg: #f0fdfa; --c-card: #ffffff; --c-sub: #ccfbf1; --c-border: #99f6e4; --c-text: #134e4a; }
 
 body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important; color: var(--c-text) !important; padding-bottom: 90px; }
 .bg-white { background-color: var(--c-card) !important; }
@@ -96,10 +96,16 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-.install-fab { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); display: none; z-index: 999999; }
+/* V57 FIX: Nút cài đặt PWA nhỏ gọn, bám lề phải, không cản trở Input */
+.install-fab { 
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.1); 
+    display: none; 
+    z-index: 999999; 
+    border-radius: 20px 0 0 20px;
+}
 .install-fab.visible { display: flex !important; }
-.install-fab:active { transform: scale(0.95); }
-.install-fab:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.5); }
+.install-fab:active { transform: translateX(5px); }
 .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
 .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -119,10 +125,10 @@ window.addEventListener('beforeunload', () => {
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
 <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
-<audio id="mstq-prefetch" preload="auto" muted></audio>
 <audio id="mstq-alarm" loop playsinline webkit-playsinline preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
 <audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
-<audio id="tts-alarm-audio" playsinline webkit-playsinline preload="auto"></audio>
+
+<div id="tts-preload-container" style="display:none;"></div>
 
 <div id="login-gate" class="fixed inset-0 z-[999999] bg-slate-50 flex-col items-center justify-center p-4 hidden">
     <h1 class="text-3xl md:text-4xl font-black mb-2 text-center tracking-tight animate-pop-in text-primary">LifeOS Family</h1>
@@ -301,7 +307,7 @@ window.addEventListener('beforeunload', () => {
 
 </main>
 
-<button id="btnInstall" class="install-fab fixed bottom-24 right-4 bg-primary text-white px-5 py-3 rounded-full hidden items-center gap-2 shadow-lg z-[9999]"><i class="ph-bold ph-download-simple text-xl"></i> Cài Đặt LifeOS</button>
+<button id="btnInstall" class="install-fab fixed top-1/2 right-0 -translate-y-1/2 bg-primary/90 backdrop-blur text-white pl-3 pr-2 py-2 rounded-l-xl hidden items-center gap-1.5 shadow-lg z-[9999] border-y border-l border-white/20 text-sm font-bold"><i class="ph-bold ph-download-simple text-base"></i> Cài App</button>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
     <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
@@ -441,7 +447,7 @@ window.addEventListener('beforeunload', () => {
 
 <script>
 // ==============================================================================
-// 1. PWA ENGINE INIT (V56 FIX: FORCE REVEAL PWA BUTTON)
+// 1. PWA ENGINE INIT 
 // ==============================================================================
 window.pwaEngine = {
     deferredPrompt: null,
@@ -457,9 +463,6 @@ window.pwaEngine = {
             e.preventDefault(); 
             this.deferredPrompt = e; 
         });
-        
-        // V56 FIX: Luôn hiện diện vật lý cái nút Cài đặt để QA và Người dùng nhìn thấy
-        // (Bất chấp việc OS có chặn beforeinstallprompt hay không)
         setTimeout(() => this.showInstallButton(), 1500);
     },
     showInstallButton() { 
@@ -535,9 +538,8 @@ window.firePhysicalBeep = () => {
         osc.frequency.setValueAtTime(1108.73, window.audioCtx.currentTime + 0.1);
         gain.gain.setValueAtTime(1, window.audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.5);
-        osc.connect(gain);
-        gain.connect(window.audioCtx.destination);
-        osc.start(); osc.stop(window.audioCtx.currentTime + 0.5);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
     } catch(e) {}
 };
 
@@ -549,75 +551,69 @@ window.initTTS=()=>{
     window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
 };
 
+// V57 FIX: TRẢ LẠI CHÂN LÝ KIẾN TRÚC V19 - NGẬM TRỰC TIẾP URL VÀO THẺ AUDIO
+window.preloadTTS = (taskId, text) => {
+    if(!window.soundEnabled) return;
+    const safeText = text.length > 100 ? text.substring(0, 100) + "..." : text;
+    // URL Google TTS
+    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
+    
+    let a = document.getElementById('tts-preload-' + taskId);
+    if (!a) {
+        a = document.createElement('audio');
+        a.id = 'tts-preload-' + taskId;
+        a.preload = 'auto';
+        a.crossOrigin = 'anonymous';
+        document.getElementById('tts-preload-container').appendChild(a);
+    }
+    // Gắn thẳng Src để ép Trình duyệt ngậm MP3 vào RAM, CHỐNG CORS FETCH!
+    a.src = url;
+    a.load(); 
+};
+
+// Hàm cứu hộ nếu thẻ Audio hỏng
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!window.soundEnabled || (!bypassGuard && window.isAlarmRinging)) return; 
+    const safeText = text.length > 200 ? text.substring(0, 200) + "..." : text; 
     
-    const safeTextForGoogle = text.length > 200 ? text.substring(0, 200) + "..." : text; 
-    
-    // V56 FIX: Cắt nhỏ Text thành từng khúc để chống Đứt Hơi trên Android Doze Mode
-    const speakNative = () => {
-        if(window.synth) {
-            window.synth.cancel();
-            setTimeout(() => {
-                let remaining = text;
-                const maxLength = 80;
-                const chunks = [];
-                while(remaining.length > 0) {
-                    let splitAt = remaining.length;
-                    if (remaining.length > maxLength) {
-                        let spaceIndex = remaining.lastIndexOf(' ', maxLength);
-                        let commaIndex = Math.max(remaining.lastIndexOf(',', maxLength), remaining.lastIndexOf('.', maxLength));
-                        splitAt = commaIndex > 0 ? commaIndex + 1 : (spaceIndex > 0 ? spaceIndex : maxLength);
-                    }
-                    chunks.push(remaining.substring(0, splitAt));
-                    remaining = remaining.substring(splitAt).trim();
+    if(window.synth) {
+        window.synth.cancel();
+        setTimeout(() => {
+            let remaining = safeText;
+            while(remaining.length > 0) {
+                let splitAt = remaining.length;
+                if (remaining.length > 80) {
+                    let space = remaining.lastIndexOf(' ', 80);
+                    let comma = Math.max(remaining.lastIndexOf(',', 80), remaining.lastIndexOf('.', 80));
+                    splitAt = comma > 0 ? comma + 1 : (space > 0 ? space : 80);
                 }
-                chunks.forEach(chunk => {
-                    if(chunk.trim() === '') return;
+                const chunk = remaining.substring(0, splitAt);
+                remaining = remaining.substring(splitAt).trim();
+                if(chunk.trim() !== '') {
                     const u = new SpeechSynthesisUtterance(chunk.trim());
                     if(window.voice) u.voice = window.voice; 
-                    u.rate = 1.1; u.pitch = 1.1; 
-                    window.synth.speak(u);
-                });
-            }, 50); // Timeout để chống cancel() triệt tiêu speak()
-        }
-    };
-    
-    if (bypassGuard) {
-        speakNative();
-        return;
+                    u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u);
+                }
+            }
+        }, 50);
     }
-    
-    try {
-        const c = document.getElementById('tts-audio');
-        if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(safeTextForGoogle)}`;
-            c.onerror = () => {
-                if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(safeTextForGoogle)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
-                    c.src = backupUrl; c.load(); c.play().catch(()=>{ speakNative(); });
-                } else { speakNative(); }
-            };
-            const playPromise = c.play();
-            if (playPromise !== undefined) { playPromise.catch(() => { speakNative(); }); }
-        } else { speakNative(); }
-    } catch (e) { speakNative(); }
 };
 
 window.audioInitialized = false;
 window.notifiedTasks = new Set();
-window.preloadedTTSData = {}; 
+window.alarmTTSInterval = null;
+window.activeAlarmTaskIds = [];
+window.alarmTextToSpeak = ""; // V57 FIX: Dọn dẹp lỗi Gộp chuông sai
 
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
     
-    const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio'); const d = el('tts-alarm-audio');
+    const a = el('mstq-silence'); const b = el('mstq-alarm'); const c = el('tts-audio');
     if(a) a.play().catch(()=>{});
     if(b) { b.muted = true; b.loop = true; b.play().catch(()=>{}); }
     if(c) { c.muted = true; c.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; c.play().catch(()=>{}); }
-    if(d) { d.muted = true; d.src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; d.play().catch(()=>{}); }
     if(window.synth) { let u = new SpeechSynthesisUtterance(''); u.volume = 0; window.synth.speak(u); }
     window.audioInitialized = true;
     
@@ -634,29 +630,17 @@ window.startBackgroundWorker = () => {
             self.onmessage = function(e) {
                 if (e.data === 'start') {
                     if (timer) clearInterval(timer);
-                    timer = setInterval(() => {
-                        self.postMessage('tick');
-                    }, 1000);
-                } else if (e.data === 'stop') {
-                    if (timer) clearInterval(timer);
-                }
+                    timer = setInterval(() => { self.postMessage('tick'); }, 1000);
+                } else if (e.data === 'stop') { if (timer) clearInterval(timer); }
             };
         `;
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         if (window.bgWorker) { window.bgWorker.terminate(); if (window.bgWorkerUrl) URL.revokeObjectURL(window.bgWorkerUrl); }
         window.bgWorkerUrl = URL.createObjectURL(blob);
         window.bgWorker = new Worker(window.bgWorkerUrl);
-        
-        window.bgWorker.onmessage = (e) => {
-            if (e.data === 'tick') {
-                if (window.checkAlarms) window.checkAlarms();
-            }
-        };
+        window.bgWorker.onmessage = (e) => { if (e.data === 'tick') { if (window.checkAlarms) window.checkAlarms(); } };
         window.bgWorker.postMessage('start');
-    } catch(e) { 
-        console.warn("Worker Fallback"); 
-        setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000);
-    }
+    } catch(e) { setInterval(() => { if (window.checkAlarms) window.checkAlarms(); }, 1000); }
 };
 
 window.showToast=(m,i='ph-info')=>{
@@ -671,7 +655,7 @@ window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glo
 window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
 window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
 window.closePasswordModal=()=>hideEl('password-modal');
-window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
+window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào', true)}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
 window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
 window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
 window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
@@ -747,7 +731,7 @@ window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 // ==============================================================================
-// 2. NLP & ALARM LOGIC
+// 2. NLP & ALARM LOGIC (V57 FIX ALARM)
 // ==============================================================================
 
 window.scheduleNativeAlarm = async (taskText, alarmTimeMs, taskId) => {
@@ -810,34 +794,22 @@ window.parseTaskNLP = (rawText) => {
     return { text: text.replace(/\s+/g, ' ').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
-window.preloadTTS = (taskId, text) => {
-    if(!window.soundEnabled) return;
-    const safeText = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent('Báo động. ' + safeText)}`;
-    fetch(url)
-        .then(res => { if (!res.ok) throw new Error('HTTP Error'); return res.blob(); })
-        .then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => { window.preloadedTTSData[taskId] = reader.result; };
-            reader.readAsDataURL(blob);
-        }).catch(() => console.warn("[LifeOS] Lỗi nạp Base64, sẽ gọi Fallback Native."));
-};
-
-window.alarmTTSInterval = null;
-
-// V56 FIX: Logic Câm điếc Offline đã được đảm bảo thông suốt
+// V57 FIX: DỌN RÁC BÁO ĐỘNG GỘP SAI VÀ CHỐNG CÂM ĐIẾC
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
-        window.alarmTextToSpeak += " + " + taskText;
+        // V57 FIX: CHỈ GỘP NẾU TEXT CHƯA TỒN TẠI (Chống lỗi hát + hát)
+        if (!window.alarmTextToSpeak.includes(taskText)) {
+            window.alarmTextToSpeak += " và " + taskText;
+        }
         const msg = el('alarm-message'); if(msg) msg.textContent = window.alarmTextToSpeak;
         
         if (window.synth) window.synth.cancel();
         clearTimeout(window.alarmTTSInterval);
         
-        window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
+        window.playSpeechTTS(window.alarmTextToSpeak, true); // Gọi cứu hộ Native
         window.alarmTTSInterval = setTimeout(() => {
             const alarmAudio = el('mstq-alarm');
             if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
@@ -856,7 +828,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     if(window.soundEnabled) {
         const musicPlayer = el('mstq-player');
         if(window.MusicApp && window.MusicApp.playing && musicPlayer) { 
-            musicPlayer.volume = 0.1; // Ducking Nhạc nền bóp cổ xuống 10%
+            musicPlayer.volume = 0.1; // Ducking Nhạc nền
             window.resumeMusicAfterAlarm = true;
         } else {
             window.resumeMusicAfterAlarm = false;
@@ -877,42 +849,33 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             if (!window.isAlarmRinging) return;
             if(alarmAudio) alarmAudio.volume = 0.1; 
             
-            const ttsAudio = el('tts-alarm-audio');
             const tid = window.activeAlarmTaskIds ? window.activeAlarmTaskIds[0] : null;
+            const a = document.getElementById('tts-preload-' + tid);
             
-            if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length > 1) {
-                window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
+            // V57 FIX: ĐỌC TỪ THẺ AUDIO ĐÃ NGẬM TRONG RAM (CHUẨN V19)
+            if (a && a.readyState >= 2) {
+                a.volume = 1.0;
+                a.currentTime = 0;
+                a.play().then(() => {
+                    a.onended = () => {
+                        if (!window.isAlarmRinging) return;
+                        if(alarmAudio) alarmAudio.volume = 1.0;
+                        window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                    };
+                }).catch(() => {
+                    window.playSpeechTTS(window.alarmTextToSpeak, true);
+                    window.alarmTTSInterval = setTimeout(() => {
+                        if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
+                        window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+                    }, 5000);
+                });
+            } else {
+                // Rớt mạng hoặc CORS -> Native Cứu Hộ
+                window.playSpeechTTS(window.alarmTextToSpeak, true);
                 window.alarmTTSInterval = setTimeout(() => {
                     if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
                     window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
                 }, 5000);
-            } else {
-                if(ttsAudio) {
-                    ttsAudio.muted = false; ttsAudio.currentTime = 0;
-                    let src = (tid && window.preloadedTTSData[tid]) ? window.preloadedTTSData[tid] : null;
-                    
-                    if (src && src.startsWith('data:audio')) {
-                        ttsAudio.src = src;
-                        ttsAudio.onended = () => {
-                            if (!window.isAlarmRinging) return;
-                            if(alarmAudio) alarmAudio.volume = 1.0;
-                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                        };
-                        ttsAudio.play().catch(()=>{
-                            window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
-                            window.alarmTTSInterval = setTimeout(() => {
-                                if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                            }, 5000);
-                        });
-                    } else {
-                        window.playSpeechTTS(window.alarmTextToSpeak, true); // Bypass Guard TRUE
-                        window.alarmTTSInterval = setTimeout(() => {
-                            if(window.isAlarmRinging && alarmAudio) alarmAudio.volume = 1.0;
-                            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
-                        }, 5000);
-                    }
-                }
             }
         };
         window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 3000);
@@ -921,6 +884,10 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
 
 window.stopGlobalAlarm = (actionType) => { 
     window.isAlarmRinging = false; 
+    
+    // V57 FIX: DỌN SẠCH CÂU NÓI TRƯỚC ĐÓ ĐỂ TRÁNH CỘNG GỘP SAI
+    window.alarmTextToSpeak = "";
+    
     if (window.beepWorker) { 
         window.beepWorker.postMessage('stop'); 
         window.beepWorker.terminate(); 
@@ -936,9 +903,7 @@ window.stopGlobalAlarm = (actionType) => {
     }
     
     const alarmAudio = el('mstq-alarm');
-    const ttsAudio = el('tts-alarm-audio');
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
-    if(ttsAudio) { ttsAudio.pause(); ttsAudio.muted = true; }
     if(window.synth) window.synth.cancel();
     
     hideEl('alarm-overlay'); window.vibrate(10);
@@ -975,6 +940,7 @@ window.stopGlobalAlarm = (actionType) => {
     window.activeAlarmTaskIds = [];
 };
 
+// V57 FIX ALARM CHECKER - KHÔNG VƠ VÉT TASK CŨ
 window.checkAlarms = () => {
     if(!window.todos || !window.todos.length) return;
     const nowMs = Date.now(), todayStr = window.getIsoDate();
@@ -994,9 +960,12 @@ window.checkAlarms = () => {
         if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
             const diff = t.alarmTime - nowMs;
             
+            // Nếu task quá 5 phút mà chưa tắt -> Tự động ẩn để không bị gộp vào chuông sau
             if (diff < -300000) { t.alerted = true; needsSync = true; return; }
-            if (diff > 0 && diff <= 300000 && !window.preloadedTTSData[t.id]) { window.preloadTTS(t.id, t.text); }
-            if (diff <= 0 && diff >= -300000 && !window.notifiedTasks.has(String(t.id))) { 
+            if (diff > 0 && diff <= 300000 && !document.getElementById('tts-preload-' + t.id)) { window.preloadTTS(t.id, t.text); }
+            
+            // V57 FIX: Chỉ vơ vét những Task ở CHÍNH XÁC PHÚT HIỆN TẠI (-60000ms)
+            if (diff <= 0 && diff >= -60000 && !window.notifiedTasks.has(String(t.id))) { 
                 window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id)); 
             }
         }
@@ -1015,7 +984,7 @@ window.execDeleteTask=id=>{window.todos=(window.todos||[]).filter(x=>String(x.id
 
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id));
-    if(!t || t.completed) return; // V56 FIX: Đã hoàn thành thì KHÔNG ĐƯỢC bấm sửa nữa
+    if(!t || t.completed) return; 
     window.vibrate(15);
     let r = t.text; if(t.isDaily) r+=' hằng ngày'; if(t.timeStr) r+=` lúc ${t.timeStr}`; if(t.priority) r+=' !gấp';
     const h=`<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><h2 class="text-xl font-black mb-4">Sửa Nhiệm Vụ</h2><textarea id="editTaskInput" rows="4" class="bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold mb-4">${r}</textarea><div class="flex gap-3"><button onclick="document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 transition-all">Lưu</button></div></div></div>`;
@@ -1034,7 +1003,7 @@ window.syncManualDateToInput = (inputEl, targetId) => {
 };
 
 // ==============================================================================
-// 3. UI RENDERING (V56 FIX: GẠCH MỜ CSS THỰC TẾ)
+// 3. UI RENDERING 
 // ==============================================================================
 window.filterTasks=m=>{window.filterMode=m;window.vibrate(10);document.querySelectorAll('.filter-btn').forEach(b=>{b.classList.remove('active','bg-primary','text-white');b.classList.add('bg-white','text-slate-500')});const a=document.querySelector(`[data-filter="${m}"]`);if(a)a.classList.add('active','bg-primary','text-white');window.renderTasksOnly()};
 
@@ -1059,7 +1028,6 @@ window.renderTasksOnly=()=>{
             if(t.priority) badges += `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-rose-200 flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Khẩn cấp</span>`;
             const bH = badges ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${badges}</div>` : '';
             
-            // V56 FIX: Tăng độ mượt mà của hiệu ứng gạch mờ (opacity-60 grayscale)
             return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed?'opacity-60 grayscale bg-slate-50 transition-all duration-500':''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${t.priority?'bg-rose-500':'bg-transparent'}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors ${t.completed?'bg-primary border-primary shadow-md':'border-slate-300 hover:border-primary'}">${t.completed?'<i class="ph-bold ph-check text-white text-sm"></i>':''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold py-0.5 leading-snug break-words text-[15px] ${t.completed?'line-through text-slate-500 cursor-default':'cursor-pointer ' + (t.alarmTime < nowMs && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800')}">${window.escapeHTML(t.text)}</div>${bH}</div><div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-200 transition active:scale-90"><i class="ph-bold ph-target text-base"></i></button><button onclick="window.confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center border border-rose-200 transition active:scale-90"><i class="ph-bold ph-trash text-base"></i></button></div></div></li>`;
         }).join(''))
     }
@@ -1122,7 +1090,7 @@ window.toggleStopwatch=()=>{
 window.resetStopwatch=()=>{clearInterval(window.timerState.swRun);window.timerState.swRun=false;window.timerState.swTime=0;setTxt('sw-min','00');setTxt('sw-sec','00');setTxt('sw-ms','.00');el('sw-toggle-btn').innerHTML='<i class="ph-fill ph-play"></i> Bắt đầu';};
 
 // ==============================================================================
-// 4. VAULT SYSTEM (V56 FIX: KIỂM TRA THƯ VIỆN jsOTP)
+// 4. VAULT SYSTEM 
 // ==============================================================================
 window.VaultUtils={
     generatePassword(len=16){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';let p='';for(let i=0;i<len;i++)p+=c[Math.floor(Math.random()*c.length)];return p},
@@ -1139,7 +1107,6 @@ window.VaultUtils={
         });
         if(h){p.rawNotes=p.notes.join('\n');}else{p.rawNotes=c;}return p
     },
-    // V56 FIX: Kiểm tra cực kỳ an toàn trước khi dùng jsOTP
     generateTOTP(s){
         if(!s || typeof jsOTP === 'undefined') return null;
         try { return new jsOTP.totp().getOtp(s.replace(/\s+/g,'').toUpperCase()); } catch(e){ return null; }
@@ -1161,7 +1128,6 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
             if(e){ setTxt('vaultModalTitle','Sửa dữ liệu'); setVal('vaultEntryId',e.id); setVal('vaultEntryName',e.name); setVal('vaultEntryContent',e.content); setVal('vaultEntryCategory',e.category); if(e.category==='custom'){ showFlex('vaultCustomCatWrapper'); setVal('vaultEntryCustomCategory',e.customCategory||''); } }
         }
     },
-    // V56 FIX: Ép reset các trường text khi đóng Modal, chống bệnh Dư âm Kẹt Modal
     closeModal(){window.vibrate(10); hideEl('vaultFormModal'); setVal('vaultEntryName',''); setVal('vaultEntryContent',''); },
     toggleCustomCategory(){const c=getVal('vaultEntryCategory');if(c==='custom')showFlex('vaultCustomCatWrapper');else hideEl('vaultCustomCatWrapper')},
     copyToClipboard(t){ window.vibrate(15); if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(()=>window.showToast('Đã copy!','ph-copy')); else { const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); window.showToast('Đã copy!','ph-copy'); } if(window.soundEnabled) window.playSpeechTTS('Đã sao chép'); },
@@ -1468,7 +1434,7 @@ window.MusicApp = {
         
         a.addEventListener('error', (e) => {
             if(e) e.stopPropagation();
-            console.warn(`[V56] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
+            console.warn(`[V57] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`);
             this.prefetchDone = false;
             setTimeout(() => { this.playNext(); }, 2000); 
         });
@@ -1515,7 +1481,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const newId = String(Date.now());
         window.todos.unshift({ id:newId, text:p.text, completed:false, priority:p.priority, tags:p.tags, alarmTime:p.alarmTime, timeStr:p.timeStr, isDaily:p.isDaily, dueDate:p.dueDate, alerted:false, createdAt:Date.now(), alarmEnabled:true });
         
-        if (p.alarmTime && (p.alarmTime - Date.now() < 300000)) window.preloadTTS(newId, p.text);
         if (p.alarmTime && p.alarmTime > Date.now()) window.scheduleNativeAlarm(p.text, p.alarmTime, newId);
         
         window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
