@@ -95,13 +95,17 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-/* Nút cài đặt PWA gọn gàng bám lề phải */
+/* V65: NÚT PWA NEON GRADIENT ĐÁNH BẠI MỌI THEME */
 .install-fab { 
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.1); 
     display: none; 
     z-index: 999999; 
-    border-radius: 20px 0 0 20px;
+    background: linear-gradient(135deg, #FF007A, #7928CA) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-right: none;
+    box-shadow: -4px 4px 15px rgba(255, 0, 122, 0.4);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .install-fab.visible { display: flex !important; }
 .install-fab:active { transform: translateX(5px); }
@@ -122,10 +126,10 @@ window.addEventListener('beforeunload', () => {
 });
 </script>
 
-<audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
-<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+<audio id="mstq-player" preload="auto" playsinline webkit-playsinline></audio>
+<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="https://actions.google.com/sounds/v1/water/water_leak.ogg"></audio>
+<audio id="mstq-prefetch" preload="auto" muted></audio>
 <audio id="mstq-alarm" loop playsinline webkit-playsinline preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-<audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
 
 <div id="tts-preload-container" style="display:none;"></div>
 
@@ -513,10 +517,6 @@ window.switchTab=(id,b)=>{
     const mi = el('mobile-input'); 
     if(id === 'view-tasks') { if(mi) { mi.classList.remove('hidden'); mi.style.display = ''; } } 
     else { if(mi) { mi.classList.add('hidden'); mi.style.display = 'none'; } }
-    if(window.soundEnabled && window.innerWidth < 1024 && !window.isAlarmRinging){
-        const names = {'view-tasks':'Nhiệm vụ','view-focus':'Tập trung','view-vault':'Kho lưu trữ','view-music':'Nghe nhạc'};
-        window.playSpeechTTS(names[id] || '', true);
-    }
 };
 
 window.cycleTheme=()=>{
@@ -538,21 +538,10 @@ window.cycleTheme=()=>{
 window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
 window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
-
 window.showToast=(m,i='ph-info')=>{ const c=el('toast-container');if(!c)return;const t=document.createElement('div'); t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]'; t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`; c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000); };
 window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
 
-window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
-window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
-window.closePasswordModal=()=>hideEl('password-modal');
-window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào', true)}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
-window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
-window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
-window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
-
-// ==============================================================================
-// 3. TTS CORE & ALARM ENGINE
-// ==============================================================================
+// TTS CORE & ALARM ENGINE 
 window.synth=window.speechSynthesis;window.audioCtx = null;
 window.audioInitialized = false;
 window.notifiedTasks = new Set();
@@ -575,7 +564,6 @@ window.firePhysicalBeep = () => {
     } catch(e) {}
 };
 
-// 🔪 DAO MỔ 1: Sửa lại hàm preloadTTS (Bỏ crossOrigin="anonymous" gây lỗi CORS)
 window.preloadTTS = (taskId, text) => {
     if(!window.navigator.onLine) return;
     const safeText = text.substring(0, 100);
@@ -591,7 +579,6 @@ window.preloadTTS = (taskId, text) => {
     a.load(); 
 };
 
-// 🔪 DAO MỔ 2: Khôi phục hàm gọi Giọng máy Native chống kẹt Doze
 window.playSpeechTTS = (text, bypassGuard = false) => {
     if (!bypassGuard && window.isAlarmRinging) return; 
     if(window.synth && window.soundEnabled) {
@@ -613,7 +600,7 @@ window.playSpeechTTS = (text, bypassGuard = false) => {
             const vnVoice = voices.find(x => x.lang.includes('vi'));
             if(vnVoice) u.voice = vnVoice;
             window.synth.speak(u);
-            if(window.synth.resume) window.synth.resume(); // Tát CPR chống kẹt
+            if(window.synth.resume) window.synth.resume();
         }, 50);
     }
 };
@@ -623,13 +610,18 @@ window.initTTS=()=>{ if(!window.synth)return; window.showToast('Voice Guard Read
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
     const a = el('mstq-silence'), b = el('mstq-alarm');
-    if(a) a.play().catch(()=>{});
+    if(a) { 
+        a.src = "https://actions.google.com/sounds/v1/water/water_leak.ogg";
+        a.volume = 0.01; 
+        a.play().catch(()=>{}); 
+    }
     if(b) { b.muted = true; b.play().catch(()=>{}); }
+    
     window.audioInitialized = true;
 };
 
-// 🔪 DAO MỔ 3: Hàm Loop Alarm - Ưu tiên Preload, trượt thì vớt bằng Native
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     if(window.isAlarmRinging) {
@@ -660,17 +652,15 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
         if (!window.isAlarmRinging) return;
         const tid = window.activeAlarmTaskIds[0];
         const a = document.getElementById('tts-preload-' + tid);
+        
         if (a && a.readyState >= 2) {
             a.volume = 1.0; a.currentTime = 0; 
             a.play().then(() => {
-                a.onended = () => { if(window.isAlarmRinging) window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); };
-            }).catch(() => { 
-                window.playSpeechTTS(window.alarmTextToSpeak, true);
-                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); 
-            });
+                a.onended = () => { if(window.isAlarmRinging) window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 3000); };
+            }).catch(() => { window.playSpeechTTS(window.alarmTextToSpeak, true); window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 4000); });
         } else {
             window.playSpeechTTS(window.alarmTextToSpeak, true);
-            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
+            window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 4000);
         }
     };
     window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 3000);
@@ -680,6 +670,7 @@ window.stopGlobalAlarm = (actionType) => {
     window.isAlarmRinging = false; window.alarmTextToSpeak = "";
     if (window.beepWorker) { window.beepWorker.terminate(); window.beepWorker = null; }
     clearTimeout(window.alarmTTSInterval);
+    
     const musicPlayer = el('mstq-player'), alarmAudio = el('mstq-alarm');
     if(window.resumeMusicAfterAlarm && musicPlayer) musicPlayer.volume = 1.0;
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
@@ -810,22 +801,6 @@ window.renderTasksOnly=()=>{
     }).join(''));
     if(d.length === 0) showFlex('empty-state'); else hideEl('empty-state');
     window.updateProgress();
-};
-
-window.toggleTask=id=>{ const t=window.todos.find(x=>String(x.id)===String(id)); if(t){ t.completed=!t.completed; window.vibrate(15); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); } };
-window.cleanupTasks=()=>{ window.todos=window.todos.filter(t=>!t.completed); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); };
-window.updateProgress=()=>{ const t=window.todos.length, d=window.todos.filter(x=>x.completed).length, p=t===0?0:Math.round((d/t)*100); setTxt('progress-text',p+'%'); const c=el('progress-ring'); if(c) c.style.strokeDashoffset=113-(p/100)*113; };
-window.confirmDeleteTask=id=>{ window.vibrate(20); if(confirm("Xóa nhiệm vụ này?")) { window.todos=window.todos.filter(x=>String(x.id)!==String(id)); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); } };
-
-window.toggleAlarm = (e, id) => {
-    e.stopPropagation(); window.vibrate(10);
-    const t = window.todos.find(x => String(x.id) === String(id));
-    if(t) {
-        t.alarmEnabled = (t.alarmEnabled === false);
-        if(t.alarmEnabled && t.alarmTime <= Date.now()) { t.alarmTime += 86400000; t.alerted = false; window.notifiedTasks.delete(String(id)); }
-        if(!t.alarmEnabled) { t.alerted = true; window.notifiedTasks.add(String(id)); } 
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
-    }
 };
 
 window.openEditTask=id=>{
@@ -1013,7 +988,7 @@ window.FirebaseSync={
     }
 };
 
-// MUSIC SYSTEM
+// 🔪 LÕI MUSIC APP TỪ V73: LOAD PLAYLIST HOÀN HẢO [cite: 78]
 window.MusicDB = {
     init() { return new Promise((resolve) => { const req = indexedDB.open('LifeOS_Music', 1); req.onupgradeneeded = e => e.target.result.createObjectStore('cache'); req.onsuccess = e => resolve(e.target.result); req.onerror = () => resolve(null); }); },
     async get() { try { const db=await this.init(); if(!db) return null; return new Promise(r=>{ const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result); req.onerror=()=>r(null); }); } catch(e){return null;} },
@@ -1104,6 +1079,7 @@ window.MusicApp = {
     },
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
+        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         if (idx >= this.visibleCount) this.visibleCount = Math.ceil((idx + 1) / 100) * 100; 
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false; a.src=this.playlist[idx].stream_url; 
@@ -1115,6 +1091,7 @@ window.MusicApp = {
     },
     togglePlay() { 
         const a=el('mstq-player'); if(!a)return; 
+        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         if(this.playing){ a.pause(); this.playing=false; if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; } 
         else { const p = a.play(); if(p !== undefined) p.catch(()=>{ a.load(); a.play().catch(()=>{}); }); this.playing=true; if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; } 
         this.updateMiniPlayer(); el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50); this.updateMediaSessionPosition();
@@ -1141,7 +1118,7 @@ window.MusicApp = {
             }
         });
         a.addEventListener('ended', (e) => { if(e) e.stopPropagation(); this.prefetchDone = false; if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } else this.playNext(); });
-        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V64] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
+        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V65] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
         if('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => this.togglePlay()); navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext()); navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
