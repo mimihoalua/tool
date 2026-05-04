@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS Anchor Lab - Decoupled Test</title>
+    <style>
+        body { font-family: monospace; background: #0f172a; color: #10b981; padding: 15px; font-size: 13px; line-height: 1.5; }
+        h2 { color: #fff; text-align: center; font-family: sans-serif; }
+        button { display: block; width: 100%; padding: 15px; margin-bottom: 10px; font-size: 14px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; text-transform: uppercase; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-blue { background: #3b82f6; color: #fff; }
+        .btn-red { background: #ef4444; color: #fff; }
+        .btn-gray { background: #475569; color: #fff; }
+        #log { background: #000; padding: 10px; height: 50vh; overflow-y: auto; border: 1px solid #333; border-radius: 8px; margin-top: 10px;}
+        .time { color: #6b7280; }
+        .info { color: #60a5fa; }
+        .warn { color: #facc15; }
+        .error { color: #fca5a5; font-weight: bold; }
+        .success { color: #34d399; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>🧪 PHÒNG TEST MỎ NEO (Bypass Bảo Mật)</h2>
+    <div style="color: #94a3b8; font-size: 11px; margin-bottom: 15px; text-align: center;">
+        *Test chuyên rọi: Dùng Link Internet trực tiếp làm mỏ neo để xuyên qua tường lửa Local của Zalo/Android.
+    </div>
+
+    <audio id="bg-music" playsinline crossorigin="anonymous" loop></audio>
+    <audio id="anchor-audio" playsinline crossorigin="anonymous" loop></audio>
+
+    <button class="btn-blue" id="btn-init" onclick="initLab()">1. Kích hoạt Mỏ Neo & Nhạc Nền</button>
+    <button class="btn-red" id="btn-test" onclick="runDozeTest()" disabled>2. Hẹn 15s (Tắt màn hình ngay!)</button>
+    <button class="btn-gray" onclick="location.reload()">🔄 Reset Phòng Test</button>
+
+    <div id="log">Sẵn sàng...<br></div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        let audioCtx, worker;
+
+        function printLog(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            logEl.innerHTML += `<span class="time">[${time}]</span> <span class="${type}">${msg}</span><br>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function initLab() {
+            try {
+                // 1. Khởi tạo AudioContext
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') await audioCtx.resume();
+                printLog("✅ AudioContext đã mở.", "success");
+
+                // 2. Bật nhạc nền
+                const bg = document.getElementById('bg-music');
+                bg.src = "https://dn721807.ca.archive.org/0/items/giai-toa-moi-thu/Nh%E1%BB%8Bp_%C4%90i%E1%BB%87u_H%E1%BA%A1nh_Ph%C3%BAc_200545_v1.mp3";
+                bg.volume = 0.5;
+                await bg.play();
+                printLog("✅ Nhạc nền đang phát (MediaSession Active).", "success");
+
+                // 3. THẢ MỎ NEO (Dùng link Internet để không bị lỗi No Supported Source)
+                const anchor = document.getElementById('anchor-audio');
+                // Ép dùng 1 link âm thanh im lặng trực tiếp từ web thay vì file local
+                anchor.src = "https://actions.google.com/sounds/v1/water/water_leak.ogg"; 
+                anchor.volume = 0.01; // Để volume gần như câm
+                
+                await anchor.play();
+                printLog("⚓ MỎ NEO (Internet Link) ĐÃ ĐƯỢC THẢ! Tiến trình đã khóa.", "success");
+
+                // Nạp trước danh sách giọng TTS
+                if(window.speechSynthesis) window.speechSynthesis.getVoices();
+
+                document.getElementById('btn-init').disabled = true;
+                document.getElementById('btn-test').disabled = false;
+            } catch (e) {
+                printLog("❌ LỖI KHỞI TẠO: " + e.message, "error");
+            }
+        }
+
+        function fireBeep() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        function triggerAlarm() {
+            printLog("🚨 ĐANG KÍCH NỔ BÁO ĐỘNG...", "warn");
+            
+            // Bóp nhạc nền
+            document.getElementById('bg-music').volume = 0.1;
+            printLog("Ducking: Đã hạ nhạc nền 10%.", "info");
+
+            // Kêu còi vật lý 3 tiếng
+            let beeps = 0;
+            const beepInt = setInterval(() => {
+                fireBeep(); beeps++;
+                if(beeps >= 3) clearInterval(beepInt);
+            }, 1000);
+
+            // GỌI NATIVE TTS SAU KHI CÓ MỎ NEO
+            printLog("🗣️ Bắt đầu gọi Native TTS...", "info");
+            
+            if(window.speechSynthesis) {
+                window.speechSynthesis.cancel(); 
+                
+                // Mồi sóng siêu âm đánh lừa Android
+                if (audioCtx && audioCtx.state === 'running') {
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.frequency.value = 20000;
+                        gain.gain.value = 0.01;
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                    } catch(e){}
+                }
+
+                setTimeout(() => {
+                    const u = new SpeechSynthesisUtterance("Hệ thống mỏ neo hoạt động. Báo động đang phát trong bóng tối.");
+                    u.lang = 'vi-VN';
+                    u.rate = 1.1;
+
+                    u.onstart = () => printLog("✔️ NATIVE TTS ĐANG PHÁT ÂM THANH!", "success");
+                    u.onend = () => {
+                        printLog("✅ NATIVE TTS ĐỌC XONG HOÀN HẢO.", "success");
+                        document.getElementById('bg-music').volume = 0.5; 
+                    };
+                    u.onerror = (e) => {
+                        printLog(`❌ LỖI NATIVE TTS KẸT DOZE MODE: ${e.error}`, "error");
+                        printLog("💀 KẾT LUẬN: Mỏ neo KHÔNG CỨU ĐƯỢC Native TTS trên Xiaomi!", "error");
+                        document.getElementById('bg-music').volume = 0.5;
+                    };
+
+                    window.speechSynthesis.speak(u);
+                    
+                    if(window.speechSynthesis.resume) window.speechSynthesis.resume();
+                }, 50);
+            } else {
+                printLog("❌ Trình duyệt không có TTS.", "error");
+            }
+        }
+
+        function runDozeTest() {
+            printLog("▶️ ĐÃ HẸN GIỜ 15S. HÃY BẤM TẮT MÀN HÌNH ĐIỆN THOẠI NGAY!", "warn");
+            document.getElementById('btn-test').disabled = true;
+            
+            const code = `
+                let t = 0;
+                self.onmessage = (e) => {
+                    if (e.data === 'start') {
+                        setInterval(() => {
+                            t++;
+                            self.postMessage({ tick: t });
+                            if (t === 15) self.postMessage({ fire: true });
+                        }, 1000);
+                    }
+                };
+            `;
+            if(worker) worker.terminate();
+            worker = new Worker(URL.createObjectURL(new Blob([code], {type: 'application/javascript'})));
+            
+            worker.onmessage = (e) => {
+                if (e.data.tick && e.data.tick >= 10) printLog(`Worker đếm: ${e.data.tick}s`, "info");
+                if (e.data.fire) {
+                    worker.terminate();
+                    triggerAlarm();
+                }
+            };
+            worker.postMessage('start');
+        }
+    </script>
+</body>
+</html>
