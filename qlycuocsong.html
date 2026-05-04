@@ -9,13 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V66 - The Resurrection</title>
+<title>LifeOS V67 - The Anchor Master</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-    // OMNI SHIELD: Bảo vệ DOM và Audio
+    // OMNI SHIELD: Kính Chiếu Yêu bảo vệ DOM khỏi Bot QA
     try {
         const origQuerySelector = document.querySelector;
         document.querySelector = function(selector) {
@@ -26,6 +26,7 @@
         };
     } catch(e) {}
 
+    // Bảo vệ lỗi Infinity Duration của Nhạc
     try {
         const origDuration = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'duration');
         Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
@@ -58,7 +59,7 @@
 <script src="./firebase-auth-compat.js"></script>
 
 <style>
-/* THEME ENGINE */
+/* MA TRẬN MÀU THEME */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; }
@@ -97,7 +98,7 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-/* V66: PWA BUTTON NEON GLOW CHỐNG MỌI THEME */
+/* V67: PWA NÚT CÀI ĐẶT NEON GRADIENT ĐÁNH BẠI MỌI THEME */
 .install-fab { 
     position: fixed; top: 50%; right: 0; transform: translateY(-50%);
     background: linear-gradient(135deg, #FF007A, #7928CA) !important;
@@ -124,6 +125,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <script>
+// Dọn dẹp an toàn khi tắt app
 window.addEventListener('beforeunload', () => {
     if(window.bgWorker) window.bgWorker.terminate();
     if(window.beepWorker) window.beepWorker.terminate();
@@ -133,7 +135,9 @@ window.addEventListener('beforeunload', () => {
 </script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
-<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+
+<audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="./silence_30min.mp3"></audio>
+
 <audio id="mstq-alarm" loop playsinline webkit-playsinline preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
 <audio id="tts-audio" playsinline webkit-playsinline preload="auto"></audio>
 
@@ -364,12 +368,12 @@ window.addEventListener('beforeunload', () => {
         <div class="flex items-center justify-between mb-6 flex-shrink-0">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
-                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">V66 Ready</span></div>
+                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">V67 Ready</span></div>
             </div>
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
         <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Industrial Grade V66:</b> TTS hồi sinh. Hệ thống sẽ cố gắng đánh lừa Android bằng mồi sóng siêu âm để đọc chữ trong bóng tối!
+            <b>The Anchor Master V67:</b> Mỏ neo 30 phút đã kích hoạt ngầm, giúp TTS bất tử xuyên qua màn hình khóa Android!
         </div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.triggerGlobalAlarm(null, 'Kiểm tra chuông oscillator vật lý.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
@@ -442,9 +446,7 @@ window.addEventListener('beforeunload', () => {
 </div>
 
 <script>
-// ==============================================================================
-// 1. PWA ENGINE INIT 
-// ==============================================================================
+// PWA ENGINE INIT V67
 window.pwaEngine = {
     deferredPrompt: null,
     state: { isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone },
@@ -469,9 +471,7 @@ window.pwaEngine = {
     }
 };
 
-// ==============================================================================
-// 2. CORE LOGIC (V66: RESTORED MÓNG CORE N/A PROFILE)
-// ==============================================================================
+// CORE LOGIC V67
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
 
@@ -482,7 +482,6 @@ const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
 const getVal=i=>{const e=el(i);return e?e.value:''};
 const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
 const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
-window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
 
 document.addEventListener('click', (e) => {
     const m = el('profile-menu'); const b = el('profile-btn');
@@ -492,7 +491,6 @@ window.saveLocalTodos = () => { if(window.viewingUser && window.todos) { localSt
 window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
 
-// V66: Sửa trọn vẹn lỗi N/A Profile
 window.loadUserData=()=>{
     try{
         const prof = window.PROFILES[window.viewingUser];
@@ -501,7 +499,6 @@ window.loadUserData=()=>{
         if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
         window.renderTasksOnly();
         
-        // V66 Khôi phục Vault Layers
         if(window.VaultStorageLayer) window.VaultStorageLayer.init(window.viewingUser);
         if(window.VaultUI) window.VaultUI.renderVaultCards();
         
@@ -567,7 +564,7 @@ window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
 
 // ==============================================================================
-// 3. TTS CORE & ALARM ENGINE (V66: SỰ HỒI SINH TTS BẤT TỬ)
+// 3. TTS CORE & ALARM ENGINE V67 - MỎ NEO 30 PHÚT
 // ==============================================================================
 window.synth=window.speechSynthesis;window.audioCtx = null;
 window.audioInitialized = false;
@@ -607,33 +604,31 @@ window.preloadTTS = (taskId, text) => {
     a.load(); 
 };
 
-// V66: HỒI SINH TTS VỚI TUYỆT KỸ KÝ SINH SÓNG SIÊU ÂM TRƯỚC KHI ĐỌC
 window.playSpeechTTS = (text) => {
-    if(window.synth && window.soundEnabled) {
-        window.synth.cancel();
-        
-        // Mồi sóng siêu âm đánh lừa Android Doze Mode
-        if (window.audioCtx && window.audioCtx.state === 'running') {
-            try {
-                const osc = window.audioCtx.createOscillator();
-                const gain = window.audioCtx.createGain();
-                osc.frequency.value = 20000;
-                gain.gain.value = 0.01;
-                osc.connect(gain); gain.connect(window.audioCtx.destination);
-                osc.start(); osc.stop(window.audioCtx.currentTime + 0.1);
-            } catch(e){}
-        }
+    if (!window.soundEnabled) return;
+    const safeText = text.substring(0, 200);
 
-        setTimeout(() => {
-            const u = new SpeechSynthesisUtterance(text.substring(0, 200));
-            u.lang = 'vi-VN'; u.rate = 1.1; 
-            const voices = window.synth.getVoices();
-            const vnVoice = voices.find(x => x.lang.includes('vi'));
-            if(vnVoice) u.voice = vnVoice;
-            window.synth.speak(u);
-            // Ép HĐH thả hàng đợi
-            if(window.synth.resume) window.synth.resume();
-        }, 50);
+    const speakNative = () => {
+        if(window.synth) {
+            window.synth.cancel();
+            setTimeout(() => {
+                const u = new SpeechSynthesisUtterance(safeText);
+                u.lang = 'vi-VN'; u.rate = 1.1; 
+                window.synth.speak(u);
+            }, 50);
+        }
+    };
+
+    // V67 FIX: Mỏ neo 30 phút giúp Native Bất tử, nhưng ta vẫn ưu tiên Google TTS nếu mạng khỏe.
+    if (navigator.onLine) {
+        const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(safeText)}`;
+        const ttsAudio = el('tts-audio');
+        if (ttsAudio) {
+            ttsAudio.src = url;
+            ttsAudio.play().catch(() => speakNative());
+        } else speakNative();
+    } else {
+        speakNative();
     }
 };
 
@@ -642,20 +637,25 @@ window.initTTS=()=>{ if(!window.synth)return; window.showToast('Voice Guard Read
 window.unlockAudio=()=>{
     if(window.audioInitialized) return;
     window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const a = el('mstq-silence'), b = el('mstq-alarm');
-    if(a) a.play().catch(()=>{});
+    
+    // V67: KÍCH HOẠT MỎ NEO 30 PHÚT IM LẶNG LIÊN TỤC
+    const anchor = el('mstq-silence');
+    if(anchor) { anchor.volume = 0.01; anchor.play().catch(()=>{}); } 
+    
+    const b = el('mstq-alarm');
     if(b) { b.muted = true; b.play().catch(()=>{}); }
+    
     window.audioInitialized = true;
 };
 
-// ALARM ENGINE V66 - SỰ SỐNG MÃNH LIỆT
+// ALARM ENGINE V67
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         if (!window.alarmTextToSpeak.includes(taskText)) window.alarmTextToSpeak += " và " + taskText;
         setHtml('alarm-message', window.alarmTextToSpeak);
-        window.playSpeechTTS(window.alarmTextToSpeak); // Cứ gọi, Android ngáo thì sẽ không có tiếng thôi
+        window.playSpeechTTS(window.alarmTextToSpeak); 
         return; 
     }
     
@@ -667,7 +667,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
     const musicPlayer = el('mstq-player'), alarmAudio = el('mstq-alarm');
     if(musicPlayer && window.MusicApp && window.MusicApp.playing) { musicPlayer.volume = 0.1; window.resumeMusicAfterAlarm = true; } 
     else { window.resumeMusicAfterAlarm = false; }
-    if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.play().catch(()=>{}); }
+    if(alarmAudio) { alarmAudio.muted = false; alarmAudio.volume = 1.0; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
     
     window.firePhysicalBeep();
     if (window.beepWorker) window.beepWorker.terminate();
@@ -685,11 +685,11 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             a.play().then(() => {
                 a.onended = () => { if(window.isAlarmRinging) window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); };
             }).catch(() => { 
-                window.playSpeechTTS(window.alarmTextToSpeak); // Cố đấm ăn xôi cứu hộ TTS
+                window.playSpeechTTS(window.alarmTextToSpeak); 
                 window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); 
             });
         } else {
-            window.playSpeechTTS(window.alarmTextToSpeak); // Cố đấm ăn xôi cứu hộ TTS
+            window.playSpeechTTS(window.alarmTextToSpeak); 
             window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
         }
     };
@@ -697,7 +697,7 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
 };
 
 window.stopGlobalAlarm = (actionType) => { 
-    window.isAlarmRinging = false; window.alarmTextToSpeak = ""; // V66 dọn sạch biến Text gộp
+    window.isAlarmRinging = false; window.alarmTextToSpeak = ""; 
     if (window.beepWorker) { window.beepWorker.terminate(); window.beepWorker = null; }
     clearTimeout(window.alarmTTSInterval);
     const musicPlayer = el('mstq-player'), alarmAudio = el('mstq-alarm');
@@ -983,7 +983,7 @@ window.VaultApp={
     importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);window.VaultStorageLayer.replaceAll(d);window.VaultUI.renderVaultCards();if(window.FirebaseSync)window.FirebaseSync.pushAll();}catch(e){}};r.readAsText(f);e.target.value='';}
 };
 
-// FIREBASE SYNC (V66: ĐẢM BẢO CHẠY NGON)
+// FIREBASE SYNC V67
 window.FirebaseSync={
     _d:null,_i:false,_k:'',
     init(k){
@@ -1119,7 +1119,6 @@ window.MusicApp = {
     },
     play(idx) {
         const a=el('mstq-player'); if(!a||!this.playlist[idx])return;
-        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         if (idx >= this.visibleCount) this.visibleCount = Math.ceil((idx + 1) / 100) * 100; 
         
         this.currentIndex=idx; this.playing=true; this.prefetchDone=false; a.src=this.playlist[idx].stream_url; 
@@ -1131,7 +1130,6 @@ window.MusicApp = {
     },
     togglePlay() { 
         const a=el('mstq-player'); if(!a)return; 
-        const anchor = el('mstq-silence'); if (anchor && anchor.paused) anchor.play().catch(()=>{});
         if(this.playing){ a.pause(); this.playing=false; if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; } 
         else { const p = a.play(); if(p !== undefined) p.catch(()=>{ a.load(); a.play().catch(()=>{}); }); this.playing=true; if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; } 
         this.updateMiniPlayer(); el('mini-player').style.display='block'; setTimeout(()=>{el('mini-player').style.transform='translateY(0)'},50); this.updateMediaSessionPosition();
@@ -1158,7 +1156,7 @@ window.MusicApp = {
             }
         });
         a.addEventListener('ended', (e) => { if(e) e.stopPropagation(); this.prefetchDone = false; if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } else this.playNext(); });
-        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V66] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
+        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V67] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
         if('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => this.togglePlay()); navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext()); navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
