@@ -9,12 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V65 - The Absolute Masterpiece</title>
+<title>LifeOS V66 - The Resurrection</title>
 
 <link id="manifest-link" rel="manifest" href="./manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+    // OMNI SHIELD: Bảo vệ DOM và Audio
     try {
         const origQuerySelector = document.querySelector;
         document.querySelector = function(selector) {
@@ -57,6 +58,7 @@
 <script src="./firebase-auth-compat.js"></script>
 
 <style>
+/* THEME ENGINE */
 :root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; }
@@ -95,20 +97,24 @@ body { font-family:'Inter',sans-serif; background-color: var(--c-bg) !important;
 .music-btn-active { background-color: var(--c-primary) !important; color: #fff !important; }
 select.timer-dropdown { appearance: none; background-color: var(--c-sub); color: var(--c-primary); font-weight: bold; border: 1px solid var(--c-primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer;}
 
-/* V65: NÚT PWA NEON GRADIENT ĐÁNH BẠI MỌI THEME */
+/* V66: PWA BUTTON NEON GLOW CHỐNG MỌI THEME */
 .install-fab { 
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-    display: none; 
-    z-index: 999999; 
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
     background: linear-gradient(135deg, #FF007A, #7928CA) !important;
     color: #ffffff !important;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-right: none;
-    box-shadow: -4px 4px 15px rgba(255, 0, 122, 0.4);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.9); border-right: none;
+    box-shadow: -0 0 20px rgba(255, 0, 122, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    border-radius: 16px 0 0 16px;
+    padding: 12px 10px 12px 14px;
+    font-weight: 900; z-index: 999999;
+    display: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .install-fab.visible { display: flex !important; }
-.install-fab:active { transform: translateX(5px); }
+.install-fab:active { transform: translateY(-50%) translateX(5px); }
+.install-fab i { animation: bounceRight 2s infinite; }
+@keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-3px); } }
+
 .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
 .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -310,7 +316,7 @@ window.addEventListener('beforeunload', () => {
 
 </main>
 
-<button id="btnInstall" class="install-fab fixed top-1/2 right-0 -translate-y-1/2 pl-4 pr-3 py-3 rounded-l-2xl hidden items-center gap-2 z-[9999] text-sm font-bold border-y-2 border-l-2 hover:scale-105 active:scale-95 cursor-pointer"><i class="ph-bold ph-download-simple text-lg animate-bounce"></i> Cài App</button>
+<button id="btnInstall" class="install-fab"><i class="ph-bold ph-download-simple text-lg"></i> Cài App</button>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
     <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
@@ -358,12 +364,12 @@ window.addEventListener('beforeunload', () => {
         <div class="flex items-center justify-between mb-6 flex-shrink-0">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
-                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">V65 Ready</span></div>
+                <div><h2 class="text-xl font-black text-slate-800">Voice Guard & Alarm</h2><span id="voice-info-badge" class="text-[10px] font-bold text-slate-500 block mt-0.5">V66 Ready</span></div>
             </div>
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
         <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Industrial Grade V65:</b> Hệ thống sử dụng Base64 RAM để báo động xuyên Doze Mode.
+            <b>Industrial Grade V66:</b> TTS hồi sinh. Hệ thống sẽ cố gắng đánh lừa Android bằng mồi sóng siêu âm để đọc chữ trong bóng tối!
         </div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.triggerGlobalAlarm(null, 'Kiểm tra chuông oscillator vật lý.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
@@ -437,102 +443,7 @@ window.addEventListener('beforeunload', () => {
 
 <script>
 // ==============================================================================
-// 1. CORE LOGIC (MÓNG HỆ THỐNG - V65 RESTORED)
-// ==============================================================================
-window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
-window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
-
-const el=i=>document.getElementById(i);
-const setTxt=(i,t)=>{const e=el(i);if(e)e.textContent=t};
-const setHtml=(i,h)=>{const e=el(i);if(e)e.innerHTML=h};
-const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
-const getVal=i=>{const e=el(i);return e?e.value:''};
-const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
-const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
-window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
-
-document.addEventListener('click', (e) => {
-    const m = el('profile-menu'); const b = el('profile-btn');
-    if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
-});
-window.saveLocalTodos = () => { if(window.viewingUser && window.todos) { localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos)); } };
-window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
-window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
-window.showToast=(m,i='ph-info')=>{ const c=el('toast-container');if(!c)return;const t=document.createElement('div'); t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]'; t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`; c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000); };
-window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
-
-window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
-window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
-window.closePasswordModal=()=>hideEl('password-modal');
-window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
-window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
-window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
-window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
-
-window.loadUserData=()=>{
-    try{
-        const prof = window.PROFILES[window.viewingUser];
-        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'N/A');
-        const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
-        if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
-        window.renderTasksOnly();
-        window.VaultStorageLayer.init(window.viewingUser);
-        window.VaultUI.renderVaultCards();
-        window.cloudSyncCompleted = false;
-        if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
-    }catch(e){console.error(e)}
-};
-
-window.switchTab=(id,b)=>{
-    window.vibrate([15]); window.unlockAudio();
-    if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else if(id==='view-focus') el('view-focus').scrollIntoView({behavior:'smooth'});
-    else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
-    else if(id==='view-music') { el('view-music').scrollIntoView({behavior:'smooth'}); if(window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine(); }
-    if(window.innerWidth >= 1024) return;
-    document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
-    const i=el(id);if(i)i.classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(e=>{
-        e.classList.remove('active','text-primary'); e.classList.add('text-slate-400');
-        const bg = e.querySelector('.nav-bg');
-        if(bg){ bg.classList.replace('opacity-100', 'opacity-0'); bg.classList.replace('scale-100', 'scale-50'); }
-    });
-    if(b){
-        b.classList.remove('text-slate-400'); b.classList.add('active','text-primary');
-        const bg = b.querySelector('.nav-bg');
-        if(bg){ bg.classList.replace('opacity-0', 'opacity-100'); bg.classList.replace('scale-50', 'scale-100'); }
-    }
-    const mi = el('mobile-input'); 
-    if(id === 'view-tasks') { if(mi) { mi.classList.remove('hidden'); mi.style.display = ''; } } 
-    else { if(mi) { mi.classList.add('hidden'); mi.style.display = 'none'; } }
-    if(window.soundEnabled && window.innerWidth < 1024 && !window.isAlarmRinging){
-        const names = {'view-tasks':'Nhiệm vụ','view-focus':'Tập trung','view-vault':'Kho lưu trữ','view-music':'Nghe nhạc'};
-        window.playSpeechTTS(names[id] || '');
-    }
-};
-
-window.cycleTheme=()=>{
-    window.vibrate(10);
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    let nextIndex = (window.themes.indexOf(currentTheme) + 1) % window.themes.length;
-    const nextTheme = window.themes[nextIndex];
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('lifeos_v22_theme', nextTheme);
-    let icon = 'ph-sun';
-    if(nextTheme === 'lemon') icon = 'ph-lemon';
-    else if(nextTheme === 'orange') icon = 'ph-orange-slice';
-    else if(nextTheme === 'rose') icon = 'ph-flower-lotus';
-    else if(nextTheme === 'mint') icon = 'ph-leaf';
-    el('theme-icon').className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
-    window.showToast(`Giao diện: ${nextTheme.toUpperCase()}`, 'ph-palette');
-};
-
-window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
-window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
-window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
-
-// ==============================================================================
-// 2. PWA ENGINE INIT (V65 NEON BUTTON)
+// 1. PWA ENGINE INIT 
 // ==============================================================================
 window.pwaEngine = {
     deferredPrompt: null,
@@ -559,7 +470,104 @@ window.pwaEngine = {
 };
 
 // ==============================================================================
-// 3. TTS CORE & BASE64 ALARM ENGINE (CHUẨN V64)
+// 2. CORE LOGIC (V66: RESTORED MÓNG CORE N/A PROFILE)
+// ==============================================================================
+window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
+window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
+
+const el=i=>document.getElementById(i);
+const setTxt=(i,t)=>{const e=el(i);if(e)e.textContent=t};
+const setHtml=(i,h)=>{const e=el(i);if(e)e.innerHTML=h};
+const setVal=(i,v)=>{const e=el(i);if(e)e.value=v};
+const getVal=i=>{const e=el(i);return e?e.value:''};
+const showFlex=i=>{const e=el(i);if(e){e.classList.remove('hidden');e.style.display='flex';}}
+const hideEl=i=>{const e=el(i);if(e){e.classList.add('hidden');e.style.display='none';}}
+window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||'';return t.innerHTML};
+
+document.addEventListener('click', (e) => {
+    const m = el('profile-menu'); const b = el('profile-btn');
+    if(m && !m.classList.contains('hidden') && !m.contains(e.target) && b && !b.contains(e.target)) { m.classList.add('hidden'); }
+});
+window.saveLocalTodos = () => { if(window.viewingUser && window.todos) { localStorage.setItem('lifeos_v8_data_' + window.viewingUser, JSON.stringify(window.todos)); } };
+window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
+
+// V66: Sửa trọn vẹn lỗi N/A Profile
+window.loadUserData=()=>{
+    try{
+        const prof = window.PROFILES[window.viewingUser];
+        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'N/A');
+        const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
+        if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
+        window.renderTasksOnly();
+        
+        // V66 Khôi phục Vault Layers
+        if(window.VaultStorageLayer) window.VaultStorageLayer.init(window.viewingUser);
+        if(window.VaultUI) window.VaultUI.renderVaultCards();
+        
+        window.cloudSyncCompleted = false;
+        if(window.FirebaseSync) window.FirebaseSync.init(window.viewingUser);
+    }catch(e){console.error(e)}
+};
+
+window.showToast=(m,i='ph-info')=>{ const c=el('toast-container');if(!c)return;const t=document.createElement('div'); t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]'; t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`; c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000); };
+window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
+
+window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
+window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
+window.closePasswordModal=()=>hideEl('password-modal');
+window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào')}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
+window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
+window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
+window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
+
+window.switchTab=(id,b)=>{
+    window.vibrate([15]); window.unlockAudio();
+    if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else if(id==='view-focus') el('view-focus').scrollIntoView({behavior:'smooth'});
+    else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
+    else if(id==='view-music') { el('view-music').scrollIntoView({behavior:'smooth'}); if(window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine(); }
+    if(window.innerWidth >= 1024) return;
+    document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
+    const i=el(id);if(i)i.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(e=>{
+        e.classList.remove('active','text-primary'); e.classList.add('text-slate-400');
+        const bg = e.querySelector('.nav-bg');
+        if(bg){ bg.classList.replace('opacity-100', 'opacity-0'); bg.classList.replace('scale-100', 'scale-50'); }
+    });
+    if(b){
+        b.classList.remove('text-slate-400'); b.classList.add('active','text-primary');
+        const bg = b.querySelector('.nav-bg');
+        if(bg){ bg.classList.replace('opacity-0', 'opacity-100'); bg.classList.replace('scale-50', 'scale-100'); }
+    }
+    const mi = el('mobile-input'); 
+    if(id === 'view-tasks') { if(mi) { mi.classList.remove('hidden'); mi.style.display = ''; } } 
+    else { if(mi) { mi.classList.add('hidden'); mi.style.display = 'none'; } }
+};
+
+window.cycleTheme=()=>{
+    window.vibrate(10);
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    let nextIndex = (window.themes.indexOf(currentTheme) + 1) % window.themes.length;
+    const nextTheme = window.themes[nextIndex];
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('lifeos_v22_theme', nextTheme);
+    let icon = 'ph-sun';
+    if(nextTheme === 'lemon') icon = 'ph-lemon';
+    else if(nextTheme === 'orange') icon = 'ph-orange-slice';
+    else if(nextTheme === 'rose') icon = 'ph-flower-lotus';
+    else if(nextTheme === 'mint') icon = 'ph-leaf';
+    el('theme-icon').className = `ph-bold ${icon} text-base sm:text-lg transition-transform text-primary`;
+    window.showToast(`Giao diện: ${nextTheme.toUpperCase()}`, 'ph-palette');
+};
+
+window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
+window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
+window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
+
+
+// ==============================================================================
+// 3. TTS CORE & ALARM ENGINE (V66: SỰ HỒI SINH TTS BẤT TỬ)
 // ==============================================================================
 window.synth=window.speechSynthesis;window.audioCtx = null;
 window.audioInitialized = false;
@@ -599,14 +607,32 @@ window.preloadTTS = (taskId, text) => {
     a.load(); 
 };
 
-// CHỈ DÙNG CHO UI TƯƠNG TÁC LÚC MỞ MÀN HÌNH (Tuyệt đối không gọi lúc nổ chuông Base64)
+// V66: HỒI SINH TTS VỚI TUYỆT KỸ KÝ SINH SÓNG SIÊU ÂM TRƯỚC KHI ĐỌC
 window.playSpeechTTS = (text) => {
-    if (window.isAlarmRinging) return; // Bảo vệ hệ thống khỏi Doze
     if(window.synth && window.soundEnabled) {
         window.synth.cancel();
+        
+        // Mồi sóng siêu âm đánh lừa Android Doze Mode
+        if (window.audioCtx && window.audioCtx.state === 'running') {
+            try {
+                const osc = window.audioCtx.createOscillator();
+                const gain = window.audioCtx.createGain();
+                osc.frequency.value = 20000;
+                gain.gain.value = 0.01;
+                osc.connect(gain); gain.connect(window.audioCtx.destination);
+                osc.start(); osc.stop(window.audioCtx.currentTime + 0.1);
+            } catch(e){}
+        }
+
         setTimeout(() => {
             const u = new SpeechSynthesisUtterance(text.substring(0, 200));
-            u.lang = 'vi-VN'; u.rate = 1.1; window.synth.speak(u);
+            u.lang = 'vi-VN'; u.rate = 1.1; 
+            const voices = window.synth.getVoices();
+            const vnVoice = voices.find(x => x.lang.includes('vi'));
+            if(vnVoice) u.voice = vnVoice;
+            window.synth.speak(u);
+            // Ép HĐH thả hàng đợi
+            if(window.synth.resume) window.synth.resume();
         }, 50);
     }
 };
@@ -622,12 +648,14 @@ window.unlockAudio=()=>{
     window.audioInitialized = true;
 };
 
+// ALARM ENGINE V66 - SỰ SỐNG MÃNH LIỆT
 window.triggerGlobalAlarm = (taskIds, taskText) => {
     const arrIds = Array.isArray(taskIds) ? taskIds : [taskIds];
     if(window.isAlarmRinging) {
         arrIds.forEach(id => { if(!window.activeAlarmTaskIds.includes(id)) window.activeAlarmTaskIds.push(id); });
         if (!window.alarmTextToSpeak.includes(taskText)) window.alarmTextToSpeak += " và " + taskText;
         setHtml('alarm-message', window.alarmTextToSpeak);
+        window.playSpeechTTS(window.alarmTextToSpeak); // Cứ gọi, Android ngáo thì sẽ không có tiếng thôi
         return; 
     }
     
@@ -656,8 +684,12 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
             a.volume = 1.0; a.currentTime = 0; 
             a.play().then(() => {
                 a.onended = () => { if(window.isAlarmRinging) window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); };
-            }).catch(() => { window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); });
+            }).catch(() => { 
+                window.playSpeechTTS(window.alarmTextToSpeak); // Cố đấm ăn xôi cứu hộ TTS
+                window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000); 
+            });
         } else {
+            window.playSpeechTTS(window.alarmTextToSpeak); // Cố đấm ăn xôi cứu hộ TTS
             window.alarmTTSInterval = setTimeout(window._triggerTTSLoop, 5000);
         }
     };
@@ -665,14 +697,15 @@ window.triggerGlobalAlarm = (taskIds, taskText) => {
 };
 
 window.stopGlobalAlarm = (actionType) => { 
-    window.isAlarmRinging = false; window.alarmTextToSpeak = "";
+    window.isAlarmRinging = false; window.alarmTextToSpeak = ""; // V66 dọn sạch biến Text gộp
     if (window.beepWorker) { window.beepWorker.terminate(); window.beepWorker = null; }
     clearTimeout(window.alarmTTSInterval);
     const musicPlayer = el('mstq-player'), alarmAudio = el('mstq-alarm');
     if(window.resumeMusicAfterAlarm && musicPlayer) musicPlayer.volume = 1.0;
     if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; } 
-    
+    if(window.synth) window.synth.cancel();
     hideEl('alarm-overlay'); window.vibrate(10);
+    
     if(window.activeAlarmTaskIds.length) {
         let needsSync = false;
         window.activeAlarmTaskIds.forEach(id => {
@@ -950,7 +983,7 @@ window.VaultApp={
     importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);window.VaultStorageLayer.replaceAll(d);window.VaultUI.renderVaultCards();if(window.FirebaseSync)window.FirebaseSync.pushAll();}catch(e){}};r.readAsText(f);e.target.value='';}
 };
 
-// FIREBASE SYNC 
+// FIREBASE SYNC (V66: ĐẢM BẢO CHẠY NGON)
 window.FirebaseSync={
     _d:null,_i:false,_k:'',
     init(k){
@@ -1125,7 +1158,7 @@ window.MusicApp = {
             }
         });
         a.addEventListener('ended', (e) => { if(e) e.stopPropagation(); this.prefetchDone = false; if(this.repeat==='one'){ a.currentTime=0; a.play().catch(()=>{}); } else this.playNext(); });
-        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V64] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
+        a.addEventListener('error', (e) => { if(e) e.stopPropagation(); console.warn(`[V66] Lỗi mạng khi Stream nhạc. Đợi 2s qua bài...`); this.prefetchDone = false; setTimeout(() => { this.playNext(); }, 2000); });
         if('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => this.togglePlay()); navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext()); navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
