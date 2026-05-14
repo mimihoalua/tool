@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corel Grade Print Engine - A4 Portrait (3x7 Layout)</title>
+
+    <style>
+        /* =========================================================
+           [ISO METRICS] KHỔ A4 DỌC & LƯỚI 3x7 (21 VÉ)
+           Đã bổ sung Gap cắt xén thực tế cho xưởng in
+           ========================================================= */
+        :root {
+            --paper-w: 210mm;
+            --paper-h: 297mm;
+            
+            /* Tự động chia đều không gian trên lưới 3x7 kèm khoảng cách cắt */
+            --c-border: #8A008A; 
+            --c-title: #00008B;  
+            --c-name: #E6005C;   
+            --c-text: #111111;   
+
+            /* Font mặc định ban đầu (Cho phép người dùng gõ đè) */
+            --f-title: 'Times New Roman', Times, serif;
+            --f-name: 'Monotype Corsiva', cursive, serif;
+            --f-date: 'Arial', sans-serif;
+            --f-plate: 'Times New Roman', Times, serif;
+            --f-foot: 'Monotype Corsiva', cursive, serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #E5E7EB; color: #111; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        /* =========================================================
+           [UI CONTROL PANEL] - NÂNG CẤP TRƯỜNG NHẬP CUSTOM FONT
+           ========================================================= */
+        #qa-panel { width: 360px; background: #FFF; display: flex; flex-direction: column; z-index: 10; box-shadow: 2px 0 15px rgba(0,0,0,0.1); border-right: 1px solid #D1D5DB; }
+        .p-head { padding: 16px 20px; background: #1F2937; color: #FFF; border-bottom: 4px solid var(--c-border); }
+        .p-head h1 { font-size: 13pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .p-head p { font-size: 8pt; color: #9CA3AF; margin-top: 2px; }
+
+        .p-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+        
+        .section-title { font-size: 8.5pt; font-weight: 800; color: #4B5563; border-bottom: 2px solid #E5E7EB; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-title:first-child { margin-top: 0; }
+
+        .fg { margin-bottom: 12px; }
+        .fg label { display: block; font-size: 7.5pt; font-weight: 700; margin-bottom: 4px; color: #6B7280; text-transform: uppercase; }
+        .fc { width: 100%; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: 4px; font-family: 'Segoe UI', sans-serif; font-size: 9pt; background: #F9FAFB; transition: 0.2s; }
+        .fc:focus { outline: none; border-color: var(--c-border); background: #FFF; }
+        
+        .fr { display: flex; gap: 10px; }
+        .fr .fg { flex: 1; }
+
+        .p-foot { padding: 15px 20px; background: #FAFAFA; border-top: 1px solid #E5E7EB; }
+        .btn { width: 100%; padding: 12px; background: var(--c-border); color: #FFF; border: none; border-radius: 4px; font-weight: 800; font-size: 10pt; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .btn:hover { background: #600060; }
+
+        /* =========================================================
+           [PRINT STAGE] - KHUNG A4 LƯỚI 3x7 (21 VÉ)
+           ========================================================= */
+        #workspace { flex: 1; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 30px; }
+
+        .a4-portrait {
+            width: var(--paper-w); height: var(--paper-h); background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            /* Bố trí lưới 3 Cột x 7 Dòng */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            padding: 8mm; /* Lề in an toàn */
+            gap: 3mm; /* Khoảng cách dao xén tiêu chuẩn xưởng in */
+        }
+
+        /* LÕI VÉ HÌNH CHỮ NHẬT CỨNG (Tự động thích ứng Grid) */
+        .ticket-trim {
+            width: 100%; height: 100%;
+            border: 1.5pt solid var(--c-border);
+            position: relative; box-sizing: border-box;
+            background: #FFF;
+            padding: 2.5mm 6.5mm; /* Khoảng trống 2 bên cho ngày tháng dọc */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* =========================================================
+           [THÀNH PHẦN THIẾT KẾ BÊN TRONG]
+           ========================================================= */
+        
+        .corner-ornament {
+            position: absolute; width: 5mm; height: 5mm;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10,10 Q40,10 50,30 Q60,10 90,10 Q70,40 90,70 Q60,50 50,90 Q40,50 10,70 Q30,40 10,10 Z" fill="none" stroke="%238A008A" stroke-width="5"/></svg>');
+            background-size: contain; background-repeat: no-repeat;
+        }
+        .co-tl { top: 0.5mm; left: 0.5mm; }
+        .co-tr { top: 0.5mm; right: 0.5mm; transform: scaleX(-1); }
+        .co-bl { bottom: 0.5mm; left: 0.5mm; transform: scaleY(-1); }
+        .co-br { bottom: 0.5mm; right: 0.5mm; transform: scale(-1, -1); }
+
+        .t-title {
+            font-family: var(--f-title); font-size: 11pt; font-weight: 900;
+            color: var(--c-title); text-align: center; text-transform: uppercase;
+            letter-spacing: 1.5px; transform: scaleX(1.1); margin-top: 0.5mm; line-height: 1;
+        }
+
+        .t-date-side {
+            position: absolute; top: 0; bottom: 0; width: 6.5mm;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--f-date); font-size: 4.5pt; font-weight: bold; color: var(--c-border);
+        }
+        .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); }
+        .date-right { right: 0; writing-mode: vertical-rl; }
+
+        .t-center-block { display: flex; justify-content: space-between; align-items: center; width: 100%; flex: 1; margin: 1mm 0; }
+        
+        .names-col {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            flex: 1; min-width: 0; color: var(--c-name); font-family: var(--f-name);
+            line-height: 0.85; 
+        }
+        
+        .n-line1 { font-size: 11pt; white-space: nowrap; transform: translateX(-1mm); } 
+        .n-line2 { font-size: 13pt; font-weight: bold; white-space: nowrap; transform: translateX(2mm); } 
+
+        .t-decor {
+            width: 10mm; height: 10mm; flex-shrink: 0; margin: 0 1mm;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="none" stroke="%23ff99cc" stroke-width="2"/><path d="M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50" fill="none" stroke="%23ff99cc" stroke-width="3" stroke-dasharray="2 4"/><text x="50" y="73" font-family="Arial" font-size="68" font-weight="bold" fill="%23E6005C" text-anchor="middle">囍</text></svg>') no-repeat center;
+            background-size: contain;
+        }
+
+        .t-plate-row {
+            display: flex; align-items: flex-end; width: 100%; gap: 3px;
+            font-family: var(--f-plate); font-size: 8pt; font-weight: 900; color: var(--c-text);
+            margin-bottom: 1.5mm;
+        }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; }
+        .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted #222; height: 100%; }
+
+        .t-footer {
+            text-align: center; color: var(--c-name); font-family: var(--f-foot);
+            font-size: 7.5pt; font-style: italic; font-weight: bold; line-height: 1; margin-bottom: 0.5mm;
+        }
+
+        /* =========================================================
+           [PRINT SYSTEM CONFIG]
+           ========================================================= */
+        @media print {
+            @page { size: A4 portrait; margin: 0 !important; }
+            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #qa-panel { display: none !important; }
+            #workspace { padding: 0 !important; }
+            .a4-portrait { width: 210mm; height: 297mm; box-shadow: none; margin: 0; padding: 8mm; gap: 3mm; page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LIST CÁC FONT GỢI Ý (Có thể gõ thêm tuỳ ý) -->
+    <datalist id="sys-fonts">
+        <option value="'Monotype Corsiva', cursive">
+        <option value="VNI-Ariston">
+        <option value="VNI-Aptima">
+        <option value="UTM Bickham">
+        <option value="UTM Alexander">
+        <option value="UVN Bai Sau">
+        <option value="SVN-Nexa">
+        <option value="'Times New Roman', Times, serif">
+        <option value="Arial, sans-serif">
+    </datalist>
+
+    <aside id="qa-panel">
+        <div class="p-head">
+            <h1>Print Config</h1>
+            <p>1 Mẫu Duy Nhất - Lưới 3 Cột x 7 Dòng (21 Vé)</p>
+        </div>
+        
+        <div class="p-body">
+            
+            <div class="section-title">Kho Font Hệ Thống (Gõ tên Font tuỳ ý)</div>
+            <div class="fg">
+                <label>Font Tiêu Đề</label>
+                <input type="text" id="ui-f-title" class="fc font-input" list="sys-fonts" value="'Times New Roman', Times, serif" data-target="--f-title" placeholder="Ví dụ: VNI-Aptima">
+            </div>
+            <div class="fg">
+                <label>Font Tên Cô Dâu / Chú Rể</label>
+                <!-- Dùng Text Input để thả tự do cho người dùng xài Font cài trong máy -->
+                <input type="text" id="ui-f-name" class="fc font-input" list="sys-fonts" value="'Monotype Corsiva', cursive" data-target="--f-name" placeholder="Gõ tên font Corel của bạn (VNI, UTM...)">
+            </div>
+            <div class="fg">
+                <label>Font Chữ Lật Dọc (Ngày)</label>
+                <input type="text" id="ui-f-date" class="fc font-input" list="sys-fonts" value="Arial, sans-serif" data-target="--f-date">
+            </div>
+            <div class="fg">
+                <label>Font Dòng Biển Số</label>
+                <input type="text" id="ui-f-plate" class="fc font-input" list="sys-fonts" value="'Times New Roman', Times, serif" data-target="--f-plate">
+            </div>
+            <div class="fg">
+                <label>Font Chân Chữ (Footer)</label>
+                <input type="text" id="ui-f-foot" class="fc font-input" list="sys-fonts" value="'Monotype Corsiva', cursive" data-target="--f-foot">
+            </div>
+
+            <div class="section-title">Thông Tin Tên (Xếp Dòng)</div>
+            <div class="fr">
+                <div class="fg">
+                    <label>Họ Nữ (Trên)</label>
+                    <input type="text" id="ui-b1" class="fc" value="Minh">
+                </div>
+                <div class="fg">
+                    <label>Tên Nữ (Dưới)</label>
+                    <input type="text" id="ui-b2" class="fc" value="Ngọc">
+                </div>
+            </div>
+
+            <div class="fr">
+                <div class="fg">
+                    <label>Họ Nam (Trên)</label>
+                    <input type="text" id="ui-g1" class="fc" value="Nguyễn">
+                </div>
+                <div class="fg">
+                    <label>Tên Nam (Dưới)</label>
+                    <input type="text" id="ui-g2" class="fc" value="Quang">
+                </div>
+            </div>
+
+            <div class="fg">
+                <label>Ngày (Lật dọc)</label>
+                <input type="text" id="ui-date" class="fc" value="Ngày 10 & 11.01.2026">
+            </div>
+            <div class="fg">
+                <label>Tiền tố Biển số</label>
+                <input type="text" id="ui-plate" class="fc" value="Biển số:">
+            </div>
+            <div class="fg">
+                <label>Lời chào</label>
+                <input type="text" id="ui-foot" class="fc" value="Rất hân hạnh được đón tiếp !">
+            </div>
+
+        </div>
+
+        <div class="p-foot">
+            <button id="btn-print" class="btn">🖨️ XUẤT 21 VÉ (A4 DỌC)</button>
+        </div>
+    </aside>
+
+    <main id="workspace">
+        <div id="print-canvas" class="a4-portrait">
+            <!-- Render JS -->
+        </div>
+    </main>
+
+    <script>
+        const MasterEngine = (() => {
+            const canvas = document.getElementById('print-canvas');
+            const btnPrint = document.getElementById('btn-print');
+            
+            const textInputs = ['b1', 'b2', 'g1', 'g2', 'date', 'plate', 'foot']
+                .reduce((acc, id) => ({ ...acc, [id]: document.getElementById(`ui-${id}`) }), {});
+            
+            // Lấy tất cả input có chức năng đổi font
+            const fontInputs = document.querySelectorAll('.font-input');
+
+            let data = {};
+
+            const updateData = () => {
+                Object.keys(textInputs).forEach(k => data[k] = textInputs[k].value.trim());
+            };
+
+            const applyFonts = () => {
+                fontInputs.forEach(inp => {
+                    const targetVar = inp.getAttribute('data-target');
+                    const fontValue = inp.value.trim();
+                    if (fontValue) {
+                        document.documentElement.style.setProperty(targetVar, fontValue);
+                    }
+                });
+            };
+
+            const fitNames = () => {
+                const tickets = document.querySelectorAll('.ticket-trim');
+                if (!tickets.length) return;
+
+                const baseS1 = 10; 
+                const baseS2 = 12;
+
+                tickets.forEach(ticket => {
+                    const colB = ticket.querySelector('.t-bride');
+                    const b1 = colB.querySelector('.n-line1');
+                    const b2 = colB.querySelector('.n-line2');
+                    
+                    const colG = ticket.querySelector('.t-groom');
+                    const g1 = colG.querySelector('.n-line1');
+                    const g2 = colG.querySelector('.n-line2');
+
+                    const getRatio = (col, l1, l2) => {
+                        let ratio = 1.0;
+                        l1.style.fontSize = `${baseS1}pt`;
+                        l2.style.fontSize = `${baseS2}pt`;
+                        
+                        const maxW = col.clientWidth;
+                        let loops = 0;
+                        while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
+                            ratio -= 0.05;
+                            l1.style.fontSize = `${baseS1 * ratio}pt`;
+                            l2.style.fontSize = `${baseS2 * ratio}pt`;
+                            loops++;
+                        }
+                        return ratio;
+                    };
+
+                    const rb = getRatio(colB, b1, b2);
+                    const rg = getRatio(colG, g1, g2);
+
+                    const finalRatio = Math.min(rb, rg);
+                    
+                    b1.style.fontSize = `${baseS1 * finalRatio}pt`;
+                    b2.style.fontSize = `${baseS2 * finalRatio}pt`;
+                    g1.style.fontSize = `${baseS1 * finalRatio}pt`;
+                    g2.style.fontSize = `${baseS2 * finalRatio}pt`;
+                });
+            };
+
+            const buildTicket = () => {
+                const { b1, b2, g1, g2, date, plate, foot } = data;
+                
+                return `
+                    <div class="ticket-trim">
+                        <div class="corner-ornament co-tl"></div>
+                        <div class="corner-ornament co-tr"></div>
+                        <div class="corner-ornament co-bl"></div>
+                        <div class="corner-ornament co-br"></div>
+
+                        <div class="t-date-side date-left">${date}</div>
+                        <div class="t-date-side date-right">${date}</div>
+
+                        <div class="t-title">VÉ GỬI XE</div>
+                        
+                        <div class="t-center-block">
+                            <!-- Nữ Trái -->
+                            <div class="names-col t-bride">
+                                <span class="n-line1">${b1}</span>
+                                <span class="n-line2">${b2}</span>
+                            </div>
+                            
+                            <!-- Hỷ Giữa -->
+                            <div class="t-decor"></div>
+                            
+                            <!-- Nam Phải -->
+                            <div class="names-col t-groom">
+                                <span class="n-line1">${g1}</span>
+                                <span class="n-line2">${g2}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="t-plate-row">
+                            <div class="t-plate-label">${plate}</div>
+                            <div class="t-plate-dots"></div>
+                        </div>
+                        
+                        <div class="t-footer">${foot}</div>
+                    </div>
+                `;
+            };
+
+            const render = () => {
+                // XUẤT 21 VÉ (3 CỘT X 7 DÒNG)
+                canvas.innerHTML = Array(21).fill(buildTicket()).join('');
+                document.fonts.ready.then(() => {
+                    setTimeout(() => requestAnimationFrame(fitNames), 50);
+                });
+            };
+
+            const init = () => {
+                Object.values(textInputs).forEach(inp => inp.addEventListener('input', () => { updateData(); render(); }));
+                fontInputs.forEach(inp => inp.addEventListener('input', () => { applyFonts(); render(); }));
+                
+                btnPrint.addEventListener('click', () => setTimeout(() => window.print(), 100));
+                window.addEventListener('resize', fitNames);
+
+                applyFonts();
+                updateData();
+                render();
+            };
+
+            return { init };
+        })();
+
+        document.addEventListener('DOMContentLoaded', MasterEngine.init);
+    </script>
+</body>
+</html>
