@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>Quản lý Liên kết YouTube cho NotebookLM</title>
+  <style>
+    :root {
+      --bg-1: #eef2ff;
+      --bg-2: #ecfeff;
+      --card: rgba(255, 255, 255, 0.94);
+      --text: #111827;
+      --muted: #64748b;
+      --line: #dbe4ef;
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --warning: #d97706;
+      --warning-soft: #fffbeb;
+      --info: #2563eb;
+      --info-soft: #eff6ff;
+      --shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 36%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    button, textarea, input { font: inherit; }
+
+    .app {
+      width: min(100%, 760px);
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 5vw, 40px);
+      backdrop-filter: blur(12px);
+    }
+
+    .header { text-align: center; margin-bottom: 26px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--info-soft);
+      color: #1d4ed8;
+      font-weight: 700;
+      font-size: 0.86rem;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.045em;
+    }
+
+    .subtitle {
+      margin: 12px auto 0;
+      max-width: 610px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .field { text-align: left; margin: 22px 0; }
+
+    label {
+      display: block;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 10px;
+    }
+
+    .input-wrap { position: relative; }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      padding: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.16);
+    }
+
+    textarea.drag-over {
+      border-color: var(--info);
+      background: #eff6ff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+    }
+
+    .mini-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, opacity 0.14s ease;
+      user-select: none;
+      text-decoration: none;
+      min-height: 46px;
+    }
+
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:focus-visible { outline: 3px solid rgba(79, 70, 229, 0.28); outline-offset: 3px; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .btn-primary { background: var(--primary); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+    .btn-warning { background: var(--warning); }
+    .btn-muted { background: #64748b; }
+    .btn-info { background: var(--info); }
+    .btn-wide { width: 100%; font-size: 1.1rem; padding: 15px 18px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0 22px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      border-radius: var(--radius-lg);
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.7rem;
+      line-height: 1;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .stat span { color: var(--muted); font-weight: 700; font-size: 0.88rem; }
+
+    .current-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      background: #ffffff;
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .current-card h2 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      color: #334155;
+    }
+
+    .current-link {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 10px;
+      word-break: break-all;
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      color: #0f172a;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .current-link.empty { color: #1d4ed8; background: var(--info-soft); border-color: #bfdbfe; font-style: italic; }
+    .current-link.done { color: #047857; background: var(--success-soft); border-color: #a7f3d0; }
+    .current-link.error { color: #991b1b; background: var(--danger-soft); border-color: #fecaca; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+      margin: 14px 0 0;
+    }
+
+    .instructions {
+      margin-top: 24px;
+      text-align: left;
+      border-left: 5px solid var(--info);
+      background: var(--info-soft);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      color: #334155;
+    }
+
+    .instructions h3 {
+      margin: 0 0 12px;
+      color: #1e40af;
+      font-size: 1.15rem;
+    }
+
+    .instructions ol {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.65;
+    }
+
+    .instructions li + li { margin-top: 5px; }
+
+    .footer-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 22px;
+    }
+
+    .toast-stack {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(calc(100vw - 28px), 520px);
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 13px 14px;
+      border-radius: 16px;
+      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.24);
+      background: #111827;
+      color: #fff;
+      animation: toastIn 0.22s ease-out;
+    }
+
+    .toast.success { background: #065f46; }
+    .toast.error { background: #991b1b; }
+    .toast.warning { background: #92400e; }
+    .toast.info { background: #1e3a8a; }
+    .toast button { background: transparent; color: inherit; border: 0; cursor: pointer; padding: 4px; opacity: 0.75; }
+    .toast button:hover { opacity: 1; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 680px) {
+      body { padding: 12px; align-items: flex-start; }
+      .app { border-radius: 22px; }
+      .stats { grid-template-columns: 1fr; }
+      .actions { grid-template-columns: 1fr; }
+      .mini-actions .btn { width: 100%; }
+      .footer-actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Công cụ quản lý liên kết YouTube cho NotebookLM">
+    <header class="header">
+      <div class="badge" aria-hidden="true">✓ Tool sạch • Chạy mượt • Không AI thừa</div>
+      <h1>Quản lý Liên kết YouTube</h1>
+      <p class="subtitle">Dán danh sách link YouTube, tool sẽ lọc link hợp lệ, sao chép từng link theo thứ tự và tự loại link đã xử lý khỏi danh sách.</p>
+    </header>
+
+    <section class="field">
+      <label for="linkInput">Danh sách liên kết YouTube</label>
+      <div class="input-wrap">
+        <textarea id="linkInput" spellcheck="false" autocomplete="off" placeholder="Mỗi dòng một link. Ví dụ:
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://youtu.be/dQw4w9WgXcQ
+https://youtube.com/shorts/dQw4w9WgXcQ" aria-describedby="helpText"></textarea>
+      </div>
+      <div class="mini-actions">
+        <button id="pasteLinksBtn" class="btn btn-warning" type="button" title="Dán từ khay nhớ tạm">Dán từ clipboard</button>
+        <button id="clearLinksBtn" class="btn btn-danger" type="button" title="Xóa ô nhập">Xóa danh sách</button>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Thống kê liên kết">
+      <div class="stat"><strong id="validCount">0</strong><span>Hợp lệ</span></div>
+      <div class="stat"><strong id="invalidCount">0</strong><span>Bị bỏ qua</span></div>
+      <div class="stat"><strong id="remainingCount">0</strong><span>Còn lại</span></div>
+    </section>
+
+    <section class="current-card">
+      <h2>Liên kết hiện tại</h2>
+      <div id="currentLink" class="current-link empty" role="status" aria-live="polite">Dán liên kết YouTube để bắt đầu.</div>
+      <div class="actions">
+        <button id="copyLinkBtn" class="btn btn-primary btn-wide" type="button" disabled>Sao chép link hiện tại</button>
+        <button id="viewOriginalLinkBtn" class="btn btn-info" type="button" disabled>Mở link</button>
+      </div>
+    </section>
+
+    <section class="instructions" id="helpText">
+      <h3>Hướng dẫn sắp xếp quy trình</h3>
+      <ol>
+        <li>Chuẩn bị danh sách YouTube, mỗi link đặt trên một dòng riêng.</li>
+        <li>Dán vào ô nhập hoặc kéo thả file <strong>.txt</strong> chứa danh sách link.</li>
+        <li>Kiểm tra 3 chỉ số: <strong>Hợp lệ</strong>, <strong>Bị bỏ qua</strong>, <strong>Còn lại</strong>.</li>
+        <li>Bấm <strong>Sao chép link hiện tại</strong>; link đầu tiên sẽ được copy và tự xóa khỏi danh sách.</li>
+        <li>Sang NotebookLM → Thêm nguồn → Liên kết → URL YouTube → dán link vừa copy.</li>
+        <li>Quay lại tool và lặp lại cho đến khi báo đã xử lý hết.</li>
+        <li>Dùng <strong>Mở link</strong> khi cần kiểm tra nhanh video hiện tại trước khi nhập vào NotebookLM.</li>
+        <li>Dùng <strong>Xóa danh sách</strong> hoặc <strong>Đặt lại tool</strong> khi muốn làm sạch toàn bộ trạng thái.</li>
+      </ol>
+    </section>
+
+    <div class="footer-actions">
+      <button id="resetAppBtn" class="btn btn-muted" type="button">Đặt lại tool</button>
+    </div>
+  </main>
+
+  <div id="toastStack" class="toast-stack" aria-live="polite" aria-relevant="additions"></div>
+
+  <script>
+    'use strict';
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      linkInput: $('linkInput'),
+      pasteLinksBtn: $('pasteLinksBtn'),
+      clearLinksBtn: $('clearLinksBtn'),
+      copyLinkBtn: $('copyLinkBtn'),
+      viewOriginalLinkBtn: $('viewOriginalLinkBtn'),
+      resetAppBtn: $('resetAppBtn'),
+      currentLink: $('currentLink'),
+      validCount: $('validCount'),
+      invalidCount: $('invalidCount'),
+      remainingCount: $('remainingCount'),
+      toastStack: $('toastStack')
+    };
+
+    const state = {
+      validLinks: [],
+      invalidLines: [],
+      lastToastKey: '',
+      lastToastAt: 0
+    };
+
+    const YOUTUBE_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/;
+
+    function extractYouTubeId(input) {
+      const value = String(input || '').trim();
+      if (!value) return null;
+      if (YOUTUBE_ID_REGEX.test(value)) return value;
+
+      try {
+        const url = new URL(value.startsWith('http') ? value : `https://${value}`);
+        const host = url.hostname.replace(/^www\./, '').toLowerCase();
+
+        if (host === 'youtu.be') {
+          const id = url.pathname.split('/').filter(Boolean)[0];
+          return YOUTUBE_ID_REGEX.test(id) ? id : null;
+        }
+
+        if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com' || host === 'youtube-nocookie.com') {
+          const watchId = url.searchParams.get('v');
+          if (YOUTUBE_ID_REGEX.test(watchId)) return watchId;
+
+          const parts = url.pathname.split('/').filter(Boolean);
+          const knownPrefixes = ['embed', 'v', 'shorts', 'live'];
+          if (knownPrefixes.includes(parts[0]) && YOUTUBE_ID_REGEX.test(parts[1])) return parts[1];
+        }
+      } catch (_) {
+        return null;
+      }
+
+      return null;
+    }
+
+    function normalizeYouTubeUrl(line) {
+      const id = extractYouTubeId(line);
+      return id ? `https://www.youtube.com/watch?v=${id}` : null;
+    }
+
+    function parseInput() {
+      const rows = els.linkInput.value
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      const seen = new Set();
+      const validLinks = [];
+      const invalidLines = [];
+      let duplicateCount = 0;
+
+      for (const row of rows) {
+        const normalized = normalizeYouTubeUrl(row);
+        if (!normalized) {
+          invalidLines.push(row);
+          continue;
+        }
+        if (seen.has(normalized)) {
+          duplicateCount += 1;
+          continue;
+        }
+        seen.add(normalized);
+        validLinks.push(normalized);
+      }
+
+      state.validLinks = validLinks;
+      state.invalidLines = invalidLines;
+      return { totalRows: rows.length, duplicateCount };
+    }
+
+    function syncTextareaFromState() {
+      els.linkInput.value = state.validLinks.join('\n');
+    }
+
+    function setCurrentBox(type, text) {
+      els.currentLink.className = `current-link ${type || ''}`.trim();
+      els.currentLink.textContent = text;
+      els.currentLink.title = type ? '' : text;
+    }
+
+    function updateUI(options = {}) {
+      const meta = parseInput();
+      const valid = state.validLinks.length;
+      const invalid = state.invalidLines.length;
+
+      els.validCount.textContent = valid;
+      els.invalidCount.textContent = invalid;
+      els.remainingCount.textContent = valid;
+
+      const hasLink = valid > 0;
+      els.copyLinkBtn.disabled = !hasLink;
+      els.viewOriginalLinkBtn.disabled = !hasLink;
+
+      if (!els.linkInput.value.trim()) {
+        setCurrentBox('empty', 'Dán liên kết YouTube để bắt đầu.');
+      } else if (!hasLink && invalid > 0) {
+        setCurrentBox('error', 'Chưa có link YouTube hợp lệ trong danh sách.');
+      } else if (!hasLink) {
+        setCurrentBox('done', 'Đã xử lý hết toàn bộ liên kết.');
+      } else {
+        setCurrentBox('', state.validLinks[0]);
+      }
+
+      if (!options.silent) {
+        if (invalid > 0) showToast(`Đã bỏ qua ${invalid} dòng không phải link YouTube hợp lệ.`, 'warning', 'invalid-lines');
+        if (meta.duplicateCount > 0) showToast(`Đã tự loại ${meta.duplicateCount} link trùng lặp.`, 'info', 'duplicate-lines');
+      }
+    }
+
+    function showToast(message, type = 'info', key = '') {
+      const now = Date.now();
+      const toastKey = key || `${type}:${message}`;
+      if (toastKey === state.lastToastKey && now - state.lastToastAt < 900) return;
+      state.lastToastKey = toastKey;
+      state.lastToastAt = now;
+
+      const icons = { success: '✓', error: '!', warning: '⚠', info: 'i' };
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<strong aria-hidden="true">${icons[type] || 'i'}</strong><span></span><button type="button" aria-label="Đóng thông báo">×</button>`;
+      toast.querySelector('span').textContent = message;
+      const close = () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px) scale(0.98)';
+        setTimeout(() => toast.remove(), 180);
+      };
+      toast.querySelector('button').addEventListener('click', close);
+      els.toastStack.appendChild(toast);
+      setTimeout(close, type === 'error' ? 4600 : 3200);
+    }
+
+    async function copyText(text) {
+      if (!text) throw new Error('Không có nội dung để sao chép.');
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.left = '-9999px';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      if (!ok) throw new Error('Trình duyệt không cho phép sao chép tự động.');
+    }
+
+    async function pasteFromClipboard() {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          showToast('Trình duyệt không cho đọc clipboard. Hãy dán thủ công bằng Ctrl+V.', 'warning');
+          els.linkInput.focus();
+          return;
+        }
+        const text = await navigator.clipboard.readText();
+        if (!text.trim()) {
+          showToast('Clipboard đang trống.', 'warning');
+          return;
+        }
+        els.linkInput.value = `${els.linkInput.value.trim() ? els.linkInput.value.trim() + '\n' : ''}${text.trim()}`;
+        updateUI();
+        showToast('Đã dán nội dung từ clipboard.', 'success');
+      } catch (error) {
+        showToast('Không thể đọc clipboard. Hãy cấp quyền hoặc dán thủ công.', 'error');
+      }
+    }
+
+    async function copyCurrentLink() {
+      updateUI({ silent: true });
+      if (!state.validLinks.length) {
+        showToast('Không có link hợp lệ để sao chép.', 'warning');
+        return;
+      }
+
+      const link = state.validLinks[0];
+      try {
+        await copyText(link);
+        state.validLinks.shift();
+        syncTextareaFromState();
+        updateUI({ silent: true });
+        showToast('Đã sao chép và xóa link khỏi danh sách.', 'success');
+      } catch (error) {
+        showToast(error.message || 'Không thể sao chép. Vui lòng sao chép thủ công.', 'error');
+      }
+    }
+
+    function openCurrentLink() {
+      updateUI({ silent: true });
+      if (!state.validLinks.length) {
+        showToast('Không có link hợp lệ để mở.', 'warning');
+        return;
+      }
+      const win = window.open(state.validLinks[0], '_blank', 'noopener,noreferrer');
+      if (!win) showToast('Trình duyệt đã chặn popup. Hãy cho phép mở tab mới.', 'warning');
+      else showToast('Đã mở link hiện tại trong tab mới.', 'info');
+    }
+
+    function clearLinks() {
+      els.linkInput.value = '';
+      state.validLinks = [];
+      state.invalidLines = [];
+      updateUI({ silent: true });
+      showToast('Đã xóa danh sách link.', 'success');
+      els.linkInput.focus();
+    }
+
+    function resetApp() {
+      clearTimeouts();
+      els.toastStack.innerHTML = '';
+      els.linkInput.value = '';
+      state.validLinks = [];
+      state.invalidLines = [];
+      state.lastToastKey = '';
+      state.lastToastAt = 0;
+      updateUI({ silent: true });
+      showToast('Tool đã được đặt lại sạch trạng thái.', 'success');
+      els.linkInput.focus();
+    }
+
+    function clearTimeouts() {
+      // Dự phòng cho các lần nâng cấp sau: gom điểm dọn trạng thái tại một nơi.
+    }
+
+    function handleDroppedFile(event) {
+      event.preventDefault();
+      els.linkInput.classList.remove('drag-over');
+      const file = event.dataTransfer.files && event.dataTransfer.files[0];
+      if (!file) {
+        const text = event.dataTransfer.getData('text/plain');
+        if (text) {
+          els.linkInput.value = `${els.linkInput.value.trim() ? els.linkInput.value.trim() + '\n' : ''}${text.trim()}`;
+          updateUI();
+          showToast('Đã nhận nội dung kéo thả.', 'success');
+        }
+        return;
+      }
+      if (!file.name.toLowerCase().endsWith('.txt') && file.type && file.type !== 'text/plain') {
+        showToast('Chỉ hỗ trợ file văn bản .txt.', 'warning');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = String(reader.result || '').trim();
+        if (!text) {
+          showToast('File rỗng, không có link để thêm.', 'warning');
+          return;
+        }
+        els.linkInput.value = `${els.linkInput.value.trim() ? els.linkInput.value.trim() + '\n' : ''}${text}`;
+        updateUI();
+        showToast('Đã nhập danh sách từ file .txt.', 'success');
+      };
+      reader.onerror = () => showToast('Không đọc được file. Vui lòng thử lại.', 'error');
+      reader.readAsText(file, 'utf-8');
+    }
+
+    els.linkInput.addEventListener('input', () => updateUI());
+    els.linkInput.addEventListener('dragover', (event) => { event.preventDefault(); els.linkInput.classList.add('drag-over'); });
+    els.linkInput.addEventListener('dragleave', () => els.linkInput.classList.remove('drag-over'));
+    els.linkInput.addEventListener('drop', handleDroppedFile);
+    els.pasteLinksBtn.addEventListener('click', pasteFromClipboard);
+    els.clearLinksBtn.addEventListener('click', clearLinks);
+    els.copyLinkBtn.addEventListener('click', copyCurrentLink);
+    els.viewOriginalLinkBtn.addEventListener('click', openCurrentLink);
+    els.resetAppBtn.addEventListener('click', resetApp);
+
+    document.addEventListener('keydown', (event) => {
+      const isMod = event.ctrlKey || event.metaKey;
+      if (isMod && event.key.toLowerCase() === 'enter') {
+        event.preventDefault();
+        copyCurrentLink();
+      }
+      if (event.key === 'Escape') {
+        els.toastStack.innerHTML = '';
+      }
+    });
+
+    updateUI({ silent: true });
+  </script>
+</body>
+</html>
