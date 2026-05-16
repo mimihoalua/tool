@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Ultimate Print Engine - 10 Premium Logos</title>
+    <style>
+        /* =========================================================
+           [CORE METRICS] HỆ MÉT A4 & BIẾN TOÀN CỤC
+           ========================================================= */
+        :root {
+            --paper-w: 210mm; --paper-h: 297mm;
+            --c-border: #8A008A; --c-title: #00008B; --c-name: #E6005C; --c-decor-stroke: #ff99cc; --c-text: #111111;
+            --f-title: 'Times New Roman', Times, serif; --f-name: 'Monotype Corsiva', cursive, serif;
+            --f-date: 'Arial', sans-serif; --f-plate: 'Times New Roman', Times, serif; --f-foot: 'Monotype Corsiva', cursive, serif;
+            --offset-x: 0mm; --offset-y: 0mm;
+        }
+        .bw-mode { --c-border: #000000; --c-title: #000000; --c-name: #000000; --c-decor-stroke: #000000; --c-text: #000000; }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #E5E7EB; color: #111; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        /* =========================================================
+           [UI CONTROL PANEL] TRỰC QUAN & ĐẦY ĐỦ TÍNH NĂNG
+           ========================================================= */
+        #qa-panel { width: 380px; background: #FFF; display: flex; flex-direction: column; z-index: 10; box-shadow: 2px 0 15px rgba(0,0,0,0.1); border-right: 1px solid #D1D5DB; }
+        .p-head { padding: 15px 20px; background: #111827; color: #FFF; border-bottom: 4px solid var(--c-border); }
+        .p-head h1 { font-size: 13pt; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .p-head p { font-size: 8pt; color: #9CA3AF; margin-top: 2px; }
+
+        .p-body { padding: 15px 20px; overflow-y: auto; flex: 1; }
+        
+        .section-title { font-size: 8.5pt; font-weight: 800; color: #4B5563; border-bottom: 2px solid #E5E7EB; padding-bottom: 4px; margin-top: 15px; margin-bottom: 10px; text-transform: uppercase; }
+        .section-title:first-child { margin-top: 0; }
+
+        .fg { margin-bottom: 10px; }
+        .fg label { display: block; font-size: 7pt; font-weight: 700; margin-bottom: 3px; color: #6B7280; text-transform: uppercase; }
+        .fc { width: 100%; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: 4px; font-family: inherit; font-size: 8.5pt; background: #F9FAFB; transition: 0.2s; }
+        .fc:focus { outline: none; border-color: var(--c-border); background: #FFF; }
+        select.fc { cursor: pointer; font-weight: 600; color: #111; }
+        .fr { display: flex; gap: 8px; } .fr .fg { flex: 1; }
+        
+        optgroup { font-weight: bold; color: var(--c-border); }
+
+        .btn-sm { padding: 6px 10px; font-size: 7.5pt; font-weight: bold; cursor: pointer; border: 1px solid #D1D5DB; background: #FFF; border-radius: 4px; transition: 0.2s; text-align: center; }
+        .btn-sm:hover { background: #E5E7EB; }
+        
+        .file-up { position: relative; border: 1px dashed var(--c-border); padding: 6px; text-align: center; border-radius: 4px; background: #FAFAFA; cursor: pointer; overflow: hidden; }
+        .file-up input { position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer; }
+        .file-up span { font-size: 7.5pt; font-weight: bold; color: var(--c-border); pointer-events: none; }
+
+        .p-foot { padding: 15px 20px; background: #FAFAFA; border-top: 1px solid #E5E7EB; }
+        .btn-print { width: 100%; padding: 12px; background: var(--c-border); color: #FFF; border: none; border-radius: 4px; font-weight: 900; font-size: 11pt; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(138,0,138,0.3); }
+        .btn-print:hover { background: #600060; transform: translateY(-1px); }
+
+        /* =========================================================
+           [PRINT STAGE] MULTI-PAGE RENDERER (A4 3x7)
+           ========================================================= */
+        #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #D1D5DB; }
+        
+        .a4-portrait { 
+            width: var(--paper-w); height: var(--paper-h); background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); 
+            padding: 8mm 6mm; gap: 2mm; flex-shrink: 0;
+            transform: translate(var(--offset-x), var(--offset-y));
+        }
+
+        .ticket-trim { width: 100%; height: 100%; border: 1.5pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 2.5mm 6.5mm; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        /* GÓC HOA VĂN */
+        .corner-ornament { position: absolute; width: 5mm; height: 5mm; display: flex; align-items: center; justify-content: center; }
+        .corner-ornament svg { width: 100%; height: 100%; }
+        .co-tl { top: 0.5mm; left: 0.5mm; } .co-tr { top: 0.5mm; right: 0.5mm; transform: scaleX(-1); }
+        .co-bl { bottom: 0.5mm; left: 0.5mm; transform: scaleY(-1); } .co-br { bottom: 0.5mm; right: 0.5mm; transform: scale(-1, -1); }
+
+        /* SỐ NHẢY GÓC TRÊN PHẢI (Không đè Title) */
+        .serial-badge { position: absolute; top: 1mm; right: 6.5mm; font-family: Arial, sans-serif; font-size: 5pt; font-weight: bold; color: var(--c-border); z-index: 5; }
+
+        /* NGÀY THÁNG LẬT DỌC */
+        .t-date-side { position: absolute; top: 0; bottom: 0; width: 6.5mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 4.5pt; font-weight: bold; color: var(--c-border); }
+        .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); } .date-right { right: 0; writing-mode: vertical-rl; }
+
+        /* TIÊU ĐỀ */
+        .t-title { font-family: var(--f-title); font-size: 11pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0.5mm; line-height: 1; position: relative; }
+
+        /* TÊN & LOGO GIỮA */
+        .t-center-block { display: flex; justify-content: space-between; align-items: center; width: 100%; flex: 1; margin: 1mm 0; }
+        .names-col { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-width: 0; color: var(--c-name); font-family: var(--f-name); line-height: 1.15; padding: 1mm 0; overflow: visible; }
+        .n-line1 { font-size: 11pt; white-space: nowrap; margin-bottom: 2px; } 
+        .n-line2 { font-size: 16pt; font-weight: bold; white-space: nowrap; } 
+        
+        .t-decor { width: 10mm; height: 10mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
+        .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
+        
+        /* FIX: CHỮ LỒNG (MONOGRAM) AN TOÀN */
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 13pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+
+        /* BIỂN SỐ */
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 3px; font-family: var(--f-plate); font-size: 8pt; font-weight: 900; color: var(--c-text); margin-bottom: 1mm; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; } 
+        .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
+        
+        /* FOOTER ROW (CHÂN CHỮ TRÁI - MÃ VẠCH PHẢI) */
+        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; gap: 2mm;}
+        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 7.5pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .barcode-box { width: 15mm; height: 3.5mm; flex-shrink: 0; color: var(--c-text); }
+        .barcode-box svg { width: 100%; height: 100%; preserveAspectRatio: none; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0 !important; }
+            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #qa-panel { display: none !important; } 
+            #workspace { padding: 0 !important; gap: 0; background: none; }
+            .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="qa-panel">
+        <div class="p-head">
+            <h1>Print Config</h1>
+            <p>10 Premium Logos & Barcode Fix</p>
+        </div>
+        
+        <div class="p-body">
+            
+            <div class="section-title">Kho Font Hệ Thống (Đã Nạp Nhanh)</div>
+            <div class="fg"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
+
+            <div class="section-title">Hệ Màu & Logo Wedding (10 Mẫu)</div>
+            <div class="fr">
+                <div class="fg">
+                    <select id="ui-colorMode" class="fc state-bind">
+                        <option value="color">🖨️ In Màu</option>
+                        <option value="bw">⚫ Đen Trắng (Siêu nét)</option>
+                    </select>
+                </div>
+                <div class="fg">
+                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#4B5563; color:#FFF; border:none; padding:7px;">🎲 Đổi Viền Góc</button>
+                </div>
+            </div>
+            
+            <div class="fg">
+                <select id="ui-logoPreset" class="fc state-bind">
+                    <optgroup label="Biểu Tượng Cưới Truyền Thống">
+                        <option value="hy_classic">囍 Song Hỷ Cổ Điển</option>
+                        <option value="hy_circle">囍 Song Hỷ Ấn Triện</option>
+                    </optgroup>
+                    <optgroup label="Biểu Tượng Hiện Đại & Luxury">
+                        <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi (Cao/Thấp)</option>
+                        <option value="ring_interlock">💍 Nhẫn Cưới Lồng Nhau</option>
+                        <option value="ring_diamond">💎 Nhẫn Kim Cương</option>
+                        <option value="heart_infinity">💖 Trái Tim Vô Cực</option>
+                        <option value="heart_double">💕 Cặp Trái Tim</option>
+                    </optgroup>
+                    <optgroup label="Khung Chữ Lồng (Monogram N&Q)">
+                        <option value="wreath_laurel">🌿 Vòng Nguyệt Quế Hoàng Gia</option>
+                        <option value="frame_vintage">🌸 Khung Hoa Vintage</option>
+                        <option value="frame_hex">⬡ Khung Lục Giác Hiện Đại</option>
+                    </optgroup>
+                    <optgroup label="Khác">
+                        <option value="custom">📁 Ảnh Logo Khách Gửi (Upload)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="fg" id="box-custom-logo" style="display:none;">
+                <div class="file-up">
+                    <span id="logo-status">📁 Tải Ảnh Logo (.PNG/.SVG)</span>
+                    <input type="file" id="logo-uploader" accept="image/png, image/svg+xml">
+                </div>
+                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7pt; color:red; display:none;">Xóa Ảnh</a></div>
+            </div>
+
+            <div class="section-title">Thông Tin Tên & Vé</div>
+            <div class="fr"><div class="fg"><label>Họ Nữ</label><input type="text" id="ui-b1" class="fc state-bind" value="Minh"></div><div class="fg"><label>Tên Nữ</label><input type="text" id="ui-b2" class="fc state-bind" value="Ngọc"></div></div>
+            <div class="fr"><div class="fg"><label>Họ Nam</label><input type="text" id="ui-g1" class="fc state-bind" value="Nguyễn"></div><div class="fg"><label>Tên Nam</label><input type="text" id="ui-g2" class="fc state-bind" value="Quang"></div></div>
+            <div class="fg"><label>Ngày</label><input type="text" id="ui-date" class="fc state-bind" value="Ngày 23 & 24.05.2026"></div>
+            <div class="fg"><label>Biển Số</label><input type="text" id="ui-plate" class="fc state-bind" value="Biển số:"></div>
+            <div class="fg"><label>Lời chào (Footer căn trái)</label><input type="text" id="ui-foot" class="fc state-bind" value="Rất hân hạnh được đón tiếp !"></div>
+
+            <div class="section-title">Sản Xuất: Số Nhảy & Mã Vạch</div>
+            <div class="fr">
+                <div class="fg"><label>Tổng Vé</label><input type="number" id="ui-total" class="fc state-bind" value="21" min="21" step="21"></div>
+                <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
+            </div>
+            <div class="fg">
+                <select id="ui-barcode" class="fc state-bind">
+                    <option value="off">Tắt Số Nhảy & Mã Vạch</option>
+                    <option value="num">Chỉ in Số Nhảy (Góc trên phải)</option>
+                    <option value="bar">In Số Nhảy (Trên) + Mã Vạch (Góc dưới)</option>
+                </select>
+            </div>
+
+            <div class="section-title">Hệ Thống: Căn Lề & Dữ Liệu</div>
+            <div class="fr">
+                <div class="fg"><label>Bù Trục X (mm)</label><input type="number" id="ui-offset-x" class="fc state-bind" value="0" step="0.5"></div>
+                <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
+            </div>
+            <div class="fr">
+                <button id="btn-export-json" class="btn-sm" style="background:#1F2937; color:#FFF; border:none; padding:7px; flex:1;">📥 Xuất Data</button>
+                <div class="file-up" style="flex:1; padding:6px; background:#1F2937; border:none;">
+                    <span style="color:#FFF;">📤 Nhập Data</span>
+                    <input type="file" id="btn-import-json" accept=".json">
+                </div>
+            </div>
+            <div class="fg" style="margin-top: 5px;">
+                <button id="btn-reset" class="btn-sm" style="width:100%; background:#EF4444; color:#FFF; border:none; padding:7px;">🚨 Khôi Phục Gốc (Xóa Lỗi LocalStorage)</button>
+            </div>
+        </div>
+
+        <div class="p-foot">
+            <button id="btn-print" class="btn-print">🖨️ XUẤT IN HÀNG LOẠT</button>
+        </div>
+    </aside>
+
+    <main id="workspace">
+        </main>
+
+    <script src="font_data.js"></script>
+
+    <script>
+        const UltimateEngine = (() => {
+            const canvas = document.getElementById('workspace');
+            const binds = document.querySelectorAll('.state-bind');
+            const fontSelects = document.querySelectorAll('.f-sel');
+            
+            let state = {
+                b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: 'Ngày 23 & 24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
+                colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
+                total: 21, startnum: 1, barcode: 'off', offsetX: 0, offsetY: 0,
+                fonts: {}
+            };
+
+            const decors = [
+                `<path d="M10,10 Q40,10 50,30 Q60,10 90,10 Q70,40 90,70 Q60,50 50,90 Q40,50 10,70 Q30,40 10,10 Z" fill="none" stroke="currentColor" stroke-width="5"/>`,
+                `<path d="M10,90 A80,80 0 0,1 90,10" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="25" cy="25" r="8" fill="currentColor"/>`,
+                `<polyline points="10,90 10,10 90,10" fill="none" stroke="currentColor" stroke-width="8"/><polyline points="30,90 30,30 90,30" fill="none" stroke="currentColor" stroke-width="3"/>`,
+                `<polygon points="10,10 80,10 10,80" fill="currentColor"/><polygon points="90,10 100,10 100,20 20,100 10,100 10,90" fill="currentColor"/>`
+            ];
+
+            // 10 LOGO VECTOR CAO CẤP
+            const premiumLogos = {
+                'hy_classic': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><path d="M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3" stroke-dasharray="2 4"/><text x="50" y="73" font-family="Arial" font-size="68" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
+                'hy_circle': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--c-name)" stroke-width="4" stroke-dasharray="8 4"/><circle cx="50" cy="50" r="38" fill="none" stroke="var(--c-decor-stroke)" stroke-width="1.5"/><text x="50" y="70" font-family="Arial" font-size="55" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
+                'glasses': `<svg viewBox="0 0 100 100"><path d="M 28 15 C 28 15, 28 50, 28 50 C 28 65, 48 65, 48 50 C 48 50, 48 15, 48 15 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><line x1="38" y1="62" x2="38" y2="85" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><line x1="25" y1="85" x2="51" y2="85" stroke="var(--c-decor-stroke)" stroke-width="2.5" stroke-linecap="round"/><path d="M 52 35 C 52 35, 52 60, 52 60 C 52 72, 72 72, 72 60 C 72 60, 72 35, 72 35 Z" fill="none" stroke="var(--c-name)" stroke-width="2.5"/><line x1="62" y1="69" x2="62" y2="85" stroke="var(--c-name)" stroke-width="2.5"/><line x1="49" y1="85" x2="75" y2="85" stroke="var(--c-name)" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="35" r="1.5" fill="var(--c-decor-stroke)"/><circle cx="62" cy="50" r="1.5" fill="var(--c-name)"/></svg>`,
+                'ring_interlock': `<svg viewBox="0 0 100 100"><circle cx="38" cy="55" r="22" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3.5"/><circle cx="62" cy="45" r="22" fill="none" stroke="var(--c-name)" stroke-width="3.5"/><polygon points="62,23 69,13 55,13" fill="var(--c-name)"/></svg>`,
+                'ring_diamond': `<svg viewBox="0 0 100 100"><path d="M50 85 A 25 25 0 1 0 50 35 A 25 25 0 1 0 50 85" fill="none" stroke="var(--c-decor-stroke)" stroke-width="4"/><polygon points="40 35, 60 35, 55 20, 45 20" fill="var(--c-name)"/><line x1="45" y1="20" x2="55" y2="35" stroke="#FFF" stroke-width="1.5"/><line x1="55" y1="20" x2="45" y2="35" stroke="#FFF" stroke-width="1.5"/></svg>`,
+                'heart_infinity': `<svg viewBox="0 0 100 100"><path d="M50,85 C50,85 10,55 10,30 C10,15 25,5 40,15 C50,22 50,22 50,22 C50,22 50,22 60,15 C75,5 90,15 90,30 C90,55 50,85 50,85 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="4"/><path d="M50,75 C50,75 20,50 20,30 C20,20 30,15 40,22 C45,26 50,30 50,30 C50,30 55,26 60,22 C70,15 80,20 80,30 C80,50 50,75 50,75 Z" fill="none" stroke="var(--c-name)" stroke-width="2"/></svg>`,
+                'heart_double': `<svg viewBox="0 0 100 100"><path d="M40,65 C40,65 15,45 15,30 C15,20 25,15 35,20 C40,23 40,23 40,23 C40,23 40,23 45,20 C55,15 65,20 65,30 C65,45 40,65 40,65 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3.5"/><path d="M60,85 C60,85 35,65 35,50 C35,40 45,35 55,40 C60,43 60,43 60,43 C60,43 60,43 65,40 C75,35 85,40 85,50 C85,65 60,85 60,85 Z" fill="none" stroke="var(--c-name)" stroke-width="3.5"/></svg>`,
+                'wreath_laurel': `<svg viewBox="0 0 100 100"><path d="M 50 95 C 10 95, 0 35, 40 10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 50 95 C 90 95, 100 35, 60 10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 15 65 Q 25 60, 20 50 M 85 65 Q 75 60, 80 50 M 10 40 Q 25 35, 25 20 M 90 40 Q 75 35, 75 20" fill="none" stroke="var(--c-name)" stroke-width="2" stroke-linecap="round"/></svg>`,
+                'frame_vintage': `<svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" rx="10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 15 30 C 5 20, 20 5, 30 15 M 70 15 C 80 5, 95 20, 85 30 M 85 70 C 95 80, 80 95, 70 85 M 30 85 C 20 95, 5 80, 15 70" fill="none" stroke="var(--c-name)" stroke-width="2"/></svg>`,
+                'frame_hex': `<svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><polygon points="50,13 82,31 82,69 50,87 18,69 18,31" fill="none" stroke="var(--c-name)" stroke-width="1.5"/></svg>`
+            };
+
+            const saveState = () => { localStorage.setItem('WEDDING_TICKET_MASTER_FINAL', JSON.stringify(state)); };
+            const loadState = () => {
+                const saved = localStorage.getItem('WEDDING_TICKET_MASTER_FINAL');
+                if(saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch(e){} }
+                syncUIFromState();
+            };
+
+            const syncUIFromState = () => {
+                binds.forEach(el => {
+                    const key = el.id.replace('ui-', '');
+                    if(state[key] !== undefined) el.value = state[key];
+                });
+                
+                const boxCustom = document.getElementById('box-custom-logo');
+                if(state.logoPreset === 'custom') {
+                    boxCustom.style.display = 'block';
+                    if(state.logoBase64) { document.getElementById('logo-status').innerText = '✅ Đã tải Logo Khách'; document.getElementById('clear-logo').style.display = 'inline'; }
+                } else {
+                    boxCustom.style.display = 'none';
+                }
+
+                document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
+                document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+            };
+
+            const syncStateFromUI = () => {
+                binds.forEach(el => {
+                    const key = el.id.replace('ui-', '');
+                    state[key] = el.type === 'number' ? Number(el.value) : el.value;
+                    if(el.classList.contains('f-sel')) state.fonts[el.getAttribute('data-target')] = el.value;
+                });
+                document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
+                document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+                saveState();
+            };
+
+            const getCode39SVG = (text) => {
+                const map = { '0':'bwbWBwBwb', '1':'BwbWbwbwB', '2':'bwBWbwbwB', '3':'BwBWbwbwb', '4':'bwbWBwbwB', '5':'BwbWBwbwb', '6':'bwBWBwbwb', '7':'bwbWbwBwB', '8':'BwbWbwBwb', '9':'bwBWbwBwb' };
+                text = '*' + text + '*'; let svg = ''; let x = 0;
+                for(let i=0; i<text.length; i++){
+                    const char = text[i]; const code = char === '*' ? 'bWbwBwBwb' : (map[char] || map['0']);
+                    for(let j=0; j<code.length; j++){
+                        const isBar = code[j].toLowerCase() === 'b'; const isWide = code[j] === 'B' || code[j] === 'W';
+                        const w = isWide ? 3 : 1;
+                        if(isBar) svg += `<rect x="${x}" y="0" width="${w}" height="20" fill="currentColor"/>`;
+                        x += w;
+                    }
+                    x += 1;
+                }
+                return `<svg viewBox="0 0 ${x} 20" preserveAspectRatio="none">${svg}</svg>`;
+            };
+
+            const loadLocalFonts = () => {
+                let optionsHtml = '<option value="">-- Mặc định --</option>';
+                if (typeof sysFonts !== 'undefined') {
+                    sysFonts.forEach(f => { optionsHtml += `<option value="${f}">${f.replace(/\.[^/.]+$/, "")}</option>`; });
+                }
+                fontSelects.forEach(sel => {
+                    sel.innerHTML = optionsHtml;
+                    if(state.fonts && state.fonts[sel.getAttribute('data-target')]) sel.value = state.fonts[sel.getAttribute('data-target')];
+                    
+                    sel.addEventListener('change', function() {
+                        const filename = this.value; const targetVar = this.getAttribute('data-target');
+                        if (filename) {
+                            const fontName = 'Font_' + filename.replace(/\W/g, '');
+                            if (!document.getElementById('style_' + fontName)) {
+                                const style = document.createElement('style'); style.id = 'style_' + fontName;
+                                style.innerHTML = `@font-face { font-family: '${fontName}'; src: url("Wedding_Fonts_ISO/${filename}"); }`;
+                                document.head.appendChild(style);
+                            }
+                            document.documentElement.style.setProperty(targetVar, `'${fontName}'`);
+                        } else {
+                            document.documentElement.style.setProperty(targetVar, "'Times New Roman', Times, serif");
+                        }
+                        setTimeout(() => requestAnimationFrame(fitNames), 50);
+                    });
+                    sel.dispatchEvent(new Event('change'));
+                });
+            };
+
+            const fitNames = () => {
+                const tickets = document.querySelectorAll('.ticket-trim');
+                tickets.forEach(ticket => {
+                    const colB = ticket.querySelector('.t-bride'), b1 = colB.querySelector('.n-line1'), b2 = colB.querySelector('.n-line2');
+                    const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
+                    if(!colB) return;
+                    const getRatio = (col, l1, l2) => {
+                        let ratio = 1.0; l1.style.fontSize = `11pt`; l2.style.fontSize = `16pt`;
+                        const maxW = col.clientWidth * 1.05; let loops = 0;
+                        while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
+                            ratio -= 0.05; l1.style.fontSize = `${11 * ratio}pt`; l2.style.fontSize = `${16 * ratio}pt`; loops++;
+                        }
+                        return ratio;
+                    };
+                    const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
+                    b1.style.fontSize = `${11 * finalRatio}pt`; b2.style.fontSize = `${16 * finalRatio}pt`;
+                    g1.style.fontSize = `${11 * finalRatio}pt`; g2.style.fontSize = `${16 * finalRatio}pt`;
+                });
+            };
+
+            const render = () => {
+                if (state.colorMode === 'bw') document.body.classList.add('bw-mode');
+                else document.body.classList.remove('bw-mode');
+
+                canvas.innerHTML = '';
+                const totalTickets = parseInt(state.total) || 21;
+                const pages = Math.ceil(totalTickets / 21);
+                let currentTicketNum = parseInt(state.startnum) || 1;
+
+                // XỬ LÝ LOGO & CHỮ LỒNG
+                let centerHtml = '';
+                if(state.logoPreset === 'custom') {
+                    centerHtml = state.logoBase64 ? `<img src="${state.logoBase64}">` : premiumLogos['hy_classic'];
+                } else {
+                    centerHtml = premiumLogos[state.logoPreset] || premiumLogos['hy_classic'];
+                    // Nếu là form chữ lồng, tự động chèn 2 chữ cái đầu
+                    if(state.logoPreset.startsWith('wreath') || state.logoPreset.startsWith('frame')) {
+                        const m1 = state.b2.charAt(0).toUpperCase();
+                        const m2 = state.g2.charAt(0).toUpperCase();
+                        // Chữ lồng được fix font-size: 13pt để 100% không bao giờ đâm ra viền
+                        centerHtml += `<div class="t-monogram-text">${m1}<span style="font-size: 0.7em; margin: 0 1px; color: var(--c-decor-stroke);">&</span>${m2}</div>`;
+                    }
+                }
+
+                const cornerHtml = `<svg viewBox="0 0 100 100" style="color:var(--c-border)">${decors[state.decorIndex]}</svg>`;
+
+                for (let p = 0; p < pages; p++) {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'a4-portrait';
+                    let pageContent = '';
+                    
+                    for (let i = 0; i < 21; i++) {
+                        if ((p * 21 + i) >= totalTickets) {
+                            pageContent += `<div></div>`; 
+                            continue;
+                        }
+
+                        const numStr = String(currentTicketNum).padStart(3, '0');
+                        let serialHtml = ''; let barcodeHtml = '';
+                        if(state.barcode !== 'off') {
+                            serialHtml = `<div class="serial-badge">NO.${numStr}</div>`;
+                            if(state.barcode === 'bar') { barcodeHtml = `<div class="barcode-box">${getCode39SVG(numStr)}</div>`; }
+                        }
+
+                        pageContent += `
+                        <div class="ticket-trim">
+                            <div class="corner-ornament co-tl">${cornerHtml}</div><div class="corner-ornament co-tr">${cornerHtml}</div>
+                            <div class="corner-ornament co-bl">${cornerHtml}</div><div class="corner-ornament co-br">${cornerHtml}</div>
+                            <div class="t-date-side date-left">${state.date}</div><div class="t-date-side date-right">${state.date}</div>
+                            
+                            ${serialHtml}
+                            <div class="t-title">VÉ GỬI XE</div>
+                            
+                            <div class="t-center-block">
+                                <div class="names-col t-bride"><span class="n-line1">${state.b1}</span><span class="n-line2">${state.b2}</span></div>
+                                <div class="t-decor">${centerHtml}</div>
+                                <div class="names-col t-groom"><span class="n-line1">${state.g1}</span><span class="n-line2">${state.g2}</span></div>
+                            </div>
+                            
+                            <div class="t-plate-row"><div class="t-plate-label">${state.plate}</div><div class="t-plate-dots"></div></div>
+                            
+                            <div class="t-footer-row">
+                                <div class="t-footer" title="${state.foot}">${state.foot}</div>
+                                ${barcodeHtml}
+                            </div>
+                        </div>`;
+                        currentTicketNum++;
+                    }
+                    pageDiv.innerHTML = pageContent;
+                    canvas.appendChild(pageDiv);
+                }
+                
+                document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
+            };
+
+            const init = () => {
+                loadState();
+                loadLocalFonts();
+                
+                binds.forEach(el => {
+                    el.addEventListener('input', () => { syncStateFromUI(); render(); });
+                    el.addEventListener('change', () => { syncStateFromUI(); render(); });
+                });
+                
+                document.getElementById('btn-rand-corner').addEventListener('click', () => {
+                    state.decorIndex = (state.decorIndex + 1) % decors.length;
+                    saveState(); render();
+                });
+
+                document.getElementById('ui-logoPreset').addEventListener('change', (e) => {
+                    const box = document.getElementById('box-custom-logo');
+                    if(e.target.value === 'custom') box.style.display = 'block';
+                    else box.style.display = 'none';
+                });
+
+                document.getElementById('logo-uploader').addEventListener('change', (e) => {
+                    const f = e.target.files[0]; if(!f) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); };
+                    reader.readAsDataURL(f);
+                });
+                document.getElementById('clear-logo').addEventListener('click', (e) => {
+                    e.preventDefault(); state.logoBase64 = null; document.getElementById('logo-status').innerText = '📁 Tải Ảnh Logo (.PNG/.SVG)'; document.getElementById('clear-logo').style.display = 'none'; document.getElementById('logo-uploader').value = '';
+                    saveState(); render();
+                });
+
+                document.getElementById('btn-export-json').addEventListener('click', () => {
+                    const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click();
+                });
+                document.getElementById('btn-import-json').addEventListener('change', (e) => {
+                    const f = e.target.files[0]; if(!f) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); } catch(err){ alert('Lỗi File!'); } };
+                    reader.readAsText(f);
+                });
+
+                document.getElementById('btn-reset').addEventListener('click', () => {
+                    if(confirm("Bạn có chắc chắn muốn XÓA SẠCH cài đặt và đưa web về trạng thái gốc?")) {
+                        localStorage.removeItem('WEDDING_TICKET_MASTER_FINAL');
+                        location.reload();
+                    }
+                });
+
+                document.getElementById('btn-print').addEventListener('click', () => setTimeout(() => window.print(), 200));
+                window.addEventListener('resize', fitNames);
+
+                render();
+            };
+
+            return { init };
+        })();
+        document.addEventListener('DOMContentLoaded', UltimateEngine.init);
+    </script>
+</body>
+</html>
