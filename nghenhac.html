@@ -8,628 +8,446 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Nghe Nhạc - XIEMSANSANG</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
   <style>
-    :root, [data-theme] { transition: background-color 0.25s ease, color 0.25s ease; }
-    [data-theme=light] { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --primary: #2563eb; --primary-fg: #ffffff; --border: #e2e8f0; --active-bg: rgba(37, 99, 235, 0.08); --danger-bg:#ffe4e6; --danger:#e11d48; }
-    [data-theme=peach] { --bg: #fff1f2; --card: #ffffff; --text: #4c0519; --muted: #9f1239; --primary: #f43f5e; --primary-fg: #ffffff; --border: #fecdd3; --active-bg: rgba(244, 63, 94, 0.08); --danger-bg:#ffe4e6; --danger:#e11d48; }
-    [data-theme=mint]  { --bg: #f0fdf4; --card: #ffffff; --text: #064e3b; --muted: #059669; --primary: #10b981; --primary-fg: #ffffff; --border: #bbf7d0; --active-bg: rgba(16, 185, 129, 0.08); --danger-bg:#dcfce7; --danger:#047857; }
-
-    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    html { min-height: 100%; background: var(--bg); color: var(--text); overscroll-behavior-y: contain; }
-    body { min-height: 100%; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; touch-action: manipulation; }
-    button, input, select { font: inherit; }
-    button, .song-row, .btn { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-
-    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 0.65rem 0.95rem; border-radius: 16px; font-weight: 800; transition: transform 0.08s ease, background-color 0.18s ease; cursor: pointer; min-height: 44px; }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
-    .btn-soft { background: var(--active-bg); color: var(--primary); border-color: transparent; }
-
-    @keyframes pulseSoft { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-    @keyframes slideDown { from { transform: translateY(-24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    .song-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 70px; padding: 8px 12px; border-bottom: 1px solid var(--border); transition: background-color 0.15s ease; cursor: pointer; content-visibility: auto; contain-intrinsic-size: 70px; }
-    .song-row:last-child { border-bottom: 0; }
-    .song-row:active { background-color: var(--active-bg); }
-    .song-row.active { background-color: var(--active-bg); }
-    .song-row.active .song-idx { color: var(--primary); font-weight: 900; animation: pulseSoft 1.6s infinite; }
-
-    .action-btn { width: 40px; height: 40px; min-width: 40px; display: flex; align-items: center; justify-content: center; border-radius: 999px; transition: background 0.15s ease, transform 0.08s ease; }
-    .action-btn:active { background: var(--active-bg); transform: scale(0.94); }
-
-    .toast-container { position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; width: min(92vw, 420px); text-align: center; }
-    .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 11px 16px; border-radius: 14px; font-weight: 800; font-size: 0.92rem; animation: slideDown 0.22s ease-out; display: inline-block; box-shadow: 0 10px 28px rgba(15,23,42,0.18); }
-
-    select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: 900; border: 1px solid var(--primary); min-height: 42px; padding: 7px 32px 7px 12px; border-radius: 999px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-size: 16px; cursor: pointer; }
-
-    .range { width: 100%; accent-color: var(--primary); height: 26px; }
-    .mini-player { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
-
-    @media (max-width: 420px) {
-      .song-row { min-height: 74px; padding-left: 10px; padding-right: 8px; }
-      .action-btn { width: 36px; height: 36px; min-width: 36px; }
-      .mobile-hide-small { display: none; }
+    :root{
+      --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--primary-fg:#ffffff;--border:#e2e8f0;--active-bg:rgba(37,99,235,.08);--danger:#e11d48;--danger-bg:#ffe4e6;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
     }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-    }
+    [data-theme="peach"]{--bg:#fff1f2;--card:#ffffff;--text:#4c0519;--muted:#9f1239;--primary:#f43f5e;--border:#fecdd3;--active-bg:rgba(244,63,94,.10);--danger:#be123c;--danger-bg:#ffe4e6;}
+    [data-theme="mint"]{--bg:#f0fdf4;--card:#ffffff;--text:#064e3b;--muted:#059669;--primary:#10b981;--border:#bbf7d0;--active-bg:rgba(16,185,129,.10);--danger:#047857;--danger-bg:#dcfce7;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain;}
+    body{padding-bottom:220px;touch-action:manipulation;}
+    button,input,select{font:inherit}button{border:0;cursor:pointer}button,input,select{touch-action:manipulation}.hidden{display:none!important}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.muted{color:var(--muted)}
+    .header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:calc(16px + env(safe-area-inset-top)) 14px 14px}.wrap{width:min(100%,820px);margin:0 auto}.topline{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.title{font-size:26px;line-height:1.05;margin:0;color:var(--primary);font-weight:1000;letter-spacing:.4px;text-transform:uppercase}.subtitle{font-size:13px;font-weight:750;color:var(--muted);margin:4px 0 0}.toolbar{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-top:13px}.btn,.circle{min-height:44px;border-radius:999px;background:var(--active-bg);color:var(--primary);font-weight:950;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,filter .15s ease}.btn:active,.circle:active,.song:active{transform:scale(.965)}.primary{background:var(--primary);color:var(--primary-fg)}.danger{background:var(--danger-bg);color:var(--danger)}.circle{width:44px;height:44px;min-width:44px}.select{appearance:none;border:1px solid var(--primary);background:var(--active-bg);color:var(--primary);border-radius:999px;padding:0 34px 0 12px;font-weight:950;min-width:0;background-image:linear-gradient(45deg,transparent 50%,var(--primary) 50%),linear-gradient(135deg,var(--primary) 50%,transparent 50%);background-position:calc(100% - 18px) 19px,calc(100% - 12px) 19px;background-size:6px 6px,6px 6px;background-repeat:no-repeat}.switchrow{margin-top:10px;border:1px solid var(--border);background:color-mix(in srgb,var(--bg) 70%,transparent);border-radius:18px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}.switchrow span{font-size:12px;font-weight:850;color:var(--muted);line-height:1.35}.switchrow input{width:22px;height:22px;accent-color:var(--primary)}.starter{width:100%;margin-top:13px;min-height:56px;border-radius:18px;font-size:18px;box-shadow:0 10px 28px color-mix(in srgb,var(--primary) 28%,transparent)}
+    .main{padding:12px 10px 18px}.search{width:100%;border:1px solid var(--border);background:var(--card);color:var(--text);padding:14px 15px;border-radius:18px;outline:0;font-weight:750;box-shadow:var(--shadow)}.search:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}.listbox{margin-top:12px;border:1px solid var(--border);border-radius:22px;background:color-mix(in srgb,var(--card) 92%,transparent);overflow:hidden;box-shadow:var(--shadow)}.status{padding:28px 16px;text-align:center;color:var(--primary);font-weight:1000}.song{display:flex;align-items:center;gap:9px;min-height:74px;padding:8px 10px;border-bottom:1px solid var(--border);transition:background .12s ease;content-visibility:auto;contain-intrinsic-size:74px}.song:last-child{border-bottom:0}.song.active{background:var(--active-bg)}.idx{width:34px;min-width:34px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:950;color:var(--muted)}.song.active .idx{color:var(--primary);animation:pulse 1.4s infinite}.smeta{flex:1;min-width:0}.sname{font-weight:950;font-size:15px}.artist{margin-top:3px;font-size:11px;color:var(--muted);font-weight:800}.actions{display:flex;align-items:center;gap:2px}.iconbtn{width:38px;height:38px;min-width:38px;border-radius:999px;background:transparent;color:var(--primary);display:flex;align-items:center;justify-content:center}.duration{width:42px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:950;color:var(--muted)}.loadmore{width:100%;min-height:52px;background:transparent;color:var(--primary);font-weight:1000;border-top:1px solid var(--border)}
+    .player{position:fixed;left:0;right:0;bottom:0;z-index:50;background:color-mix(in srgb,var(--card) 96%,transparent);backdrop-filter:blur(22px);border-top:1px solid var(--border);box-shadow:0 -10px 40px rgba(15,23,42,.08);padding:14px 14px max(14px,env(safe-area-inset-bottom))}.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.ptext{min-width:0}.pname{font-size:15px;font-weight:1000;margin:0}.pstate{font-size:12px;color:var(--primary);font-weight:900;margin-top:3px}.ptime{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);font-weight:950;white-space:nowrap}.range{width:100%;height:30px;accent-color:var(--primary);margin:6px 0 4px}.controls{display:flex;align-items:center;justify-content:space-between}.mid{display:flex;align-items:center;gap:14px}.big{width:64px;height:64px;border-radius:999px;background:var(--primary);color:var(--primary-fg);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px color-mix(in srgb,var(--primary) 26%,transparent)}.navbtn{width:50px;height:50px;border-radius:999px;background:var(--active-bg);color:var(--primary);display:flex;align-items:center;justify-content:center}.toggle{width:44px;height:44px;border-radius:999px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center}.toggle.on{background:var(--active-bg);color:var(--primary)}.toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2000;max-width:min(92vw,460px);background:var(--primary);color:#fff;border-radius:16px;padding:12px 16px;font-size:14px;font-weight:950;box-shadow:0 10px 30px rgba(0,0,0,.18);animation:down .2s ease-out}.countdown{margin-top:10px;text-align:center;font-size:12px;font-weight:1000;color:var(--danger);animation:pulse 1.1s infinite}.diag{margin:10px auto 0;width:min(100%,820px);font-size:12px;color:var(--danger);background:var(--danger-bg);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);border-radius:14px;padding:10px 12px;font-weight:800;display:none}.diag.show{display:block}
+    @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}@keyframes down{from{transform:translate(-50%,-18px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+    @media(max-width:440px){body{padding-bottom:224px}.title{font-size:23px}.toolbar{grid-template-columns:1fr auto auto auto;gap:7px}.circle{width:42px;height:42px;min-width:42px}.duration{display:none}.iconbtn{width:36px;height:36px;min-width:36px}.mid{gap:10px}.big{width:62px;height:62px}.navbtn{width:48px;height:48px}.song{padding-left:8px;padding-right:7px}.switchrow span{font-size:11.5px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
-<body class="font-sans pb-48">
-  <div id="root"></div>
+<body>
+  <noscript>Ứng dụng cần bật JavaScript để phát nhạc.</noscript>
+  <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></audio>
+  <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
 
-  <audio id="mstq-player" preload="metadata" playsinline webkit-playsinline></audio>
-  <audio id="mstq-silence" preload="none" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
+  <div id="app">
+    <header class="header">
+      <div class="wrap">
+        <div class="topline">
+          <div style="min-width:0">
+            <h1 class="title">Xiemsansang</h1>
+            <div id="subtitle" class="subtitle">Đang khởi động lõi nghe nhạc...</div>
+          </div>
+          <button id="themeBtn" class="circle" title="Đổi màu">🎨</button>
+        </div>
+        <div class="toolbar">
+          <select id="timerSelect" class="select">
+            <option value="0">🕒 Hẹn giờ: Tắt</option>
+            <option value="15">🕒 Tắt sau 15 phút</option>
+            <option value="30">🕒 Tắt sau 30 phút</option>
+            <option value="45">🕒 Tắt sau 45 phút</option>
+            <option value="60">🕒 Tắt sau 60 phút</option>
+            <option value="90">🕒 Tắt sau 90 phút</option>
+            <option value="120">🕒 Tắt sau 120 phút</option>
+            <option value="240">🕒 Tắt sau 240 phút</option>
+            <option value="480">🕒 Tắt sau 480 phút</option>
+          </select>
+          <button id="survivalBtn" class="circle primary" title="Chống tự dừng">🛡️</button>
+          <button id="refreshBtn" class="circle" title="Đồng bộ lại">↻</button>
+          <button id="clearBtn" class="circle danger" title="Xóa cache">🗑</button>
+        </div>
+        <label class="switchrow">
+          <span>Giữ sáng màn hình: tắt để nghe qua đêm mát máy, bật khi cần nhìn giao diện lâu.</span>
+          <input id="wakeCheck" type="checkbox" />
+        </label>
+        <div id="countdown" class="countdown hidden"></div>
+        <button id="startBtn" class="btn primary starter">▶ Khởi Động & Phát Nhạc</button>
+      </div>
+      <div id="diag" class="diag"></div>
+    </header>
 
-  <script type="text/javascript">
-    const { useState, useEffect, useRef, useCallback, createElement: e } = React;
+    <main class="main wrap">
+      <input id="searchBox" class="search" placeholder="Tìm tên bài hát..." autocomplete="off" />
+      <section class="listbox">
+        <div id="status" class="status">Đang đồng bộ máy chủ...</div>
+        <div id="list"></div>
+        <button id="loadMoreBtn" class="loadmore hidden">⬇ Tải thêm danh sách xuống</button>
+      </section>
+    </main>
 
-    const SONGS_CACHE_KEY = 'xs_songs_v5_mobile_final';
-    const RESUME_KEY = 'xs_resume_v5_mobile_final';
-    const THEME_KEY = 'xs_theme_v5_mobile_final';
-    const SHUFFLE_KEY = 'xs_shuffle_v5_mobile_final';
-    const REPEAT_KEY = 'xs_repeat_v5_mobile_final';
-    const KEEP_SCREEN_KEY = 'xs_keep_screen_v5_mobile_final';
-    const INITIAL_VISIBLE = 60;
-    const VISIBLE_STEP = 60;
+    <section id="playerBar" class="player hidden">
+      <div class="wrap">
+        <div class="phead">
+          <div class="ptext">
+            <p id="nowTitle" class="pname truncate">Chưa chọn bài</p>
+            <div id="nowState" class="pstate">Sẵn sàng</div>
+          </div>
+          <div id="timeText" class="ptime">0:00 / 0:00</div>
+        </div>
+        <input id="seekRange" class="range" type="range" min="0" max="1000" value="0" />
+        <div class="controls">
+          <button id="shuffleBtn" class="toggle" title="Trộn bài">🔀</button>
+          <div class="mid">
+            <button id="prevBtn" class="navbtn" title="Bài trước">⏮</button>
+            <button id="playBtn" class="big" title="Phát / dừng">▶</button>
+            <button id="nextBtn" class="navbtn" title="Bài sau">⏭</button>
+          </div>
+          <button id="repeatBtn" class="toggle on" title="Lặp lại">🔁</button>
+        </div>
+      </div>
+    </section>
+  </div>
 
-    const saveNow = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-    const save = (k, v) => { try { if (document.visibilityState !== 'hidden') localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-    const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
-    const formatTime = s => { if (!isFinite(s) || s < 0) return '0:00'; const m = Math.floor(s / 60), sec = Math.floor(s % 60); return `${m}:${String(sec).padStart(2, '0')}`; };
-    const cleanTitle = txt => String(txt || 'Không tên').replace(/\.mp3$/i, '').replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
-    const haptic = (ms = 12) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} };
-    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  <script>
+  (function(){
+    'use strict';
 
-    let wakeLock = null;
-    const requestWakeLock = async () => {
-      if (!('wakeLock' in navigator)) return;
-      try { wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+    var SONGS_CACHE_KEY='xs_songs_v6_nowhite';
+    var RESUME_KEY='xs_resume_v6_nowhite';
+    var THEME_KEY='xs_theme_v6_nowhite';
+    var SHUFFLE_KEY='xs_shuffle_v6_nowhite';
+    var REPEAT_KEY='xs_repeat_v6_nowhite';
+    var SURVIVAL_KEY='xs_survival_v6_nowhite';
+    var VISIBLE_STEP=60;
+    var themes=['light','peach','mint'];
+
+    var state={
+      playlist:[], filtered:[], visible:VISIBLE_STEP, currentIndex:0,
+      initialized:false, playing:false, loading:true, filter:'',
+      shuffle:load(SHUFFLE_KEY,false), repeat:load(REPEAT_KEY,'all'), survival:load(SURVIVAL_KEY,true),
+      progress:{current:0,duration:0}, timerLeft:null, keepScreen:false,
+      playIntent:false, userPaused:true, transitioning:false, prefetchDone:false,
+      lastUi:0, lastMedia:0, rescueCount:0
     };
-    const releaseWakeLock = () => {
-      if (wakeLock) { try { wakeLock.release().catch(() => {}); } catch {} wakeLock = null; }
+
+    var audio=document.getElementById('mstq-player');
+    var anchor=document.getElementById('mstq-silence');
+    var wakeLock=null;
+    var timerHandle=null;
+    var toastHandle=null;
+    var rescueHandle=null;
+    var resumeApplied=false;
+
+    var el={
+      subtitle:byId('subtitle'), themeBtn:byId('themeBtn'), timerSelect:byId('timerSelect'), survivalBtn:byId('survivalBtn'), refreshBtn:byId('refreshBtn'), clearBtn:byId('clearBtn'), wakeCheck:byId('wakeCheck'), countdown:byId('countdown'), startBtn:byId('startBtn'), diag:byId('diag'), searchBox:byId('searchBox'), status:byId('status'), list:byId('list'), loadMoreBtn:byId('loadMoreBtn'), playerBar:byId('playerBar'), nowTitle:byId('nowTitle'), nowState:byId('nowState'), timeText:byId('timeText'), seekRange:byId('seekRange'), shuffleBtn:byId('shuffleBtn'), prevBtn:byId('prevBtn'), playBtn:byId('playBtn'), nextBtn:byId('nextBtn'), repeatBtn:byId('repeatBtn')
     };
 
-    const Icon = ({ d = 24, p = 'M5 12h14', f = 'none', sw = '1.8' }) => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: f, stroke: 'currentColor', strokeWidth: sw, 'aria-hidden': true }, e('path', { d: p, strokeLinecap: 'round', strokeLinejoin: 'round' }));
-    const Icons = {
-      play: d => e(Icon, { d, p: 'M8 5v14l11-7z', f: 'currentColor', sw: '1' }),
-      pause: d => e(Icon, { d, p: 'M6 5h4v14H6zM14 5h4v14h-4z', f: 'currentColor', sw: '1' }),
-      next: d => e(Icon, { d, p: 'M13 5 20 12l-7 7V5z M4 5h2v14H4z', f: 'currentColor', sw: '1' }),
-      back: d => e(Icon, { d, p: 'M11 19 4 12l7-7v14z M18 5h2v14h-2z', f: 'currentColor', sw: '1' }),
-      share: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('circle', { cx: '18', cy: '5', r: '3' }), e('circle', { cx: '6', cy: '12', r: '3' }), e('circle', { cx: '18', cy: '19', r: '3' }), e('line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49' }), e('line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49' })),
-      download: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('path', { d: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' }), e('polyline', { points: '7 10 12 15 17 10' }), e('line', { x1: '12', y1: '15', x2: '12', y2: '3' })),
-      palette: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('circle', { cx: '12', cy: '12', r: '10' }), e('path', { d: 'M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z' })),
-      trash: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '3 6 5 6 21 6' }), e('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })),
-      shuffle: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '16 3 21 3 21 8' }), e('line', { x1: '4', y1: '20', x2: '21', y2: '3' }), e('polyline', { points: '21 16 21 21 16 21' }), e('line', { x1: '15', y1: '15', x2: '21', y2: '21' }), e('line', { x1: '4', y1: '4', x2: '9', y2: '9' })),
-      repeat: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '17 1 21 5 17 9' }), e('path', { d: 'M3 11V9a4 4 0 0 1 4-4h14' }), e('polyline', { points: '7 23 3 19 7 15' }), e('path', { d: 'M21 13v2a4 4 0 0 1-4 4H3' })),
-      repeatOne: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '17 1 21 5 17 9' }), e('path', { d: 'M3 11V9a4 4 0 0 1 4-4h14' }), e('polyline', { points: '7 23 3 19 7 15' }), e('path', { d: 'M21 13v2a4 4 0 0 1-4 4H3' }), e('line', { x1: '12', y1: '10', x2: '12', y2: '14' }), e('line', { x1: '10', y1: '12', x2: '12', y2: '10' })),
-      screen: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('rect', { x: '3', y: '4', width: '18', height: '12', rx: '2' }), e('path', { d: 'M8 21h8M12 16v5' })),
-      refresh: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('path', { d: 'M21 12a9 9 0 1 1-2.64-6.36' }), e('path', { d: 'M21 3v6h-6' }))
-    };
+    window.addEventListener('error',function(ev){showDiag('Lỗi JavaScript: '+(ev.message||'không rõ')+' - dòng '+(ev.lineno||'?'));});
+    window.addEventListener('unhandledrejection',function(ev){showDiag('Promise bị lỗi: '+String(ev.reason&&ev.reason.message?ev.reason.message:ev.reason));});
 
-    const THEME_LIST = ['light', 'peach', 'mint'];
+    init();
 
-    function App() {
-      const [isInitialized, setIsInitialized] = useState(false);
-      const [theme, setTheme] = useState(localStorage.getItem(THEME_KEY) || 'light');
-      const [toast, setToast] = useState(null);
-      const [playlist, setPlaylist] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [visible, setVisible] = useState(INITIAL_VISIBLE);
-      const [filter, setFilter] = useState('');
-      const [currentIndex, setCurrentIndex] = useState(load(RESUME_KEY, { index: 0, current: 0 }).index || 0);
-      const [playing, setPlaying] = useState(false);
-      const [progress, setProgress] = useState({ current: 0, duration: 0 });
-      const [shuffle, setShuffle] = useState(load(SHUFFLE_KEY, false));
-      const [repeat, setRepeat] = useState(load(REPEAT_KEY, 'all'));
-      const [keepScreen, setKeepScreen] = useState(load(KEEP_SCREEN_KEY, false));
-      const [timerLeft, setTimerLeft] = useState(null);
-
-      const playlistRef = useRef(playlist);
-      const currentIndexRef = useRef(currentIndex);
-      const shuffleRef = useRef(shuffle);
-      const repeatRef = useRef(repeat);
-      const keepScreenRef = useRef(keepScreen);
-      const audioRef = useRef(null);
-      const timerRef = useRef(null);
-      const lastMediaSessionUpdateRef = useRef(-1);
-      const lastUiUpdateRef = useRef(0);
-      const isTransitioningRef = useRef(false);
-      const metadataPrefetchRef = useRef(null);
-      const resumeAppliedRef = useRef(false);
-      const playIntentRef = useRef(false);
-
-      useEffect(() => { audioRef.current = document.getElementById('mstq-player'); }, []);
-      useEffect(() => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem(THEME_KEY, theme); }, [theme]);
-      useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 2600); return () => clearTimeout(t); } }, [toast]);
-      useEffect(() => { playlistRef.current = playlist; }, [playlist]);
-      useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
-      useEffect(() => { shuffleRef.current = shuffle; save(SHUFFLE_KEY, shuffle); }, [shuffle]);
-      useEffect(() => { repeatRef.current = repeat; save(REPEAT_KEY, repeat); }, [repeat]);
-      useEffect(() => { keepScreenRef.current = keepScreen; save(KEEP_SCREEN_KEY, keepScreen); if (!keepScreen) releaseWakeLock(); else if (playing) requestWakeLock(); }, [keepScreen, playing]);
-
-      const maybeWake = () => { if (keepScreenRef.current) requestWakeLock(); };
-      const unlockAudioAnchor = () => {
-        const anchor = document.getElementById('mstq-silence');
-        if (!anchor || !anchor.paused) return;
-        try {
-          anchor.volume = 0;
-          const p = anchor.play();
-          if (p && p.then) p.then(() => setTimeout(() => { try { anchor.pause(); anchor.currentTime = 0; } catch {} }, 300)).catch(() => {});
-        } catch {}
-      };
-
-      const persistResume = useCallback(() => {
-        const a = audioRef.current;
-        saveNow(RESUME_KEY, {
-          index: currentIndexRef.current || 0,
-          current: a && isFinite(a.currentTime) ? Math.floor(a.currentTime) : 0,
-          savedAt: Date.now()
-        });
-      }, []);
-
-      useEffect(() => {
-        const onPageHide = () => persistResume();
-        const onVisibility = () => {
-          if (document.visibilityState === 'visible') {
-            const a = audioRef.current;
-            if (a && !a.paused && keepScreenRef.current) requestWakeLock();
-          } else {
-            persistResume();
-            releaseWakeLock();
-          }
-        };
-        window.addEventListener('pagehide', onPageHide, { passive: true });
-        document.addEventListener('visibilitychange', onVisibility, { passive: true });
-        return () => { window.removeEventListener('pagehide', onPageHide); document.removeEventListener('visibilitychange', onVisibility); };
-      }, [persistResume]);
-
-      const handleTimerChange = (ev) => {
-        const val = parseInt(ev.target.value, 10);
-        haptic();
-        clearInterval(timerRef.current);
-        if (!val) { setTimerLeft(null); setToast('Đã hủy hẹn giờ'); return; }
-        const end = Date.now() + val * 60 * 1000;
-        setTimerLeft(val * 60 * 1000);
-        setToast(`Đã hẹn tắt sau ${val} phút`);
-        timerRef.current = setInterval(() => {
-          const left = end - Date.now();
-          if (left <= 0) {
-            clearInterval(timerRef.current);
-            setTimerLeft(null);
-            const a = audioRef.current;
-            if (a) a.pause();
-            setPlaying(false);
-            releaseWakeLock();
-            setToast('Đã tắt nhạc theo hẹn giờ');
-          } else setTimerLeft(left);
-        }, 1000);
-      };
-
-      const clearCache = () => {
-        haptic();
-        if (confirm('Bạn có chắc chắn muốn xóa Cache và làm mới ứng dụng?')) {
-          const keepTheme = localStorage.getItem(THEME_KEY);
-          localStorage.clear();
-          if (keepTheme) localStorage.setItem(THEME_KEY, keepTheme);
-          location.reload();
-        }
-      };
-
-      const refetch = useCallback(async () => {
-        setLoading(true);
-        try {
-          let all = [];
-          const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-          const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
-          const r = await fetch(url, { cache: 'no-store' });
-          if (r.ok) {
-            const j = await r.json();
-            const docs = j?.response?.docs || [];
-            for (const d of docs) {
-              try {
-                const meta = await fetch(`https://archive.org/metadata/${encodeURIComponent(d.identifier)}`, { cache: 'no-store' }).then(x => x.json());
-                (meta.files || []).forEach(f => {
-                  const fmt = String(f.format || '').toUpperCase();
-                  const name = String(f.name || '');
-                  if (fmt.includes('MP3') || /\.mp3$/i.test(name)) {
-                    const fileTitle = (f.title && String(f.title).trim() && String(f.title).trim() !== String(d.title || '').trim()) ? f.title : name;
-                    all.push({
-                      id: `${d.identifier}/${name}`,
-                      title: cleanTitle(fileTitle),
-                      artist: d.creator || 'Xiemsansang',
-                      stream_url: `https://archive.org/download/${encodeURIComponent(d.identifier)}/${encodeURIComponent(name)}`,
-                      duration: parseFloat(f.length || 0) || 0
-                    });
-                  }
-                });
-              } catch {}
-            }
-          }
-          const seen = new Set();
-          all = all.filter(s => s.stream_url && !seen.has(s.id) && seen.add(s.id));
-          if (!all.length) throw new Error('empty-list');
-          setPlaylist(all);
-          saveNow(SONGS_CACHE_KEY, all);
-          setToast(`Đã đồng bộ ${all.length} bài`);
-        } catch {
-          const cached = load(SONGS_CACHE_KEY, []);
-          if (cached && cached.length) { setPlaylist(cached); setToast('Đang dùng danh sách đã lưu offline'); }
-          else setToast('Không có dữ liệu bài hát');
-        } finally {
-          setLoading(false);
-        }
-      }, []);
-
-      useEffect(() => { refetch(); }, [refetch]);
-
-      useEffect(() => {
-        if (!playlist.length || resumeAppliedRef.current) return;
-        resumeAppliedRef.current = true;
-        const saved = load(RESUME_KEY, { index: 0, current: 0 });
-        const safeIndex = clamp(saved.index || 0, 0, Math.max(0, playlist.length - 1));
-        currentIndexRef.current = safeIndex;
-        setCurrentIndex(safeIndex);
-        const a = audioRef.current;
-        const s = playlist[safeIndex];
-        if (a && s) {
-          a.src = s.stream_url;
-          a.preload = 'metadata';
-          a.addEventListener('loadedmetadata', () => {
-            if (saved.current && saved.current < (a.duration || Infinity) - 3) {
-              try { a.currentTime = saved.current; setProgress({ current: saved.current, duration: a.duration || s.duration || 0 }); } catch {}
-            }
-          }, { once: true });
-        }
-      }, [playlist]);
-
-      async function shareTrack(s) {
-        haptic();
-        try {
-          if (navigator.share) await navigator.share({ title: s.title, text: s.artist || 'Xiemsansang', url: s.stream_url });
-          else { await navigator.clipboard.writeText(s.stream_url); setToast('Đã copy link bài hát'); }
-        } catch {}
-      }
-
-      async function downloadTrack(s) {
-        haptic();
-        setToast('Đang mở file tải về...');
-        try {
-          const a = document.createElement('a');
-          a.href = s.stream_url;
-          a.download = `${s.title}.mp3`;
-          a.rel = 'noopener';
-          a.target = '_blank';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } catch { setToast('Lỗi tải file'); }
-      }
-
-      const getNextIndexLogic = (idx) => {
-        const pl = playlistRef.current;
-        if (!pl.length) return 0;
-        if (shuffleRef.current && pl.length > 1) {
-          let nextIdx = Math.floor(Math.random() * pl.length);
-          return nextIdx === idx ? (nextIdx + 1) % pl.length : nextIdx;
-        }
-        return (idx + 1) % pl.length;
-      };
-      const getPrevIndexLogic = (idx) => {
-        const pl = playlistRef.current;
-        return pl.length ? (idx - 1 + pl.length) % pl.length : 0;
-      };
-
-      const triggerMetadataPrefetch = (idx) => {
-        const nextSong = playlistRef.current[idx];
-        if (!nextSong || !nextSong.stream_url) return;
-        try {
-          if (metadataPrefetchRef.current) metadataPrefetchRef.current.src = '';
-          const pre = new Audio();
-          pre.preload = 'metadata';
-          pre.src = nextSong.stream_url;
-          metadataPrefetchRef.current = pre;
-        } catch {}
-      };
-
-      const updatePositionState = (a) => {
-        if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-          if (a && isFinite(a.duration) && isFinite(a.currentTime) && a.duration > 0) {
-            try { navigator.mediaSession.setPositionState({ duration: a.duration, playbackRate: a.playbackRate || 1, position: a.currentTime }); } catch {}
-          }
-        }
-      };
-
-      const updateMediaMetadata = (s) => {
-        if (!('mediaSession' in navigator) || !window.MediaMetadata || !s) return;
-        try { navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist || 'Xiemsansang', album: 'XIEMSANSANG' }); } catch {}
-      };
-
-      const playNativeSync = useCallback((i, opts = {}) => {
-        const a = audioRef.current;
-        const pl = playlistRef.current;
-        if (!a || !pl.length) return;
-        const index = clamp(i, 0, pl.length - 1);
-        const s = pl[index];
-        if (!s) return;
-
-        isTransitioningRef.current = true;
-        playIntentRef.current = true;
-        setIsInitialized(true);
-        setCurrentIndex(index);
-        currentIndexRef.current = index;
-        updateMediaMetadata(s);
-
-        if (a.src !== s.stream_url) {
-          a.pause();
-          a.src = s.stream_url;
-          a.preload = 'metadata';
-          a.load();
-        }
-        if (opts.seek && isFinite(opts.seek)) {
-          const applySeek = () => { try { if (a.duration && opts.seek < a.duration - 2) a.currentTime = opts.seek; } catch {} };
-          if (a.readyState >= 1) applySeek(); else a.addEventListener('loadedmetadata', applySeek, { once: true });
-        }
-
-        const p = a.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => {
-            setPlaying(true);
-            maybeWake();
-            isTransitioningRef.current = false;
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-            updatePositionState(a);
-          }).catch(() => {
-            isTransitioningRef.current = false;
-            playIntentRef.current = false;
-            setPlaying(false);
-            releaseWakeLock();
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-            setToast('Trình duyệt chặn tự phát, bấm phát lại một lần');
-          });
-        } else {
-          setPlaying(true);
-          isTransitioningRef.current = false;
-          maybeWake();
-        }
-      }, []);
-
-      const pickSong = useCallback((s) => {
-        haptic();
-        const idx = playlistRef.current.findIndex(x => x.id === s.id);
-        if (idx < 0) return;
-        unlockAudioAnchor();
-        playNativeSync(idx);
-      }, [playNativeSync]);
-
-      const initAudioEngine = () => {
-        haptic(18);
-        unlockAudioAnchor();
-        setIsInitialized(true);
-        if (playlistRef.current.length > 0) playNativeSync(currentIndexRef.current || 0, load(RESUME_KEY, {}));
-      };
-
-      const playPauseUI = useCallback(() => {
-        haptic();
-        const a = audioRef.current;
-        if (!a || !playlistRef.current.length) return;
-        unlockAudioAnchor();
-        if (playing || (!a.paused && a.currentTime >= 0)) {
-          playIntentRef.current = false;
-          a.pause();
-          setPlaying(false);
-          releaseWakeLock();
-          persistResume();
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        } else {
-          if (!a.src) {
-            const s = playlistRef.current[currentIndexRef.current] || playlistRef.current[0];
-            if (s) { a.src = s.stream_url; a.load(); updateMediaMetadata(s); }
-          }
-          playIntentRef.current = true;
-          const p = a.play();
-          if (p && p.catch) p.catch(() => playNativeSync(currentIndexRef.current || 0));
-          setPlaying(true);
-          maybeWake();
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-        }
-      }, [playing, playNativeSync, persistResume]);
-
-      useEffect(() => {
-        const a = audioRef.current;
-        if (!a) return;
-        const onLoadedMetadata = () => {
-          setProgress({ current: a.currentTime || 0, duration: a.duration || playlistRef.current[currentIndexRef.current]?.duration || 0 });
-          updatePositionState(a);
-        };
-        const onTime = () => {
-          if (!isFinite(a.duration) || a.duration <= 0) return;
-          const now = Date.now();
-          if (document.visibilityState === 'visible' && now - lastUiUpdateRef.current > 700) {
-            setProgress({ current: a.currentTime, duration: a.duration });
-            lastUiUpdateRef.current = now;
-          }
-          const currentSec = Math.floor(a.currentTime);
-          if (currentSec !== lastMediaSessionUpdateRef.current) {
-            updatePositionState(a);
-            lastMediaSessionUpdateRef.current = currentSec;
-          }
-          if (currentSec > 0 && currentSec % 15 === 0) persistResume();
-          if (a.duration > 45 && a.currentTime >= a.duration - 18) triggerMetadataPrefetch(getNextIndexLogic(currentIndexRef.current));
-        };
-        const onEnded = () => {
-          persistResume();
-          if (repeatRef.current === 'one') { a.currentTime = 0; a.play().catch(() => {}); return; }
-          if (repeatRef.current === 'off' && currentIndexRef.current === playlistRef.current.length - 1 && !shuffleRef.current) {
-            playIntentRef.current = false;
-            setPlaying(false);
-            releaseWakeLock();
-            return;
-          }
-          if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current));
-        };
-        const onPlay = () => { setPlaying(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; };
-        const onPause = () => { setPlaying(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; if (!playIntentRef.current) releaseWakeLock(); };
-
-        a.addEventListener('loadedmetadata', onLoadedMetadata);
-        a.addEventListener('timeupdate', onTime);
-        a.addEventListener('ended', onEnded);
-        a.addEventListener('play', onPlay);
-        a.addEventListener('pause', onPause);
-        return () => {
-          a.removeEventListener('loadedmetadata', onLoadedMetadata);
-          a.removeEventListener('timeupdate', onTime);
-          a.removeEventListener('ended', onEnded);
-          a.removeEventListener('play', onPlay);
-          a.removeEventListener('pause', onPause);
-        };
-      }, [persistResume, playNativeSync]);
-
-      useEffect(() => {
-        if (!('mediaSession' in navigator)) return;
-        const safePlay = () => {
-          unlockAudioAnchor();
-          const a = audioRef.current;
-          if (!a) return;
-          if (!a.src && playlistRef.current.length) playNativeSync(currentIndexRef.current || 0);
-          else {
-            playIntentRef.current = true;
-            a.play().then(() => { setPlaying(true); maybeWake(); navigator.mediaSession.playbackState = 'playing'; }).catch(() => {});
-          }
-        };
-        const safePause = () => {
-          const a = audioRef.current;
-          if (!a) return;
-          playIntentRef.current = false;
-          a.pause();
-          setPlaying(false);
-          releaseWakeLock();
-          persistResume();
-          navigator.mediaSession.playbackState = 'paused';
-        };
-        const handleSeek = (details) => {
-          const a = audioRef.current;
-          if (!a || details.seekTime === undefined) return;
-          const t = clamp(details.seekTime, 0, isFinite(a.duration) ? a.duration : details.seekTime);
-          try { if (details.fastSeek && 'fastSeek' in a) a.fastSeek(t); else a.currentTime = t; } catch {}
-          setProgress({ current: t, duration: a.duration || 0 });
-          updatePositionState(a);
-          persistResume();
-        };
-        try {
-          navigator.mediaSession.setActionHandler('play', safePlay);
-          navigator.mediaSession.setActionHandler('pause', safePause);
-          navigator.mediaSession.setActionHandler('nexttrack', () => playNativeSync(getNextIndexLogic(currentIndexRef.current)));
-          navigator.mediaSession.setActionHandler('previoustrack', () => playNativeSync(getPrevIndexLogic(currentIndexRef.current)));
-          navigator.mediaSession.setActionHandler('seekto', handleSeek);
-          navigator.mediaSession.setActionHandler('seekbackward', d => handleSeek({ seekTime: (audioRef.current?.currentTime || 0) - (d.seekOffset || 10) }));
-          navigator.mediaSession.setActionHandler('seekforward', d => handleSeek({ seekTime: (audioRef.current?.currentTime || 0) + (d.seekOffset || 10) }));
-        } catch {}
-      }, [playNativeSync, persistResume]);
-
-      const list = filter.trim() ? playlist.filter(s => (s.title || '').toLowerCase().includes(filter.trim().toLowerCase()) || (s.artist || '').toLowerCase().includes(filter.trim().toLowerCase())) : playlist;
-      const currentSong = playlist[currentIndex] || null;
-      const currentId = currentSong ? currentSong.id : '';
-      const shown = list.slice(0, visible);
-      const progressPct = progress.duration > 0 ? clamp((progress.current / progress.duration) * 100, 0, 100) : 0;
-
-      const seekByRange = (ev) => {
-        const a = audioRef.current;
-        const pct = parseFloat(ev.target.value);
-        if (!a || !progress.duration) return;
-        const t = (pct / 100) * progress.duration;
-        try { a.currentTime = t; } catch {}
-        setProgress(p => ({ ...p, current: t }));
-        updatePositionState(a);
-      };
-
-      return e('div', null,
-        toast && e('div', { className: 'toast-container' }, e('div', { className: 'toast-msg' }, toast)),
-
-        e('header', { className: 'sticky top-0 z-40 px-4 pt-[max(18px,env(safe-area-inset-top))] pb-4 border-b border-[var(--border)] bg-[var(--card)]/95 backdrop-blur-xl' },
-          e('div', { className: 'max-w-3xl mx-auto' },
-            e('div', { className: 'flex items-start justify-between gap-3' },
-              e('div', { className: 'min-w-0' },
-                e('h1', { className: 'text-2xl font-black text-[var(--primary)] uppercase tracking-wide leading-tight' }, 'Xiemsansang'),
-                e('p', { className: 'text-sm text-[var(--muted)] mt-0.5 font-semibold' }, loading ? 'Đang đồng bộ danh sách...' : `${playlist.length} bài • Chọn bài nào phát bài đó`)
-              ),
-              e('button', { title: 'Đổi màu giao diện', onClick: () => { haptic(); setTheme(THEME_LIST[(THEME_LIST.indexOf(theme) + 1) % THEME_LIST.length]); }, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95' }, Icons.palette(21))
-            ),
-
-            e('div', { className: 'mt-4 grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center' },
-              e('select', { className: 'timer-dropdown w-full', onChange: handleTimerChange, 'aria-label': 'Hẹn giờ tắt nhạc' },
-                e('option', { value: '0' }, '🕒 Hẹn giờ: Tắt'),
-                [15, 30, 45, 60, 90, 120].map(m => e('option', { key: m, value: m }, `🕒 Tắt sau ${m} phút`))
-              ),
-              e('button', { title: keepScreen ? 'Đang giữ màn hình sáng' : 'Tiết kiệm pin: không giữ màn hình', onClick: () => { haptic(); setKeepScreen(v => !v); setToast(!keepScreen ? 'Đã bật giữ màn hình sáng' : 'Đã bật chế độ tiết kiệm pin'); }, className: `w-11 h-11 flex justify-center items-center rounded-full active:scale-95 ${keepScreen ? 'bg-[var(--primary)] text-[var(--primary-fg)]' : 'bg-[var(--active-bg)] text-[var(--primary)]'}` }, Icons.screen(20)),
-              e('button', { title: 'Đồng bộ lại danh sách', onClick: refetch, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95' }, Icons.refresh(20)),
-              e('button', { title: 'Xóa cache', onClick: clearCache, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--danger-bg)] text-[var(--danger)] active:scale-95' }, Icons.trash(20))
-            ),
-
-            timerLeft && e('div', { className: 'mt-3 text-center text-xs font-black text-rose-500 animate-pulse' }, `Hệ thống sẽ dừng sau: ${formatTime(Math.ceil(timerLeft / 1000))}`),
-            !isInitialized && e('button', { className: 'mt-4 btn btn-primary w-full py-4 text-lg shadow-lg shadow-[var(--primary)]/25', onClick: initAudioEngine }, '▶ Khởi động & phát nhạc')
-          )
-        ),
-
-        e('main', { className: 'max-w-3xl mx-auto px-3 pt-3' },
-          e('div', { className: 'mb-3' },
-            e('input', { className: 'w-full bg-[var(--card)] border border-[var(--border)] rounded-2xl py-3.5 px-4 focus:outline-none focus:ring-2 ring-[var(--primary)]/40 shadow-sm', placeholder: 'Tìm tên bài hát hoặc nghệ sĩ...', value: filter, onChange: ev => { setFilter(ev.target.value); setVisible(INITIAL_VISIBLE); } })
-          ),
-
-          loading ? e('div', { className: 'p-10 text-center text-[var(--primary)] font-black animate-pulse' }, 'Đang đồng bộ máy chủ...') :
-          e('section', { className: 'border border-[var(--border)] bg-[var(--card)]/85 rounded-3xl overflow-hidden shadow-sm' },
-            shown.length ? shown.map((s, index) => {
-              const actualIndex = playlist.findIndex(x => x.id === s.id);
-              const isCurrent = currentId === s.id;
-              return e('div', { key: s.id, className: `song-row ${isCurrent ? 'active' : ''}`, onClick: () => pickSong(s), role: 'button', tabIndex: 0 },
-                e('div', { className: `w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-[var(--muted)]'}` }, isCurrent ? (playing ? '▶' : 'Ⅱ') : (actualIndex + 1 || index + 1)),
-                e('div', { className: 'flex-1 min-w-0 pr-1' },
-                  e('div', { className: `truncate text-[0.95rem] leading-tight ${isCurrent ? 'text-[var(--primary)] font-black' : 'text-[var(--text)] font-bold'}` }, s.title),
-                  e('div', { className: 'truncate text-[11px] font-semibold text-[var(--muted)] mt-1' }, `${s.artist || 'Xiemsansang'}${isCurrent ? ' • Đang chọn' : ''}`)
-                ),
-                e('div', { className: 'flex items-center gap-0.5 flex-shrink-0' },
-                  e('button', { title: 'Chia sẻ', className: 'action-btn text-[var(--primary)]', onClick: ev => { ev.stopPropagation(); shareTrack(s); } }, Icons.share(18)),
-                  e('span', { className: 'mobile-hide-small text-xs font-mono font-black text-[var(--muted)] w-11 text-center' }, formatTime(s.duration)),
-                  e('button', { title: 'Tải bài hát', className: 'action-btn text-rose-500', onClick: ev => { ev.stopPropagation(); downloadTrack(s); } }, Icons.download(19))
-                )
-              );
-            }) : e('div', { className: 'p-8 text-center text-[var(--muted)] font-bold' }, 'Không tìm thấy bài phù hợp'),
-            list.length > visible && e('button', { onClick: () => { haptic(); setVisible(v => v + VISIBLE_STEP); }, className: 'w-full py-4 text-sm font-black text-[var(--primary)] bg-[var(--active-bg)] active:scale-[0.99]' }, `⬇ Tải thêm ${Math.min(VISIBLE_STEP, list.length - visible)} bài`)
-          )
-        ),
-
-        currentSong && isInitialized && e('footer', { className: 'mini-player fixed bottom-0 left-0 right-0 w-full bg-[var(--card)]/96 border-t border-[var(--border)] backdrop-blur-2xl px-4 pt-3 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]' },
-          e('div', { className: 'max-w-3xl mx-auto' },
-            e('div', { className: 'flex items-center justify-between gap-2 mb-2' },
-              e('div', { className: 'flex-1 min-w-0 pr-2' },
-                e('p', { className: 'truncate font-black text-[0.95rem] text-[var(--text)] leading-tight' }, currentSong.title),
-                e('p', { className: 'text-xs font-bold text-[var(--primary)] mt-0.5' }, playing ? 'Đang phát...' : 'Đã tạm dừng')
-              ),
-              e('div', { className: 'text-xs font-black text-[var(--muted)] whitespace-nowrap' }, `${formatTime(progress.current)} / ${formatTime(progress.duration || currentSong.duration)}`)
-            ),
-
-            e('input', { className: 'range', type: 'range', min: '0', max: '100', step: '0.1', value: String(progressPct), onChange: seekByRange, 'aria-label': 'Tua bài hát' }),
-
-            e('div', { className: 'flex items-center justify-between w-full px-1 pb-1' },
-              e('button', { title: shuffle ? 'Đang trộn bài' : 'Trộn bài', onClick: () => { haptic(); setShuffle(!shuffle); }, className: `w-11 h-11 flex justify-center items-center rounded-full ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}` }, Icons.shuffle(20)),
-              e('div', { className: 'flex items-center gap-4' },
-                e('button', { title: 'Bài trước', className: 'w-12 h-12 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95', onClick: () => { haptic(); playNativeSync(getPrevIndexLogic(currentIndexRef.current)); } }, Icons.back(23)),
-                e('button', { title: playing ? 'Tạm dừng' : 'Phát', className: 'w-16 h-16 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg shadow-[var(--primary)]/25 active:scale-95', onClick: playPauseUI }, playing ? Icons.pause(30) : Icons.play(30)),
-                e('button', { title: 'Bài tiếp', className: 'w-12 h-12 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95', onClick: () => { haptic(); playNativeSync(getNextIndexLogic(currentIndexRef.current)); } }, Icons.next(23))
-              ),
-              e('button', { title: repeat === 'one' ? 'Lặp 1 bài' : repeat === 'all' ? 'Lặp danh sách' : 'Không lặp', onClick: () => { haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all'); }, className: `w-11 h-11 flex justify-center items-center rounded-full ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}` }, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
-            )
-          )
-        )
-      );
+    function init(){
+      var theme=localStorage.getItem(THEME_KEY)||'light';
+      document.documentElement.setAttribute('data-theme',theme);
+      audio.preload='auto';
+      wireEvents();
+      renderStaticState();
+      refetch(false);
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(e(App, null));
+    function wireEvents(){
+      el.themeBtn.addEventListener('click',function(){haptic();var cur=document.documentElement.getAttribute('data-theme')||'light';var next=themes[(themes.indexOf(cur)+1)%themes.length];document.documentElement.setAttribute('data-theme',next);localStorage.setItem(THEME_KEY,next);});
+      el.refreshBtn.addEventListener('click',function(){haptic();refetch(true);});
+      el.clearBtn.addEventListener('click',function(){haptic();if(confirm('Xóa cache danh sách và trạng thái nghe?')){var theme=localStorage.getItem(THEME_KEY);localStorage.clear();if(theme)localStorage.setItem(THEME_KEY,theme);location.reload();}});
+      el.survivalBtn.addEventListener('click',function(){haptic();state.survival=!state.survival;saveNow(SURVIVAL_KEY,state.survival);toast(state.survival?'Đã bật chống tự dừng':'Đã tắt chống tự dừng');renderStaticState();});
+      el.wakeCheck.addEventListener('change',function(){haptic();state.keepScreen=!!el.wakeCheck.checked;if(state.keepScreen&&state.playing)requestWake();else releaseWake();});
+      el.timerSelect.addEventListener('change',onTimerChange);
+      el.startBtn.addEventListener('click',startEngine);
+      el.searchBox.addEventListener('input',function(){state.filter=el.searchBox.value||'';state.visible=VISIBLE_STEP;applyFilter();renderList();});
+      el.loadMoreBtn.addEventListener('click',function(){state.visible+=VISIBLE_STEP;renderList();});
+      el.playBtn.addEventListener('click',togglePlay);
+      el.prevBtn.addEventListener('click',function(){haptic();playIndex(prevIndex());});
+      el.nextBtn.addEventListener('click',function(){haptic();playIndex(nextIndex());});
+      el.shuffleBtn.addEventListener('click',function(){haptic();state.shuffle=!state.shuffle;saveNow(SHUFFLE_KEY,state.shuffle);renderStaticState();});
+      el.repeatBtn.addEventListener('click',function(){haptic();state.repeat=state.repeat==='all'?'one':state.repeat==='one'?'off':'all';saveNow(REPEAT_KEY,state.repeat);renderStaticState();});
+      el.seekRange.addEventListener('input',function(){var dur=state.progress.duration||audio.duration||0;if(!dur)return;var t=(parseFloat(el.seekRange.value)||0)/1000*dur;try{audio.currentTime=t;}catch(e){}state.progress.current=t;renderPlayer();updatePositionState();});
+
+      audio.addEventListener('loadedmetadata',function(){state.progress.duration=validDuration(audio.duration)||currentSongDuration();renderPlayer();updatePositionState();});
+      audio.addEventListener('timeupdate',onTimeUpdate);
+      audio.addEventListener('ended',onEnded);
+      audio.addEventListener('play',function(){state.playing=true;state.playIntent=true;state.userPaused=false;state.rescueCount=0;startAnchor();if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';renderPlayer();if(state.keepScreen)requestWake();});
+      audio.addEventListener('pause',function(){if(state.playIntent&&!state.userPaused&&state.survival){rescue('unexpected-pause');return;}state.playing=false;if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';stopAnchor();releaseWake();renderPlayer();});
+      ['stalled','waiting','suspend','emptied','error','abort'].forEach(function(ev){audio.addEventListener(ev,function(){if(state.playIntent&&!state.userPaused&&state.survival)rescue(ev);});});
+
+      document.addEventListener('visibilitychange',function(){persistResume();if(document.visibilityState==='hidden'){if(state.playIntent&&!state.userPaused){startAnchor();warmNext(nextIndex());}releaseWake();}else{renderAll();if(state.playIntent&&!state.userPaused&&audio.paused&&state.survival)rescue('visible-return');}});
+      window.addEventListener('pagehide',persistResume);
+      window.addEventListener('beforeunload',persistResume);
+
+      setupMediaSession();
+    }
+
+    async function refetch(force){
+      state.loading=true;renderList();
+      try{
+        var all=[];
+        var query='identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+        var url='https://archive.org/advancedsearch.php?q='+encodeURIComponent(query)+'&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json';
+        var r=await fetch(url,{cache:force?'no-store':'default'});
+        if(!r.ok)throw new Error('search failed');
+        var j=await r.json();
+        var docs=(j&&j.response&&j.response.docs)||[];
+        for(var i=0;i<docs.length;i++){
+          var d=docs[i];
+          try{
+            var mr=await fetch('https://archive.org/metadata/'+encodeURIComponent(d.identifier),{cache:force?'no-store':'default'});
+            if(!mr.ok)continue;
+            var meta=await mr.json();
+            var files=meta.files||[];
+            for(var k=0;k<files.length;k++){
+              var f=files[k], name=String(f.name||''), fmt=String(f.format||'').toUpperCase();
+              if(fmt.indexOf('MP3')>=0||/\.mp3$/i.test(name)){
+                var fileTitle=(f.title&&String(f.title).trim()&&String(f.title).trim()!==String(d.title||'').trim())?String(f.title):name;
+                all.push({id:String(d.identifier)+'/'+name,title:cleanTitle(fileTitle),artist:d.creator||'Xiemsansang',stream_url:'https://archive.org/download/'+encodeURIComponent(d.identifier)+'/'+encodeURIComponent(name),duration:parseFloat(f.length||0)||0});
+              }
+            }
+          }catch(inner){}
+        }
+        var seen={};
+        all=all.filter(function(s){if(!s.stream_url||seen[s.id])return false;seen[s.id]=true;return true;});
+        if(!all.length)throw new Error('empty list');
+        state.playlist=all;saveNow(SONGS_CACHE_KEY,all);toast('Đã đồng bộ '+all.length+' bài');
+      }catch(e){
+        var cached=load(SONGS_CACHE_KEY,[]);
+        if(cached&&cached.length){state.playlist=cached;toast('Đang dùng danh sách đã lưu');}
+        else{state.playlist=[];toast('Không lấy được dữ liệu bài hát');}
+      }
+      state.loading=false;applyFilter();restoreResumeOnce();renderAll();
+    }
+
+    function restoreResumeOnce(){
+      if(resumeApplied||!state.playlist.length)return;resumeApplied=true;
+      var saved=load(RESUME_KEY,{index:0,current:0});
+      state.currentIndex=clamp(saved.index||0,0,state.playlist.length-1);
+      var s=state.playlist[state.currentIndex];
+      if(s){audio.src=s.stream_url;audio.preload='auto';audio.load();}
+      state.progress.current=saved.current||0;state.progress.duration=s?s.duration||0:0;
+    }
+
+    function startEngine(){
+      haptic(18);state.initialized=true;state.playIntent=true;state.userPaused=false;startAnchor();if(!state.playlist.length){toast('Chưa có danh sách bài hát');renderAll();return;}playIndex(state.currentIndex||0,load(RESUME_KEY,{}));}
+
+    function playIndex(i,resume){
+      if(!state.playlist.length)return;
+      i=clamp(i,0,state.playlist.length-1);
+      var s=state.playlist[i];
+      if(!s)return;
+      state.transitioning=true;state.prefetchDone=false;state.currentIndex=i;state.initialized=true;state.playIntent=true;state.userPaused=false;state.playing=true;state.progress={current:0,duration:s.duration||0};
+      updateMediaMetadata(s);
+      if(audio.src!==s.stream_url){audio.src=s.stream_url;audio.preload='auto';try{audio.load();}catch(e){}}
+      var seek=(resume&&resume.index===i&&resume.current)?resume.current:0;
+      if(seek>0){audio.addEventListener('loadedmetadata',function once(){audio.removeEventListener('loadedmetadata',once);try{if(seek<(audio.duration||Infinity)-3)audio.currentTime=seek;}catch(e){}},{once:true});}
+      startAnchor();
+      renderAll();
+      safePlay('play-index');
+      warmNext(nextIndex());
+      setTimeout(function(){state.transitioning=false;},1200);
+    }
+
+    function safePlay(reason){
+      var p;
+      try{p=audio.play();}catch(e){rescue(reason+'-throw');return;}
+      if(p&&typeof p.then==='function'){
+        p.then(function(){state.playing=true;state.userPaused=false;state.playIntent=true;state.rescueCount=0;if(state.keepScreen)requestWake();renderPlayer();updatePositionState();})
+         .catch(function(){setTimeout(function(){try{audio.load();audio.play().catch(function(){rescue(reason+'-catch');});}catch(e2){}},650);});
+      }
+    }
+
+    function togglePlay(){
+      haptic();
+      if(!state.playlist.length)return;
+      if(!state.initialized){startEngine();return;}
+      if(state.playing||(!audio.paused&&audio.currentTime>=0)){
+        state.userPaused=true;state.playIntent=false;try{audio.pause();}catch(e){}stopAnchor();releaseWake();persistResume();state.playing=false;renderPlayer();if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';
+      }else{
+        state.userPaused=false;state.playIntent=true;startAnchor();if(!audio.src){var s=state.playlist[state.currentIndex]||state.playlist[0];if(s){audio.src=s.stream_url;audio.load();updateMediaMetadata(s);}}
+        safePlay('toggle');
+      }
+    }
+
+    function rescue(reason){
+      if(!state.survival||!state.playIntent||state.userPaused)return;
+      clearTimeout(rescueHandle);
+      var delay=Math.min(1800,350+state.rescueCount*250);
+      state.rescueCount++;
+      rescueHandle=setTimeout(function(){
+        if(!state.playIntent||state.userPaused)return;
+        startAnchor();
+        try{
+          if(audio.error||audio.readyState===0){audio.load();}
+          var p=audio.play();
+          if(p&&p.catch)p.catch(function(){if(state.rescueCount<8){rescue(reason+'-again');}else{toast('Máy đang chặn phát nền, hãy mở màn hình rồi bấm phát lại');}});
+        }catch(e){if(state.rescueCount<8)rescue(reason+'-throw');}
+      },delay);
+    }
+
+    function onTimeUpdate(){
+      var dur=validDuration(audio.duration)||currentSongDuration();
+      if(!dur)return;
+      var now=Date.now();
+      state.progress.current=audio.currentTime||0;state.progress.duration=dur;
+      if(document.visibilityState==='visible'&&now-state.lastUi>700){renderPlayer();state.lastUi=now;}
+      var sec=Math.floor(audio.currentTime||0);
+      if(sec!==state.lastMedia&&sec%2===0){updatePositionState();state.lastMedia=sec;}
+      if(document.visibilityState==='visible'&&sec>0&&sec%45===0)persistResume();
+      if(dur>45&&audio.currentTime>=dur-25&&!state.prefetchDone){state.prefetchDone=true;warmNext(nextIndex());}
+    }
+
+    function onEnded(){
+      persistResume();
+      if(state.repeat==='one'){try{audio.currentTime=0;}catch(e){}safePlay('repeat-one');return;}
+      if(state.repeat==='off'&&state.currentIndex===state.playlist.length-1&&!state.shuffle){state.playIntent=false;state.userPaused=true;state.playing=false;stopAnchor();releaseWake();renderPlayer();return;}
+      playIndex(nextIndex());
+    }
+
+    function nextIndex(){
+      var n=state.playlist.length;if(!n)return 0;
+      if(state.shuffle&&n>1){var x=Math.floor(Math.random()*n);return x===state.currentIndex?(x+1)%n:x;}
+      return (state.currentIndex+1)%n;
+    }
+    function prevIndex(){var n=state.playlist.length;if(!n)return 0;return (state.currentIndex-1+n)%n;}
+
+    function startAnchor(){
+      if(!anchor)return;
+      try{anchor.volume=0;anchor.muted=true;anchor.loop=true;if(anchor.paused){var p=anchor.play();if(p&&p.catch)p.catch(function(){});}}catch(e){}
+    }
+    function stopAnchor(){try{if(anchor)anchor.pause();}catch(e){}}
+
+    function warmNext(i){
+      var s=state.playlist[i];if(!s||!s.stream_url)return;
+      try{fetch(s.stream_url,{mode:'no-cors',cache:'force-cache'}).catch(function(){});}catch(e){}
+    }
+
+    function setupMediaSession(){
+      if(!('mediaSession' in navigator))return;
+      try{
+        navigator.mediaSession.setActionHandler('play',function(){state.userPaused=false;state.playIntent=true;startAnchor();if(!audio.src&&state.playlist.length)playIndex(state.currentIndex||0);else safePlay('media-play');});
+        navigator.mediaSession.setActionHandler('pause',function(){state.userPaused=true;state.playIntent=false;try{audio.pause();}catch(e){}stopAnchor();releaseWake();persistResume();state.playing=false;renderPlayer();navigator.mediaSession.playbackState='paused';});
+        navigator.mediaSession.setActionHandler('nexttrack',function(){playIndex(nextIndex());});
+        navigator.mediaSession.setActionHandler('previoustrack',function(){playIndex(prevIndex());});
+        navigator.mediaSession.setActionHandler('seekto',function(details){if(!details||details.seekTime===undefined)return;seekTo(details.seekTime,!!details.fastSeek);});
+        navigator.mediaSession.setActionHandler('seekbackward',function(d){seekTo((audio.currentTime||0)-((d&&d.seekOffset)||10),false);});
+        navigator.mediaSession.setActionHandler('seekforward',function(d){seekTo((audio.currentTime||0)+((d&&d.seekOffset)||10),false);});
+      }catch(e){}
+    }
+
+    function seekTo(t,fast){
+      var dur=validDuration(audio.duration)||currentSongDuration()||t;t=clamp(t,0,dur);
+      try{if(fast&&audio.fastSeek)audio.fastSeek(t);else audio.currentTime=t;}catch(e){}
+      state.progress.current=t;state.progress.duration=dur;renderPlayer();updatePositionState();persistResume();
+    }
+
+    function updateMediaMetadata(s){
+      if(!('mediaSession' in navigator)||!s)return;
+      try{navigator.mediaSession.metadata=new MediaMetadata({title:s.title,artist:s.artist||'Xiemsansang',album:'XIEMSANSANG'});}catch(e){}
+    }
+    function updatePositionState(){
+      if(!('mediaSession' in navigator)||!navigator.mediaSession.setPositionState)return;
+      var dur=validDuration(audio.duration)||currentSongDuration();
+      if(!dur)return;
+      try{navigator.mediaSession.setPositionState({duration:dur,playbackRate:audio.playbackRate||1,position:clamp(audio.currentTime||0,0,dur)});}catch(e){}
+    }
+
+    async function requestWake(){
+      if(!state.keepScreen||!('wakeLock' in navigator))return;
+      try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',function(){wakeLock=null;});}catch(e){}
+    }
+    function releaseWake(){if(wakeLock){try{wakeLock.release().catch(function(){});}catch(e){}wakeLock=null;}}
+
+    function onTimerChange(){
+      haptic();clearInterval(timerHandle);var val=parseInt(el.timerSelect.value,10)||0;
+      if(!val){state.timerLeft=null;el.countdown.classList.add('hidden');toast('Đã hủy hẹn giờ');return;}
+      var end=Date.now()+val*60*1000;state.timerLeft=val*60*1000;toast('Đã hẹn tắt sau '+val+' phút');
+      timerHandle=setInterval(function(){var left=end-Date.now();if(left<=0){clearInterval(timerHandle);state.timerLeft=null;state.userPaused=true;state.playIntent=false;try{audio.pause();}catch(e){}stopAnchor();releaseWake();state.playing=false;toast('Đã tắt nhạc theo hẹn giờ');renderAll();}else{state.timerLeft=left;renderCountdown();}},1000);
+      renderCountdown();
+    }
+
+    function persistResume(){
+      if(document.visibilityState==='hidden'){
+        try{localStorage.setItem(RESUME_KEY,JSON.stringify({index:state.currentIndex,current:audio.currentTime||state.progress.current||0,ts:Date.now()}));}catch(e){}
+        return;
+      }
+      saveNow(RESUME_KEY,{index:state.currentIndex,current:audio.currentTime||state.progress.current||0,ts:Date.now()});
+    }
+
+    function applyFilter(){
+      var q=normalize(state.filter);
+      state.filtered=q?state.playlist.filter(function(s){return normalize(s.title).indexOf(q)>=0||normalize(s.artist).indexOf(q)>=0;}):state.playlist.slice();
+    }
+
+    function renderAll(){renderStaticState();renderList();renderPlayer();renderCountdown();}
+    function renderStaticState(){
+      el.subtitle.textContent=state.loading?'Đang đồng bộ danh sách...':(state.playlist.length+' bài • nghe liên tục nền mobile');
+      el.survivalBtn.className='circle '+(state.survival?'primary':'');
+      el.survivalBtn.textContent=state.survival?'🛡️':'🛡';
+      el.shuffleBtn.className='toggle '+(state.shuffle?'on':'');
+      el.repeatBtn.className='toggle '+(state.repeat!=='off'?'on':'');
+      el.repeatBtn.textContent=state.repeat==='one'?'🔂':'🔁';
+      el.startBtn.classList.toggle('hidden',state.initialized);
+    }
+    function renderList(){
+      renderStaticState();
+      if(state.loading){el.status.classList.remove('hidden');el.status.textContent='Đang đồng bộ máy chủ...';el.list.innerHTML='';el.loadMoreBtn.classList.add('hidden');return;}
+      if(!state.filtered.length){el.status.classList.remove('hidden');el.status.textContent=state.playlist.length?'Không tìm thấy bài phù hợp':'Không có dữ liệu bài hát';el.list.innerHTML='';el.loadMoreBtn.classList.add('hidden');return;}
+      el.status.classList.add('hidden');
+      var shown=state.filtered.slice(0,state.visible);
+      var html=[];
+      for(var i=0;i<shown.length;i++){
+        var s=shown[i];var real=state.playlist.findIndex(function(x){return x.id===s.id;});var active=real===state.currentIndex;
+        html.push('<div class="song '+(active?'active':'')+'" data-id="'+escAttr(s.id)+'">'+
+          '<div class="idx">'+(active?(state.playing?'▶':'Ⅱ'):(i+1))+'</div>'+
+          '<div class="smeta"><div class="sname truncate">'+esc(s.title)+'</div><div class="artist truncate">'+esc(s.artist||'Xiemsansang')+(real>=0?' • #'+(real+1):'')+'</div></div>'+
+          '<div class="actions"><button class="iconbtn share" data-id="'+escAttr(s.id)+'" title="Chia sẻ">↗</button><span class="duration">'+formatTime(s.duration)+'</span><button class="iconbtn down" data-id="'+escAttr(s.id)+'" title="Tải">⇩</button></div>'+
+        '</div>');
+      }
+      el.list.innerHTML=html.join('');
+      el.loadMoreBtn.classList.toggle('hidden',state.filtered.length<=state.visible);
+      Array.prototype.forEach.call(el.list.querySelectorAll('.song'),function(row){row.addEventListener('click',function(){var s=findSong(row.getAttribute('data-id'));if(s){haptic();playIndex(state.playlist.findIndex(function(x){return x.id===s.id;}));}});});
+      Array.prototype.forEach.call(el.list.querySelectorAll('.share'),function(btn){btn.addEventListener('click',function(ev){ev.stopPropagation();shareTrack(findSong(btn.getAttribute('data-id')));});});
+      Array.prototype.forEach.call(el.list.querySelectorAll('.down'),function(btn){btn.addEventListener('click',function(ev){ev.stopPropagation();downloadTrack(findSong(btn.getAttribute('data-id')));});});
+    }
+    function renderPlayer(){
+      var s=state.playlist[state.currentIndex];
+      el.playerBar.classList.toggle('hidden',!state.initialized||!s);
+      if(!s)return;
+      el.nowTitle.textContent=s.title;
+      el.nowState.textContent=state.playing?'Đang phát • chống tự dừng '+(state.survival?'bật':'tắt'):'Đã tạm dừng';
+      var dur=validDuration(audio.duration)||state.progress.duration||s.duration||0;
+      var cur=audio.currentTime||state.progress.current||0;
+      el.timeText.textContent=formatTime(cur)+' / '+formatTime(dur);
+      el.seekRange.value=dur?String(Math.round(clamp(cur/dur*1000,0,1000))):'0';
+      el.playBtn.textContent=state.playing?'Ⅱ':'▶';
+      renderStaticState();
+    }
+    function renderCountdown(){
+      if(state.timerLeft){el.countdown.classList.remove('hidden');el.countdown.textContent='Hệ thống sẽ dừng sau: '+formatTime(Math.ceil(state.timerLeft/1000));}
+      else el.countdown.classList.add('hidden');
+    }
+
+    async function shareTrack(s){
+      if(!s)return;haptic();
+      try{if(navigator.share)await navigator.share({title:s.title,text:s.artist||'Xiemsansang',url:s.stream_url});else{await navigator.clipboard.writeText(s.stream_url);toast('Đã copy link bài hát');}}catch(e){}
+    }
+    function downloadTrack(s){if(!s)return;haptic();toast('Đang mở file tải về...');try{var a=document.createElement('a');a.href=s.stream_url;a.download=s.title+'.mp3';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}catch(e){toast('Lỗi tải file');}}
+
+    function currentSongDuration(){var s=state.playlist[state.currentIndex];return s?s.duration||0:0;}
+    function findSong(id){for(var i=0;i<state.playlist.length;i++)if(state.playlist[i].id===id)return state.playlist[i];return null;}
+    function haptic(ms){try{if(navigator.vibrate)navigator.vibrate(ms||14);}catch(e){}}
+    function toast(msg){clearTimeout(toastHandle);var old=document.querySelector('.toast');if(old)old.remove();var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);toastHandle=setTimeout(function(){t.remove();},2800);}
+    function showDiag(msg){el.diag.textContent=msg;el.diag.classList.add('show');}
+    function byId(id){return document.getElementById(id);}
+    function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+    function saveNow(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+    function formatTime(s){s=Number(s);if(!isFinite(s)||s<0)return'0:00';var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0');}
+    function clamp(v,min,max){v=Number(v)||0;return Math.min(max,Math.max(min,v));}
+    function validDuration(v){return isFinite(v)&&v>0?v:0;}
+    function cleanTitle(t){return String(t||'Không tên').replace(/\.mp3$/i,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim()||'Không tên';}
+    function normalize(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function escAttr(s){return esc(s).replace(/'/g,'&#39;');}
+  })();
   </script>
 </body>
 </html>
