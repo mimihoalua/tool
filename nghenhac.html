@@ -1,128 +1,559 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="peach">
+<html lang="vi" data-theme="light">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#fff1f2">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Nghe Nhạc - XIEMSANSANG</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
   <style>
-    :root{--bg:#fff7f8;--card:#fff;--text:#4c0519;--muted:#9f1239;--primary:#f43f5e;--border:#fecdd3;--soft:#fff1f2;--soft2:#ffe4e6;--shadow:0 12px 30px rgba(159,18,57,.10)}
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior-y:contain}body{padding-bottom:205px}button,input,select{font:inherit}button{border:0;cursor:pointer}button:active,.song:active{transform:scale(.965)}.wrap{width:min(100%,820px);margin:0 auto}.hidden{display:none!important}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .head{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:calc(14px + env(safe-area-inset-top)) 12px 12px}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.title{margin:0;color:var(--primary);font-weight:1000;font-size:25px;letter-spacing:.4px;text-transform:uppercase;line-height:1}.sub{margin:4px 0 0;color:var(--muted);font-size:12px;font-weight:850}.tools{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:12px}.select{min-height:44px;border:1px solid var(--primary);background:var(--soft);color:var(--primary);border-radius:999px;padding:0 12px;font-weight:950;min-width:0}.circle{width:44px;height:44px;border-radius:999px;background:var(--soft2);color:var(--primary);font-weight:1000;display:inline-flex;align-items:center;justify-content:center}.primary{background:var(--primary);color:#fff}.hint{margin-top:10px;border:1px solid var(--border);background:var(--soft);border-radius:16px;padding:10px 12px;font-size:12px;font-weight:850;color:var(--muted);line-height:1.35}.start{width:100%;min-height:56px;margin-top:12px;border-radius:18px;background:var(--primary);color:#fff;font-size:18px;font-weight:1000;box-shadow:0 12px 28px rgba(244,63,94,.22)}
-    .main{padding:12px 10px}.search{width:100%;border:1px solid var(--border);background:#fff;border-radius:18px;padding:14px 15px;outline:0;font-weight:850;box-shadow:var(--shadow)}.search:focus{border-color:var(--primary)}.listbox{margin-top:12px;border:1px solid var(--border);border-radius:22px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}.status{text-align:center;padding:28px 16px;color:var(--primary);font-weight:1000}.song{display:flex;align-items:center;gap:10px;min-height:72px;padding:8px 10px;border-bottom:1px solid var(--border);content-visibility:auto;contain-intrinsic-size:72px}.song:last-child{border-bottom:0}.song.active{background:var(--soft)}.idx{width:34px;min-width:34px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:1000;color:var(--muted)}.song.active .idx{color:var(--primary)}.meta{flex:1;min-width:0}.name{font-size:15px;font-weight:1000}.artist{margin-top:3px;font-size:11px;color:var(--muted);font-weight:850}.time{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);font-weight:1000}.loadmore{width:100%;height:52px;background:#fff;color:var(--primary);font-weight:1000;border-top:1px solid var(--border)}
-    .player{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);box-shadow:0 -12px 34px rgba(159,18,57,.10);padding:13px 14px max(13px,env(safe-area-inset-bottom))}.phead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.pname{font-weight:1000;font-size:15px;margin:0}.pstate{margin-top:3px;font-size:12px;color:var(--primary);font-weight:900}.ptime{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);font-weight:1000;white-space:nowrap}.range{width:100%;height:30px;accent-color:var(--primary);margin:5px 0}.controls{display:flex;align-items:center;justify-content:space-between}.mid{display:flex;align-items:center;gap:13px}.nav{width:50px;height:50px;border-radius:999px;background:var(--soft2);color:var(--primary);font-weight:1000}.play{width:64px;height:64px;border-radius:999px;background:var(--primary);color:#fff;font-size:22px;font-weight:1000;box-shadow:0 12px 28px rgba(244,63,94,.22)}.toggle{width:44px;height:44px;border-radius:999px;background:#fff;color:var(--muted);font-weight:1000}.toggle.on{background:var(--soft2);color:var(--primary)}.toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2000;background:var(--primary);color:#fff;border-radius:15px;padding:12px 16px;max-width:min(92vw,460px);font-size:14px;font-weight:950;box-shadow:0 10px 28px rgba(0,0,0,.16)}.diag{display:none;margin:10px auto 0;width:min(100%,820px);background:#fff1f2;border:1px solid var(--border);border-radius:15px;padding:10px 12px;color:#be123c;font-size:12px;font-weight:850}.diag.show{display:block}.count{margin-top:9px;text-align:center;color:#be123c;font-size:12px;font-weight:1000}
-    @media(max-width:440px){body{padding-bottom:212px}.title{font-size:23px}.time{display:none}.mid{gap:10px}.play{width:62px;height:62px}.nav{width:48px;height:48px}.tools{grid-template-columns:1fr auto auto}.song{padding-right:8px}.hint{font-size:11.5px}}
+    :root, [data-theme] { transition: background-color 0.4s ease, color 0.4s ease; }
+    
+    [data-theme=light] { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --primary: #2563eb; --primary-fg: #ffffff; --border: #e2e8f0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(37, 99, 235, 0.08); }
+    [data-theme=peach] { --bg: #fff1f2; --card: #ffffff; --text: #4c0519; --muted: #9f1239; --primary: #f43f5e; --primary-fg: #ffffff; --border: #fecdd3; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(244, 63, 94, 0.08); }
+    [data-theme=mint]  { --bg: #f0fdf4; --card: #ffffff; --text: #064e3b; --muted: #059669; --primary: #10b981; --primary-fg: #ffffff; --border: #bbf7d0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(16, 185, 129, 0.08); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 14px; font-weight: 600; transition: transform 0.1s; cursor: pointer; }
+    .btn:active { transform: scale(0.95); } 
+    .btn-primary { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+    
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+    .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--border); transition: background-color 0.2s; cursor: pointer; }
+    .song-row:active { background-color: var(--border); }
+    .song-row.active { background-color: var(--active-bg); }
+    .song-row.active .song-idx { color: var(--primary); font-weight: 900; animation: pulse 1.5s infinite; }
+    
+    .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .action-btn:active { background: var(--border); transform: scale(0.9); }
+
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; width: 90%; max-width: 380px; text-align: center; }
+    .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer; }
+    .guide-card { margin-top: 12px; border: 1px solid var(--border); background: var(--card); border-radius: 16px; overflow: hidden; }
+    .guide-card summary { cursor: pointer; padding: 12px 14px; font-size: 13px; font-weight: 900; color: var(--primary); user-select: none; }
+    .guide-card .guide-body { padding: 0 14px 14px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .guide-card .guide-body b { color: var(--text); }
   </style>
 </head>
-<body>
-  <noscript>Ứng dụng cần JavaScript để phát nhạc.</noscript>
-  <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></audio>
+<body class="bg-[var(--bg)] text-[var(--text)] font-sans pb-40">
+  <div id="root"></div>
+
+  <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
   <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
 
-  <header class="head"><div class="wrap">
-    <div class="top"><div><h1 class="title">Xiemsansang</h1><div id="sub" class="sub">Đang nạp lõi nghe nhạc...</div></div><button id="refresh" class="circle" title="Đồng bộ lại">↻</button></div>
-    <div class="tools"><select id="timer" class="select"><option value="0">🕒 Hẹn giờ: Tắt</option><option value="30">Tắt sau 30 phút</option><option value="60">Tắt sau 60 phút</option><option value="120">Tắt sau 120 phút</option><option value="240">Tắt sau 240 phút</option><option value="480">Tắt sau 480 phút</option></select><button id="clear" class="circle" title="Xóa cache">🗑</button><button id="wake" class="circle" title="Giữ sáng màn hình">☀</button></div>
-    <div class="hint">Chuẩn Xiaomi 13T: bấm “Khởi động & phát” một lần, sau đó có thể tắt màn hình. Ứng dụng không dùng vòng lặp ép phát liên tục gây nóng máy; chỉ dùng audio native + media session + nạp trước bài kế tiếp.</div>
-    <button id="start" class="start">▶ Khởi động & phát nhạc</button>
-    <div id="count" class="count hidden"></div><div id="diag" class="diag"></div>
-  </div></header>
+  <script type="text/javascript">
+    window.addEventListener('error', function(ev){
+      try{
+        var root = document.getElementById('root');
+        if(root && !root.childElementCount){
+          root.innerHTML = '<div style="padding:18px;margin:16px;border:1px solid #fecdd3;border-radius:14px;background:#fff1f2;color:#9f1239;font-family:Arial,sans-serif"><b>Ứng dụng bị lỗi JavaScript.</b><br>Hãy tải lại trang. Chi tiết: '+String(ev.message||'không rõ')+'</div>';
+        }
+      }catch(e){}
+    });
+    const { useState, useEffect, useRef, useCallback, createElement: e } = React;
 
-  <main class="main"><div class="wrap">
-    <input id="search" class="search" placeholder="Tìm bài hát...">
-    <div class="listbox"><div id="status" class="status">Đang tải danh sách...</div><div id="list"></div><button id="more" class="loadmore hidden">⬇ Tải thêm danh sách</button></div>
-  </div></main>
+    const SONGS_CACHE_KEY='xs_songs_v4';
+    const RESUME_KEY='xs_resume_v4'; 
+    const THEME_KEY='xs_theme_v4';
+    const SHUFFLE_KEY='xs_shuffle';
+    const REPEAT_KEY='xs_repeat';
+    const INITIAL_VISIBLE=50, VISIBLE_STEP=50;
 
-  <section id="playerbar" class="player hidden"><div class="wrap">
-    <div class="phead"><div style="min-width:0"><p id="now" class="pname truncate">...</p><div id="state" class="pstate">Đã sẵn sàng</div></div><div id="ptime" class="ptime">0:00 / 0:00</div></div>
-    <input id="seek" class="range" type="range" min="0" max="1000" value="0">
-    <div class="controls"><button id="shuffle" class="toggle">🔀</button><div class="mid"><button id="prev" class="nav">⏮</button><button id="play" class="play">▶</button><button id="next" class="nav">⏭</button></div><button id="repeat" class="toggle on">🔁</button></div>
-  </div></section>
+    const save=(k,v)=>{ try{ if (document.visibilityState === 'hidden') return; localStorage.setItem(k,JSON.stringify(v)); }catch{} };
+    const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
+    const formatTime=s=>{if(!isFinite(s)||s<0)return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return`${m}:${String(sec).padStart(2,'0')}`};
+    const haptic=(ms=14)=>{ try{ navigator.vibrate?.(ms); }catch{} };
 
-<script>
-(function(){'use strict';
-  var KEY='xs_xiaomi13t_playlist_v1', RESUME='xs_xiaomi13t_resume_v1', SHUFF='xs_xiaomi13t_shuffle', REP='xs_xiaomi13t_repeat';
-  var initial=50, step=50, toastTimer=0, timerHandle=0, wakeLock=null, lastUi=0, lastPos=0, retryTimer=0;
-  var audio=id('mstq-player'), anchor=id('mstq-silence');
-  var el={sub:id('sub'),refresh:id('refresh'),timer:id('timer'),clear:id('clear'),wake:id('wake'),start:id('start'),count:id('count'),diag:id('diag'),search:id('search'),status:id('status'),list:id('list'),more:id('more'),bar:id('playerbar'),now:id('now'),state:id('state'),ptime:id('ptime'),seek:id('seek'),shuffle:id('shuffle'),prev:id('prev'),play:id('play'),next:id('next'),repeat:id('repeat')};
-  var state={playlist:load(KEY,[]),filtered:[],visible:initial,index:0,playing:false,started:false,userPaused:true,loading:true,filter:'',shuffle:load(SHUFF,false),repeat:load(REP,'all'),keepScreen:false,prefetched:false,advance:false,progress:{current:0,duration:0}};
-  window.addEventListener('error',function(e){showDiag('Lỗi JS: '+(e.message||e.error||'không rõ'));});
-  boot();
-  function boot(){
-    var r=load(RESUME,null); if(r&&Number.isInteger(r.index)) state.index=Math.max(0,r.index);
-    bind(); setupMedia(); if(state.playlist.length){applyFilter(); state.loading=false; renderAll();}
-    refetch(false);
-  }
-  function bind(){
-    el.start.onclick=function(){tap(); if(!state.playlist.length){toast('Chưa có danh sách bài');return;} playIndex(state.index||0,true);};
-    el.play.onclick=function(){tap(); togglePlay();}; el.prev.onclick=function(){tap(); playIndex(prevIndex(),true);}; el.next.onclick=function(){tap(); playIndex(nextIndex(),true);};
-    el.shuffle.onclick=function(){tap(); state.shuffle=!state.shuffle; save(SHUFF,state.shuffle); renderPlayer();};
-    el.repeat.onclick=function(){tap(); state.repeat=state.repeat==='all'?'one':state.repeat==='one'?'off':'all'; save(REP,state.repeat); renderPlayer();};
-    el.refresh.onclick=function(){tap(); refetch(true);};
-    el.clear.onclick=function(){tap(); if(confirm('Xóa cache danh sách và nạp lại?')){localStorage.removeItem(KEY); state.playlist=[]; state.filtered=[]; renderList(); refetch(true);}};
-    el.search.oninput=function(){state.filter=this.value; state.visible=initial; applyFilter(); renderList();};
-    el.more.onclick=function(){state.visible+=step; renderList();};
-    el.wake.onclick=function(){tap(); state.keepScreen=!state.keepScreen; if(state.keepScreen&&state.playing) requestWake(); else releaseWake(); renderStatic(); toast(state.keepScreen?'Đã bật giữ sáng màn hình':'Đã tắt giữ sáng để mát máy');};
-    el.seek.oninput=function(){var d=duration(); if(d) seekTo((Number(el.seek.value)||0)/1000*d);};
-    el.timer.onchange=timerChange;
-    audio.addEventListener('play',function(){state.playing=true; state.userPaused=false; if('mediaSession'in navigator) navigator.mediaSession.playbackState='playing'; startAnchor(); requestWake(); renderPlayer();});
-    audio.addEventListener('pause',function(){ if(state.advance) return; state.playing=false; if('mediaSession'in navigator) navigator.mediaSession.playbackState='paused'; if(state.userPaused){stopAnchor(); releaseWake();} renderPlayer(); });
-    audio.addEventListener('timeupdate',onTime);
-    audio.addEventListener('loadedmetadata',function(){state.progress.duration=duration(); updatePosition(); renderPlayer();});
-    audio.addEventListener('ended',onEnded);
-    audio.addEventListener('error',function(){recoverThenNext('Nguồn bài hiện tại lỗi, chuyển bài kế tiếp');});
-    ['stalled','waiting'].forEach(function(ev){audio.addEventListener(ev,function(){warmNext(nextIndex());});});
-    document.addEventListener('visibilitychange',function(){saveResume(); if(document.visibilityState==='hidden'){warmNext(nextIndex()); releaseWake();} else {renderAll(); updatePosition();}});
-    window.addEventListener('pagehide',saveResume);
-  }
-  async function refetch(force){
-    state.loading=!state.playlist.length; renderStatic(); if(state.loading) renderList();
-    try{
-      var query='identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-      var url='https://archive.org/advancedsearch.php?q='+encodeURIComponent(query)+'&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json';
-      var j=await fetch(url,{cache:force?'no-store':'default'}).then(function(r){return r.json();});
-      var docs=(j.response&&j.response.docs)||[]; if(!docs.length) throw Error('Không thấy dữ liệu archive');
-      var results=[], i=0, workers=[];
-      function addTrack(d,f){ if(!f||!/mp3/i.test(String(f.format||f.name||''))) return; var name=f.name||''; results.push({id:d.identifier+'/'+name,title:clean(f.title&&f.title!==d.title?f.title:name),artist:d.creator||'Xiemsansang',duration:Number(f.length)||0,stream_url:'https://archive.org/download/'+encodeURIComponent(d.identifier)+'/'+encodeURIComponent(name)}); }
-      async function worker(){ while(i<docs.length){ var d=docs[i++]; try{ var m=await fetch('https://archive.org/metadata/'+encodeURIComponent(d.identifier),{cache:force?'no-store':'default'}).then(function(r){return r.json();}); (m.files||[]).forEach(function(f){addTrack(d,f);}); if(results.length && results.length%40<6){publish(results,false);} }catch(e){} } }
-      for(var w=0;w<8;w++) workers.push(worker()); await Promise.all(workers); publish(results,true);
-    }catch(e){ state.loading=false; if(!state.playlist.length) showDiag('Không tải được danh sách. Có thể mạng/CDN Archive chậm. Nếu đã có cache, app sẽ dùng cache. Chi tiết: '+e.message); renderAll(); }
-  }
-  function publish(arr,done){ if(!arr.length) return; arr=dedupe(arr).sort(function(a,b){return natural(a.title,b.title);}); state.playlist=arr; save(KEY,arr); applyFilter(); state.loading=!done; renderAll(); }
-  function playIndex(i,gesture){ if(!state.playlist.length) return; i=(i+state.playlist.length)%state.playlist.length; var s=state.playlist[i]; state.index=i; state.started=true; state.userPaused=false; state.prefetched=false; state.advance=true; state.progress={current:0,duration:s.duration||0}; updateMeta(s); startAnchor(); if(audio.src!==s.stream_url){audio.src=s.stream_url; audio.load();} safePlay(gesture?'user':'auto'); setTimeout(function(){state.advance=false;},350); renderAll(); }
-  function safePlay(reason){ clearTimeout(retryTimer); var p; try{p=audio.play();}catch(e){return scheduleRetry(reason);} if(p&&p.catch)p.catch(function(){scheduleRetry(reason);}); }
-  function scheduleRetry(reason){ if(state.userPaused) return; retryTimer=setTimeout(function(){ if(state.userPaused) return; try{audio.load();}catch(e){} try{audio.play().catch(function(){ if(reason==='auto') playIndex(nextIndex(),false); });}catch(e){} },900); }
-  function togglePlay(){ if(!state.started){playIndex(state.index||0,true); return;} if(audio.paused){state.userPaused=false; startAnchor(); safePlay('user');} else {state.userPaused=true; try{audio.pause();}catch(e){} stopAnchor(); releaseWake(); saveResume();} renderPlayer(); }
-  function onEnded(){ if(state.repeat==='one'){seekTo(0); safePlay('auto'); return;} if(state.repeat==='off' && !state.shuffle && state.index>=state.playlist.length-1){state.userPaused=true; stopAnchor(); releaseWake(); state.playing=false; renderPlayer(); return;} playIndex(nextIndex(),false); }
-  function onTime(){ var d=duration(), c=audio.currentTime||0; state.progress={current:c,duration:d||state.progress.duration}; if(d>45 && c>=d-30 && !state.prefetched){state.prefetched=true; warmNext(nextIndex());} var sec=Math.floor(c); if(sec!==lastPos){lastPos=sec; updatePosition();} if(document.visibilityState==='visible' && Date.now()-lastUi>650){lastUi=Date.now(); renderPlayer();} }
-  function recoverThenNext(msg){ if(state.userPaused) return; warmNext(nextIndex()); setTimeout(function(){ if(audio.error && !state.userPaused){toast(msg); playIndex(nextIndex(),false);} },1000); }
-  function warmNext(i){ var s=state.playlist[i]; if(!s) return; try{fetch(s.stream_url,{mode:'no-cors',cache:'force-cache'}).catch(function(){});}catch(e){} }
-  function startAnchor(){ try{ if(anchor){anchor.volume=0;anchor.muted=true;anchor.loop=true; if(anchor.paused){var p=anchor.play(); if(p&&p.catch)p.catch(function(){});}}}catch(e){} }
-  function stopAnchor(){ try{ if(anchor) anchor.pause(); }catch(e){} }
-  function setupMedia(){ if(!('mediaSession'in navigator)) return; try{navigator.mediaSession.setActionHandler('play',function(){state.userPaused=false; if(!state.started)playIndex(state.index||0,true); else safePlay('media');}); navigator.mediaSession.setActionHandler('pause',function(){state.userPaused=true; audio.pause(); stopAnchor(); releaseWake(); renderPlayer();}); navigator.mediaSession.setActionHandler('nexttrack',function(){playIndex(nextIndex(),true);}); navigator.mediaSession.setActionHandler('previoustrack',function(){playIndex(prevIndex(),true);}); navigator.mediaSession.setActionHandler('seekto',function(d){if(d&&d.seekTime!==undefined)seekTo(d.seekTime);});}catch(e){} }
-  function updateMeta(s){ if(!('mediaSession'in navigator)||!s) return; try{navigator.mediaSession.metadata=new MediaMetadata({title:s.title,artist:s.artist||'Xiemsansang',album:'XIEMSANSANG'});}catch(e){} }
-  function updatePosition(){ if(!('mediaSession'in navigator)||!navigator.mediaSession.setPositionState) return; var d=duration(); if(!d) return; try{navigator.mediaSession.setPositionState({duration:d,playbackRate:audio.playbackRate||1,position:Math.max(0,Math.min(audio.currentTime||0,d))});}catch(e){} }
-  function seekTo(t){ var d=duration(); t=Math.max(0,Math.min(Number(t)||0,d||t)); try{ if(audio.fastSeek)audio.fastSeek(t); else audio.currentTime=t; }catch(e){} state.progress.current=t; renderPlayer(); updatePosition(); }
-  async function requestWake(){ if(!state.keepScreen||!('wakeLock'in navigator)) return; try{wakeLock=await navigator.wakeLock.request('screen');}catch(e){} }
-  function releaseWake(){ if(wakeLock){try{wakeLock.release().catch(function(){});}catch(e){} wakeLock=null;} }
-  function nextIndex(){ if(state.shuffle&&state.playlist.length>1){var n=Math.floor(Math.random()*state.playlist.length); return n===state.index?(n+1)%state.playlist.length:n;} return (state.index+1)%Math.max(1,state.playlist.length); }
-  function prevIndex(){ return (state.index-1+state.playlist.length)%Math.max(1,state.playlist.length); }
-  function timerChange(){ clearInterval(timerHandle); var min=parseInt(el.timer.value,10)||0; if(!min){el.count.classList.add('hidden'); toast('Đã hủy hẹn giờ'); return;} var end=Date.now()+min*60000; toast('Đã hẹn tắt sau '+min+' phút'); timerHandle=setInterval(function(){var left=end-Date.now(); if(left<=0){clearInterval(timerHandle); state.userPaused=true; audio.pause(); stopAnchor(); releaseWake(); el.count.classList.add('hidden'); toast('Đã tắt nhạc theo hẹn giờ');}else{el.count.classList.remove('hidden'); el.count.textContent='Còn '+fmt(left/1000)+' sẽ tắt nhạc';}},1000); }
-  function saveResume(){ try{save(RESUME,{index:state.index,current:audio.currentTime||0,ts:Date.now()});}catch(e){} }
-  function applyFilter(){ var q=norm(state.filter); state.filtered=q?state.playlist.filter(function(s){return norm(s.title).indexOf(q)>=0||norm(s.artist).indexOf(q)>=0;}):state.playlist.slice(); }
-  function renderAll(){renderStatic(); renderList(); renderPlayer();}
-  function renderStatic(){ el.sub.textContent=state.loading?'Đang đồng bộ danh sách...':state.playlist.length+' bài • nền mobile Xiaomi'; el.start.classList.toggle('hidden',state.started); el.wake.classList.toggle('primary',state.keepScreen); }
-  function renderList(){ if(state.loading&&!state.playlist.length){el.status.classList.remove('hidden'); el.status.textContent='Đang đồng bộ máy chủ...'; return;} applyFilter(); if(!state.filtered.length){el.status.classList.remove('hidden'); el.status.textContent='Không có bài phù hợp'; el.list.innerHTML=''; return;} el.status.classList.add('hidden'); var rows=state.filtered.slice(0,state.visible), html=''; rows.forEach(function(s,k){var i=state.playlist.findIndex(function(x){return x.id===s.id}); var a=i===state.index; html+='<div class="song '+(a?'active':'')+'" data-i="'+i+'"><div class="idx">'+(a?(state.playing?'▶':'Ⅱ'):(k+1))+'</div><div class="meta"><div class="name truncate">'+esc(s.title)+'</div><div class="artist truncate">'+esc(s.artist||'Xiemsansang')+' • #'+(i+1)+'</div></div><div class="time">'+fmt(s.duration)+'</div></div>';}); el.list.innerHTML=html; [].forEach.call(el.list.children,function(row){row.onclick=function(){tap(); playIndex(Number(row.getAttribute('data-i')),true);};}); el.more.classList.toggle('hidden',state.filtered.length<=state.visible); }
-  function renderPlayer(){ var s=state.playlist[state.index]; el.bar.classList.toggle('hidden',!state.started||!s); if(!s) return; var d=duration()||s.duration||state.progress.duration||0, c=audio.currentTime||state.progress.current||0; el.now.textContent=s.title; el.state.textContent=state.playing?'Đang phát liên tục':'Đã tạm dừng'; el.ptime.textContent=fmt(c)+' / '+fmt(d); el.seek.value=d?Math.round(c/d*1000):0; el.play.textContent=state.playing?'Ⅱ':'▶'; el.shuffle.classList.toggle('on',state.shuffle); el.repeat.classList.toggle('on',state.repeat!=='off'); el.repeat.textContent=state.repeat==='one'?'🔂':'🔁'; }
-  function duration(){return isFinite(audio.duration)&&audio.duration>0?audio.duration:0} function id(x){return document.getElementById(x)} function tap(){try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
-  function toast(m){clearTimeout(toastTimer);var old=document.querySelector('.toast');if(old)old.remove();var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);toastTimer=setTimeout(function(){t.remove()},2600)}
-  function showDiag(m){el.diag.textContent=m;el.diag.classList.add('show')} function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}} function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-  function fmt(s){s=Number(s); if(!isFinite(s)||s<0)return'0:00'; var m=Math.floor(s/60),x=Math.floor(s%60); return m+':'+String(x).padStart(2,'0')} function clean(s){return String(s||'Không tên').replace(/\.mp3$/i,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim()||'Không tên'}
-  function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()} function esc(s){return String(s==null?'':s).replace(/[&<>\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c})}
-  function dedupe(a){var m={},o=[];a.forEach(function(s){if(!m[s.id]){m[s.id]=1;o.push(s)}});return o} function natural(a,b){return String(a).localeCompare(String(b),'vi',{numeric:true,sensitivity:'base'})}
-})();
-</script>
+    let wakeLock = null;
+    const requestWakeLock = async () => { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } };
+    const releaseWakeLock = () => { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }).catch(()=>{}); } };
+
+    const Icon = ({d=24,p="M5 12h14", f="none", sw="1.7"}) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:f, stroke:"currentColor", strokeWidth:sw}, e('path', {d:p, strokeLinecap:"round", strokeLinejoin:"round"}));
+    const Icons={
+      play:(d)=>e(Icon, {d:d, p:"M8 5v14l11-7z", f:"currentColor", sw:"1"}), 
+      pause:(d)=>e(Icon, {d:d, p:"M6 5h4v14H6zM14 5h4v14h-4z", f:"currentColor", sw:"1"}),
+      next:(d)=>e(Icon, {d:d, p:"M13 5 20 12l-7 7V5z M4 5h2v14H4z", f:"currentColor", sw:"1"}), 
+      back:(d)=>e(Icon, {d:d, p:"M11 19 4 12l7-7v14z M18 5h2v14h-2z", f:"currentColor", sw:"1"}),
+      share:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('circle',{cx:"18",cy:"5",r:"3"}), e('circle',{cx:"6",cy:"12",r:"3"}), e('circle',{cx:"18",cy:"19",r:"3"}), e('line',{x1:"8.59",y1:"13.51",x2:"15.42",y2:"17.49"}), e('line',{x1:"15.41",y1:"6.51",x2:"8.59",y2:"10.49"})),
+      download:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('path',{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}), e('polyline',{points:"7 10 12 15 17 10"}), e('line',{x1:"12",y1:"15",x2:"12",y2:"3"})),
+      palette: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('circle',{cx:"12",cy:"12",r:"10"}), e('path',{d:"M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"})),
+      trash: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"3 6 5 6 21 6"}), e('path',{d:"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"})),
+      shuffle: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"16 3 21 3 21 8"}), e('line',{x1:"4",y1:"20",x2:"21",y2:"3"}), e('polyline',{points:"21 16 21 21 16 21"}), e('line',{x1:"15",y1:"15",x2:"21",y2:"21"}), e('line',{x1:"4",y1:"4",x2:"9",y2:"9"})),
+      repeat: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"})),
+      repeatOne: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"}), e('line',{x1:"12",y1:"10",x2:"12",y2:"14"}), e('line',{x1:"10",y1:"12",x2:"12",y2:"10"}))
+    };
+
+    const THEME_LIST = ['light', 'peach', 'mint'];
+
+    function App(){
+      const [isInitialized, setIsInitialized] = useState(false); 
+      const [theme, setTheme] = useState(localStorage.getItem(THEME_KEY) || 'light');
+      
+      useEffect(()=>{
+          document.documentElement.setAttribute('data-theme',theme);
+          localStorage.setItem(THEME_KEY,theme);
+      },[theme]);
+
+      const [toast, setToast] = useState(null);
+      useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
+
+      const [playlist,setPlaylist]=useState([]);
+      const [loading,setLoading]=useState(true);
+      const [visible,setVisible]=useState(INITIAL_VISIBLE);
+      const [filter,setFilter]=useState('');
+
+      const [currentIndex,setCurrentIndex]=useState(0);
+      const [playing,setPlaying]=useState(false);
+      const [progress,setProgress]=useState({current:0,duration:0});
+      
+      const [shuffle,setShuffle]=useState(load(SHUFFLE_KEY,false));
+      const [repeat,setRepeat]=useState(load(REPEAT_KEY,'all')); 
+      
+      const playlistRef = useRef(playlist); useEffect(()=>{playlistRef.current=playlist},[playlist]);
+      const currentIndexRef = useRef(currentIndex); 
+      const userPausedRef = useRef(true);
+      const playIntentRef = useRef(false);
+      const retryTimerRef = useRef(null);
+      const resumeSaveRef = useRef(0);
+      const shuffleRef = useRef(shuffle); useEffect(()=>{shuffleRef.current=shuffle; save(SHUFFLE_KEY,shuffle);},[shuffle]);
+      const repeatRef = useRef(repeat); useEffect(()=>{repeatRef.current=repeat; save(REPEAT_KEY,repeat);},[repeat]);
+
+      const audioRef=useRef(null);
+      useEffect(()=>{ audioRef.current=document.getElementById('mstq-player'); },[]);
+
+      useEffect(()=>{
+        const r = load(RESUME_KEY, null);
+        if(r && Number.isInteger(r.index) && r.index >= 0){
+          setCurrentIndex(r.index);
+          currentIndexRef.current = r.index;
+          setProgress(p => ({...p, current: Number(r.time || 0)}));
+        }
+      },[]);
+
+      const startAnchor = () => {
+          const anchor = document.getElementById('mstq-silence');
+          if(anchor && anchor.paused) anchor.play().catch(()=>{});
+      };
+      const stopAnchor = () => {
+          const anchor = document.getElementById('mstq-silence');
+          try{ if(anchor && !anchor.paused) anchor.pause(); }catch{}
+      };
+      const saveResumeNow = () => {
+          const a = audioRef.current;
+          try{ save(RESUME_KEY, {index: currentIndexRef.current, time: a ? a.currentTime || 0 : 0, ts: Date.now()}); }catch{}
+      };
+
+      // HẸN GIỜ TẮT NHẠC
+      const [timerLeft,setTimerLeft]=useState(null);
+      const timerRef=useRef(null);
+      const handleTimerChange = (e) => {
+          const val = parseInt(e.target.value);
+          haptic();
+          clearInterval(timerRef.current);
+          if (val === 0) {
+              setTimerLeft(null); setToast('Đã hủy hẹn giờ'); return;
+          }
+          const ms = val * 60 * 1000;
+          const end = Date.now() + ms;
+          setTimerLeft(ms);
+          setToast(`Đã hẹn tắt sau ${val} phút`);
+          timerRef.current = setInterval(() => { 
+              const left = end - Date.now(); 
+              if(left <= 0){ clearInterval(timerRef.current); setTimerLeft(null); userPausedRef.current = true; playIntentRef.current = false; if(audioRef.current) audioRef.current.pause(); stopAnchor(); setPlaying(false); } 
+              else setTimerLeft(left); 
+          }, 1000);
+      };
+
+      const clearCache = () => {
+          if(confirm("Bạn có chắc chắn muốn xóa Cache và làm mới ứng dụng?")) {
+              localStorage.clear();
+              location.reload();
+          }
+      };
+
+      const fetchMetadata = async (identifier) => {
+        const meta = await fetch(`https://archive.org/metadata/${identifier}`,{cache:'no-store'}).then(r=>r.json());
+        return (meta.files||[]).filter(f => String(f.format||'').toUpperCase().includes('MP3')).map(f => ({doc: meta.metadata || {}, file: f, identifier}));
+      };
+
+      const refetch=useCallback(async()=>{
+        setLoading(true);
+        try{
+          let all=[];
+          const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
+          const url=`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
+          const r=await fetch(url,{cache:'no-store'}); 
+          if(r.ok){
+              const j=await r.json(); 
+              const docs=j?.response?.docs||[];
+              const chunkSize = 8;
+              for(let p=0; p<docs.length; p+=chunkSize){
+                const chunk = docs.slice(p, p + chunkSize);
+                const settled = await Promise.allSettled(chunk.map(d => fetchMetadata(d.identifier).then(items => ({d, items}))));
+                settled.forEach(res => {
+                  if(res.status !== 'fulfilled') return;
+                  const {d, items} = res.value;
+                  items.forEach(({file:f})=>{
+                    let trackTitle = f.name;
+                    if(f.title && (!d.title || f.title.trim() !== String(d.title).trim())) trackTitle = f.title;
+                    all.push({
+                        id:`${d.identifier}/${f.name}`,
+                        title: String(trackTitle).replace(/\.mp3$/i,'').replace(/_/g,' ').trim(),
+                        artist:d.creator||'Xiemsansang',
+                        stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`,
+                        duration:parseFloat(f.length||0)||0
+                    });
+                  });
+                });
+                if(document.visibilityState === 'visible' && all.length > 0) setToast(`Đã nạp ${all.length} bài...`);
+              }
+          }
+          if(all.length > 0) { setPlaylist(all); save(SONGS_CACHE_KEY,all); } 
+          else throw new Error("Empty list");
+        }catch{
+          const cached=load(SONGS_CACHE_KEY,[]);
+          if(cached && cached.length > 0) setPlaylist(cached);
+          else setToast("Không có dữ liệu.");
+        }
+        setLoading(false);
+      },[]);
+      useEffect(()=>{refetch()},[refetch]);
+
+      async function shareTrack(s){ haptic(); try{ if(navigator.share) await navigator.share({title:s.title, url:s.stream_url}); else { await navigator.clipboard.writeText(s.stream_url); setToast('Đã copy link!'); } }catch{} }
+      async function downloadTrack(s) { haptic(); setToast(`Đang lấy file tải về...`); try { const a = document.createElement('a'); a.href = s.stream_url; a.download = `${s.title}.mp3`; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); } catch (e) { setToast('Lỗi tải file'); } }
+
+      const getNextIndexLogic = (idx) => {
+          const pl = playlistRef.current;
+          if (shuffleRef.current && pl.length > 1) {
+              let nextIdx = Math.floor(Math.random() * pl.length);
+              return (nextIdx === idx) ? (nextIdx + 1) % pl.length : nextIdx;
+          }
+          return (idx + 1) % pl.length;
+      };
+      
+      const getPrevIndexLogic = (idx) => (idx - 1 + playlistRef.current.length) % playlistRef.current.length;
+
+      const lastMediaSessionUpdateRef = useRef(0), lastUiUpdateRef = useRef(0), isTransitioningRef = useRef(false), prefetchDoneRef = useRef(false);
+
+      const triggerNetworkPrefetch = (idx) => { const nextSong = playlistRef.current[idx]; if (nextSong && nextSong.stream_url) fetch(nextSong.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=>{}); };
+
+      // HÀM ĐỒNG BỘ THỜI GIAN LÊN TRÌNH PHÁT NỔI (LOCKSCREEN)
+      const updatePositionState = (a) => {
+          if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+              if (a && !isNaN(a.duration) && !isNaN(a.currentTime) && isFinite(a.duration) && a.duration > 0) {
+                  try {
+                      navigator.mediaSession.setPositionState({
+                          duration: a.duration,
+                          playbackRate: a.playbackRate || 1,
+                          position: a.currentTime
+                      });
+                  } catch(e) {}
+              }
+          }
+      };
+
+      const scheduleResume = (reason='resume') => {
+          clearTimeout(retryTimerRef.current);
+          if(!playIntentRef.current || userPausedRef.current) return;
+          retryTimerRef.current = setTimeout(() => {
+              const a = audioRef.current;
+              if(!a || userPausedRef.current || !playIntentRef.current) return;
+              startAnchor();
+              if(a.paused || a.readyState < 2){
+                  a.play().then(()=>{
+                      if (document.visibilityState === 'visible') setPlaying(true);
+                      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+                  }).catch(()=>{
+                      try{ a.load(); }catch{}
+                      setTimeout(()=>{ if(!userPausedRef.current && playIntentRef.current) a.play().catch(()=>{}); }, 900);
+                  });
+              }
+          }, reason === 'error' ? 1200 : 700);
+      };
+
+      const pickSong = (song) => {
+          const idx = playlistRef.current.findIndex(x => x.id === song.id);
+          if(idx >= 0) playNativeSync(idx);
+      };
+
+      const playNativeSync = (i) => {
+        const a = audioRef.current; if(!a) return;
+        const s = playlistRef.current[i]; if(!s) return; 
+        
+        isTransitioningRef.current = true; prefetchDoneRef.current = false;
+        userPausedRef.current = false; playIntentRef.current = true;
+        startAnchor();
+        setCurrentIndex(i); currentIndexRef.current = i;
+        if (document.visibilityState === 'visible') setPlaying(true); 
+
+        if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
+        
+        a.loop = false; 
+        if (a.src !== s.stream_url) { a.src = s.stream_url; a.load(); }
+        const r = load(RESUME_KEY, null);
+        if(r && r.index === i && r.time > 5 && a.readyState >= 1){ try{ a.currentTime = Number(r.time) || 0; }catch{} }
+
+        const playPromise = a.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isTransitioningRef.current = false;
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                    updatePositionState(a); // Gửi số liệu báo cáo độ dài ra màn hình ngoài
+                }
+            }).catch(e => {
+                isTransitioningRef.current = false;
+                scheduleResume('error');
+                if (document.visibilityState === 'visible') setPlaying(false); 
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            });
+        }
+      }; 
+
+      const playPauseUI = useCallback(() => {
+          haptic();
+          const a = audioRef.current; if(!a) return;
+          const anchor = document.getElementById('mstq-silence');
+          if (anchor && anchor.paused) anchor.play().catch(()=>{});
+
+          if(!playlistRef.current.length) return;
+          if(playing || (!a.paused && a.currentTime > 0)){ 
+            userPausedRef.current = true; playIntentRef.current = false;
+            if (document.visibilityState === 'visible') setPlaying(false); 
+            a.pause(); stopAnchor(); saveResumeNow();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+          } else { 
+            userPausedRef.current = false; playIntentRef.current = true; startAnchor();
+            a.play().catch(()=>{ a.load(); scheduleResume('error'); });
+            if (document.visibilityState === 'visible') setPlaying(true);
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+          }
+      }, [playing]); 
+
+      const initAudioEngine = () => {
+          haptic(); setIsInitialized(true);
+          const anchor = document.getElementById('mstq-silence');
+          if (anchor && anchor.paused) anchor.play().catch(()=>{});
+          if (playlistRef.current.length > 0 && !playing) playNativeSync(currentIndexRef.current);
+      };
+
+      useEffect(()=>{
+        const a = audioRef.current; if(!a) return;
+        const onTime = (e) => { 
+          const target = e.target;
+          if(isNaN(target.duration) || target.duration <= 0) return;
+          
+          if (document.visibilityState === 'visible') {
+              const now = Date.now();
+              if (now - lastUiUpdateRef.current > 500) { setProgress({current: target.currentTime, duration: target.duration}); lastUiUpdateRef.current = now; }
+          }
+          
+          // Bơm số liệu thanh tiến trình ra Lockscreen (1 giây/lần tránh hao pin)
+          const currentSec = Math.floor(target.currentTime);
+          if (currentSec !== lastMediaSessionUpdateRef.current) {
+              updatePositionState(target);
+              lastMediaSessionUpdateRef.current = currentSec;
+          }
+
+          if (Date.now() - resumeSaveRef.current > 15000) { resumeSaveRef.current = Date.now(); saveResumeNow(); }
+
+          if (target.duration > 30 && target.currentTime >= target.duration - 25) {
+              if (!prefetchDoneRef.current) { prefetchDoneRef.current = true; triggerNetworkPrefetch(getNextIndexLogic(currentIndexRef.current)); }
+          }
+        };
+
+        const onEndedNative = () => {
+            if (repeatRef.current === 'one') { a.currentTime = 0; a.play().catch(()=>{}); return; }
+            if (repeatRef.current === 'off' && currentIndexRef.current === playlistRef.current.length - 1 && !shuffleRef.current) {
+                if (document.visibilityState === 'visible') setPlaying(false); return;
+            }
+            if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current));
+        };
+        
+        const onPauseNative = () => { if(!userPausedRef.current && playIntentRef.current && !a.ended) scheduleResume('pause'); };
+        const onStallNative = () => { if(playIntentRef.current && !userPausedRef.current) scheduleResume('stall'); };
+        const onErrorNative = () => { if(playIntentRef.current && !userPausedRef.current) scheduleResume('error'); };
+        a.addEventListener('timeupdate',onTime); a.addEventListener('ended',onEndedNative);
+        a.addEventListener('pause', onPauseNative); a.addEventListener('stalled', onStallNative); a.addEventListener('waiting', onStallNative); a.addEventListener('suspend', onStallNative); a.addEventListener('error', onErrorNative); a.addEventListener('abort', onErrorNative);
+        return()=>{ a.removeEventListener('timeupdate',onTime); a.removeEventListener('ended',onEndedNative); a.removeEventListener('pause', onPauseNative); a.removeEventListener('stalled', onStallNative); a.removeEventListener('waiting', onStallNative); a.removeEventListener('suspend', onStallNative); a.removeEventListener('error', onErrorNative); a.removeEventListener('abort', onErrorNative); };
+      },[]); 
+
+      // BỌC THÉP API LOCKSCREEN BAO GỒM TUA NHẠC
+      useEffect(()=>{
+        if(!('mediaSession' in navigator)) return;
+        
+        const handlePlay = () => {
+            const a = document.getElementById('mstq-player');
+            const anchor = document.getElementById('mstq-silence');
+            if (anchor && anchor.paused) anchor.play().catch(()=>{});
+            
+            if (a) {
+                userPausedRef.current = false; playIntentRef.current = true;
+                a.play().catch(()=>{ a.load(); scheduleResume('error'); });
+                if (document.visibilityState === 'visible') setPlaying(true);
+                navigator.mediaSession.playbackState = 'playing';
+            }
+        };
+
+        const handlePause = () => {
+            const a = document.getElementById('mstq-player');
+            if (a) {
+                userPausedRef.current = true; playIntentRef.current = false;
+                a.pause(); stopAnchor(); saveResumeNow();
+                if (document.visibilityState === 'visible') setPlaying(false);
+                navigator.mediaSession.playbackState = 'paused';
+            }
+        };
+
+        // HÀM XỬ LÝ LỆNH TUA TỪ LOCKSCREEN
+        const handleSeek = (details) => {
+            const a = document.getElementById('mstq-player');
+            if (a && a.readyState >= 1) {
+                if (details.fastSeek && 'fastSeek' in a) {
+                    a.fastSeek(details.seekTime);
+                } else if (details.seekTime !== undefined) {
+                    a.currentTime = details.seekTime;
+                }
+                updatePositionState(a); // Ép vẽ lại số liệu sau khi tua
+            } else if (a) {
+                a.load();
+                a.currentTime = details.seekTime || 0;
+                a.play().catch(()=>{});
+            }
+        };
+
+        try{
+          navigator.mediaSession.setActionHandler('play', handlePlay);
+          navigator.mediaSession.setActionHandler('pause', handlePause);
+          navigator.mediaSession.setActionHandler('nexttrack', () => { if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current)); });
+          navigator.mediaSession.setActionHandler('previoustrack', () => { if (!isTransitioningRef.current) playNativeSync(getPrevIndexLogic(currentIndexRef.current)); });
+          navigator.mediaSession.setActionHandler('seekto', handleSeek); // Bật tính năng kéo tua nhạc
+        }catch(e){}
+      },[]);
+
+      useEffect(()=>{
+        const onVis = () => {
+          if(document.visibilityState === 'hidden'){
+            if(playIntentRef.current && !userPausedRef.current) startAnchor();
+            saveResumeNow();
+          } else {
+            const a = audioRef.current;
+            if(a && !a.paused && !a.ended) setPlaying(true);
+            if(a && a.paused && playIntentRef.current && !userPausedRef.current) scheduleResume('visible');
+          }
+        };
+        const onPageHide = () => saveResumeNow();
+        document.addEventListener('visibilitychange', onVis);
+        window.addEventListener('pagehide', onPageHide);
+        window.addEventListener('beforeunload', onPageHide);
+        return ()=>{ document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', onPageHide); window.removeEventListener('beforeunload', onPageHide); };
+      },[]);
+
+      const list = filter.trim() ? playlist.filter(s => (s.title||'').toLowerCase().includes(filter.toLowerCase())) : playlist;
+      const currentSong = playlist[currentIndex] || null;
+
+      return e('div', null,
+        toast && e('div', {className: "toast-container"}, e('div', {className: "toast-msg"}, toast)),
+        
+        /* HEADER & CÔNG CỤ */
+        e('div', {className: "px-4 pt-6 pb-4 border-b border-[var(--border)] bg-[var(--card)]/50"},
+            e('h1', {className: "text-2xl font-black text-[var(--primary)] uppercase tracking-wide"}, "Xiemsansang"),
+            e('p', {className: "text-sm text-[var(--muted)] mt-0.5 font-medium mb-4"}, "Nghe nhạc liên tục trên mobile"),
+            
+            // Thanh công cụ
+            e('div', {className: "flex items-center gap-3"},
+                e('select', {className: "timer-dropdown flex-1", onChange: handleTimerChange},
+                    e('option', {value: "0"}, "🕒 Hẹn giờ: Tắt"),
+                    [15,30,45,60,90,120].map(m => e('option', {key:m, value: m}, `🕒 Tắt sau ${m} phút`))
+                ),
+                e('button', {onClick: clearCache, className: "w-10 h-10 flex justify-center items-center rounded-full bg-rose-100 text-rose-600 active:scale-90"}, Icons.trash(20)),
+                e('button', {onClick: ()=>{haptic(); setTheme(THEME_LIST[(THEME_LIST.indexOf(theme) + 1) % THEME_LIST.length])}, className: "w-10 h-10 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90"}, Icons.palette(20))
+            ),
+            
+            // Đồng hồ đếm ngược
+            timerLeft && e('div', {className: "mt-3 text-center text-xs font-bold text-rose-500 animate-pulse"}, `Hệ thống sẽ dừng sau: ${formatTime(Math.ceil(timerLeft/1000))}`),
+
+            e('details', {className: "guide-card"},
+              e('summary', null, "📱 Hướng dẫn nghe nền trên Xiaomi/Android"),
+              e('div', {className: "guide-body"},
+                e('div', null, "1) Mở bằng link web https, bấm ", e('b', null, "Khởi Động & Phát Nhạc"), " một lần."),
+                e('div', null, "2) Trên Xiaomi: Cài đặt → Ứng dụng → Chrome/trình duyệt đang dùng → Pin → chọn ", e('b', null, "Không hạn chế"), "."),
+                e('div', null, "3) Không vuốt tắt app khỏi đa nhiệm khi đang nghe. Có thể tắt màn hình, để đầu giường hoặc bỏ túi." )
+              )
+            ),
+
+            !isInitialized && e('button', {
+                className: "mt-5 btn btn-primary w-full py-4 text-lg shadow-lg shadow-[var(--primary)]/30 animate-pulse", 
+                onClick: initAudioEngine
+            }, "▶ Khởi Động & Phát Nhạc")
+        ),
+
+        /* PLAYLIST BLOCK */
+        e('div', {className: "px-2 pt-3"},
+            e('div', {className: "px-2 mb-3"},
+                e('input', {className: "w-full bg-[var(--card)] border border-[var(--border)] rounded-xl py-3 px-4 focus:outline-none focus:ring-2 ring-[var(--primary)]/50 shadow-sm transition-shadow", placeholder: "Tìm tên bài hát...", value: filter, onChange: e=>setFilter(e.target.value)})
+            ),
+            
+            loading ? e('div', {className: "p-10 text-center text-[var(--primary)] font-bold animate-pulse"}, "Đang đồng bộ máy chủ...") :
+            e('div', {className: "border border-[var(--border)] bg-[var(--card)]/80 rounded-2xl overflow-hidden shadow-sm"}, 
+                list.slice(0,visible).map((s, index) => {
+                    const isCurrent = currentIndexRef.current === playlist.findIndex(x => x.id === s.id);
+                    return e('div', { key: s.id, className: `song-row ${isCurrent ? 'active' : ''}`, onClick: () => { if(!isInitialized) setIsInitialized(true); pickSong(s); } },
+                        e('div', {className: `w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-[var(--muted)]'}`}, isCurrent ? "▶" : (index + 1)),
+                        e('div', {className: "flex-1 min-w-0 pr-2"}, 
+                            e('div', {className: `truncate text-[0.95rem] ${isCurrent ? 'text-[var(--primary)] font-bold' : 'text-[var(--text)] font-semibold'}`}, s.title),
+                            e('div', {className: "truncate text-[11px] font-medium text-[var(--muted)] mt-0.5"}, s.artist)
+                        ),
+                        e('div', {className: "flex items-center gap-1 flex-shrink-0"},
+                            e('button', { className: "action-btn text-[var(--primary)]", onClick: (ev)=>{ ev.stopPropagation(); shareTrack(s); } }, Icons.share(18)),
+                            e('span', { className: "text-xs font-mono font-bold text-[var(--muted)] w-10 text-center" }, formatTime(s.duration)),
+                            e('button', { className: "action-btn text-rose-500", onClick: (ev)=>{ ev.stopPropagation(); downloadTrack(s); } }, Icons.download(20))
+                        )
+                    );
+                }),
+                list.length>visible && e('button', { onClick: ()=>setVisible(v=>v+VISIBLE_STEP), className: "w-full py-4 text-sm font-bold text-[var(--primary)] hover:bg-[var(--active-bg)] transition-colors" }, "⬇ Tải thêm danh sách xuống")
+            )
+        ),
+
+        /* MINI PLAYER ĐA NĂNG */
+        currentSong && isInitialized && e('div', { className: "fixed bottom-0 left-0 right-0 w-full bg-[var(--card)]/95 border-t border-[var(--border)] backdrop-blur-2xl p-4 pb-[env(safe-area-inset-bottom)] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"},
+          
+          e('div', {className: "flex items-center justify-between gap-2 w-full max-w-2xl mx-auto mb-3"},
+              e('div', {className: "flex-1 min-w-0 pr-2"},
+                e('p', {className: "truncate font-extrabold text-[0.95rem] text-[var(--text)]"}, currentSong.title),
+                e('p', {className: "text-xs font-medium text-[var(--primary)] mt-0.5"}, playing ? "Đang phát..." : "Đã tạm dừng")
+              )
+          ),
+
+          e('div', {className: "flex items-center justify-between w-full max-w-2xl mx-auto px-2"},
+              e('button', {onClick: ()=>{haptic(); setShuffle(!shuffle)}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, Icons.shuffle(20)),
+              
+              e('div', {className: "flex items-center gap-4"},
+                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getPrevIndexLogic(currentIndexRef.current))}, Icons.back(22)), 
+                e('button', {className: "w-14 h-14 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg active:scale-95 transition-transform", onClick: playPauseUI}, playing?Icons.pause(28):Icons.play(28)), 
+                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getNextIndexLogic(currentIndexRef.current))}, Icons.next(22))
+              ),
+              
+              e('button', {onClick: ()=>{haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all')}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
+          ),
+
+          e('div', {className: "max-w-2xl mx-auto mt-4 h-1.5 bg-[var(--border)] rounded-full overflow-hidden"},
+            e('div', {className: "h-full bg-[var(--primary)] rounded-full transition-all duration-[500ms] ease-linear", style:{width:`${progress.duration>0?(progress.current/progress.duration)*100:0}%`}})
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(e(App, null));
+  </script>
 </body>
 </html>
