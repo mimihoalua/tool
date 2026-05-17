@@ -2,10 +2,11 @@
 <html lang="vi" data-theme="light">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Nghe Nhạc - XIEMSANSANG</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,435 +14,616 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
   <style>
-    :root, [data-theme] { transition: background-color 0.4s ease, color 0.4s ease; }
-    
-    [data-theme=light] { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --primary: #2563eb; --primary-fg: #ffffff; --border: #e2e8f0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(37, 99, 235, 0.08); }
-    [data-theme=peach] { --bg: #fff1f2; --card: #ffffff; --text: #4c0519; --muted: #9f1239; --primary: #f43f5e; --primary-fg: #ffffff; --border: #fecdd3; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(244, 63, 94, 0.08); }
-    [data-theme=mint]  { --bg: #f0fdf4; --card: #ffffff; --text: #064e3b; --muted: #059669; --primary: #10b981; --primary-fg: #ffffff; --border: #bbf7d0; --nav-bg: rgba(255, 255, 255, 0.95); --active-bg: rgba(16, 185, 129, 0.08); }
-    
-    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 14px; font-weight: 600; transition: transform 0.1s; cursor: pointer; }
-    .btn:active { transform: scale(0.95); } 
+    :root, [data-theme] { transition: background-color 0.25s ease, color 0.25s ease; }
+    [data-theme=light] { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --primary: #2563eb; --primary-fg: #ffffff; --border: #e2e8f0; --active-bg: rgba(37, 99, 235, 0.08); --danger-bg:#ffe4e6; --danger:#e11d48; }
+    [data-theme=peach] { --bg: #fff1f2; --card: #ffffff; --text: #4c0519; --muted: #9f1239; --primary: #f43f5e; --primary-fg: #ffffff; --border: #fecdd3; --active-bg: rgba(244, 63, 94, 0.08); --danger-bg:#ffe4e6; --danger:#e11d48; }
+    [data-theme=mint]  { --bg: #f0fdf4; --card: #ffffff; --text: #064e3b; --muted: #059669; --primary: #10b981; --primary-fg: #ffffff; --border: #bbf7d0; --active-bg: rgba(16, 185, 129, 0.08); --danger-bg:#dcfce7; --danger:#047857; }
+
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); color: var(--text); overscroll-behavior-y: contain; }
+    body { min-height: 100%; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; touch-action: manipulation; }
+    button, input, select { font: inherit; }
+    button, .song-row, .btn { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 0.65rem 0.95rem; border-radius: 16px; font-weight: 800; transition: transform 0.08s ease, background-color 0.18s ease; cursor: pointer; min-height: 44px; }
+    .btn:active { transform: scale(0.97); }
     .btn-primary { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
-    
-    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    .btn-soft { background: var(--active-bg); color: var(--primary); border-color: transparent; }
 
-    .song-row { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 68px; border-bottom: 1px solid var(--border); transition: background-color 0.2s; cursor: pointer; }
-    .song-row:active { background-color: var(--border); }
+    @keyframes pulseSoft { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+    @keyframes slideDown { from { transform: translateY(-24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .song-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 70px; padding: 8px 12px; border-bottom: 1px solid var(--border); transition: background-color 0.15s ease; cursor: pointer; content-visibility: auto; contain-intrinsic-size: 70px; }
+    .song-row:last-child { border-bottom: 0; }
+    .song-row:active { background-color: var(--active-bg); }
     .song-row.active { background-color: var(--active-bg); }
-    .song-row.active .song-idx { color: var(--primary); font-weight: 900; animation: pulse 1.5s infinite; }
-    
-    .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
-    .action-btn:active { background: var(--border); transform: scale(0.9); }
+    .song-row.active .song-idx { color: var(--primary); font-weight: 900; animation: pulseSoft 1.6s infinite; }
 
-    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; width: 90%; max-width: 380px; text-align: center; }
-    .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .action-btn { width: 40px; height: 40px; min-width: 40px; display: flex; align-items: center; justify-content: center; border-radius: 999px; transition: background 0.15s ease, transform 0.08s ease; }
+    .action-btn:active { background: var(--active-bg); transform: scale(0.94); }
 
-    select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); padding: 6px 30px 6px 12px; border-radius: 99px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; cursor: pointer; }
+    .toast-container { position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; width: min(92vw, 420px); text-align: center; }
+    .toast-msg { background: var(--primary); color: var(--primary-fg); padding: 11px 16px; border-radius: 14px; font-weight: 800; font-size: 0.92rem; animation: slideDown 0.22s ease-out; display: inline-block; box-shadow: 0 10px 28px rgba(15,23,42,0.18); }
+
+    select.timer-dropdown { appearance: none; background-color: var(--active-bg); color: var(--primary); font-weight: 900; border: 1px solid var(--primary); min-height: 42px; padding: 7px 32px 7px 12px; border-radius: 999px; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-size: 16px; cursor: pointer; }
+
+    .range { width: 100%; accent-color: var(--primary); height: 26px; }
+    .mini-player { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+
+    @media (max-width: 420px) {
+      .song-row { min-height: 74px; padding-left: 10px; padding-right: 8px; }
+      .action-btn { width: 36px; height: 36px; min-width: 36px; }
+      .mobile-hide-small { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] font-sans pb-40">
+<body class="font-sans pb-48">
   <div id="root"></div>
 
-  <audio id="mstq-player" preload="auto" playsinline webkit-playsinline crossOrigin="anonymous"></audio>
-  <audio id="mstq-silence" preload="auto" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
+  <audio id="mstq-player" preload="metadata" playsinline webkit-playsinline></audio>
+  <audio id="mstq-silence" preload="none" loop playsinline webkit-playsinline src="silence_30min.mp3"></audio>
 
   <script type="text/javascript">
     const { useState, useEffect, useRef, useCallback, createElement: e } = React;
 
-    const SONGS_CACHE_KEY='xs_songs_v4';
-    const RESUME_KEY='xs_resume_v4'; 
-    const THEME_KEY='xs_theme_v4';
-    const SHUFFLE_KEY='xs_shuffle';
-    const REPEAT_KEY='xs_repeat';
-    const INITIAL_VISIBLE=50, VISIBLE_STEP=50;
+    const SONGS_CACHE_KEY = 'xs_songs_v5_mobile_final';
+    const RESUME_KEY = 'xs_resume_v5_mobile_final';
+    const THEME_KEY = 'xs_theme_v5_mobile_final';
+    const SHUFFLE_KEY = 'xs_shuffle_v5_mobile_final';
+    const REPEAT_KEY = 'xs_repeat_v5_mobile_final';
+    const KEEP_SCREEN_KEY = 'xs_keep_screen_v5_mobile_final';
+    const INITIAL_VISIBLE = 60;
+    const VISIBLE_STEP = 60;
 
-    const save=(k,v)=>{ try{ if (document.visibilityState === 'hidden') return; localStorage.setItem(k,JSON.stringify(v)); }catch{} };
-    const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
-    const formatTime=s=>{if(!isFinite(s)||s<0)return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return`${m}:${String(sec).padStart(2,'0')}`};
-    const haptic=(ms=14)=>{ try{ navigator.vibrate?.(ms); }catch{} };
+    const saveNow = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+    const save = (k, v) => { try { if (document.visibilityState !== 'hidden') localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+    const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+    const formatTime = s => { if (!isFinite(s) || s < 0) return '0:00'; const m = Math.floor(s / 60), sec = Math.floor(s % 60); return `${m}:${String(sec).padStart(2, '0')}`; };
+    const cleanTitle = txt => String(txt || 'Không tên').replace(/\.mp3$/i, '').replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const haptic = (ms = 12) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} };
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
     let wakeLock = null;
-    const requestWakeLock = async () => { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } };
-    const releaseWakeLock = () => { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }).catch(()=>{}); } };
+    const requestWakeLock = async () => {
+      if (!('wakeLock' in navigator)) return;
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+    };
+    const releaseWakeLock = () => {
+      if (wakeLock) { try { wakeLock.release().catch(() => {}); } catch {} wakeLock = null; }
+    };
 
-    const Icon = ({d=24,p="M5 12h14", f="none", sw="1.7"}) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:f, stroke:"currentColor", strokeWidth:sw}, e('path', {d:p, strokeLinecap:"round", strokeLinejoin:"round"}));
-    const Icons={
-      play:(d)=>e(Icon, {d:d, p:"M8 5v14l11-7z", f:"currentColor", sw:"1"}), 
-      pause:(d)=>e(Icon, {d:d, p:"M6 5h4v14H6zM14 5h4v14h-4z", f:"currentColor", sw:"1"}),
-      next:(d)=>e(Icon, {d:d, p:"M13 5 20 12l-7 7V5z M4 5h2v14H4z", f:"currentColor", sw:"1"}), 
-      back:(d)=>e(Icon, {d:d, p:"M11 19 4 12l7-7v14z M18 5h2v14h-2z", f:"currentColor", sw:"1"}),
-      share:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('circle',{cx:"18",cy:"5",r:"3"}), e('circle',{cx:"6",cy:"12",r:"3"}), e('circle',{cx:"18",cy:"19",r:"3"}), e('line',{x1:"8.59",y1:"13.51",x2:"15.42",y2:"17.49"}), e('line',{x1:"15.41",y1:"6.51",x2:"8.59",y2:"10.49"})),
-      download:(d)=>e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"}, e('path',{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}), e('polyline',{points:"7 10 12 15 17 10"}), e('line',{x1:"12",y1:"15",x2:"12",y2:"3"})),
-      palette: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('circle',{cx:"12",cy:"12",r:"10"}), e('path',{d:"M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"})),
-      trash: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"3 6 5 6 21 6"}), e('path',{d:"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"})),
-      shuffle: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"16 3 21 3 21 8"}), e('line',{x1:"4",y1:"20",x2:"21",y2:"3"}), e('polyline',{points:"21 16 21 21 16 21"}), e('line',{x1:"15",y1:"15",x2:"21",y2:"21"}), e('line',{x1:"4",y1:"4",x2:"9",y2:"9"})),
-      repeat: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"})),
-      repeatOne: (d) => e('svg', {width:d, height:d, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:"2"}, e('polyline',{points:"17 1 21 5 17 9"}), e('path',{d:"M3 11V9a4 4 0 0 1 4-4h14"}), e('polyline',{points:"7 23 3 19 7 15"}), e('path',{d:"M21 13v2a4 4 0 0 1-4 4H3"}), e('line',{x1:"12",y1:"10",x2:"12",y2:"14"}), e('line',{x1:"10",y1:"12",x2:"12",y2:"10"}))
+    const Icon = ({ d = 24, p = 'M5 12h14', f = 'none', sw = '1.8' }) => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: f, stroke: 'currentColor', strokeWidth: sw, 'aria-hidden': true }, e('path', { d: p, strokeLinecap: 'round', strokeLinejoin: 'round' }));
+    const Icons = {
+      play: d => e(Icon, { d, p: 'M8 5v14l11-7z', f: 'currentColor', sw: '1' }),
+      pause: d => e(Icon, { d, p: 'M6 5h4v14H6zM14 5h4v14h-4z', f: 'currentColor', sw: '1' }),
+      next: d => e(Icon, { d, p: 'M13 5 20 12l-7 7V5z M4 5h2v14H4z', f: 'currentColor', sw: '1' }),
+      back: d => e(Icon, { d, p: 'M11 19 4 12l7-7v14z M18 5h2v14h-2z', f: 'currentColor', sw: '1' }),
+      share: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('circle', { cx: '18', cy: '5', r: '3' }), e('circle', { cx: '6', cy: '12', r: '3' }), e('circle', { cx: '18', cy: '19', r: '3' }), e('line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49' }), e('line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49' })),
+      download: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('path', { d: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' }), e('polyline', { points: '7 10 12 15 17 10' }), e('line', { x1: '12', y1: '15', x2: '12', y2: '3' })),
+      palette: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('circle', { cx: '12', cy: '12', r: '10' }), e('path', { d: 'M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z' })),
+      trash: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '3 6 5 6 21 6' }), e('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })),
+      shuffle: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '16 3 21 3 21 8' }), e('line', { x1: '4', y1: '20', x2: '21', y2: '3' }), e('polyline', { points: '21 16 21 21 16 21' }), e('line', { x1: '15', y1: '15', x2: '21', y2: '21' }), e('line', { x1: '4', y1: '4', x2: '9', y2: '9' })),
+      repeat: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '17 1 21 5 17 9' }), e('path', { d: 'M3 11V9a4 4 0 0 1 4-4h14' }), e('polyline', { points: '7 23 3 19 7 15' }), e('path', { d: 'M21 13v2a4 4 0 0 1-4 4H3' })),
+      repeatOne: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2' }, e('polyline', { points: '17 1 21 5 17 9' }), e('path', { d: 'M3 11V9a4 4 0 0 1 4-4h14' }), e('polyline', { points: '7 23 3 19 7 15' }), e('path', { d: 'M21 13v2a4 4 0 0 1-4 4H3' }), e('line', { x1: '12', y1: '10', x2: '12', y2: '14' }), e('line', { x1: '10', y1: '12', x2: '12', y2: '10' })),
+      screen: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('rect', { x: '3', y: '4', width: '18', height: '12', rx: '2' }), e('path', { d: 'M8 21h8M12 16v5' })),
+      refresh: d => e('svg', { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }, e('path', { d: 'M21 12a9 9 0 1 1-2.64-6.36' }), e('path', { d: 'M21 3v6h-6' }))
     };
 
     const THEME_LIST = ['light', 'peach', 'mint'];
 
-    function App(){
-      const [isInitialized, setIsInitialized] = useState(false); 
+    function App() {
+      const [isInitialized, setIsInitialized] = useState(false);
       const [theme, setTheme] = useState(localStorage.getItem(THEME_KEY) || 'light');
-      
-      useEffect(()=>{
-          document.documentElement.setAttribute('data-theme',theme);
-          localStorage.setItem(THEME_KEY,theme);
-      },[theme]);
-
       const [toast, setToast] = useState(null);
-      useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
+      const [playlist, setPlaylist] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [visible, setVisible] = useState(INITIAL_VISIBLE);
+      const [filter, setFilter] = useState('');
+      const [currentIndex, setCurrentIndex] = useState(load(RESUME_KEY, { index: 0, current: 0 }).index || 0);
+      const [playing, setPlaying] = useState(false);
+      const [progress, setProgress] = useState({ current: 0, duration: 0 });
+      const [shuffle, setShuffle] = useState(load(SHUFFLE_KEY, false));
+      const [repeat, setRepeat] = useState(load(REPEAT_KEY, 'all'));
+      const [keepScreen, setKeepScreen] = useState(load(KEEP_SCREEN_KEY, false));
+      const [timerLeft, setTimerLeft] = useState(null);
 
-      const [playlist,setPlaylist]=useState([]);
-      const [loading,setLoading]=useState(true);
-      const [visible,setVisible]=useState(INITIAL_VISIBLE);
-      const [filter,setFilter]=useState('');
+      const playlistRef = useRef(playlist);
+      const currentIndexRef = useRef(currentIndex);
+      const shuffleRef = useRef(shuffle);
+      const repeatRef = useRef(repeat);
+      const keepScreenRef = useRef(keepScreen);
+      const audioRef = useRef(null);
+      const timerRef = useRef(null);
+      const lastMediaSessionUpdateRef = useRef(-1);
+      const lastUiUpdateRef = useRef(0);
+      const isTransitioningRef = useRef(false);
+      const metadataPrefetchRef = useRef(null);
+      const resumeAppliedRef = useRef(false);
+      const playIntentRef = useRef(false);
 
-      const [currentIndex,setCurrentIndex]=useState(0);
-      const [playing,setPlaying]=useState(false);
-      const [progress,setProgress]=useState({current:0,duration:0});
-      
-      const [shuffle,setShuffle]=useState(load(SHUFFLE_KEY,false));
-      const [repeat,setRepeat]=useState(load(REPEAT_KEY,'all')); 
-      
-      const playlistRef = useRef(playlist); useEffect(()=>{playlistRef.current=playlist},[playlist]);
-      const currentIndexRef = useRef(currentIndex); 
-      const shuffleRef = useRef(shuffle); useEffect(()=>{shuffleRef.current=shuffle; save(SHUFFLE_KEY,shuffle);},[shuffle]);
-      const repeatRef = useRef(repeat); useEffect(()=>{repeatRef.current=repeat; save(REPEAT_KEY,repeat);},[repeat]);
+      useEffect(() => { audioRef.current = document.getElementById('mstq-player'); }, []);
+      useEffect(() => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem(THEME_KEY, theme); }, [theme]);
+      useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 2600); return () => clearTimeout(t); } }, [toast]);
+      useEffect(() => { playlistRef.current = playlist; }, [playlist]);
+      useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+      useEffect(() => { shuffleRef.current = shuffle; save(SHUFFLE_KEY, shuffle); }, [shuffle]);
+      useEffect(() => { repeatRef.current = repeat; save(REPEAT_KEY, repeat); }, [repeat]);
+      useEffect(() => { keepScreenRef.current = keepScreen; save(KEEP_SCREEN_KEY, keepScreen); if (!keepScreen) releaseWakeLock(); else if (playing) requestWakeLock(); }, [keepScreen, playing]);
 
-      const audioRef=useRef(null);
-      useEffect(()=>{ audioRef.current=document.getElementById('mstq-player'); },[]);
+      const maybeWake = () => { if (keepScreenRef.current) requestWakeLock(); };
+      const unlockAudioAnchor = () => {
+        const anchor = document.getElementById('mstq-silence');
+        if (!anchor || !anchor.paused) return;
+        try {
+          anchor.volume = 0;
+          const p = anchor.play();
+          if (p && p.then) p.then(() => setTimeout(() => { try { anchor.pause(); anchor.currentTime = 0; } catch {} }, 300)).catch(() => {});
+        } catch {}
+      };
 
-      // HẸN GIỜ TẮT NHẠC
-      const [timerLeft,setTimerLeft]=useState(null);
-      const timerRef=useRef(null);
-      const handleTimerChange = (e) => {
-          const val = parseInt(e.target.value);
-          haptic();
-          clearInterval(timerRef.current);
-          if (val === 0) {
-              setTimerLeft(null); setToast('Đã hủy hẹn giờ'); return;
+      const persistResume = useCallback(() => {
+        const a = audioRef.current;
+        saveNow(RESUME_KEY, {
+          index: currentIndexRef.current || 0,
+          current: a && isFinite(a.currentTime) ? Math.floor(a.currentTime) : 0,
+          savedAt: Date.now()
+        });
+      }, []);
+
+      useEffect(() => {
+        const onPageHide = () => persistResume();
+        const onVisibility = () => {
+          if (document.visibilityState === 'visible') {
+            const a = audioRef.current;
+            if (a && !a.paused && keepScreenRef.current) requestWakeLock();
+          } else {
+            persistResume();
+            releaseWakeLock();
           }
-          const ms = val * 60 * 1000;
-          const end = Date.now() + ms;
-          setTimerLeft(ms);
-          setToast(`Đã hẹn tắt sau ${val} phút`);
-          timerRef.current = setInterval(() => { 
-              const left = end - Date.now(); 
-              if(left <= 0){ clearInterval(timerRef.current); setTimerLeft(null); if(audioRef.current) audioRef.current.pause(); setPlaying(false); } 
-              else setTimerLeft(left); 
-          }, 1000);
+        };
+        window.addEventListener('pagehide', onPageHide, { passive: true });
+        document.addEventListener('visibilitychange', onVisibility, { passive: true });
+        return () => { window.removeEventListener('pagehide', onPageHide); document.removeEventListener('visibilitychange', onVisibility); };
+      }, [persistResume]);
+
+      const handleTimerChange = (ev) => {
+        const val = parseInt(ev.target.value, 10);
+        haptic();
+        clearInterval(timerRef.current);
+        if (!val) { setTimerLeft(null); setToast('Đã hủy hẹn giờ'); return; }
+        const end = Date.now() + val * 60 * 1000;
+        setTimerLeft(val * 60 * 1000);
+        setToast(`Đã hẹn tắt sau ${val} phút`);
+        timerRef.current = setInterval(() => {
+          const left = end - Date.now();
+          if (left <= 0) {
+            clearInterval(timerRef.current);
+            setTimerLeft(null);
+            const a = audioRef.current;
+            if (a) a.pause();
+            setPlaying(false);
+            releaseWakeLock();
+            setToast('Đã tắt nhạc theo hẹn giờ');
+          } else setTimerLeft(left);
+        }, 1000);
       };
 
       const clearCache = () => {
-          if(confirm("Bạn có chắc chắn muốn xóa Cache và làm mới ứng dụng?")) {
-              localStorage.clear();
-              location.reload();
-          }
+        haptic();
+        if (confirm('Bạn có chắc chắn muốn xóa Cache và làm mới ứng dụng?')) {
+          const keepTheme = localStorage.getItem(THEME_KEY);
+          localStorage.clear();
+          if (keepTheme) localStorage.setItem(THEME_KEY, keepTheme);
+          location.reload();
+        }
       };
 
-      const refetch=useCallback(async()=>{
+      const refetch = useCallback(async () => {
         setLoading(true);
-        try{
-          let all=[];
+        try {
+          let all = [];
           const query = 'identifier:(giai-toa-moi-thu) OR uploader:(xiemsansang) AND mediatype:(audio)';
-          const url=`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
-          
-          const r=await fetch(url,{cache:'no-store'}); 
-          if(r.ok){
-              const j=await r.json(); 
-              const docs=j?.response?.docs||[];
-              for(const d of docs){
-                try{
-                  const meta=await fetch(`https://archive.org/metadata/${d.identifier}`,{cache:'no-store'}).then(r=>r.json());
-                  (meta.files||[]).forEach(f=>{
-                    if(String(f.format||'').toUpperCase().includes('MP3')){
-                      let trackTitle = f.name; 
-                      if(f.title && f.title.trim() !== d.title.trim()) trackTitle = f.title;
-                      
-                      all.push({
-                          id:`${d.identifier}/${f.name}`,
-                          title: trackTitle.replace(/\.mp3$/i,'').replace(/_/g,' ').trim(),
-                          artist:d.creator||'Xiemsansang',
-                          stream_url:`https://archive.org/download/${d.identifier}/${encodeURIComponent(f.name)}`,
-                          duration:parseFloat(f.length||0)||0
-                      });
-                    }
-                  });
-                }catch{}
-              }
+          const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json`;
+          const r = await fetch(url, { cache: 'no-store' });
+          if (r.ok) {
+            const j = await r.json();
+            const docs = j?.response?.docs || [];
+            for (const d of docs) {
+              try {
+                const meta = await fetch(`https://archive.org/metadata/${encodeURIComponent(d.identifier)}`, { cache: 'no-store' }).then(x => x.json());
+                (meta.files || []).forEach(f => {
+                  const fmt = String(f.format || '').toUpperCase();
+                  const name = String(f.name || '');
+                  if (fmt.includes('MP3') || /\.mp3$/i.test(name)) {
+                    const fileTitle = (f.title && String(f.title).trim() && String(f.title).trim() !== String(d.title || '').trim()) ? f.title : name;
+                    all.push({
+                      id: `${d.identifier}/${name}`,
+                      title: cleanTitle(fileTitle),
+                      artist: d.creator || 'Xiemsansang',
+                      stream_url: `https://archive.org/download/${encodeURIComponent(d.identifier)}/${encodeURIComponent(name)}`,
+                      duration: parseFloat(f.length || 0) || 0
+                    });
+                  }
+                });
+              } catch {}
+            }
           }
-          if(all.length > 0) { setPlaylist(all); save(SONGS_CACHE_KEY,all); } 
-          else throw new Error("Empty list");
-        }catch{
-          const cached=load(SONGS_CACHE_KEY,[]);
-          if(cached && cached.length > 0) setPlaylist(cached);
-          else setToast("Không có dữ liệu.");
+          const seen = new Set();
+          all = all.filter(s => s.stream_url && !seen.has(s.id) && seen.add(s.id));
+          if (!all.length) throw new Error('empty-list');
+          setPlaylist(all);
+          saveNow(SONGS_CACHE_KEY, all);
+          setToast(`Đã đồng bộ ${all.length} bài`);
+        } catch {
+          const cached = load(SONGS_CACHE_KEY, []);
+          if (cached && cached.length) { setPlaylist(cached); setToast('Đang dùng danh sách đã lưu offline'); }
+          else setToast('Không có dữ liệu bài hát');
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
-      },[]);
-      useEffect(()=>{refetch()},[refetch]);
+      }, []);
 
-      async function shareTrack(s){ haptic(); try{ if(navigator.share) await navigator.share({title:s.title, url:s.stream_url}); else { await navigator.clipboard.writeText(s.stream_url); setToast('Đã copy link!'); } }catch{} }
-      async function downloadTrack(s) { haptic(); setToast(`Đang lấy file tải về...`); try { const a = document.createElement('a'); a.href = s.stream_url; a.download = `${s.title}.mp3`; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); } catch (e) { setToast('Lỗi tải file'); } }
+      useEffect(() => { refetch(); }, [refetch]);
+
+      useEffect(() => {
+        if (!playlist.length || resumeAppliedRef.current) return;
+        resumeAppliedRef.current = true;
+        const saved = load(RESUME_KEY, { index: 0, current: 0 });
+        const safeIndex = clamp(saved.index || 0, 0, Math.max(0, playlist.length - 1));
+        currentIndexRef.current = safeIndex;
+        setCurrentIndex(safeIndex);
+        const a = audioRef.current;
+        const s = playlist[safeIndex];
+        if (a && s) {
+          a.src = s.stream_url;
+          a.preload = 'metadata';
+          a.addEventListener('loadedmetadata', () => {
+            if (saved.current && saved.current < (a.duration || Infinity) - 3) {
+              try { a.currentTime = saved.current; setProgress({ current: saved.current, duration: a.duration || s.duration || 0 }); } catch {}
+            }
+          }, { once: true });
+        }
+      }, [playlist]);
+
+      async function shareTrack(s) {
+        haptic();
+        try {
+          if (navigator.share) await navigator.share({ title: s.title, text: s.artist || 'Xiemsansang', url: s.stream_url });
+          else { await navigator.clipboard.writeText(s.stream_url); setToast('Đã copy link bài hát'); }
+        } catch {}
+      }
+
+      async function downloadTrack(s) {
+        haptic();
+        setToast('Đang mở file tải về...');
+        try {
+          const a = document.createElement('a');
+          a.href = s.stream_url;
+          a.download = `${s.title}.mp3`;
+          a.rel = 'noopener';
+          a.target = '_blank';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch { setToast('Lỗi tải file'); }
+      }
 
       const getNextIndexLogic = (idx) => {
-          const pl = playlistRef.current;
-          if (shuffleRef.current && pl.length > 1) {
-              let nextIdx = Math.floor(Math.random() * pl.length);
-              return (nextIdx === idx) ? (nextIdx + 1) % pl.length : nextIdx;
-          }
-          return (idx + 1) % pl.length;
-      };
-      
-      const getPrevIndexLogic = (idx) => (idx - 1 + playlistRef.current.length) % playlistRef.current.length;
-
-      const lastMediaSessionUpdateRef = useRef(0), lastUiUpdateRef = useRef(0), isTransitioningRef = useRef(false), prefetchDoneRef = useRef(false);
-
-      const triggerNetworkPrefetch = (idx) => { const nextSong = playlistRef.current[idx]; if (nextSong && nextSong.stream_url) fetch(nextSong.stream_url, { mode: 'no-cors', cache: 'force-cache' }).catch(()=>{}); };
-
-      // HÀM ĐỒNG BỘ THỜI GIAN LÊN TRÌNH PHÁT NỔI (LOCKSCREEN)
-      const updatePositionState = (a) => {
-          if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-              if (a && !isNaN(a.duration) && !isNaN(a.currentTime) && isFinite(a.duration) && a.duration > 0) {
-                  try {
-                      navigator.mediaSession.setPositionState({
-                          duration: a.duration,
-                          playbackRate: a.playbackRate || 1,
-                          position: a.currentTime
-                      });
-                  } catch(e) {}
-              }
-          }
-      };
-
-      const playNativeSync = (i) => {
-        const a = audioRef.current; if(!a) return;
-        const s = playlistRef.current[i]; if(!s) return; 
-        
-        isTransitioningRef.current = true; prefetchDoneRef.current = false;
-        setCurrentIndex(i); currentIndexRef.current = i;
-        if (document.visibilityState === 'visible') setPlaying(true); 
-
-        if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
-        
-        a.loop = false; 
-        if (a.src !== s.stream_url) { a.src = s.stream_url; a.load(); }
-
-        const playPromise = a.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                isTransitioningRef.current = false; requestWakeLock();
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.playbackState = 'playing';
-                    updatePositionState(a); // Gửi số liệu báo cáo độ dài ra màn hình ngoài
-                }
-            }).catch(e => {
-                isTransitioningRef.current = false;
-                setTimeout(() => { a.load(); a.play().catch(()=>{}); }, 800);
-                if (document.visibilityState === 'visible') setPlaying(false); 
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-            });
+        const pl = playlistRef.current;
+        if (!pl.length) return 0;
+        if (shuffleRef.current && pl.length > 1) {
+          let nextIdx = Math.floor(Math.random() * pl.length);
+          return nextIdx === idx ? (nextIdx + 1) % pl.length : nextIdx;
         }
-      }; 
+        return (idx + 1) % pl.length;
+      };
+      const getPrevIndexLogic = (idx) => {
+        const pl = playlistRef.current;
+        return pl.length ? (idx - 1 + pl.length) % pl.length : 0;
+      };
 
-      const playPauseUI = useCallback(() => {
-          haptic();
-          const a = audioRef.current; if(!a) return;
-          const anchor = document.getElementById('mstq-silence');
-          if (anchor && anchor.paused) anchor.play().catch(()=>{});
+      const triggerMetadataPrefetch = (idx) => {
+        const nextSong = playlistRef.current[idx];
+        if (!nextSong || !nextSong.stream_url) return;
+        try {
+          if (metadataPrefetchRef.current) metadataPrefetchRef.current.src = '';
+          const pre = new Audio();
+          pre.preload = 'metadata';
+          pre.src = nextSong.stream_url;
+          metadataPrefetchRef.current = pre;
+        } catch {}
+      };
 
-          if(!playlistRef.current.length) return;
-          if(playing || (!a.paused && a.currentTime > 0)){ 
-            if (document.visibilityState === 'visible') setPlaying(false); 
-            a.pause(); releaseWakeLock();
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-          } else { 
-            a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); });
-            if (document.visibilityState === 'visible') setPlaying(true);
-            requestWakeLock();
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+      const updatePositionState = (a) => {
+        if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+          if (a && isFinite(a.duration) && isFinite(a.currentTime) && a.duration > 0) {
+            try { navigator.mediaSession.setPositionState({ duration: a.duration, playbackRate: a.playbackRate || 1, position: a.currentTime }); } catch {}
           }
-      }, [playing]); 
+        }
+      };
+
+      const updateMediaMetadata = (s) => {
+        if (!('mediaSession' in navigator) || !window.MediaMetadata || !s) return;
+        try { navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist || 'Xiemsansang', album: 'XIEMSANSANG' }); } catch {}
+      };
+
+      const playNativeSync = useCallback((i, opts = {}) => {
+        const a = audioRef.current;
+        const pl = playlistRef.current;
+        if (!a || !pl.length) return;
+        const index = clamp(i, 0, pl.length - 1);
+        const s = pl[index];
+        if (!s) return;
+
+        isTransitioningRef.current = true;
+        playIntentRef.current = true;
+        setIsInitialized(true);
+        setCurrentIndex(index);
+        currentIndexRef.current = index;
+        updateMediaMetadata(s);
+
+        if (a.src !== s.stream_url) {
+          a.pause();
+          a.src = s.stream_url;
+          a.preload = 'metadata';
+          a.load();
+        }
+        if (opts.seek && isFinite(opts.seek)) {
+          const applySeek = () => { try { if (a.duration && opts.seek < a.duration - 2) a.currentTime = opts.seek; } catch {} };
+          if (a.readyState >= 1) applySeek(); else a.addEventListener('loadedmetadata', applySeek, { once: true });
+        }
+
+        const p = a.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            setPlaying(true);
+            maybeWake();
+            isTransitioningRef.current = false;
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            updatePositionState(a);
+          }).catch(() => {
+            isTransitioningRef.current = false;
+            playIntentRef.current = false;
+            setPlaying(false);
+            releaseWakeLock();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            setToast('Trình duyệt chặn tự phát, bấm phát lại một lần');
+          });
+        } else {
+          setPlaying(true);
+          isTransitioningRef.current = false;
+          maybeWake();
+        }
+      }, []);
+
+      const pickSong = useCallback((s) => {
+        haptic();
+        const idx = playlistRef.current.findIndex(x => x.id === s.id);
+        if (idx < 0) return;
+        unlockAudioAnchor();
+        playNativeSync(idx);
+      }, [playNativeSync]);
 
       const initAudioEngine = () => {
-          haptic(); setIsInitialized(true);
-          const anchor = document.getElementById('mstq-silence');
-          if (anchor && anchor.paused) anchor.play().catch(()=>{});
-          if (playlistRef.current.length > 0 && !playing) playNativeSync(currentIndexRef.current);
+        haptic(18);
+        unlockAudioAnchor();
+        setIsInitialized(true);
+        if (playlistRef.current.length > 0) playNativeSync(currentIndexRef.current || 0, load(RESUME_KEY, {}));
       };
 
-      useEffect(()=>{
-        const a = audioRef.current; if(!a) return;
-        const onTime = (e) => { 
-          const target = e.target;
-          if(isNaN(target.duration) || target.duration <= 0) return;
-          
-          if (document.visibilityState === 'visible') {
-              const now = Date.now();
-              if (now - lastUiUpdateRef.current > 500) { setProgress({current: target.currentTime, duration: target.duration}); lastUiUpdateRef.current = now; }
+      const playPauseUI = useCallback(() => {
+        haptic();
+        const a = audioRef.current;
+        if (!a || !playlistRef.current.length) return;
+        unlockAudioAnchor();
+        if (playing || (!a.paused && a.currentTime >= 0)) {
+          playIntentRef.current = false;
+          a.pause();
+          setPlaying(false);
+          releaseWakeLock();
+          persistResume();
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+        } else {
+          if (!a.src) {
+            const s = playlistRef.current[currentIndexRef.current] || playlistRef.current[0];
+            if (s) { a.src = s.stream_url; a.load(); updateMediaMetadata(s); }
           }
-          
-          // Bơm số liệu thanh tiến trình ra Lockscreen (1 giây/lần tránh hao pin)
-          const currentSec = Math.floor(target.currentTime);
+          playIntentRef.current = true;
+          const p = a.play();
+          if (p && p.catch) p.catch(() => playNativeSync(currentIndexRef.current || 0));
+          setPlaying(true);
+          maybeWake();
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+        }
+      }, [playing, playNativeSync, persistResume]);
+
+      useEffect(() => {
+        const a = audioRef.current;
+        if (!a) return;
+        const onLoadedMetadata = () => {
+          setProgress({ current: a.currentTime || 0, duration: a.duration || playlistRef.current[currentIndexRef.current]?.duration || 0 });
+          updatePositionState(a);
+        };
+        const onTime = () => {
+          if (!isFinite(a.duration) || a.duration <= 0) return;
+          const now = Date.now();
+          if (document.visibilityState === 'visible' && now - lastUiUpdateRef.current > 700) {
+            setProgress({ current: a.currentTime, duration: a.duration });
+            lastUiUpdateRef.current = now;
+          }
+          const currentSec = Math.floor(a.currentTime);
           if (currentSec !== lastMediaSessionUpdateRef.current) {
-              updatePositionState(target);
-              lastMediaSessionUpdateRef.current = currentSec;
+            updatePositionState(a);
+            lastMediaSessionUpdateRef.current = currentSec;
           }
+          if (currentSec > 0 && currentSec % 15 === 0) persistResume();
+          if (a.duration > 45 && a.currentTime >= a.duration - 18) triggerMetadataPrefetch(getNextIndexLogic(currentIndexRef.current));
+        };
+        const onEnded = () => {
+          persistResume();
+          if (repeatRef.current === 'one') { a.currentTime = 0; a.play().catch(() => {}); return; }
+          if (repeatRef.current === 'off' && currentIndexRef.current === playlistRef.current.length - 1 && !shuffleRef.current) {
+            playIntentRef.current = false;
+            setPlaying(false);
+            releaseWakeLock();
+            return;
+          }
+          if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current));
+        };
+        const onPlay = () => { setPlaying(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; };
+        const onPause = () => { setPlaying(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'; if (!playIntentRef.current) releaseWakeLock(); };
 
-          if (target.duration > 30 && target.currentTime >= target.duration - 20) {
-              if (!prefetchDoneRef.current) { prefetchDoneRef.current = true; triggerNetworkPrefetch(getNextIndexLogic(currentIndexRef.current)); }
+        a.addEventListener('loadedmetadata', onLoadedMetadata);
+        a.addEventListener('timeupdate', onTime);
+        a.addEventListener('ended', onEnded);
+        a.addEventListener('play', onPlay);
+        a.addEventListener('pause', onPause);
+        return () => {
+          a.removeEventListener('loadedmetadata', onLoadedMetadata);
+          a.removeEventListener('timeupdate', onTime);
+          a.removeEventListener('ended', onEnded);
+          a.removeEventListener('play', onPlay);
+          a.removeEventListener('pause', onPause);
+        };
+      }, [persistResume, playNativeSync]);
+
+      useEffect(() => {
+        if (!('mediaSession' in navigator)) return;
+        const safePlay = () => {
+          unlockAudioAnchor();
+          const a = audioRef.current;
+          if (!a) return;
+          if (!a.src && playlistRef.current.length) playNativeSync(currentIndexRef.current || 0);
+          else {
+            playIntentRef.current = true;
+            a.play().then(() => { setPlaying(true); maybeWake(); navigator.mediaSession.playbackState = 'playing'; }).catch(() => {});
           }
         };
-
-        const onEndedNative = () => {
-            if (repeatRef.current === 'one') { a.currentTime = 0; a.play().catch(()=>{}); return; }
-            if (repeatRef.current === 'off' && currentIndexRef.current === playlistRef.current.length - 1 && !shuffleRef.current) {
-                if (document.visibilityState === 'visible') setPlaying(false); return;
-            }
-            if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current));
+        const safePause = () => {
+          const a = audioRef.current;
+          if (!a) return;
+          playIntentRef.current = false;
+          a.pause();
+          setPlaying(false);
+          releaseWakeLock();
+          persistResume();
+          navigator.mediaSession.playbackState = 'paused';
         };
-        
-        a.addEventListener('timeupdate',onTime); a.addEventListener('ended',onEndedNative);
-        return()=>{ a.removeEventListener('timeupdate',onTime); a.removeEventListener('ended',onEndedNative); };
-      },[]); 
-
-      // BỌC THÉP API LOCKSCREEN BAO GỒM TUA NHẠC
-      useEffect(()=>{
-        if(!('mediaSession' in navigator)) return;
-        
-        const handlePlay = () => {
-            const a = document.getElementById('mstq-player');
-            const anchor = document.getElementById('mstq-silence');
-            if (anchor && anchor.paused) anchor.play().catch(()=>{});
-            
-            if (a) {
-                a.play().catch(()=>{ a.load(); a.play().catch(()=>{}); });
-                if (document.visibilityState === 'visible') setPlaying(true);
-                navigator.mediaSession.playbackState = 'playing';
-                requestWakeLock();
-            }
-        };
-
-        const handlePause = () => {
-            const a = document.getElementById('mstq-player');
-            if (a) {
-                a.pause();
-                if (document.visibilityState === 'visible') setPlaying(false);
-                navigator.mediaSession.playbackState = 'paused';
-                releaseWakeLock();
-            }
-        };
-
-        // HÀM XỬ LÝ LỆNH TUA TỪ LOCKSCREEN
         const handleSeek = (details) => {
-            const a = document.getElementById('mstq-player');
-            if (a && a.readyState >= 1) {
-                if (details.fastSeek && 'fastSeek' in a) {
-                    a.fastSeek(details.seekTime);
-                } else if (details.seekTime !== undefined) {
-                    a.currentTime = details.seekTime;
-                }
-                updatePositionState(a); // Ép vẽ lại số liệu sau khi tua
-            } else if (a) {
-                a.load();
-                a.currentTime = details.seekTime || 0;
-                a.play().catch(()=>{});
-            }
+          const a = audioRef.current;
+          if (!a || details.seekTime === undefined) return;
+          const t = clamp(details.seekTime, 0, isFinite(a.duration) ? a.duration : details.seekTime);
+          try { if (details.fastSeek && 'fastSeek' in a) a.fastSeek(t); else a.currentTime = t; } catch {}
+          setProgress({ current: t, duration: a.duration || 0 });
+          updatePositionState(a);
+          persistResume();
         };
+        try {
+          navigator.mediaSession.setActionHandler('play', safePlay);
+          navigator.mediaSession.setActionHandler('pause', safePause);
+          navigator.mediaSession.setActionHandler('nexttrack', () => playNativeSync(getNextIndexLogic(currentIndexRef.current)));
+          navigator.mediaSession.setActionHandler('previoustrack', () => playNativeSync(getPrevIndexLogic(currentIndexRef.current)));
+          navigator.mediaSession.setActionHandler('seekto', handleSeek);
+          navigator.mediaSession.setActionHandler('seekbackward', d => handleSeek({ seekTime: (audioRef.current?.currentTime || 0) - (d.seekOffset || 10) }));
+          navigator.mediaSession.setActionHandler('seekforward', d => handleSeek({ seekTime: (audioRef.current?.currentTime || 0) + (d.seekOffset || 10) }));
+        } catch {}
+      }, [playNativeSync, persistResume]);
 
-        try{
-          navigator.mediaSession.setActionHandler('play', handlePlay);
-          navigator.mediaSession.setActionHandler('pause', handlePause);
-          navigator.mediaSession.setActionHandler('nexttrack', () => { if (!isTransitioningRef.current) playNativeSync(getNextIndexLogic(currentIndexRef.current)); });
-          navigator.mediaSession.setActionHandler('previoustrack', () => { if (!isTransitioningRef.current) playNativeSync(getPrevIndexLogic(currentIndexRef.current)); });
-          navigator.mediaSession.setActionHandler('seekto', handleSeek); // Bật tính năng kéo tua nhạc
-        }catch(e){}
-      },[]);
-
-      const list = filter.trim() ? playlist.filter(s => (s.title||'').toLowerCase().includes(filter.toLowerCase())) : playlist;
+      const list = filter.trim() ? playlist.filter(s => (s.title || '').toLowerCase().includes(filter.trim().toLowerCase()) || (s.artist || '').toLowerCase().includes(filter.trim().toLowerCase())) : playlist;
       const currentSong = playlist[currentIndex] || null;
+      const currentId = currentSong ? currentSong.id : '';
+      const shown = list.slice(0, visible);
+      const progressPct = progress.duration > 0 ? clamp((progress.current / progress.duration) * 100, 0, 100) : 0;
+
+      const seekByRange = (ev) => {
+        const a = audioRef.current;
+        const pct = parseFloat(ev.target.value);
+        if (!a || !progress.duration) return;
+        const t = (pct / 100) * progress.duration;
+        try { a.currentTime = t; } catch {}
+        setProgress(p => ({ ...p, current: t }));
+        updatePositionState(a);
+      };
 
       return e('div', null,
-        toast && e('div', {className: "toast-container"}, e('div', {className: "toast-msg"}, toast)),
-        
-        /* HEADER & CÔNG CỤ */
-        e('div', {className: "px-4 pt-6 pb-4 border-b border-[var(--border)] bg-[var(--card)]/50"},
-            e('h1', {className: "text-2xl font-black text-[var(--primary)] uppercase tracking-wide"}, "Xiemsansang"),
-            e('p', {className: "text-sm text-[var(--muted)] mt-0.5 font-medium mb-4"}, "Luồng phát Pre-fetch bất tận"),
-            
-            // Thanh công cụ
-            e('div', {className: "flex items-center gap-3"},
-                e('select', {className: "timer-dropdown flex-1", onChange: handleTimerChange},
-                    e('option', {value: "0"}, "🕒 Hẹn giờ: Tắt"),
-                    [15,30,45,60,90,120].map(m => e('option', {key:m, value: m}, `🕒 Tắt sau ${m} phút`))
-                ),
-                e('button', {onClick: clearCache, className: "w-10 h-10 flex justify-center items-center rounded-full bg-rose-100 text-rose-600 active:scale-90"}, Icons.trash(20)),
-                e('button', {onClick: ()=>{haptic(); setTheme(THEME_LIST[(THEME_LIST.indexOf(theme) + 1) % THEME_LIST.length])}, className: "w-10 h-10 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90"}, Icons.palette(20))
-            ),
-            
-            // Đồng hồ đếm ngược
-            timerLeft && e('div', {className: "mt-3 text-center text-xs font-bold text-rose-500 animate-pulse"}, `Hệ thống sẽ dừng sau: ${formatTime(Math.ceil(timerLeft/1000))}`),
+        toast && e('div', { className: 'toast-container' }, e('div', { className: 'toast-msg' }, toast)),
 
-            !isInitialized && e('button', {
-                className: "mt-5 btn btn-primary w-full py-4 text-lg shadow-lg shadow-[var(--primary)]/30 animate-pulse", 
-                onClick: initAudioEngine
-            }, "▶ Khởi Động & Phát Nhạc")
-        ),
-
-        /* PLAYLIST BLOCK */
-        e('div', {className: "px-2 pt-3"},
-            e('div', {className: "px-2 mb-3"},
-                e('input', {className: "w-full bg-[var(--card)] border border-[var(--border)] rounded-xl py-3 px-4 focus:outline-none focus:ring-2 ring-[var(--primary)]/50 shadow-sm transition-shadow", placeholder: "Tìm tên bài hát...", value: filter, onChange: e=>setFilter(e.target.value)})
-            ),
-            
-            loading ? e('div', {className: "p-10 text-center text-[var(--primary)] font-bold animate-pulse"}, "Đang đồng bộ máy chủ...") :
-            e('div', {className: "border border-[var(--border)] bg-[var(--card)]/80 rounded-2xl overflow-hidden shadow-sm"}, 
-                list.slice(0,visible).map((s, index) => {
-                    const isCurrent = currentIndexRef.current === playlist.findIndex(x => x.id === s.id);
-                    return e('div', { key: s.id, className: `song-row ${isCurrent ? 'active' : ''}`, onClick: () => {if(!isInitialized) initAudioEngine(); else pickSong(s);} },
-                        e('div', {className: `w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-[var(--muted)]'}`}, isCurrent ? "▶" : (index + 1)),
-                        e('div', {className: "flex-1 min-w-0 pr-2"}, 
-                            e('div', {className: `truncate text-[0.95rem] ${isCurrent ? 'text-[var(--primary)] font-bold' : 'text-[var(--text)] font-semibold'}`}, s.title),
-                            e('div', {className: "truncate text-[11px] font-medium text-[var(--muted)] mt-0.5"}, s.artist)
-                        ),
-                        e('div', {className: "flex items-center gap-1 flex-shrink-0"},
-                            e('button', { className: "action-btn text-[var(--primary)]", onClick: (ev)=>{ ev.stopPropagation(); shareTrack(s); } }, Icons.share(18)),
-                            e('span', { className: "text-xs font-mono font-bold text-[var(--muted)] w-10 text-center" }, formatTime(s.duration)),
-                            e('button', { className: "action-btn text-rose-500", onClick: (ev)=>{ ev.stopPropagation(); downloadTrack(s); } }, Icons.download(20))
-                        )
-                    );
-                }),
-                list.length>visible && e('button', { onClick: ()=>setVisible(v=>v+VISIBLE_STEP), className: "w-full py-4 text-sm font-bold text-[var(--primary)] hover:bg-[var(--active-bg)] transition-colors" }, "⬇ Tải thêm danh sách xuống")
-            )
-        ),
-
-        /* MINI PLAYER ĐA NĂNG */
-        currentSong && isInitialized && e('div', { className: "fixed bottom-0 left-0 right-0 w-full bg-[var(--card)]/95 border-t border-[var(--border)] backdrop-blur-2xl p-4 pb-[env(safe-area-inset-bottom)] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"},
-          
-          e('div', {className: "flex items-center justify-between gap-2 w-full max-w-2xl mx-auto mb-3"},
-              e('div', {className: "flex-1 min-w-0 pr-2"},
-                e('p', {className: "truncate font-extrabold text-[0.95rem] text-[var(--text)]"}, currentSong.title),
-                e('p', {className: "text-xs font-medium text-[var(--primary)] mt-0.5"}, playing ? "Đang phát..." : "Đã tạm dừng")
-              )
-          ),
-
-          e('div', {className: "flex items-center justify-between w-full max-w-2xl mx-auto px-2"},
-              e('button', {onClick: ()=>{haptic(); setShuffle(!shuffle)}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, Icons.shuffle(20)),
-              
-              e('div', {className: "flex items-center gap-4"},
-                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getPrevIndexLogic(currentIndex))}, Icons.back(22)), 
-                e('button', {className: "w-14 h-14 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg active:scale-95 transition-transform", onClick: playPauseUI}, playing?Icons.pause(28):Icons.play(28)), 
-                e('button', {className: "w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-90 transition-transform", onClick: ()=>playNativeSync(getNextIndexLogic(currentIndex))}, Icons.next(22))
+        e('header', { className: 'sticky top-0 z-40 px-4 pt-[max(18px,env(safe-area-inset-top))] pb-4 border-b border-[var(--border)] bg-[var(--card)]/95 backdrop-blur-xl' },
+          e('div', { className: 'max-w-3xl mx-auto' },
+            e('div', { className: 'flex items-start justify-between gap-3' },
+              e('div', { className: 'min-w-0' },
+                e('h1', { className: 'text-2xl font-black text-[var(--primary)] uppercase tracking-wide leading-tight' }, 'Xiemsansang'),
+                e('p', { className: 'text-sm text-[var(--muted)] mt-0.5 font-semibold' }, loading ? 'Đang đồng bộ danh sách...' : `${playlist.length} bài • Chọn bài nào phát bài đó`)
               ),
-              
-              e('button', {onClick: ()=>{haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all')}, className: `w-10 h-10 flex justify-center items-center rounded-full transition-colors ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}`}, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
+              e('button', { title: 'Đổi màu giao diện', onClick: () => { haptic(); setTheme(THEME_LIST[(THEME_LIST.indexOf(theme) + 1) % THEME_LIST.length]); }, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95' }, Icons.palette(21))
+            ),
+
+            e('div', { className: 'mt-4 grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center' },
+              e('select', { className: 'timer-dropdown w-full', onChange: handleTimerChange, 'aria-label': 'Hẹn giờ tắt nhạc' },
+                e('option', { value: '0' }, '🕒 Hẹn giờ: Tắt'),
+                [15, 30, 45, 60, 90, 120].map(m => e('option', { key: m, value: m }, `🕒 Tắt sau ${m} phút`))
+              ),
+              e('button', { title: keepScreen ? 'Đang giữ màn hình sáng' : 'Tiết kiệm pin: không giữ màn hình', onClick: () => { haptic(); setKeepScreen(v => !v); setToast(!keepScreen ? 'Đã bật giữ màn hình sáng' : 'Đã bật chế độ tiết kiệm pin'); }, className: `w-11 h-11 flex justify-center items-center rounded-full active:scale-95 ${keepScreen ? 'bg-[var(--primary)] text-[var(--primary-fg)]' : 'bg-[var(--active-bg)] text-[var(--primary)]'}` }, Icons.screen(20)),
+              e('button', { title: 'Đồng bộ lại danh sách', onClick: refetch, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95' }, Icons.refresh(20)),
+              e('button', { title: 'Xóa cache', onClick: clearCache, className: 'w-11 h-11 flex justify-center items-center rounded-full bg-[var(--danger-bg)] text-[var(--danger)] active:scale-95' }, Icons.trash(20))
+            ),
+
+            timerLeft && e('div', { className: 'mt-3 text-center text-xs font-black text-rose-500 animate-pulse' }, `Hệ thống sẽ dừng sau: ${formatTime(Math.ceil(timerLeft / 1000))}`),
+            !isInitialized && e('button', { className: 'mt-4 btn btn-primary w-full py-4 text-lg shadow-lg shadow-[var(--primary)]/25', onClick: initAudioEngine }, '▶ Khởi động & phát nhạc')
+          )
+        ),
+
+        e('main', { className: 'max-w-3xl mx-auto px-3 pt-3' },
+          e('div', { className: 'mb-3' },
+            e('input', { className: 'w-full bg-[var(--card)] border border-[var(--border)] rounded-2xl py-3.5 px-4 focus:outline-none focus:ring-2 ring-[var(--primary)]/40 shadow-sm', placeholder: 'Tìm tên bài hát hoặc nghệ sĩ...', value: filter, onChange: ev => { setFilter(ev.target.value); setVisible(INITIAL_VISIBLE); } })
           ),
 
-          e('div', {className: "max-w-2xl mx-auto mt-4 h-1.5 bg-[var(--border)] rounded-full overflow-hidden"},
-            e('div', {className: "h-full bg-[var(--primary)] rounded-full transition-all duration-[500ms] ease-linear", style:{width:`${progress.duration>0?(progress.current/progress.duration)*100:0}%`}})
+          loading ? e('div', { className: 'p-10 text-center text-[var(--primary)] font-black animate-pulse' }, 'Đang đồng bộ máy chủ...') :
+          e('section', { className: 'border border-[var(--border)] bg-[var(--card)]/85 rounded-3xl overflow-hidden shadow-sm' },
+            shown.length ? shown.map((s, index) => {
+              const actualIndex = playlist.findIndex(x => x.id === s.id);
+              const isCurrent = currentId === s.id;
+              return e('div', { key: s.id, className: `song-row ${isCurrent ? 'active' : ''}`, onClick: () => pickSong(s), role: 'button', tabIndex: 0 },
+                e('div', { className: `w-8 text-center text-xs font-mono flex-shrink-0 ${isCurrent ? 'song-idx' : 'text-[var(--muted)]'}` }, isCurrent ? (playing ? '▶' : 'Ⅱ') : (actualIndex + 1 || index + 1)),
+                e('div', { className: 'flex-1 min-w-0 pr-1' },
+                  e('div', { className: `truncate text-[0.95rem] leading-tight ${isCurrent ? 'text-[var(--primary)] font-black' : 'text-[var(--text)] font-bold'}` }, s.title),
+                  e('div', { className: 'truncate text-[11px] font-semibold text-[var(--muted)] mt-1' }, `${s.artist || 'Xiemsansang'}${isCurrent ? ' • Đang chọn' : ''}`)
+                ),
+                e('div', { className: 'flex items-center gap-0.5 flex-shrink-0' },
+                  e('button', { title: 'Chia sẻ', className: 'action-btn text-[var(--primary)]', onClick: ev => { ev.stopPropagation(); shareTrack(s); } }, Icons.share(18)),
+                  e('span', { className: 'mobile-hide-small text-xs font-mono font-black text-[var(--muted)] w-11 text-center' }, formatTime(s.duration)),
+                  e('button', { title: 'Tải bài hát', className: 'action-btn text-rose-500', onClick: ev => { ev.stopPropagation(); downloadTrack(s); } }, Icons.download(19))
+                )
+              );
+            }) : e('div', { className: 'p-8 text-center text-[var(--muted)] font-bold' }, 'Không tìm thấy bài phù hợp'),
+            list.length > visible && e('button', { onClick: () => { haptic(); setVisible(v => v + VISIBLE_STEP); }, className: 'w-full py-4 text-sm font-black text-[var(--primary)] bg-[var(--active-bg)] active:scale-[0.99]' }, `⬇ Tải thêm ${Math.min(VISIBLE_STEP, list.length - visible)} bài`)
+          )
+        ),
+
+        currentSong && isInitialized && e('footer', { className: 'mini-player fixed bottom-0 left-0 right-0 w-full bg-[var(--card)]/96 border-t border-[var(--border)] backdrop-blur-2xl px-4 pt-3 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]' },
+          e('div', { className: 'max-w-3xl mx-auto' },
+            e('div', { className: 'flex items-center justify-between gap-2 mb-2' },
+              e('div', { className: 'flex-1 min-w-0 pr-2' },
+                e('p', { className: 'truncate font-black text-[0.95rem] text-[var(--text)] leading-tight' }, currentSong.title),
+                e('p', { className: 'text-xs font-bold text-[var(--primary)] mt-0.5' }, playing ? 'Đang phát...' : 'Đã tạm dừng')
+              ),
+              e('div', { className: 'text-xs font-black text-[var(--muted)] whitespace-nowrap' }, `${formatTime(progress.current)} / ${formatTime(progress.duration || currentSong.duration)}`)
+            ),
+
+            e('input', { className: 'range', type: 'range', min: '0', max: '100', step: '0.1', value: String(progressPct), onChange: seekByRange, 'aria-label': 'Tua bài hát' }),
+
+            e('div', { className: 'flex items-center justify-between w-full px-1 pb-1' },
+              e('button', { title: shuffle ? 'Đang trộn bài' : 'Trộn bài', onClick: () => { haptic(); setShuffle(!shuffle); }, className: `w-11 h-11 flex justify-center items-center rounded-full ${shuffle ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}` }, Icons.shuffle(20)),
+              e('div', { className: 'flex items-center gap-4' },
+                e('button', { title: 'Bài trước', className: 'w-12 h-12 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95', onClick: () => { haptic(); playNativeSync(getPrevIndexLogic(currentIndexRef.current)); } }, Icons.back(23)),
+                e('button', { title: playing ? 'Tạm dừng' : 'Phát', className: 'w-16 h-16 flex justify-center items-center rounded-full bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg shadow-[var(--primary)]/25 active:scale-95', onClick: playPauseUI }, playing ? Icons.pause(30) : Icons.play(30)),
+                e('button', { title: 'Bài tiếp', className: 'w-12 h-12 flex justify-center items-center rounded-full bg-[var(--active-bg)] text-[var(--primary)] active:scale-95', onClick: () => { haptic(); playNativeSync(getNextIndexLogic(currentIndexRef.current)); } }, Icons.next(23))
+              ),
+              e('button', { title: repeat === 'one' ? 'Lặp 1 bài' : repeat === 'all' ? 'Lặp danh sách' : 'Không lặp', onClick: () => { haptic(); setRepeat(r => r === 'all' ? 'one' : r === 'one' ? 'off' : 'all'); }, className: `w-11 h-11 flex justify-center items-center rounded-full ${repeat !== 'off' ? 'text-[var(--primary)] bg-[var(--active-bg)]' : 'text-[var(--muted)]'}` }, repeat === 'one' ? Icons.repeatOne(20) : Icons.repeat(20))
+            )
           )
         )
       );
