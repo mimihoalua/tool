@@ -195,12 +195,14 @@
             body.preview-ticket .a4-portrait { zoom: 1.05; }
         }
 
+        /* [SURGICAL PATCH] Sửa lỗi Print Spooler bị ẩn các trang dưới do overflow: hidden của UI */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
-            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* Tháo chốt overflow và height để trình duyệt tự do quét trang */
+            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; height: auto !important; overflow: visible !important; display: block !important; }
             #qa-panel, #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none !important; } 
-            #workspace { padding: 0 !important; gap: 0; background: none; }
-            .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; zoom: 1 !important; }
+            #workspace { padding: 0 !important; gap: 0; background: none; height: auto !important; overflow: visible !important; display: block !important; }
+            .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; zoom: 1 !important; display: grid !important; }
             .qr-box { outline: none !important; box-shadow: none !important; }
         }
     </style>
@@ -351,8 +353,7 @@
     </aside>
 
     <main id="workspace">
-        <!-- Render 2x4 Grid Here -->
-    </main>
+        </main>
 
     <script>
     /* =========================================================
@@ -420,7 +421,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: '23/24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 bridePhone: '', groomPhone: '', ticketType: 'Vé xe nhà gái', venue: '', guestTime: '', qrNote: 'VE NAY CHI PHUC VU DAM CUOI',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
-                total: 8, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 8, previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
+                total: 40, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 8, previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
                 fonts: {}
             };
 
@@ -825,7 +826,6 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 });
             };
 
-            // [PATCH] Update scaling ratio logic to fit new bigger size smoothly
             const fitNames = () => {
                 const tickets = document.querySelectorAll('.ticket-trim');
                 tickets.forEach(ticket => {
@@ -880,7 +880,6 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     pageDiv.className = 'a4-portrait';
                     let pageContent = '';
                     
-                    // [PATCH] Loop blocks of 8 tickets per page
                     for (let i = 0; i < 8; i++) {
                         if ((p * 8 + i) >= totalTickets) {
                             pageContent += `<div></div>`; 
