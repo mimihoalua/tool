@@ -18,231 +18,148 @@
         .bw-mode { --c-border: #000000; --c-title: #000000; --c-name: #000000; --c-decor-stroke: #000000; --c-text: #000000; }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #E5E7EB; color: #111; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        /* [PATCH] UI Tông vàng ấm chống mỏi mắt */
+        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
 
         /* =========================================================
-           [UI CONTROL PANEL] TRỰC QUAN & ĐẦY ĐỦ TÍNH NĂNG
+           [UI CONTROL PANEL] BỐ CỤC 3 CỘT RESPONSIVE CÔNG THÁI HỌC
            ========================================================= */
-        #qa-panel { width: 380px; background: #FFF; display: flex; flex-direction: column; z-index: 10; box-shadow: 2px 0 15px rgba(0,0,0,0.1); border-right: 1px solid #D1D5DB; }
-        .p-head { padding: 15px 20px; background: #111827; color: #FFF; border-bottom: 4px solid var(--c-border); }
-        .p-head h1 { font-size: 13pt; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        .p-head p { font-size: 8pt; color: #9CA3AF; margin-top: 2px; }
+        #qa-panel { width: 760px; background: #FFFAF0; display: flex; flex-direction: column; z-index: 10; box-shadow: 4px 0 25px rgba(0,0,0,0.05); border-right: 1px solid #E7E5E4; }
+        .p-head { padding: 15px 25px; background: #292524; color: #FFFBEB; border-bottom: 4px solid var(--c-border); }
+        .p-head h1 { font-size: 14pt; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .p-head p { font-size: 8.5pt; color: #D6D3D1; margin-top: 3px; }
 
-        .p-body { padding: 15px 20px; overflow-y: auto; flex: 1; }
+        /* [PATCH] Auto flow 2 column cho Panel -> Kết hợp Workspace thành 3 Cột */
+        .p-body { padding: 20px 25px; overflow-y: auto; flex: 1; column-count: 2; column-gap: 30px; }
+        .p-body > div, .p-body > .section-title { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
         
-        .section-title { font-size: 8.5pt; font-weight: 800; color: #4B5563; border-bottom: 2px solid #E5E7EB; padding-bottom: 4px; margin-top: 15px; margin-bottom: 10px; text-transform: uppercase; }
-        .section-title:first-child { margin-top: 0; }
+        .section-title { font-size: 9pt; font-weight: 800; color: #57534E; border-bottom: 2px solid #E7E5E4; padding-bottom: 5px; margin-top: 0; text-transform: uppercase; }
 
-        .fg { margin-bottom: 10px; }
-        .fg label { display: block; font-size: 7pt; font-weight: 700; margin-bottom: 3px; color: #6B7280; text-transform: uppercase; }
-        .fc { width: 100%; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: 4px; font-family: inherit; font-size: 8.5pt; background: #F9FAFB; transition: 0.2s; }
-        .fc:focus { outline: none; border-color: var(--c-border); background: #FFF; }
-        select.fc { cursor: pointer; font-weight: 600; color: #111; }
-        .fr { display: flex; gap: 8px; } .fr .fg { flex: 1; }
+        .fg label { display: block; font-size: 7.5pt; font-weight: 700; margin-bottom: 4px; color: #78716C; text-transform: uppercase; }
+        .fc { width: 100%; padding: 8px 10px; border: 1px solid #D6D3D1; border-radius: 6px; font-family: inherit; font-size: 9pt; background: #FFF; transition: 0.2s; color: #292524; }
+        .fc:focus { outline: none; border-color: var(--c-border); box-shadow: 0 0 0 2px rgba(138,0,138,0.1); }
+        select.fc { cursor: pointer; font-weight: 600; }
+        .fr { display: flex; gap: 10px; } .fr .fg { flex: 1; }
         
         optgroup { font-weight: bold; color: var(--c-border); }
 
-        .btn-sm { padding: 6px 10px; font-size: 7.5pt; font-weight: bold; cursor: pointer; border: 1px solid #D1D5DB; background: #FFF; border-radius: 4px; transition: 0.2s; text-align: center; }
-        .btn-sm:hover { background: #E5E7EB; }
+        .btn-sm { padding: 8px 12px; font-size: 8pt; font-weight: bold; cursor: pointer; border: 1px solid #D6D3D1; background: #FFF; border-radius: 6px; transition: 0.2s; text-align: center; }
+        .btn-sm:hover { background: #F5F5F4; }
         
-        .file-up { position: relative; border: 1px dashed var(--c-border); padding: 6px; text-align: center; border-radius: 4px; background: #FAFAFA; cursor: pointer; overflow: hidden; }
+        .file-up { position: relative; border: 1px dashed var(--c-border); padding: 8px; text-align: center; border-radius: 6px; background: #FAFAFA; cursor: pointer; overflow: hidden; }
         .file-up input { position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer; }
-        .file-up span { font-size: 7.5pt; font-weight: bold; color: var(--c-border); pointer-events: none; }
+        .file-up span { font-size: 8pt; font-weight: bold; color: var(--c-border); pointer-events: none; }
 
-        .p-foot { padding: 15px 20px; background: #FAFAFA; border-top: 1px solid #E5E7EB; }
-        .btn-print { width: 100%; padding: 12px; background: var(--c-border); color: #FFF; border: none; border-radius: 4px; font-weight: 900; font-size: 11pt; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(138,0,138,0.3); }
-        .btn-print:hover { background: #600060; transform: translateY(-1px); }
+        .p-foot { padding: 15px 25px; background: #FFFBEB; border-top: 1px solid #E7E5E4; column-span: all; }
+        .btn-print { width: 100%; padding: 14px; background: var(--c-border); color: #FFF; border: none; border-radius: 6px; font-weight: 900; font-size: 12pt; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(138,0,138,0.25); }
+        .btn-print:hover { background: #600060; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(138,0,138,0.3); }
 
         /* =========================================================
-           [PRINT STAGE] MULTI-PAGE RENDERER (A4 3x7)
+           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x4)
            ========================================================= */
-        #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #D1D5DB; }
+        #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px; background: #E7E5E4; }
         
+        /* [PATCH] Sắp xếp 2 cột 4 hàng */
         .a4-portrait { 
-            width: var(--paper-w); height: var(--paper-h); background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(7, 1fr); 
-            padding: 8mm 6mm; gap: 2mm; flex-shrink: 0;
+            width: var(--paper-w); height: var(--paper-h); max-height: var(--paper-h); overflow: hidden; background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); 
+            padding: 10mm 8mm; gap: 4mm; flex-shrink: 0;
             transform: translate(var(--offset-x), var(--offset-y));
         }
 
-        .ticket-trim { width: 100%; height: 100%; border: 1.5pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 2.5mm 6.5mm; display: flex; flex-direction: column; justify-content: space-between; }
+        /* [PATCH] Scale nội dung vé lên ~1.45x để fit ô 2x4 */
+        .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 4.5mm 10mm 3.5mm 10mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         
         /* GÓC HOA VĂN */
-        .corner-ornament { position: absolute; width: 5mm; height: 5mm; display: flex; align-items: center; justify-content: center; }
+        .corner-ornament { position: absolute; width: 8mm; height: 8mm; display: flex; align-items: center; justify-content: center; }
         .corner-ornament svg { width: 100%; height: 100%; }
-        .co-tl { top: 0.5mm; left: 0.5mm; } .co-tr { top: 0.5mm; right: 0.5mm; transform: scaleX(-1); }
-        .co-bl { bottom: 0.5mm; left: 0.5mm; transform: scaleY(-1); } .co-br { bottom: 0.5mm; right: 0.5mm; transform: scale(-1, -1); }
+        .co-tl { top: 1mm; left: 1mm; } .co-tr { top: 1mm; right: 1mm; transform: scaleX(-1); }
+        .co-bl { bottom: 1mm; left: 1mm; transform: scaleY(-1); } .co-br { bottom: 1mm; right: 1mm; transform: scale(-1, -1); }
 
-        /* SỐ NHẢY GÓC TRÊN PHẢI (Không đè Title) */
-        .serial-badge { position: absolute; top: 1mm; right: 6.5mm; font-family: Arial, sans-serif; font-size: 5pt; font-weight: bold; color: var(--c-border); z-index: 5; }
+        /* SỐ NHẢY GÓC TRÊN PHẢI */
+        .serial-badge { position: absolute; top: 2mm; right: 9mm; font-family: Arial, sans-serif; font-size: 7pt; font-weight: bold; color: var(--c-border); z-index: 5; }
 
         /* NGÀY THÁNG LẬT DỌC */
-        .t-date-side { position: absolute; top: 0; bottom: 0; width: 6.5mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 4.5pt; font-weight: bold; color: var(--c-border); }
+        .t-date-side { position: absolute; top: 0; bottom: 0; width: 10mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 6.5pt; font-weight: bold; color: var(--c-border); }
         .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); } .date-right { right: 0; writing-mode: vertical-rl; }
 
         /* TIÊU ĐỀ */
-        .t-title { font-family: var(--f-title); font-size: 11pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0.5mm; line-height: 1; position: relative; }
+        .t-title { font-family: var(--f-title); font-size: 16pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 3px; transform: scaleX(1.1); margin-top: 1mm; margin-bottom: 1mm; line-height: 1; position: relative; }
 
         /* TÊN & LOGO GIỮA */
-        .t-center-block { display: flex; justify-content: space-between; align-items: center; width: 100%; flex: 1; margin: 1mm 0; }
-        .names-col { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-width: 0; color: var(--c-name); font-family: var(--f-name); line-height: 1.15; padding: 1mm 0; overflow: visible; }
-        .n-line1 { font-size: 11pt; white-space: nowrap; margin-bottom: 2px; } 
-        .n-line2 { font-size: 16pt; font-weight: bold; white-space: nowrap; } 
+        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 15mm; margin: 1.5mm auto; padding-left: 12mm; padding-right: 15mm; gap: 1mm; }
+        .t-bride, .t-groom { flex: 0 0 35mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1.1; color: var(--c-name); font-family: var(--f-name); }
+        .t-bride .n-line1, .t-groom .n-line1 { font-size: 12pt !important; white-space: nowrap; margin-bottom: 2px; } 
+        .t-bride .n-line2, .t-groom .n-line2 { font-size: 18pt !important; font-weight: bold; white-space: nowrap; } 
         
-        .t-decor { width: 10mm; height: 10mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
+        .t-decor { width: 12mm; height: 12mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
         
-        /* FIX: CHỮ LỒNG (MONOGRAM) AN TOÀN */
-        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 13pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 18pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
 
         /* BIỂN SỐ */
-        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 3px; font-family: var(--f-plate); font-size: 8pt; font-weight: 900; color: var(--c-text); margin-bottom: 1mm; }
-        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; } 
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 11.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 24mm; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 11.5pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
-        /* FOOTER ROW (CHÂN CHỮ TRÁI - MÃ VẠCH PHẢI) */
-        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; gap: 2mm;}
-        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 7.5pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .barcode-box { width: 15mm; height: 3.5mm; flex-shrink: 0; color: var(--c-text); }
+        /* FOOTER ROW */
+        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 24mm; min-height: 4.5mm; }
+        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 11pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+        /* [PATCH] MÃ VẠCH (BARCODE) LAYOUT SCALED UP */
+        .barcode-box { position: absolute; right: 5mm; bottom: 2.5mm; width: 25mm; height: 6mm; flex-shrink: 0; color: var(--c-text); }
         .barcode-box svg { width: 100%; height: 100%; preserveAspectRatio: none; }
 
-
-
         /* =========================================================
-           [MOBILE SURGICAL PATCH] DRAWER PANEL + SMART TOAST
-           Chỉ vá lớp điều khiển mobile, không động vào layout in A4.
+           [MOBILE PATCH] GIỮ NGUYÊN KIẾN TRÚC DRAWER
            ========================================================= */
-        #mobile-panel-toggle,
-        #mobile-panel-overlay,
-        #smart-toast { display: none; }
+        #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
 
-        #smart-toast {
-            position: fixed;
-            left: 50%;
-            bottom: 18px;
-            transform: translate(-50%, 18px);
-            z-index: 9999;
-            min-width: min(92vw, 320px);
-            max-width: 92vw;
-            padding: 11px 14px;
-            border-radius: 999px;
-            background: rgba(17, 24, 39, 0.96);
-            color: #fff;
-            font-size: 9pt;
-            font-weight: 700;
-            text-align: center;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.28);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .22s ease, transform .22s ease;
+        @media screen and (max-width: 1100px) {
+            #qa-panel { width: 400px; }
+            .p-body { column-count: 1; }
         }
-        #smart-toast.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
-        #smart-toast.ok { background: rgba(17, 24, 39, 0.96); }
-        #smart-toast.warn { background: rgba(146, 64, 14, 0.96); }
-        #smart-toast.err { background: rgba(153, 27, 27, 0.96); }
 
         @media screen and (max-width: 900px) {
-            body {
-                display: block;
-                height: 100dvh;
-                min-height: 100vh;
-                overflow: hidden;
-                -webkit-tap-highlight-color: transparent;
-            }
-
+            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
             #qa-panel {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                width: min(88vw, 380px);
-                max-width: 380px;
-                height: 100dvh;
-                z-index: 1001;
-                transform: translateX(-103%);
-                transition: transform .26s ease;
-                border-right: 1px solid #D1D5DB;
-                box-shadow: 12px 0 30px rgba(0,0,0,0.22);
+                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
+                z-index: 1001; transform: translateX(-103%); transition: transform .26s ease;
             }
             body.panel-open #qa-panel { transform: translateX(0); }
-
             #mobile-panel-overlay {
-                display: block;
-                position: fixed;
-                inset: 0;
-                z-index: 1000;
-                background: rgba(17, 24, 39, .42);
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity .24s ease;
+                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .42);
+                opacity: 0; pointer-events: none; transition: opacity .24s ease;
             }
-            body.panel-open #mobile-panel-overlay {
-                opacity: 1;
-                pointer-events: auto;
-            }
-
+            body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
             #mobile-panel-toggle {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                position: fixed;
-                top: max(12px, env(safe-area-inset-top));
-                left: max(12px, env(safe-area-inset-left));
-                z-index: 1002;
-                width: 46px;
-                height: 46px;
-                border: 0;
-                border-radius: 999px;
-                background: var(--c-border);
-                color: #fff;
-                font-size: 18px;
-                font-weight: 900;
-                box-shadow: 0 10px 24px rgba(0,0,0,.22);
-                cursor: pointer;
+                display: inline-flex; align-items: center; justify-content: center; position: fixed;
+                top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
+                z-index: 1002; width: 46px; height: 46px; border: 0; border-radius: 999px;
+                background: var(--c-border); color: #fff; font-size: 18px; font-weight: 900;
+                box-shadow: 0 10px 24px rgba(0,0,0,.22); cursor: pointer;
             }
-            body.panel-open #mobile-panel-toggle { left: calc(min(88vw, 380px) + 10px); }
-
-            .p-head { padding: 14px 18px 12px; }
-            .p-body { padding: 12px 16px 18px; }
-            .p-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
-            .fc, .btn-sm { min-height: 36px; font-size: 10pt; }
-            .fg label { font-size: 7.8pt; }
-            .section-title { font-size: 8pt; margin-top: 14px; }
-
-            #workspace {
-                height: 100dvh;
-                overflow: auto;
-                padding: 70px 10px 24px;
-                gap: 12px;
-                align-items: center;
-                -webkit-overflow-scrolling: touch;
-            }
-            .a4-portrait {
-                zoom: .52;
-            }
+            body.panel-open #mobile-panel-toggle { left: calc(min(88vw, 400px) + 10px); }
+            #workspace { height: 100dvh; overflow: auto; padding: 70px 10px 24px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
+            .a4-portrait { zoom: .52; }
+            .p-body { column-count: 1; }
         }
 
         @media screen and (max-width: 520px) {
-            body.panel-open #mobile-panel-toggle {
-                left: auto;
-                right: max(10px, env(safe-area-inset-right));
-                background: #111827;
-            }
+            body.panel-open #mobile-panel-toggle { left: auto; right: max(10px, env(safe-area-inset-right)); background: #292524; }
             #workspace { padding-left: 6px; padding-right: 6px; }
             .a4-portrait { zoom: .43; }
-            .fr { gap: 6px; }
         }
 
+        /* [SURGICAL PATCH] Sửa lỗi Print Spooler bị ẩn các trang dưới do overflow: hidden của UI */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
-            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* Tháo chốt overflow và height để trình duyệt tự do quét trang */
+            body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; height: auto !important; overflow: visible !important; display: block !important; }
             #qa-panel, #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none !important; } 
-            #workspace { padding: 0 !important; gap: 0; background: none; }
-            .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; }
+            #workspace { padding: 0 !important; gap: 0; background: none; height: auto !important; overflow: visible !important; display: block !important; }
+            .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; zoom: 1 !important; display: grid !important; }
         }
     </style>
 </head>
@@ -252,11 +169,10 @@
     <div id="mobile-panel-overlay" aria-hidden="true"></div>
     <div id="smart-toast" role="status" aria-live="polite"></div>
 
-
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Print Config</h1>
-            <p>10 Premium Logos & Barcode Fix</p>
+            <p>Layout 2x4 (8 vé/A4) • 10 Premium Logos & Barcode Fix</p>
         </div>
         
         <div class="p-body">
@@ -277,7 +193,7 @@
                     </select>
                 </div>
                 <div class="fg">
-                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#4B5563; color:#FFF; border:none; padding:7px;">🎲 Đổi Viền Góc</button>
+                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none; padding:9px;">🎲 Đổi Viền Góc</button>
                 </div>
             </div>
             
@@ -309,7 +225,7 @@
                     <span id="logo-status">📁 Tải Ảnh Logo (.PNG/.SVG)</span>
                     <input type="file" id="logo-uploader" accept="image/png, image/svg+xml">
                 </div>
-                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7pt; color:red; display:none;">Xóa Ảnh</a></div>
+                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7.5pt; color:red; display:none;">Xóa Ảnh</a></div>
             </div>
 
             <div class="section-title">Thông Tin Tên & Vé</div>
@@ -321,7 +237,7 @@
 
             <div class="section-title">Sản Xuất: Số Nhảy & Mã Vạch</div>
             <div class="fr">
-                <div class="fg"><label>Tổng Vé</label><input type="number" id="ui-total" class="fc state-bind" value="21" min="21" step="21"></div>
+                <div class="fg"><label>Tổng Vé (Bội số 8)</label><input type="number" id="ui-total" class="fc state-bind" value="8" min="8" step="8"></div>
                 <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
             </div>
             <div class="fg">
@@ -338,14 +254,14 @@
                 <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
             </div>
             <div class="fr">
-                <button id="btn-export-json" class="btn-sm" style="background:#1F2937; color:#FFF; border:none; padding:7px; flex:1;">📥 Xuất Data</button>
-                <div class="file-up" style="flex:1; padding:6px; background:#1F2937; border:none;">
+                <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; padding:9px; flex:1;">📥 Xuất Data</button>
+                <div class="file-up" style="flex:1; padding:8px; background:#44403C; border:none;">
                     <span style="color:#FFF;">📤 Nhập Data</span>
                     <input type="file" id="btn-import-json" accept=".json">
                 </div>
             </div>
             <div class="fg" style="margin-top: 5px;">
-                <button id="btn-reset" class="btn-sm" style="width:100%; background:#EF4444; color:#FFF; border:none; padding:7px;">🚨 Khôi Phục Gốc (Xóa Lỗi LocalStorage)</button>
+                <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none; padding:9px;">🚨 Khôi Phục Gốc</button>
             </div>
         </div>
 
@@ -360,6 +276,60 @@
     <script src="font_data.js"></script>
 
     <script>
+    /* =========================================================
+       [QR ISO LIBRARY - OFFLINE EMBEDDED]
+       Giữ nguyên thư viện theo yêu cầu Zero Inference, dù hiện tại file này dùng Code39.
+       ========================================================= */
+    (function(){
+        var modules = {
+"./QRMode": function(module, exports, require) {
+module.exports = { MODE_NUMBER : 1 << 0, MODE_ALPHA_NUM : 1 << 1, MODE_8BIT_BYTE : 1 << 2, MODE_KANJI : 1 << 3 };
+},
+"./QRErrorCorrectLevel": function(module, exports, require) {
+module.exports = { L : 1, M : 0, Q : 3, H : 2 };
+},
+"./QRMaskPattern": function(module, exports, require) {
+module.exports = { PATTERN000 : 0, PATTERN001 : 1, PATTERN010 : 2, PATTERN011 : 3, PATTERN100 : 4, PATTERN101 : 5, PATTERN110 : 6, PATTERN111 : 7 };
+},
+"./QRMath": function(module, exports, require) {
+var QRMath = { glog : function(n) { if (n < 1) throw new Error("glog(" + n + ")"); return QRMath.LOG_TABLE[n]; }, gexp : function(n) { while (n < 0) n += 255; while (n >= 256) n -= 255; return QRMath.EXP_TABLE[n]; }, EXP_TABLE : new Array(256), LOG_TABLE : new Array(256) }; for (var i = 0; i < 8; i++) { QRMath.EXP_TABLE[i] = 1 << i; } for (var i = 8; i < 256; i++) { QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4] ^ QRMath.EXP_TABLE[i - 5] ^ QRMath.EXP_TABLE[i - 6] ^ QRMath.EXP_TABLE[i - 8]; } for (var i = 0; i < 255; i++) { QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i; } module.exports = QRMath;
+},
+"./QRPolynomial": function(module, exports, require) {
+var QRMath = require('./QRMath'); function QRPolynomial(num, shift) { if (num.length === undefined) throw new Error(num.length + "/" + shift); var offset = 0; while (offset < num.length && num[offset] === 0) { offset++; } this.num = new Array(num.length - offset + shift); for (var i = 0; i < num.length - offset; i++) { this.num[i] = num[i + offset]; } } QRPolynomial.prototype = { get : function(index) { return this.num[index]; }, getLength : function() { return this.num.length; }, multiply : function(e) { var num = new Array(this.getLength() + e.getLength() - 1); for (var i = 0; i < this.getLength(); i++) { for (var j = 0; j < e.getLength(); j++) { num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) ); } } return new QRPolynomial(num, 0); }, mod : function(e) { if (this.getLength() - e.getLength() < 0) { return this; } var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) ); var num = new Array(this.getLength() ); for (var i = 0; i < this.getLength(); i++) { num[i] = this.get(i); } for (var x = 0; x < e.getLength(); x++) { num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio); } return new QRPolynomial(num, 0).mod(e); } }; module.exports = QRPolynomial;
+},
+"./QRRSBlock": function(module, exports, require) {
+var QRErrorCorrectLevel = require('./QRErrorCorrectLevel'); function QRRSBlock(totalCount, dataCount) { this.totalCount = totalCount; this.dataCount  = dataCount; } QRRSBlock.RS_BLOCK_TABLE = [ [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16] ]; QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) { var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel); if (rsBlock === undefined) throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel); var length = rsBlock.length / 3; var list = []; for (var i = 0; i < length; i++) { var count = rsBlock[i * 3 + 0]; var totalCount = rsBlock[i * 3 + 1]; var dataCount  = rsBlock[i * 3 + 2]; for (var j = 0; j < count; j++) { list.push(new QRRSBlock(totalCount, dataCount) ); } } return list; }; QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) { switch(errorCorrectLevel) { case QRErrorCorrectLevel.L : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0]; case QRErrorCorrectLevel.M : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1]; case QRErrorCorrectLevel.Q : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2]; case QRErrorCorrectLevel.H : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]; default : return undefined; } }; module.exports = QRRSBlock;
+},
+"./QRBitBuffer": function(module, exports, require) {
+function QRBitBuffer() { this.buffer = []; this.length = 0; } QRBitBuffer.prototype = { get : function(index) { var bufIndex = Math.floor(index / 8); return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1; }, put : function(num, length) { for (var i = 0; i < length; i++) { this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1); } }, getLengthInBits : function() { return this.length; }, putBit : function(bit) { var bufIndex = Math.floor(this.length / 8); if (this.buffer.length <= bufIndex) { this.buffer.push(0); } if (bit) { this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) ); } this.length++; } }; module.exports = QRBitBuffer;
+},
+"./QR8bitByte": function(module, exports, require) {
+var QRMode = require('./QRMode'); function QR8bitByte(data) { this.mode = QRMode.MODE_8BIT_BYTE; this.data = data; } QR8bitByte.prototype = { getLength : function() { return this.data.length; }, write : function(buffer) { for (var i = 0; i < this.data.length; i++) { buffer.put(this.data.charCodeAt(i), 8); } } }; module.exports = QR8bitByte;
+},
+"./QRUtil": function(module, exports, require) {
+var QRMode = require('./QRMode'); var QRPolynomial = require('./QRPolynomial'); var QRMath = require('./QRMath'); var QRMaskPattern = require('./QRMaskPattern'); var QRUtil = { PATTERN_POSITION_TABLE : [ [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90], [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130], [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170] ], G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0), G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0), G15_MASK : (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1), getBCHTypeInfo : function(data) { var d = data << 10; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) { d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) ); } return ( (data << 10) | d) ^ QRUtil.G15_MASK; }, getBCHTypeNumber : function(data) { var d = data << 12; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) { d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) ); } return (data << 12) | d; }, getBCHDigit : function(data) { var digit = 0; while (data !== 0) { digit++; data >>>= 1; } return digit; }, getPatternPosition : function(typeNumber) { return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1]; }, getMask : function(maskPattern, i, j) { switch (maskPattern) { case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0; case QRMaskPattern.PATTERN001 : return i % 2 === 0; case QRMaskPattern.PATTERN010 : return j % 3 === 0; case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0; case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0; case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0; case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0; case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0; default : throw new Error("bad maskPattern:" + maskPattern); } }, getErrorCorrectPolynomial : function(errorCorrectLength) { var a = new QRPolynomial([1], 0); for (var i = 0; i < errorCorrectLength; i++) { a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) ); } return a; }, getLengthInBits : function(mode, type) { if (1 <= type && type < 10) { switch(mode) { case QRMode.MODE_NUMBER : return 10; case QRMode.MODE_ALPHA_NUM : return 9; case QRMode.MODE_8BIT_BYTE : return 8; case QRMode.MODE_KANJI : return 8; default : throw new Error("mode:" + mode); } } else if (type < 27) { switch(mode) { case QRMode.MODE_NUMBER : return 12; case QRMode.MODE_ALPHA_NUM : return 11; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 10; default : throw new Error("mode:" + mode); } } else if (type < 41) { switch(mode) { case QRMode.MODE_NUMBER : return 14; case QRMode.MODE_ALPHA_NUM : return 13; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 12; default : throw new Error("mode:" + mode); } } else { throw new Error("type:" + type); } }, getLostPoint : function(qrCode) { var moduleCount = qrCode.getModuleCount(); var lostPoint = 0; var row = 0; var col = 0; for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount; col++) { var sameCount = 0; var dark = qrCode.isDark(row, col); for (var r = -1; r <= 1; r++) { if (row + r < 0 || moduleCount <= row + r) { continue; } for (var c = -1; c <= 1; c++) { if (col + c < 0 || moduleCount <= col + c) { continue; } if (r === 0 && c === 0) { continue; } if (dark === qrCode.isDark(row + r, col + c) ) { sameCount++; } } } if (sameCount > 5) { lostPoint += (3 + sameCount - 5); } } } for (row = 0; row < moduleCount - 1; row++) { for (col = 0; col < moduleCount - 1; col++) { var count = 0; if (qrCode.isDark(row, col ) ) count++; if (qrCode.isDark(row + 1, col ) ) count++; if (qrCode.isDark(row, col + 1) ) count++; if (qrCode.isDark(row + 1, col + 1) ) count++; if (count === 0 || count === 4) { lostPoint += 3; } } } for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount - 6; col++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row, col + 1) && qrCode.isDark(row, col + 2) && qrCode.isDark(row, col + 3) && qrCode.isDark(row, col + 4) && !qrCode.isDark(row, col + 5) && qrCode.isDark(row, col + 6) ) { lostPoint += 40; } } } for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount - 6; row++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row + 1, col) && qrCode.isDark(row + 2, col) && qrCode.isDark(row + 3, col) && qrCode.isDark(row + 4, col) && !qrCode.isDark(row + 5, col) && qrCode.isDark(row + 6, col) ) { lostPoint += 40; } } } var darkCount = 0; for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount; row++) { if (qrCode.isDark(row, col) ) { darkCount++; } } } var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5; lostPoint += ratio * 10; return lostPoint; } }; module.exports = QRUtil;
+},
+"./index": function(module, exports, require) {
+var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var QRPolynomial = require('./QRPolynomial'); var QRRSBlock = require('./QRRSBlock'); var QRBitBuffer = require('./QRBitBuffer'); function QRCode(typeNumber, errorCorrectLevel) { this.typeNumber = typeNumber; this.errorCorrectLevel = errorCorrectLevel; this.modules = null; this.moduleCount = 0; this.dataCache = null; this.dataList = []; } QRCode.prototype = { addData : function(data) { var newData = new QR8bitByte(data); this.dataList.push(newData); this.dataCache = null; }, isDark : function(row, col) { if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) { throw new Error(row + "," + col); } return this.modules[row][col]; }, getModuleCount : function() { return this.moduleCount; }, make : function() { if (this.typeNumber < 1 ){ var typeNumber = 1; for (typeNumber = 1; typeNumber < 40; typeNumber++) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel); var buffer = new QRBitBuffer(); var totalDataCount = 0; for (var i = 0; i < rsBlocks.length; i++) { totalDataCount += rsBlocks[i].dataCount; } for (var x = 0; x < this.dataList.length; x++) { var data = this.dataList[x]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } if (buffer.getLengthInBits() <= totalDataCount * 8) break; } this.typeNumber = typeNumber; } this.makeImpl(false, this.getBestMaskPattern() ); }, makeImpl : function(test, maskPattern) { this.moduleCount = this.typeNumber * 4 + 17; this.modules = new Array(this.moduleCount); for (var row = 0; row < this.moduleCount; row++) { this.modules[row] = new Array(this.moduleCount); for (var col = 0; col < this.moduleCount; col++) { this.modules[row][col] = null; } } this.setupPositionProbePattern(0, 0); this.setupPositionProbePattern(this.moduleCount - 7, 0); this.setupPositionProbePattern(0, this.moduleCount - 7); this.setupPositionAdjustPattern(); this.setupTimingPattern(); this.setupTypeInfo(test, maskPattern); if (this.typeNumber >= 7) { this.setupTypeNumber(test); } if (this.dataCache === null) { this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList); } this.mapData(this.dataCache, maskPattern); }, setupPositionProbePattern : function(row, col)  { for (var r = -1; r <= 7; r++) { if (row + r <= -1 || this.moduleCount <= row + r) continue; for (var c = -1; c <= 7; c++) { if (col + c <= -1 || this.moduleCount <= col + c) continue; if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || (0 <= c && c <= 6 && (r === 0 || r === 6) ) || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } }, getBestMaskPattern : function() { var minLostPoint = 0; var pattern = 0; for (var i = 0; i < 8; i++) { this.makeImpl(true, i); var lostPoint = QRUtil.getLostPoint(this); if (i === 0 || minLostPoint >  lostPoint) { minLostPoint = lostPoint; pattern = i; } } return pattern; }, setupTimingPattern : function() { for (var r = 8; r < this.moduleCount - 8; r++) { if (this.modules[r][6] !== null) { continue; } this.modules[r][6] = (r % 2 === 0); } for (var c = 8; c < this.moduleCount - 8; c++) { if (this.modules[6][c] !== null) { continue; } this.modules[6][c] = (c % 2 === 0); } }, setupPositionAdjustPattern : function() { var pos = QRUtil.getPatternPosition(this.typeNumber); for (var i = 0; i < pos.length; i++) { for (var j = 0; j < pos.length; j++) { var row = pos[i]; var col = pos[j]; if (this.modules[row][col] !== null) { continue; } for (var r = -2; r <= 2; r++) { for (var c = -2; c <= 2; c++) { if (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } } } }, setupTypeNumber : function(test) { var bits = QRUtil.getBCHTypeNumber(this.typeNumber); var mod; for (var i = 0; i < 18; i++) { mod = (!test && ( (bits >> i) & 1) === 1); this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod; } for (var x = 0; x < 18; x++) { mod = (!test && ( (bits >> x) & 1) === 1); this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod; } }, setupTypeInfo : function(test, maskPattern) { var data = (this.errorCorrectLevel << 3) | maskPattern; var bits = QRUtil.getBCHTypeInfo(data); var mod; for (var v = 0; v < 15; v++) { mod = (!test && ( (bits >> v) & 1) === 1); if (v < 6) { this.modules[v][8] = mod; } else if (v < 8) { this.modules[v + 1][8] = mod; } else { this.modules[this.moduleCount - 15 + v][8] = mod; } } for (var h = 0; h < 15; h++) { mod = (!test && ( (bits >> h) & 1) === 1); if (h < 8) { this.modules[8][this.moduleCount - h - 1] = mod; } else if (h < 9) { this.modules[8][15 - h - 1 + 1] = mod; } else { this.modules[8][15 - h - 1] = mod; } } this.modules[this.moduleCount - 8][8] = (!test); }, mapData : function(data, maskPattern) { var inc = -1; var row = this.moduleCount - 1; var bitIndex = 7; var byteIndex = 0; for (var col = this.moduleCount - 1; col > 0; col -= 2) { if (col === 6) col--; while (true) { for (var c = 0; c < 2; c++) { if (this.modules[row][col - c] === null) { var dark = false; if (byteIndex < data.length) { dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1); } var mask = QRUtil.getMask(maskPattern, row, col - c); if (mask) { dark = !dark; } this.modules[row][col - c] = dark; bitIndex--; if (bitIndex === -1) { byteIndex++; bitIndex = 7; } } } row += inc; if (row < 0 || this.moduleCount <= row) { row -= inc; inc = -inc; break; } } } } }; QRCode.PAD0 = 0xEC; QRCode.PAD1 = 0x11; QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel); var buffer = new QRBitBuffer(); for (var i = 0; i < dataList.length; i++) { var data = dataList[i]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } var totalDataCount = 0; for (var x = 0; x < rsBlocks.length; x++) { totalDataCount += rsBlocks[x].dataCount; } if (buffer.getLengthInBits() > totalDataCount * 8) { throw new Error("code length overflow. (" + buffer.getLengthInBits() + ">" +  totalDataCount * 8 + ")"); } if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) { buffer.put(0, 4); } while (buffer.getLengthInBits() % 8 !== 0) { buffer.putBit(false); } while (true) { if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD0, 8); if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD1, 8); } return QRCode.createBytes(buffer, rsBlocks); }; QRCode.createBytes = function(buffer, rsBlocks) { var offset = 0; var maxDcCount = 0; var maxEcCount = 0; var dcdata = new Array(rsBlocks.length); var ecdata = new Array(rsBlocks.length); for (var r = 0; r < rsBlocks.length; r++) { var dcCount = rsBlocks[r].dataCount; var ecCount = rsBlocks[r].totalCount - dcCount; maxDcCount = Math.max(maxDcCount, dcCount); maxEcCount = Math.max(maxEcCount, ecCount); dcdata[r] = new Array(dcCount); for (var i = 0; i < dcdata[r].length; i++) { dcdata[r][i] = 0xff & buffer.buffer[i + offset]; } offset += dcCount; var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount); var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1); var modPoly = rawPoly.mod(rsPoly); ecdata[r] = new Array(rsPoly.getLength() - 1); for (var x = 0; x < ecdata[r].length; x++) { var modIndex = x + modPoly.getLength() - ecdata[r].length; ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0; } } var totalCodeCount = 0; for (var y = 0; y < rsBlocks.length; y++) { totalCodeCount += rsBlocks[y].totalCount; } var data = new Array(totalCodeCount); var index = 0; for (var z = 0; z < maxDcCount; z++) { for (var s = 0; s < rsBlocks.length; s++) { if (z < dcdata[s].length) { data[index++] = dcdata[s][z]; } } } for (var xx = 0; xx < maxEcCount; xx++) { for (var t = 0; t < rsBlocks.length; t++) { if (xx < ecdata[t].length) { data[index++] = ecdata[t][xx]; } } } return data; }; module.exports = QRCode;
+}
+        };
+        var cache = {};
+        function require(id){
+            if(cache[id]) return cache[id].exports;
+            if(!modules[id]) throw new Error('QR module not found: ' + id);
+            var module = {exports:{}};
+            cache[id] = module;
+            modules[id](module, module.exports, require);
+            return module.exports;
+        }
+        window.QRCodeISO = {
+            QRCode: require('./index'),
+            QRErrorCorrectLevel: require('./QRErrorCorrectLevel')
+        };
+    })();
+    </script>
+
+    <script>
         const UltimateEngine = (() => {
             const canvas = document.getElementById('workspace');
             const binds = document.querySelectorAll('.state-bind');
@@ -368,7 +338,7 @@
             let state = {
                 b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: 'Ngày 23 & 24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
-                total: 21, startnum: 1, barcode: 'off', offsetX: 0, offsetY: 0,
+                total: 8, startnum: 1, barcode: 'off', offsetX: 0, offsetY: 0,
                 fonts: {}
             };
 
@@ -379,7 +349,6 @@
                 `<polygon points="10,10 80,10 10,80" fill="currentColor"/><polygon points="90,10 100,10 100,20 20,100 10,100 10,90" fill="currentColor"/>`
             ];
 
-            // 10 LOGO VECTOR CAO CẤP
             const premiumLogos = {
                 'hy_classic': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><path d="M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3" stroke-dasharray="2 4"/><text x="50" y="73" font-family="Arial" font-size="68" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
                 'hy_circle': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--c-name)" stroke-width="4" stroke-dasharray="8 4"/><circle cx="50" cy="50" r="38" fill="none" stroke="var(--c-decor-stroke)" stroke-width="1.5"/><text x="50" y="70" font-family="Arial" font-size="55" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
@@ -480,16 +449,16 @@
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
                     if(!colB) return;
                     const getRatio = (col, l1, l2) => {
-                        let ratio = 1.0; l1.style.fontSize = `11pt`; l2.style.fontSize = `16pt`;
+                        let ratio = 1.0; l1.style.fontSize = `12pt`; l2.style.fontSize = `18pt`;
                         const maxW = col.clientWidth * 1.05; let loops = 0;
                         while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
-                            ratio -= 0.05; l1.style.fontSize = `${11 * ratio}pt`; l2.style.fontSize = `${16 * ratio}pt`; loops++;
+                            ratio -= 0.05; l1.style.fontSize = `${12 * ratio}pt`; l2.style.fontSize = `${18 * ratio}pt`; loops++;
                         }
                         return ratio;
                     };
                     const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                    b1.style.fontSize = `${11 * finalRatio}pt`; b2.style.fontSize = `${16 * finalRatio}pt`;
-                    g1.style.fontSize = `${11 * finalRatio}pt`; g2.style.fontSize = `${16 * finalRatio}pt`;
+                    b1.style.fontSize = `${12 * finalRatio}pt`; b2.style.fontSize = `${18 * finalRatio}pt`;
+                    g1.style.fontSize = `${12 * finalRatio}pt`; g2.style.fontSize = `${18 * finalRatio}pt`;
                 });
             };
 
@@ -498,8 +467,8 @@
                 else document.body.classList.remove('bw-mode');
 
                 canvas.innerHTML = '';
-                const totalTickets = parseInt(state.total) || 21;
-                const pages = Math.ceil(totalTickets / 21);
+                const totalTickets = parseInt(state.total) || 8;
+                const pages = Math.ceil(totalTickets / 8);
                 let currentTicketNum = parseInt(state.startnum) || 1;
 
                 // XỬ LÝ LOGO & CHỮ LỒNG
@@ -512,7 +481,7 @@
                     if(state.logoPreset.startsWith('wreath') || state.logoPreset.startsWith('frame')) {
                         const m1 = state.b2.charAt(0).toUpperCase();
                         const m2 = state.g2.charAt(0).toUpperCase();
-                        // Chữ lồng được fix font-size: 13pt để 100% không bao giờ đâm ra viền
+                        // Chữ lồng được fix font-size: 18pt để 100% không bao giờ đâm ra viền
                         centerHtml += `<div class="t-monogram-text">${m1}<span style="font-size: 0.7em; margin: 0 1px; color: var(--c-decor-stroke);">&</span>${m2}</div>`;
                     }
                 }
@@ -524,8 +493,8 @@
                     pageDiv.className = 'a4-portrait';
                     let pageContent = '';
                     
-                    for (let i = 0; i < 21; i++) {
-                        if ((p * 21 + i) >= totalTickets) {
+                    for (let i = 0; i < 8; i++) {
+                        if ((p * 8 + i) >= totalTickets) {
                             pageContent += `<div></div>`; 
                             continue;
                         }
@@ -547,9 +516,9 @@
                             <div class="t-title">VÉ GỬI XE</div>
                             
                             <div class="t-center-block">
-                                <div class="names-col t-bride"><span class="n-line1">${state.b1}</span><span class="n-line2">${state.b2}</span></div>
+                                <div class="t-bride"><span class="n-line1">${state.b1}</span><span class="n-line2">${state.b2}</span></div>
                                 <div class="t-decor">${centerHtml}</div>
-                                <div class="names-col t-groom"><span class="n-line1">${state.g1}</span><span class="n-line2">${state.g2}</span></div>
+                                <div class="t-groom"><span class="n-line1">${state.g1}</span><span class="n-line2">${state.g2}</span></div>
                             </div>
                             
                             <div class="t-plate-row"><div class="t-plate-label">${state.plate}</div><div class="t-plate-dots"></div></div>
@@ -568,60 +537,9 @@
                 document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
             };
 
-
-
-            const notify = (message, type = 'ok', timeout = 2200) => {
-                const toast = document.getElementById('smart-toast');
-                if (!toast) return;
-                clearTimeout(toast._timer);
-                toast.className = type;
-                toast.textContent = message;
-                // Ép reflow nhẹ để toast hiện ổn định cả khi bấm liên tục trên mobile.
-                void toast.offsetWidth;
-                toast.classList.add('show', type);
-                toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
-            };
-
-            const isMobilePanelMode = () => window.matchMedia('(max-width: 900px)').matches;
-
-            const setPanelOpen = (open) => {
-                document.body.classList.toggle('panel-open', !!open);
-                const btn = document.getElementById('mobile-panel-toggle');
-                if (btn) {
-                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    btn.setAttribute('aria-label', open ? 'Đóng bảng cấu hình' : 'Mở bảng cấu hình');
-                    btn.textContent = open ? '×' : '⚙';
-                }
-            };
-
-            const closePanelOnMobile = () => {
-                if (isMobilePanelMode()) setPanelOpen(false);
-            };
-
-            const initMobilePanel = () => {
-                const btn = document.getElementById('mobile-panel-toggle');
-                const overlay = document.getElementById('mobile-panel-overlay');
-                if (!btn || !overlay) return;
-
-                const syncByViewport = () => {
-                    if (!isMobilePanelMode()) setPanelOpen(false);
-                };
-
-                btn.addEventListener('click', () => {
-                    const willOpen = !document.body.classList.contains('panel-open');
-                    setPanelOpen(willOpen);
-                    if (willOpen) notify('Đã mở bảng cấu hình. Bấm × hoặc vùng mờ để thu gọn.', 'ok', 1800);
-                });
-                overlay.addEventListener('click', closePanelOnMobile);
-                window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanelOnMobile(); });
-                window.addEventListener('resize', syncByViewport);
-                syncByViewport();
-            };
-
             const init = () => {
                 loadState();
                 loadLocalFonts();
-                initMobilePanel();
                 
                 binds.forEach(el => {
                     el.addEventListener('input', () => { syncStateFromUI(); render(); });
@@ -631,7 +549,6 @@
                 document.getElementById('btn-rand-corner').addEventListener('click', () => {
                     state.decorIndex = (state.decorIndex + 1) % decors.length;
                     saveState(); render();
-                    notify('Đã đổi mẫu viền góc.');
                 });
 
                 document.getElementById('ui-logoPreset').addEventListener('change', (e) => {
@@ -643,24 +560,23 @@
                 document.getElementById('logo-uploader').addEventListener('change', (e) => {
                     const f = e.target.files[0]; if(!f) return;
                     const reader = new FileReader();
-                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); notify('Đã nạp logo khách gửi.'); };
+                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); };
                     reader.readAsDataURL(f);
                 });
                 document.getElementById('clear-logo').addEventListener('click', (e) => {
                     e.preventDefault(); state.logoBase64 = null; document.getElementById('logo-status').innerText = '📁 Tải Ảnh Logo (.PNG/.SVG)'; document.getElementById('clear-logo').style.display = 'none'; document.getElementById('logo-uploader').value = '';
                     saveState(); render();
-                    notify('Đã xóa logo khách gửi.');
                 });
 
                 document.getElementById('btn-export-json').addEventListener('click', () => {
                     const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); notify('Đã xuất file dữ liệu JSON.');
+                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
                 });
                 document.getElementById('btn-import-json').addEventListener('change', (e) => {
                     const f = e.target.files[0]; if(!f) return;
                     const reader = new FileReader();
-                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); notify('Đã nhập dữ liệu thành công.'); } catch(err){ notify('File JSON lỗi hoặc sai định dạng.', 'err', 3200); } };
+                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); } catch(err){ alert('Lỗi file JSON'); } };
                     reader.readAsText(f);
                 });
 
@@ -671,7 +587,7 @@
                     }
                 });
 
-                document.getElementById('btn-print').addEventListener('click', () => { closePanelOnMobile(); notify('Đang mở hộp thoại in hàng loạt...', 'ok', 1600); setTimeout(() => window.print(), 220); });
+                document.getElementById('btn-print').addEventListener('click', () => { setTimeout(() => window.print(), 220); });
                 window.addEventListener('resize', fitNames);
 
                 render();
