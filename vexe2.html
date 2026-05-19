@@ -20,7 +20,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         /* [PATCH] UI Tông vàng ấm chống mỏi mắt */
-        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         /* =========================================================
            [UI CONTROL PANEL] BỐ CỤC 3 CỘT RESPONSIVE CÔNG THÁI HỌC
@@ -123,17 +123,18 @@
         }
 
         /* =========================================================
-           [MOBILE PATCH] GIỮ NGUYÊN KIẾN TRÚC DRAWER
+           [MOBILE SURGICAL PATCH] DRAWER PANEL + SMART TOAST
            ========================================================= */
         #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
 
         #smart-toast {
-            position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 18px); z-index: 9999;
-            min-width: min(92vw, 320px); max-width: 92vw; padding: 11px 14px; border-radius: 999px;
-            background: rgba(41, 37, 36, 0.96); color: #fff; font-size: 9pt; font-weight: 700; text-align: center;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.28); opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease;
+            position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px); z-index: 9999;
+            min-width: min(90vw, 320px); max-width: 90vw; padding: 12px 18px; border-radius: 999px;
+            background: rgba(41, 37, 36, 0.95); color: #fff; font-size: 9.5pt; font-weight: 700; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
         }
         #smart-toast.show { display: block; opacity: 1; transform: translate(-50%, 0); }
+        #smart-toast.ok { background: rgba(41, 37, 36, 0.95); }
         #smart-toast.warn { background: rgba(146, 64, 14, 0.96); }
         #smart-toast.err { background: rgba(153, 27, 27, 0.96); }
 
@@ -143,32 +144,38 @@
         }
 
         @media screen and (max-width: 900px) {
-            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
+            
             #qa-panel {
                 position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
-                z-index: 1001; transform: translateX(-103%); transition: transform .26s ease;
+                z-index: 1001; transform: translateX(-105%); transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             body.panel-open #qa-panel { transform: translateX(0); }
+            
             #mobile-panel-overlay {
-                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .42);
-                opacity: 0; pointer-events: none; transition: opacity .24s ease;
+                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .45);
+                opacity: 0; pointer-events: none; transition: opacity .3s ease;
             }
             body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
+            
+            /* [PATCH] NÚT FAB DƯỚI PHẢI (THUMB ZONE) */
             #mobile-panel-toggle {
                 display: inline-flex; align-items: center; justify-content: center; position: fixed;
-                top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
-                z-index: 1002; width: 46px; height: 46px; border: 0; border-radius: 999px;
-                background: var(--c-border); color: #fff; font-size: 18px; font-weight: 900;
-                box-shadow: 0 10px 24px rgba(0,0,0,.22); cursor: pointer;
+                bottom: 24px; right: 24px;
+                z-index: 1002; width: 52px; height: 52px; border: 0; border-radius: 50%;
+                background: var(--c-border); color: #fff; font-size: 24px; font-weight: 900;
+                box-shadow: 0 4px 15px rgba(138, 0, 138, 0.35); cursor: pointer; 
+                transition: transform 0.3s ease, background 0.3s ease;
             }
-            body.panel-open #mobile-panel-toggle { left: calc(min(88vw, 400px) + 10px); }
-            #workspace { height: 100dvh; overflow: auto; padding: 70px 10px 24px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
+            body.panel-open #mobile-panel-toggle { background: #292524; transform: rotate(90deg); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+            /* [PATCH] Padding tránh bị nút FAB đè */
+            #workspace { height: 100dvh; overflow: auto; padding: 20px 10px 90px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
             .a4-portrait { zoom: .52; }
             .p-body { column-count: 1; }
         }
 
         @media screen and (max-width: 520px) {
-            body.panel-open #mobile-panel-toggle { left: auto; right: max(10px, env(safe-area-inset-right)); background: #292524; }
             #workspace { padding-left: 6px; padding-right: 6px; }
             .a4-portrait { zoom: .43; }
         }
@@ -209,7 +216,7 @@
 </head>
 <body>
 
-    <button id="mobile-panel-toggle" type="button" aria-label="Mở bảng cấu hình" aria-expanded="false">⚙</button>
+    <button id="mobile-panel-toggle" type="button" aria-label="Mở bảng cấu hình">⚙</button>
     <div id="mobile-panel-overlay" aria-hidden="true"></div>
     <div id="smart-toast" role="status" aria-live="polite"></div>
 
@@ -231,7 +238,7 @@
                 <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
                 <button type="button" class="btn-preset dark" data-preset="qrprod">QR Đám Cưới</button>
             </div>
-            <div class="fr mobile-keep">
+            <div class="fr mobile-keep" style="margin-top:10px;">
                 <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
                 <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Vé đầu</button></div>
             </div>
@@ -795,7 +802,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 <style>body{font-family:Arial,sans-serif;margin:0;padding:22px;background:#f3f4f6;color:#111} .card{max-width:360px;margin:auto;background:#fff;border-radius:16px;padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.15)} .qr{width:260px;height:260px;margin:10px auto 16px;background:#fff;padding:14px;border:1px solid #ddd} .qr svg,.qr img{width:100%;height:100%;display:block;object-fit:contain;image-rendering:pixelated;shape-rendering:crispEdges} pre{white-space:pre-wrap;word-break:break-word;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:13px;line-height:1.35}</style>
                 </head><body><div class="card"><h2>KIỂM TRA QR NO.${numStr}</h2><p>Mã QR dùng payload ngắn để ưu tiên quét được trong khung vé nhỏ.</p><div class="qr">${qrSvg}</div><pre>MA QUET TREN VE: ${escapeHtml(qrText)}</pre></div></body></html>`;
                 if (win) { win.document.open(); win.document.write(html); win.document.close(); }
-                else notify('Trình duyệt chặn popup. Hãy cho phép popup để kiểm tra QR mẫu.', 'warn', 3500);
+                else notify('Trình duyệt chặn popup.', 'warn', 3500);
             };
 
             const loadLocalFonts = () => {
@@ -926,13 +933,14 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
             };
 
+            /* HỆ THỐNG SMART TOAST & UI MOBILE */
             const notify = (message, type = 'ok', timeout = 2200) => {
                 const toast = document.getElementById('smart-toast');
                 if (!toast) return;
                 clearTimeout(toast._timer);
                 toast.className = type;
                 toast.textContent = message;
-                void toast.offsetWidth;
+                void toast.offsetWidth; 
                 toast.classList.add('show', type);
                 toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
             };
@@ -944,8 +952,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const btn = document.getElementById('mobile-panel-toggle');
                 if (btn) {
                     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    btn.setAttribute('aria-label', open ? 'Đóng bảng' : 'Mở bảng');
-                    btn.textContent = open ? '×' : '⚙';
+                    btn.setAttribute('aria-label', open ? 'Đóng bảng cài đặt' : 'Mở bảng cài đặt');
+                    btn.innerHTML = open ? '×' : '⚙';
                 }
             };
 
@@ -955,12 +963,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const btn = document.getElementById('mobile-panel-toggle');
                 const overlay = document.getElementById('mobile-panel-overlay');
                 if (!btn || !overlay) return;
+
                 const syncByViewport = () => { if (!isMobilePanelMode()) setPanelOpen(false); };
+
                 btn.addEventListener('click', () => {
+                    if (navigator.vibrate) navigator.vibrate(40); // Rung nhẹ khi mở cài đặt
                     const willOpen = !document.body.classList.contains('panel-open');
                     setPanelOpen(willOpen);
-                    if (willOpen) notify('Đã mở bảng cấu hình.', 'ok', 1800);
+                    if (willOpen) notify('Đã mở bảng cấu hình.');
                 });
+
                 overlay.addEventListener('click', closePanelOnMobile);
                 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanelOnMobile(); });
                 window.addEventListener('resize', syncByViewport);
@@ -1042,7 +1054,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     }
                 });
 
-                document.getElementById('btn-print').addEventListener('click', () => { const check = validateBeforePrint(); if (!check.ok) { notify(check.msg, 'err', 3600); return; } closePanelOnMobile(); const p = check.plan; notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); setTimeout(() => window.print(), 280); });
+                document.getElementById('btn-print').addEventListener('click', () => { 
+                    if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Rung nhịp kép khi in
+                    const check = validateBeforePrint(); 
+                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
+                    closePanelOnMobile(); 
+                    const p = check.plan; 
+                    notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
+                    setTimeout(() => window.print(), 350); 
+                });
+                
                 window.addEventListener('resize', fitNames);
 
                 render();
