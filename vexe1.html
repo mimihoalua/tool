@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Print Engine - Wedding Luxury Edition (2x4)</title>
+    <title>Master Print Engine - Wedding Luxury Edition (2x4) + Mobile UX</title>
 
     <style>
         /* =========================================================
@@ -28,7 +28,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         /* [PATCH] UI Tông vàng ấm chống mỏi mắt */
-        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         /* =========================================================
            [UI CONTROL PANEL] BỐ CỤC 3 CỘT CÔNG THÁI HỌC
@@ -38,7 +38,6 @@
         .p-head h1 { font-size: 14pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .p-head p { font-size: 8.5pt; color: #D6D3D1; margin-top: 3px; }
 
-        /* Chia 2 cột cho Panel */
         .p-body { padding: 20px 25px; overflow-y: auto; flex: 1; column-count: 2; column-gap: 30px; }
         .p-body > div, .p-body > .section-title, .p-body > .fr { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
         
@@ -80,7 +79,6 @@
             overflow: hidden;
         }
 
-        /* THÀNH PHẦN VÉ ĐƯỢC SCALED */
         .corner-ornament { position: absolute; width: 8mm; height: 8mm; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10,10 Q40,10 50,30 Q60,10 90,10 Q70,40 90,70 Q60,50 50,90 Q40,50 10,70 Q30,40 10,10 Z" fill="none" stroke="%238A008A" stroke-width="5"/></svg>'); background-size: contain; background-repeat: no-repeat; }
         .co-tl { top: 1mm; left: 1mm; } .co-tr { top: 1mm; right: 1mm; transform: scaleX(-1); }
         .co-bl { bottom: 1mm; left: 1mm; transform: scaleY(-1); } .co-br { bottom: 1mm; right: 1mm; transform: scale(-1, -1); }
@@ -92,11 +90,7 @@
 
         .t-center-block { display: flex; justify-content: space-between; align-items: center; width: calc(100% - 1mm); flex: 0 0 15mm; margin: 1.5mm auto; padding-left: 5mm; padding-right: 5mm; }
         
-        .names-col { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            flex: 1; min-width: 0; color: var(--c-name); font-family: var(--f-name); 
-            line-height: 1.15; padding: 1mm 0; overflow: visible; 
-        }
+        .names-col { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-width: 0; color: var(--c-name); font-family: var(--f-name); line-height: 1.15; padding: 1mm 0; overflow: visible; }
         
         .n-line1 { font-size: 12pt; white-space: nowrap; margin-bottom: 2px; } 
         .n-line2 { font-size: 18pt; font-weight: bold; white-space: nowrap; } 
@@ -104,21 +98,70 @@
         .t-decor { width: 12mm; height: 12mm; flex-shrink: 0; margin: 0 2mm; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="none" stroke="%23ff99cc" stroke-width="2"/><path d="M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50" fill="none" stroke="%23ff99cc" stroke-width="3" stroke-dasharray="2 4"/><text x="50" y="73" font-family="Arial" font-size="68" font-weight="bold" fill="%23E6005C" text-anchor="middle">囍</text></svg>') no-repeat center; background-size: contain; }
 
         .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 11.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; }
-        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; } .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted #222; height: 100%; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 11.5pt; } .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted #222; height: 100%; }
         
         .t-footer { text-align: center; color: var(--c-name); font-family: var(--f-foot); font-size: 11pt; font-style: italic; font-weight: bold; line-height: 1; margin-bottom: 0.5mm; }
 
-        /* Responsive thu gọn Panel trên màn nhỏ */
+        /* =========================================================
+           [MOBILE PATCH] NÚT CÀI ĐẶT THÔNG MINH + TOAST
+           ========================================================= */
+        #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
+
+        #smart-toast {
+            position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px); z-index: 9999;
+            min-width: min(90vw, 320px); max-width: 90vw; padding: 12px 18px; border-radius: 999px;
+            background: rgba(41, 37, 36, 0.95); color: #fff; font-size: 9.5pt; font-weight: 700; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+        }
+        #smart-toast.show { display: block; opacity: 1; transform: translate(-50%, 0); }
+        #smart-toast.ok { background: rgba(41, 37, 36, 0.95); }
+
         @media screen and (max-width: 1100px) {
             #qa-panel { width: 380px; }
             .p-body { column-count: 1; }
+        }
+
+        @media screen and (max-width: 900px) {
+            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
+            
+            #qa-panel {
+                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
+                z-index: 1001; transform: translateX(-105%); transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            body.panel-open #qa-panel { transform: translateX(0); }
+            
+            #mobile-panel-overlay {
+                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .45);
+                opacity: 0; pointer-events: none; transition: opacity .3s ease;
+            }
+            body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
+            
+            /* NÚT FAB CÔNG THÁI HỌC (GÓC DƯỚI PHẢI) */
+            #mobile-panel-toggle {
+                display: inline-flex; align-items: center; justify-content: center; position: fixed;
+                bottom: 24px; right: 24px;
+                z-index: 1002; width: 52px; height: 52px; border: 0; border-radius: 50%;
+                background: var(--c-border); color: #fff; font-size: 24px; font-weight: 900;
+                box-shadow: 0 4px 15px rgba(138, 0, 138, 0.35); cursor: pointer; 
+                transition: transform 0.3s ease, background 0.3s ease;
+            }
+            body.panel-open #mobile-panel-toggle { background: #292524; transform: rotate(90deg); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+            #workspace { height: 100dvh; overflow: auto; padding: 20px 10px 90px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
+            .a4-portrait { zoom: .52; }
+            .p-body { column-count: 1; }
+        }
+
+        @media screen and (max-width: 520px) {
+            #workspace { padding-left: 6px; padding-right: 6px; }
+            .a4-portrait { zoom: .43; }
         }
 
         /* [SURGICAL PATCH] Sửa lỗi Print Spooler bị cắt trang */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
             body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; height: auto !important; overflow: visible !important; display: block !important; }
-            #qa-panel { display: none !important; } 
+            #qa-panel, #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none !important; } 
             #workspace { padding: 0 !important; background: none; height: auto !important; overflow: visible !important; display: block !important; }
             .a4-portrait { width: 210mm; height: 297mm; box-shadow: none; margin: 0; padding: 10mm 8mm; gap: 4mm; page-break-after: always; display: grid !important; }
         }
@@ -126,10 +169,14 @@
 </head>
 <body>
 
+    <button id="mobile-panel-toggle" type="button" aria-label="Mở bảng cài đặt">⚙</button>
+    <div id="mobile-panel-overlay" aria-hidden="true"></div>
+    <div id="smart-toast" role="status" aria-live="polite"></div>
+
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Print Config</h1>
-            <p>Wedding Luxury Edition - Bản Vá 2 Cột 4 Hàng</p>
+            <p>Wedding Luxury Edition - Bản Vá Mobile & Lưới 2x4</p>
         </div>
         
         <div class="p-body">
@@ -199,6 +246,51 @@
 
             let data = {};
 
+            /* Tích hợp hệ thống Toast & Mobile Panel */
+            const notify = (message, timeout = 2200) => {
+                const toast = document.getElementById('smart-toast');
+                if (!toast) return;
+                clearTimeout(toast._timer);
+                toast.className = 'ok';
+                toast.textContent = message;
+                void toast.offsetWidth; // Trigger reflow
+                toast.classList.add('show', 'ok');
+                toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
+            };
+
+            const isMobilePanelMode = () => window.matchMedia('(max-width: 900px)').matches;
+
+            const setPanelOpen = (open) => {
+                document.body.classList.toggle('panel-open', !!open);
+                const btn = document.getElementById('mobile-panel-toggle');
+                if (btn) {
+                    btn.setAttribute('aria-label', open ? 'Đóng bảng cài đặt' : 'Mở bảng cài đặt');
+                    btn.innerHTML = open ? '×' : '⚙';
+                }
+            };
+
+            const closePanelOnMobile = () => { if (isMobilePanelMode()) setPanelOpen(false); };
+
+            const initMobilePanel = () => {
+                const btn = document.getElementById('mobile-panel-toggle');
+                const overlay = document.getElementById('mobile-panel-overlay');
+                if (!btn || !overlay) return;
+
+                const syncByViewport = () => { if (!isMobilePanelMode()) setPanelOpen(false); };
+
+                btn.addEventListener('click', () => {
+                    if (navigator.vibrate) navigator.vibrate(40); // Rung nhẹ khi bấm
+                    const willOpen = !document.body.classList.contains('panel-open');
+                    setPanelOpen(willOpen);
+                    if (willOpen) notify('Đã mở bảng cấu hình.');
+                });
+
+                overlay.addEventListener('click', closePanelOnMobile);
+                window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanelOnMobile(); });
+                window.addEventListener('resize', syncByViewport);
+                syncByViewport();
+            };
+
             const updateData = () => { Object.keys(textInputs).forEach(k => data[k] = textInputs[k].value.trim()); };
 
             const applyFonts = () => {
@@ -225,7 +317,6 @@
                         l1.style.fontSize = `${baseS1}pt`; 
                         l2.style.fontSize = `${baseS2}pt`;
                         
-                        // Cho phép text chườm qua biên 5% để không cản trở font uốn lượn
                         const maxW = col.clientWidth * 1.05; 
                         let loops = 0;
                         while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
@@ -262,15 +353,25 @@
             };
 
             const render = () => {
-                // Đổi biến lặp từ 21 thành 8 để khớp với Grid 2x4
+                // Đổi biến lặp thành 8 để khớp với Grid 2x4
                 canvas.innerHTML = Array(8).fill(buildTicket()).join('');
                 document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 50));
             };
 
             const init = () => {
+                initMobilePanel();
+
                 Object.values(textInputs).forEach(inp => inp.addEventListener('input', () => { updateData(); render(); }));
                 fontSelects.forEach(sel => sel.addEventListener('change', () => { applyFonts(); render(); }));
-                btnPrint.addEventListener('click', () => setTimeout(() => window.print(), 100));
+                
+                btnPrint.addEventListener('click', () => {
+                    // Rung nhịp kép báo hiệu thành công chuẩn bị in
+                    if (navigator.vibrate) navigator.vibrate([30, 50, 30]); 
+                    closePanelOnMobile();
+                    notify('Chuẩn bị xuất in 8 vé...', 1500);
+                    setTimeout(() => window.print(), 300);
+                });
+                
                 window.addEventListener('resize', fitNames);
 
                 applyFonts(); updateData(); render();
