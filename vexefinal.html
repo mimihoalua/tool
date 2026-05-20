@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công Cụ In Vé Gửi Xe Đám Cưới - QR Trong Suốt Cân Tâm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Công Cụ In Vé Gửi Xe Đám Cưới - 10 Vé/A4 & QR Mobile</title>
     <style>
         /* =========================================================
            [CORE METRICS] HỆ MÉT A4 & BIẾN TOÀN CỤC
@@ -19,20 +19,19 @@
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* [PATCH] UI Tông vàng ấm chống mỏi mắt */
-        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+        /* UI Tông vàng ấm chống mỏi mắt */
+        body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         /* =========================================================
            [UI CONTROL PANEL] BỐ CỤC 3 CỘT RESPONSIVE CÔNG THÁI HỌC
            ========================================================= */
         #qa-panel { width: 760px; background: #FFFAF0; display: flex; flex-direction: column; z-index: 10; box-shadow: 4px 0 25px rgba(0,0,0,0.05); border-right: 1px solid #E7E5E4; }
-        .p-head { padding: 15px 25px; background: #292524; color: #FFFBEB; border-bottom: 4px solid var(--c-border); }
+        .p-head { padding: 15px 25px; background: #292524; color: #FFFBEB; border-bottom: 4px solid var(--c-border); flex-shrink: 0; }
         .p-head h1 { font-size: 14pt; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
         .p-head p { font-size: 8.5pt; color: #D6D3D1; margin-top: 3px; }
 
-        /* [PATCH] Auto flow 2 column cho Panel -> Kết hợp Workspace thành 3 Cột */
         .p-body { padding: 20px 25px; overflow-y: auto; flex: 1; column-count: 2; column-gap: 30px; }
-        .p-body > div, .p-body > .section-title { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
+        .p-body > div, .p-body > .section-title, .p-body > .fr { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
         
         .section-title { font-size: 9pt; font-weight: 800; color: #57534E; border-bottom: 2px solid #E7E5E4; padding-bottom: 5px; margin-top: 0; text-transform: uppercase; }
 
@@ -40,7 +39,7 @@
         .fc { width: 100%; padding: 8px 10px; border: 1px solid #D6D3D1; border-radius: 6px; font-family: inherit; font-size: 9pt; background: #FFF; transition: 0.2s; color: #292524; }
         .fc:focus { outline: none; border-color: var(--c-border); box-shadow: 0 0 0 2px rgba(138,0,138,0.1); }
         select.fc { cursor: pointer; font-weight: 600; }
-        .fr { display: flex; gap: 10px; } .fr .fg { flex: 1; }
+        .fr { display: flex; gap: 10px; } .fr .fg { flex: 1; margin-bottom: 0; }
         
         optgroup { font-weight: bold; color: var(--c-border); }
 
@@ -51,65 +50,59 @@
         .file-up input { position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer; }
         .file-up span { font-size: 8pt; font-weight: bold; color: var(--c-border); pointer-events: none; }
 
-        .p-foot { padding: 15px 25px; background: #FFFBEB; border-top: 1px solid #E7E5E4; column-span: all; }
+        .p-foot { padding: 15px 25px; background: #FFFBEB; border-top: 1px solid #E7E5E4; column-span: all; flex-shrink: 0; }
         .btn-print { width: 100%; padding: 14px; background: var(--c-border); color: #FFF; border: none; border-radius: 6px; font-weight: 900; font-size: 12pt; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(138,0,138,0.25); }
         .btn-print:hover { background: #600060; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(138,0,138,0.3); }
 
         /* =========================================================
-           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x4)
+           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x5 = 10 VÉ)
            ========================================================= */
         #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px; background: #E7E5E4; }
         
-        /* [PATCH] Sắp xếp 2 cột 4 hàng */
         .a4-portrait { 
             width: var(--paper-w); height: var(--paper-h); max-height: var(--paper-h); overflow: hidden; background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); 
-            padding: 10mm 8mm; gap: 4mm; flex-shrink: 0;
+            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); 
+            padding: 8mm 6mm; gap: 3mm; flex-shrink: 0;
             transform: translate(var(--offset-x), var(--offset-y));
         }
 
-        /* [PATCH] Scale nội dung vé lên ~1.45x để fit ô 2x4 */
-        .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 4.5mm 10mm 3.5mm 10mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+        /* Padding được vi phẫu tinh chỉnh cho tỷ lệ 10 vé */
+        .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 3.5mm 9mm 2.5mm 9mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         
-        /* GÓC HOA VĂN */
-        .corner-ornament { position: absolute; width: 8mm; height: 8mm; display: flex; align-items: center; justify-content: center; }
+        .corner-ornament { position: absolute; width: 7mm; height: 7mm; display: flex; align-items: center; justify-content: center; }
         .corner-ornament svg { width: 100%; height: 100%; }
         .co-tl { top: 1mm; left: 1mm; } .co-tr { top: 1mm; right: 1mm; transform: scaleX(-1); }
         .co-bl { bottom: 1mm; left: 1mm; transform: scaleY(-1); } .co-br { bottom: 1mm; right: 1mm; transform: scale(-1, -1); }
 
-        /* SỐ NHẢY GÓC TRÊN PHẢI */
-        .serial-badge { position: absolute; top: 2mm; right: 9mm; font-family: Arial, sans-serif; font-size: 7pt; font-weight: bold; color: var(--c-border); z-index: 5; }
+        /* Số Nhảy Nền Trắng Không Đè Viền */
+        .serial-badge { position: absolute; top: 3.5mm; right: 9.5mm; font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; color: var(--c-border); z-index: 5; background: #FFF; padding: 0 1mm; }
 
-        /* NGÀY THÁNG LẬT DỌC */
-        .t-date-side { position: absolute; top: 0; bottom: 0; width: 10mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 6.5pt; font-weight: bold; color: var(--c-border); }
+        .t-date-side { position: absolute; top: 0; bottom: 0; width: 9mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 5.5pt; font-weight: bold; color: var(--c-border); }
         .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); } .date-right { right: 0; writing-mode: vertical-rl; }
 
-        /* TIÊU ĐỀ */
-        .t-title { font-family: var(--f-title); font-size: 16pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 3px; transform: scaleX(1.1); margin-top: 1mm; margin-bottom: 1mm; line-height: 1; position: relative; }
+        .t-title { font-family: var(--f-title); font-size: 13pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
 
-        /* TÊN & LOGO GIỮA */
-        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 15mm; margin: 1.5mm auto; padding-left: 12mm; padding-right: 15mm; gap: 1mm; }
+        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 13mm; margin: 1mm auto; padding-left: 8mm; padding-right: 8mm; gap: 1mm; }
         .t-bride, .t-groom { flex: 0 0 35mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1.1; color: var(--c-name); font-family: var(--f-name); }
-        .t-bride .n-line1, .t-groom .n-line1 { font-size: 12pt !important; white-space: nowrap; margin-bottom: 2px; } 
-        .t-bride .n-line2, .t-groom .n-line2 { font-size: 18pt !important; font-weight: bold; white-space: nowrap; } 
+        .t-bride .n-line1, .t-groom .n-line1 { font-size: 10.5pt !important; white-space: nowrap; margin-bottom: 2px; } 
+        .t-bride .n-line2, .t-groom .n-line2 { font-size: 15pt !important; font-weight: bold; white-space: nowrap; } 
         
-        .t-decor { width: 12mm; height: 12mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
+        .t-decor { width: 9mm; height: 9mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
         
-        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 18pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 15pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
 
-        /* BIỂN SỐ */
-        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 11.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 24mm; }
-        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 11.5pt; } 
+        /* Chừa khoảng cách an toàn cho mã QR (padding-right: 22mm) */
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 22mm; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10.5pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
-        /* FOOTER ROW */
-        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 24mm; min-height: 4.5mm; }
-        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 11pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 22mm; min-height: 3.5mm; }
+        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 9.5pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
-        /* QR TRANSPARENT LAYOUT */
+        /* QR TRANSPARENT LAYOUT (Scale cho lưới 2x5) */
         .qr-wrap {
-            position: absolute; right: 6mm; bottom: 2mm; width: 20mm; height: 20mm; z-index: 30; display: block;
+            position: absolute; right: 5.5mm; bottom: 1.5mm; width: 18mm; height: 18mm; z-index: 30; display: block;
             background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important;
             outline: 0 !important; box-shadow: none !important; pointer-events: none;
         }
@@ -123,17 +116,18 @@
         }
 
         /* =========================================================
-           [MOBILE PATCH] GIỮ NGUYÊN KIẾN TRÚC DRAWER
+           [MOBILE SURGICAL PATCH] GIAO DIỆN GỌN (COMPACT UX)
            ========================================================= */
         #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
 
         #smart-toast {
-            position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 18px); z-index: 9999;
-            min-width: min(92vw, 320px); max-width: 92vw; padding: 11px 14px; border-radius: 999px;
-            background: rgba(41, 37, 36, 0.96); color: #fff; font-size: 9pt; font-weight: 700; text-align: center;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.28); opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease;
+            position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px); z-index: 9999;
+            min-width: min(90vw, 320px); max-width: 90vw; padding: 12px 18px; border-radius: 999px;
+            background: rgba(41, 37, 36, 0.95); color: #fff; font-size: 9.5pt; font-weight: 700; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
         }
         #smart-toast.show { display: block; opacity: 1; transform: translate(-50%, 0); }
+        #smart-toast.ok { background: rgba(41, 37, 36, 0.95); }
         #smart-toast.warn { background: rgba(146, 64, 14, 0.96); }
         #smart-toast.err { background: rgba(153, 27, 27, 0.96); }
 
@@ -142,51 +136,72 @@
             .p-body { column-count: 1; }
         }
 
+        /* Phẫu thuật nén Panel trên điện thoại */
         @media screen and (max-width: 900px) {
-            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+            body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
+            
             #qa-panel {
-                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
-                z-index: 1001; transform: translateX(-103%); transition: transform .26s ease;
+                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 380px); max-width: 380px; height: 100dvh;
+                z-index: 1001; transform: translateX(-105%); transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             body.panel-open #qa-panel { transform: translateX(0); }
+            
             #mobile-panel-overlay {
-                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .42);
-                opacity: 0; pointer-events: none; transition: opacity .24s ease;
+                display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .45);
+                opacity: 0; pointer-events: none; transition: opacity .3s ease;
             }
             body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
+            
+            /* NÚT FAB CÔNG THÁI HỌC (THUMB ZONE) */
             #mobile-panel-toggle {
                 display: inline-flex; align-items: center; justify-content: center; position: fixed;
-                top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
-                z-index: 1002; width: 46px; height: 46px; border: 0; border-radius: 999px;
-                background: var(--c-border); color: #fff; font-size: 18px; font-weight: 900;
-                box-shadow: 0 10px 24px rgba(0,0,0,.22); cursor: pointer;
+                bottom: 24px; right: 24px;
+                z-index: 1002; width: 52px; height: 52px; border: 0; border-radius: 50%;
+                background: var(--c-border); color: #fff; font-size: 24px; font-weight: 900;
+                box-shadow: 0 4px 15px rgba(138, 0, 138, 0.35); cursor: pointer; 
+                transition: transform 0.3s ease, background 0.3s ease;
             }
-            body.panel-open #mobile-panel-toggle { left: calc(min(88vw, 400px) + 10px); }
-            #workspace { height: 100dvh; overflow: auto; padding: 70px 10px 24px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
-            .a4-portrait { zoom: .52; }
-            .p-body { column-count: 1; }
+            body.panel-open #mobile-panel-toggle { background: #292524; transform: rotate(90deg); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+            /* Nén Menu Control Panel */
+            .p-head { padding: 12px 18px; }
+            .p-body { padding: 12px 18px; column-count: 1; }
+            .p-body > div, .p-body > .section-title, .p-body > .fr { margin-bottom: 10px; }
+            
+            /* CHỐNG ZOOM MÀN HÌNH BẰNG FONT-SIZE 16px */
+            .fc { padding: 6px 8px; font-size: 16px; height: 38px; }
+            .btn-sm { padding: 6px 8px; font-size: 9pt; height: 38px; }
+            
+            .fg label { font-size: 7.5pt; margin-bottom: 3px; }
+            .section-title { font-size: 8.5pt; margin-top: 10px; margin-bottom: 8px; padding-bottom: 3px; }
+            .p-foot { padding: 12px 18px calc(12px + env(safe-area-inset-bottom)); }
+
+            /* Padding Workspace tránh nút FAB đè lên vé */
+            #workspace { height: 100dvh; overflow: auto; padding: 20px 10px 100px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
+            .a4-portrait { zoom: .52; transform-origin: top center; }
         }
 
         @media screen and (max-width: 520px) {
-            body.panel-open #mobile-panel-toggle { left: auto; right: max(10px, env(safe-area-inset-right)); background: #292524; }
             #workspace { padding-left: 6px; padding-right: 6px; }
             .a4-portrait { zoom: .43; }
         }
 
         .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-        .btn-preset, .btn-preview-action { min-height: 36px; border: 0; border-radius: 8px; padding: 8px 10px; font-size: 8pt; font-weight: 900; cursor: pointer; color: #fff; background: #57534E; }
+        .btn-preset, .btn-preview-action { min-height: 38px; border: 0; border-radius: 6px; padding: 6px 8px; font-size: 8.5pt; font-weight: 900; cursor: pointer; color: #fff; background: #57534E; }
         .btn-preset:hover, .btn-preview-action:hover { filter: brightness(.95); transform: translateY(-1px); }
         .btn-preset.gold { background: #8A008A; }
         .btn-preset.dark { background: #292524; }
         .btn-preset.soft { background: #BE185D; }
         .btn-preset.bw { background: #000; }
         
-        .smart-hint { padding: 10px 12px; border-radius: 8px; background: #FFF; border: 1px solid #E7E5E4; font-size: 8pt; font-weight: 700; color: #57534E; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .print-summary { padding: 10px 12px; border-radius: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .smart-hint { padding: 10px 12px; border-radius: 6px; background: #FFF; border: 1px solid #E7E5E4; font-size: 8pt; font-weight: 700; color: #57534E; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-top: 5px;}
+        .print-summary { padding: 10px 12px; border-radius: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .print-summary.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
         
-        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #D6D3D1; border-radius: 8px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #D6D3D1; border-radius: 6px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer;}
         .operator-toggle input { width: 18px; height: 18px; accent-color: var(--c-border); }
+        
+        /* CƠ CHẾ ẨN HIỆN GIAO DIỆN GỌN (DEEP HIDE) */
         body.operator-mode .advanced-only { display: none !important; }
 
         @media screen {
@@ -198,7 +213,6 @@
         /* [SURGICAL PATCH] Sửa lỗi Print Spooler bị ẩn các trang dưới do overflow: hidden của UI */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
-            /* Tháo chốt overflow và height để trình duyệt tự do quét trang */
             body { background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; height: auto !important; overflow: visible !important; display: block !important; }
             #qa-panel, #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none !important; } 
             #workspace { padding: 0 !important; gap: 0; background: none; height: auto !important; overflow: visible !important; display: block !important; }
@@ -209,141 +223,154 @@
 </head>
 <body>
 
-    <button id="mobile-panel-toggle" type="button" aria-label="Mở bảng cấu hình" aria-expanded="false">⚙</button>
+    <button id="mobile-panel-toggle" type="button" aria-label="Mở bảng cấu hình">⚙</button>
     <div id="mobile-panel-overlay" aria-hidden="true"></div>
     <div id="smart-toast" role="status" aria-live="polite"></div>
 
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Cấu Hình In Vé</h1>
-            <p>Layout 2x4 (8 vé/A4) • QR trong suốt • Cân tâm chuẩn</p>
+            <p>Layout 2x5 (10 vé/A4) • QR Đám Cưới & Mobile UI Tối Ưu</p>
         </div>
         
         <div class="p-body">
             
-            <div class="section-title mobile-keep">Chế Độ Nhanh Điện Thoại & Mẫu Sẵn</div>
-            <div class="fg mobile-keep">
+            <div class="section-title">Chế Độ Điện Thoại</div>
+            <div class="fg">
                 <label class="operator-toggle">📱 Giao diện gọn cho điện thoại <input type="checkbox" id="ui-operatorMode" class="state-bind"></label>
             </div>
-            <div class="quick-grid mobile-keep">
-                <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
-                <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
-                <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
-                <button type="button" class="btn-preset dark" data-preset="qrprod">QR Đám Cưới</button>
+            
+            <div class="advanced-only">
+                <div class="quick-grid">
+                    <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
+                    <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
+                    <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
+                    <button type="button" class="btn-preset dark" data-preset="qrprod">QR Cổ Điển</button>
+                </div>
+                <div class="fr" style="margin-top:10px;">
+                    <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
+                    <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Về vé đầu</button></div>
+                </div>
             </div>
-            <div class="fr mobile-keep">
-                <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
-                <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Vé đầu</button></div>
-            </div>
-            <div class="smart-hint mobile-keep">Gợi ý: trên điện thoại dùng “Vừa màn hình” để kiểm tổng thể, dùng “Soi lớn từng vé” để kiểm chi tiết trước khi in.</div>
 
-            <div class="section-title advanced-only">Kho Font Hệ Thống (Đã Nạp Nhanh)</div>
-            <div class="fg advanced-only"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg advanced-only"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg advanced-only"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg advanced-only"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg advanced-only"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
+            <div class="advanced-only">
+                <div class="section-title">Kho Font Hệ Thống</div>
+                <div class="fg"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
+                <div class="fg"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
+                <div class="fg"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
+                <div class="fg"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
+                <div class="fg"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
 
-            <div class="section-title">Hệ Màu & Biểu Tượng Cưới (10 Mẫu)</div>
-            <div class="fr">
+                <div class="section-title">Hệ Màu & Logo Wedding (10 Mẫu)</div>
+                <div class="fr">
+                    <div class="fg">
+                        <select id="ui-colorMode" class="fc state-bind">
+                            <option value="color">🖨️ In Màu</option>
+                            <option value="bw">⚫ Đen Trắng (Siêu nét)</option>
+                        </select>
+                    </div>
+                    <div class="fg">
+                        <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none;">🎲 Đổi Viền</button>
+                    </div>
+                </div>
+                
                 <div class="fg">
-                    <select id="ui-colorMode" class="fc state-bind">
-                        <option value="color">🖨️ In Màu</option>
-                        <option value="bw">⚫ Đen Trắng (Siêu nét)</option>
+                    <select id="ui-logoPreset" class="fc state-bind">
+                        <optgroup label="Biểu Tượng Cưới Truyền Thống">
+                            <option value="hy_classic">囍 Song Hỷ Cổ Điển</option>
+                            <option value="hy_circle">囍 Song Hỷ Ấn Triện</option>
+                        </optgroup>
+                        <optgroup label="Biểu Tượng Hiện Đại & Luxury">
+                            <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi</option>
+                            <option value="ring_interlock">💍 Nhẫn Cưới Lồng Nhau</option>
+                            <option value="ring_diamond">💎 Nhẫn Kim Cương</option>
+                            <option value="heart_infinity">💖 Trái Tim Vô Cực</option>
+                            <option value="heart_double">💕 Cặp Trái Tim</option>
+                        </optgroup>
+                        <optgroup label="Khung Chữ Lồng (Monogram N&Q)">
+                            <option value="wreath_laurel">🌿 Vòng Nguyệt Quế</option>
+                            <option value="frame_vintage">🌸 Khung Hoa Vintage</option>
+                            <option value="frame_hex">⬡ Khung Lục Giác</option>
+                        </optgroup>
+                        <optgroup label="Khác">
+                            <option value="custom">📁 Ảnh Logo Khách Gửi (Upload)</option>
+                        </optgroup>
                     </select>
                 </div>
-                <div class="fg">
-                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none; padding:9px;">🎲 Đổi Viền Góc</button>
+                <div class="fg" id="box-custom-logo" style="display:none;">
+                    <div class="file-up">
+                        <span id="logo-status">📁 Tải Ảnh Logo (.PNG/.SVG)</span>
+                        <input type="file" id="logo-uploader" accept="image/png, image/svg+xml">
+                    </div>
+                    <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7pt; color:red; display:none;">Xóa Ảnh</a></div>
                 </div>
-            </div>
-            
-            <div class="fg">
-                <select id="ui-logoPreset" class="fc state-bind">
-                    <optgroup label="Biểu Tượng Cưới Truyền Thống">
-                        <option value="hy_classic">囍 Song Hỷ Cổ Điển</option>
-                        <option value="hy_circle">囍 Song Hỷ Ấn Triện</option>
-                    </optgroup>
-                    <optgroup label="Biểu Tượng Hiện Đại & Luxury">
-                        <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi</option>
-                        <option value="ring_interlock">💍 Nhẫn Cưới Lồng Nhau</option>
-                        <option value="ring_diamond">💎 Nhẫn Kim Cương</option>
-                        <option value="heart_infinity">💖 Trái Tim Vô Cực</option>
-                        <option value="heart_double">💕 Cặp Trái Tim</option>
-                    </optgroup>
-                    <optgroup label="Khung Chữ Lồng (Monogram N&Q)">
-                        <option value="wreath_laurel">🌿 Vòng Nguyệt Quế</option>
-                        <option value="frame_vintage">🌸 Khung Hoa Vintage</option>
-                        <option value="frame_hex">⬡ Khung Lục Giác</option>
-                    </optgroup>
-                    <optgroup label="Khác">
-                        <option value="custom">📁 Ảnh Logo Khách Gửi (Upload)</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="fg" id="box-custom-logo" style="display:none;">
-                <div class="file-up">
-                    <span id="logo-status">📁 Tải Ảnh Logo (.PNG/.SVG)</span>
-                    <input type="file" id="logo-uploader" accept="image/png, image/svg+xml">
-                </div>
-                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7.5pt; color:red; display:none;">Xóa Ảnh</a></div>
             </div>
 
             <div class="section-title">Thông Tin Tên & Vé</div>
             <div class="fr"><div class="fg"><label>Họ Nữ</label><input type="text" id="ui-b1" class="fc state-bind" value="Minh"></div><div class="fg"><label>Tên Nữ</label><input type="text" id="ui-b2" class="fc state-bind" value="Ngọc"></div></div>
             <div class="fr"><div class="fg"><label>Họ Nam</label><input type="text" id="ui-g1" class="fc state-bind" value="Nguyễn"></div><div class="fg"><label>Tên Nam</label><input type="text" id="ui-g2" class="fc state-bind" value="Quang"></div></div>
-            <div class="fg"><label>Ngày</label><input type="text" id="ui-date" class="fc state-bind" value="23/24.05.2026"></div>
+            <div class="fg"><label>Ngày</label><input type="text" id="ui-date" class="fc state-bind" value="Ngày 23 & 24.05.2026"></div>
             <div class="fr">
                 <div class="fg"><label>ĐT Nhà Gái</label><input type="text" id="ui-bridePhone" class="fc state-bind" value=""></div>
                 <div class="fg"><label>ĐT Nhà Trai</label><input type="text" id="ui-groomPhone" class="fc state-bind" value=""></div>
             </div>
-            <div class="fg"><label>Loại vé QR</label><select id="ui-ticketType" class="fc state-bind"><option value="Vé xe nhà gái">Vé xe nhà gái</option><option value="Vé xe nhà trai">Vé xe nhà trai</option><option value="Vé xe chung hai họ">Vé xe chung hai họ</option><option value="Vé xe ban tổ chức">Vé xe ban tổ chức</option></select></div>
-            <div class="fr">
-                <div class="fg"><label>Địa điểm QR</label><input type="text" id="ui-venue" class="fc state-bind" value=""></div>
-                <div class="fg"><label>Giờ đón khách</label><input type="text" id="ui-guestTime" class="fc state-bind" value=""></div>
+            
+            <div class="advanced-only">
+                <div class="fg"><label>Loại vé QR</label><select id="ui-ticketType" class="fc state-bind"><option value="Vé xe nhà gái">Vé xe nhà gái</option><option value="Vé xe nhà trai">Vé xe nhà trai</option><option value="Vé xe chung hai họ">Vé xe chung hai họ</option><option value="Vé xe ban tổ chức">Vé xe ban tổ chức</option></select></div>
+                <div class="fr">
+                    <div class="fg"><label>Địa điểm QR</label><input type="text" id="ui-venue" class="fc state-bind" value=""></div>
+                    <div class="fg"><label>Giờ đón khách</label><input type="text" id="ui-guestTime" class="fc state-bind" value=""></div>
+                </div>
+                <div class="fg"><label>Ghi chú QR</label><textarea id="ui-qrNote" class="fc state-bind" rows="2">VE NAY CHI PHUC VU DAM CUOI</textarea></div>
             </div>
-            <div class="fg"><label>Ghi chú QR</label><textarea id="ui-qrNote" class="fc state-bind" rows="2">VE NAY CHI PHUC VU DAM CUOI</textarea></div>
+
             <div class="fg"><label>Biển Số</label><input type="text" id="ui-plate" class="fc state-bind" value="Biển số:"></div>
             <div class="fg"><label>Lời chào (Footer)</label><input type="text" id="ui-foot" class="fc state-bind" value="Rất hân hạnh được đón tiếp !"></div>
 
             <div class="section-title">Sản Xuất: Số Nhảy & QR</div>
             <div class="fr">
-                <div class="fg"><label>Tổng Vé (Bội số 8)</label><input type="number" id="ui-total" class="fc state-bind" value="8" min="8" step="8"></div>
+                <div class="fg"><label>Tổng Vé (Bội số 10)</label><input type="number" id="ui-total" class="fc state-bind" value="40" min="10" step="10"></div>
                 <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
             </div>
-            <div class="fg">
-                <label>Chế độ QR</label>
-                <select id="ui-barcode" class="fc state-bind">
-                    <option value="qr">Số Nhảy + QR thông tin đám cưới</option>
-                    <option value="off">Tắt QR / Tắt Số Nhảy</option>
-                </select>
-            </div>
-            <div class="fg">
-                <button type="button" id="btn-qr-test" class="btn-sm" style="width:100%; background:#92400E; color:#FFF; border:none; padding:9px;">🔍 Kiểm tra QR mẫu NO.001</button>
-            </div>
-            <div class="fr">
-                <div class="fg"><label>Chế Độ Xuất</label><select id="ui-printScope" class="fc state-bind"><option value="all">In tất cả</option><option value="first">In thử 1 trang</option><option value="range">Dải số</option></select></div>
-                <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none; padding:9px;">🧮 Tính trang</button></div>
-            </div>
-            <div class="fr" id="range-box">
-                <div class="fg"><label>Từ số vé</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
-                <div class="fg"><label>Đến số vé</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="8" min="1"></div>
+            
+            <div class="advanced-only">
+                <div class="fg">
+                    <label>Chế độ QR</label>
+                    <select id="ui-barcode" class="fc state-bind">
+                        <option value="qr">Số Nhảy + QR thông tin đám cưới</option>
+                        <option value="off">Tắt QR / Tắt Số Nhảy</option>
+                    </select>
+                </div>
+                <div class="fg">
+                    <button type="button" id="btn-qr-test" class="btn-sm" style="width:100%; background:#92400E; color:#FFF; border:none;">🔍 Kiểm tra QR mẫu</button>
+                </div>
+                <div class="fr">
+                    <div class="fg"><label>Chế Độ Xuất</label><select id="ui-printScope" class="fc state-bind"><option value="all">In tất cả</option><option value="first">In thử 1 trang</option><option value="range">Dải số</option></select></div>
+                    <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none;">🧮 Tính trang</button></div>
+                </div>
+                <div class="fr" id="range-box">
+                    <div class="fg"><label>Từ số vé</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
+                    <div class="fg"><label>Đến số vé</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="10" min="1"></div>
+                </div>
             </div>
             <div id="print-summary" class="print-summary">Sẵn sàng.</div>
 
-            <div class="section-title advanced-only">Hệ Thống: Căn Lề & Dữ Liệu</div>
-            <div class="fr advanced-only">
-                <div class="fg"><label>Bù Trục X (mm)</label><input type="number" id="ui-offset-x" class="fc state-bind" value="0" step="0.5"></div>
-                <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
-            </div>
-            <div class="fr advanced-only">
-                <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; padding:9px; flex:1;">📥 Xuất Dữ Liệu</button>
-                <div class="file-up" style="flex:1; padding:8px; background:#44403C; border:none;">
-                    <span style="color:#FFF;">📤 Nhập Dữ Liệu</span>
-                    <input type="file" id="btn-import-json" accept=".json">
+            <div class="advanced-only">
+                <div class="section-title">Hệ Thống & Sao Lưu</div>
+                <div class="fr">
+                    <div class="fg"><label>Bù Trục X (mm)</label><input type="number" id="ui-offset-x" class="fc state-bind" value="0" step="0.5"></div>
+                    <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
                 </div>
-            </div>
-            <div class="fg advanced-only">
-                <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none; padding:9px;">🚨 Khôi Phục Gốc</button>
+                <div class="fr">
+                    <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; flex:1;">📥 Xuất Dữ Liệu</button>
+                    <div class="file-up" style="flex:1; background:#44403C; border:none;">
+                        <span style="color:#FFF;">📤 Nhập Dữ Liệu</span>
+                        <input type="file" id="btn-import-json" accept=".json">
+                    </div>
+                </div>
+                <div class="fg" style="margin-top: 5px;">
+                    <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none;">🚨 Khôi Phục Cài Đặt Gốc</button>
+                </div>
             </div>
         </div>
 
@@ -355,10 +382,12 @@
     <main id="workspace">
         </main>
 
+    <script src="font_data.js"></script>
+
     <script>
     /* =========================================================
        [QR ISO LIBRARY - OFFLINE EMBEDDED]
-       Kazuhiko Arase QRCode JS, MIT License. Embedded để chạy offline.
+       Giữ nguyên khối lượng engine QR gốc theo Zero Inference.
        ========================================================= */
     (function(){
         var modules = {
@@ -409,8 +438,6 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
     })();
     </script>
 
-    <script src="font_data.js"></script>
-
     <script>
         const UltimateEngine = (() => {
             const canvas = document.getElementById('workspace');
@@ -421,7 +448,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: '23/24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 bridePhone: '', groomPhone: '', ticketType: 'Vé xe nhà gái', venue: '', guestTime: '', qrNote: 'VE NAY CHI PHUC VU DAM CUOI',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
-                total: 40, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 8, previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
+                total: 40, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 10, previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
                 fonts: {}
             };
 
@@ -453,7 +480,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
             const normalizeState = () => {
                 if (state.barcode !== 'off') state.barcode = 'qr';
-                state.total = Math.max(1, parseInt(state.total, 10) || 8);
+                state.total = Math.max(1, parseInt(state.total, 10) || 40);
                 state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
                 const noteNorm = removeVietnamese(String(state.qrNote || '')).toUpperCase();
                 if (!noteNorm.includes('VE NAY CHI PHUC VU DAM CUOI') || noteNorm.length > 80) {
@@ -524,7 +551,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
             };
 
             const getPrintPlan = () => {
-                const total = normalizePositiveInt(state.total, 8, 1);
+                // Đổi cơ số sinh mảng thành 10 vé
+                const total = normalizePositiveInt(state.total, 40, 1);
                 const start = normalizePositiveInt(state.startnum, 1, 1);
                 const last = start + total - 1;
                 let renderStart = start;
@@ -532,7 +560,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 let label = 'Tất cả';
 
                 if (state.printScope === 'first') {
-                    count = Math.min(8, total);
+                    count = Math.min(10, total);
                     label = 'In thử 1 trang đầu';
                 } else if (state.printScope === 'range') {
                     let from = normalizePositiveInt(state.rangeFrom, start, 1);
@@ -545,9 +573,9 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     label = `Dải số ${String(from).padStart(3,'0')} → ${String(to).padStart(3,'0')}`;
                 }
 
-                const pages = Math.ceil(count / 8);
+                const pages = Math.ceil(count / 10);
                 const end = count > 0 ? renderStart + count - 1 : renderStart;
-                return { total, start, last, renderStart, count, pages, end, label, blanks: pages * 8 - count };
+                return { total, start, last, renderStart, count, pages, end, label, blanks: pages * 10 - count };
             };
 
             const updatePrintSummary = () => {
@@ -833,16 +861,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
                     if(!colB) return;
                     const getRatio = (col, l1, l2) => {
-                        let ratio = 1.0; l1.style.fontSize = `12pt`; l2.style.fontSize = `18pt`;
+                        let ratio = 1.0; l1.style.fontSize = `10.5pt`; l2.style.fontSize = `15pt`;
                         const maxW = col.clientWidth * 1.05; let loops = 0;
                         while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
-                            ratio -= 0.05; l1.style.fontSize = `${12 * ratio}pt`; l2.style.fontSize = `${18 * ratio}pt`; loops++;
+                            ratio -= 0.05; l1.style.fontSize = `${10.5 * ratio}pt`; l2.style.fontSize = `${15 * ratio}pt`; loops++;
                         }
                         return ratio;
                     };
                     const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                    b1.style.fontSize = `${12 * finalRatio}pt`; b2.style.fontSize = `${18 * finalRatio}pt`;
-                    g1.style.fontSize = `${12 * finalRatio}pt`; g2.style.fontSize = `${18 * finalRatio}pt`;
+                    b1.style.fontSize = `${10.5 * finalRatio}pt`; b2.style.fontSize = `${15 * finalRatio}pt`;
+                    g1.style.fontSize = `${10.5 * finalRatio}pt`; g2.style.fontSize = `${15 * finalRatio}pt`;
                 });
             };
 
@@ -880,8 +908,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     pageDiv.className = 'a4-portrait';
                     let pageContent = '';
                     
-                    for (let i = 0; i < 8; i++) {
-                        if ((p * 8 + i) >= totalTickets) {
+                    for (let i = 0; i < 10; i++) {
+                        if ((p * 10 + i) >= totalTickets) {
                             pageContent += `<div></div>`; 
                             continue;
                         }
@@ -926,13 +954,14 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
             };
 
+            /* HỆ THỐNG SMART TOAST & UI MOBILE */
             const notify = (message, type = 'ok', timeout = 2200) => {
                 const toast = document.getElementById('smart-toast');
                 if (!toast) return;
                 clearTimeout(toast._timer);
                 toast.className = type;
                 toast.textContent = message;
-                void toast.offsetWidth;
+                void toast.offsetWidth; 
                 toast.classList.add('show', type);
                 toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
             };
@@ -944,8 +973,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const btn = document.getElementById('mobile-panel-toggle');
                 if (btn) {
                     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    btn.setAttribute('aria-label', open ? 'Đóng bảng' : 'Mở bảng');
-                    btn.textContent = open ? '×' : '⚙';
+                    btn.setAttribute('aria-label', open ? 'Đóng bảng cài đặt' : 'Mở bảng cài đặt');
+                    btn.innerHTML = open ? '×' : '⚙';
                 }
             };
 
@@ -955,12 +984,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const btn = document.getElementById('mobile-panel-toggle');
                 const overlay = document.getElementById('mobile-panel-overlay');
                 if (!btn || !overlay) return;
+
                 const syncByViewport = () => { if (!isMobilePanelMode()) setPanelOpen(false); };
+
                 btn.addEventListener('click', () => {
+                    if (navigator.vibrate) navigator.vibrate(40); // Rung nhẹ khi mở cài đặt
                     const willOpen = !document.body.classList.contains('panel-open');
                     setPanelOpen(willOpen);
                     if (willOpen) notify('Đã mở bảng cấu hình.', 'ok', 1800);
                 });
+
                 overlay.addEventListener('click', closePanelOnMobile);
                 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanelOnMobile(); });
                 window.addEventListener('resize', syncByViewport);
@@ -1042,7 +1075,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     }
                 });
 
-                document.getElementById('btn-print').addEventListener('click', () => { const check = validateBeforePrint(); if (!check.ok) { notify(check.msg, 'err', 3600); return; } closePanelOnMobile(); const p = check.plan; notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); setTimeout(() => window.print(), 280); });
+                document.getElementById('btn-print').addEventListener('click', () => { 
+                    if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Rung nhịp kép khi in
+                    const check = validateBeforePrint(); 
+                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
+                    closePanelOnMobile(); 
+                    const p = check.plan; 
+                    notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
+                    setTimeout(() => window.print(), 350); 
+                });
+                
                 window.addEventListener('resize', fitNames);
 
                 render();
