@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Ultimate Print Engine - 10 Premium Logos</title>
+    <title>Master Print Engine - Wedding 2x5 Mobile Optimized</title>
     <style>
         /* =========================================================
            [CORE METRICS] HỆ MÉT A4 & BIẾN TOÀN CỤC
@@ -19,7 +19,6 @@
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* [PATCH] UI Tông vàng ấm chống mỏi mắt */
         body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         /* =========================================================
@@ -30,7 +29,6 @@
         .p-head h1 { font-size: 14pt; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
         .p-head p { font-size: 8.5pt; color: #D6D3D1; margin-top: 3px; }
 
-        /* [PATCH] Auto flow 2 column cho Panel -> Kết hợp Workspace thành 3 Cột */
         .p-body { padding: 20px 25px; overflow-y: auto; flex: 1; column-count: 2; column-gap: 30px; }
         .p-body > div, .p-body > .section-title { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
         
@@ -56,11 +54,10 @@
         .btn-print:hover { background: #600060; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(138,0,138,0.3); }
 
         /* =========================================================
-           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x5)
+           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x5 = 10 VÉ)
            ========================================================= */
         #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px; background: #E7E5E4; }
         
-        /* [PATCH] Sắp xếp 2 cột 5 hàng (10 vé) */
         .a4-portrait { 
             width: var(--paper-w); height: var(--paper-h); max-height: var(--paper-h); overflow: hidden; background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
             display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); 
@@ -68,47 +65,40 @@
             transform: translate(var(--offset-x), var(--offset-y));
         }
 
-        /* [PATCH] Scale nội dung vé lọt khung 5 hàng */
         .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 3.5mm 9mm 2.5mm 9mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         
-        /* GÓC HOA VĂN */
         .corner-ornament { position: absolute; width: 7mm; height: 7mm; display: flex; align-items: center; justify-content: center; }
         .corner-ornament svg { width: 100%; height: 100%; }
         .co-tl { top: 1mm; left: 1mm; } .co-tr { top: 1mm; right: 1mm; transform: scaleX(-1); }
         .co-bl { bottom: 1mm; left: 1mm; transform: scaleY(-1); } .co-br { bottom: 1mm; right: 1mm; transform: scale(-1, -1); }
 
-        /* SỐ NHẢY GÓC TRÊN PHẢI (Nền trắng bảo vệ không đè viền) */
+        /* SỐ NHẢY ĐƯỢC BẢO VỆ NỀN TRẮNG */
         .serial-badge { position: absolute; top: 3.5mm; right: 9.5mm; font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; color: var(--c-border); z-index: 5; background: #FFF; padding: 0 1mm; }
 
-        /* NGÀY THÁNG LẬT DỌC */
         .t-date-side { position: absolute; top: 0; bottom: 0; width: 9mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 5.5pt; font-weight: bold; color: var(--c-border); }
         .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); } .date-right { right: 0; writing-mode: vertical-rl; }
 
-        /* TIÊU ĐỀ */
-        .t-title { font-family: var(--f-title); font-size: 14pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
+        .t-title { font-family: var(--f-title); font-size: 13pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
 
-        /* TÊN & LOGO GIỮA */
         .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 13mm; margin: 1mm auto; padding-left: 8mm; padding-right: 8mm; gap: 1mm; }
         .t-bride, .t-groom { flex: 0 0 35mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1.1; color: var(--c-name); font-family: var(--f-name); }
-        .t-bride .n-line1, .t-groom .n-line1 { font-size: 11pt !important; white-space: nowrap; margin-bottom: 2px; } 
-        .t-bride .n-line2, .t-groom .n-line2 { font-size: 16pt !important; font-weight: bold; white-space: nowrap; } 
+        .t-bride .n-line1, .t-groom .n-line1 { font-size: 10.5pt !important; white-space: nowrap; margin-bottom: 2px; } 
+        .t-bride .n-line2, .t-groom .n-line2 { font-size: 15pt !important; font-weight: bold; white-space: nowrap; } 
         
-        .t-decor { width: 10mm; height: 10mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
+        .t-decor { width: 9mm; height: 9mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
         
-        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 16pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 15pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
 
-        /* BIỂN SỐ */
-        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 12mm; }
-        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10.5pt; } 
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 12mm; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
-        /* FOOTER ROW */
         .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 12mm; min-height: 3.5mm; }
-        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 10pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 9.5pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         /* =========================================================
-           [MOBILE SURGICAL PATCH] DRAWER PANEL + SMART TOAST CÔNG THÁI HỌC
+           [MOBILE SURGICAL PATCH] GIAO DIỆN GỌN (COMPACT UX)
            ========================================================= */
         #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
 
@@ -128,11 +118,12 @@
             .p-body { column-count: 1; }
         }
 
+        /* [PHẪU THUẬT MOBILE UX] Làm thon gọn triệt để các ô nhập liệu */
         @media screen and (max-width: 900px) {
             body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
             
             #qa-panel {
-                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
+                position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 380px); max-width: 380px; height: 100dvh;
                 z-index: 1001; transform: translateX(-105%); transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             body.panel-open #qa-panel { transform: translateX(0); }
@@ -143,7 +134,7 @@
             }
             body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
             
-            /* NÚT FAB CÔNG THÁI HỌC (GÓC DƯỚI PHẢI) */
+            /* NÚT FAB CÔNG THÁI HỌC */
             #mobile-panel-toggle {
                 display: inline-flex; align-items: center; justify-content: center; position: fixed;
                 bottom: 24px; right: 24px;
@@ -154,9 +145,17 @@
             }
             body.panel-open #mobile-panel-toggle { background: #292524; transform: rotate(90deg); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
+            /* Nén Menu Control Panel */
+            .p-head { padding: 12px 18px; }
+            .p-body { padding: 12px 18px; column-count: 1; }
+            .p-body > div, .p-body > .section-title, .p-body > .fr { margin-bottom: 10px; }
+            .fc, .btn-sm { padding: 6px 8px; font-size: 8.5pt; height: 34px; }
+            .fg label { font-size: 7pt; margin-bottom: 2px; }
+            .section-title { font-size: 8pt; margin-top: 10px; margin-bottom: 8px; padding-bottom: 3px; }
+
+            /* Padding Workspace tránh nút FAB đè */
             #workspace { height: 100dvh; overflow: auto; padding: 20px 10px 90px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
             .a4-portrait { zoom: .52; }
-            .p-body { column-count: 1; }
         }
 
         @media screen and (max-width: 520px) {
@@ -165,19 +164,21 @@
         }
 
         .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-        .btn-preset, .btn-preview-action { min-height: 36px; border: 0; border-radius: 8px; padding: 8px 10px; font-size: 8pt; font-weight: 900; cursor: pointer; color: #fff; background: #57534E; }
+        .btn-preset, .btn-preview-action { min-height: 34px; border: 0; border-radius: 6px; padding: 6px 8px; font-size: 8pt; font-weight: 900; cursor: pointer; color: #fff; background: #57534E; }
         .btn-preset:hover, .btn-preview-action:hover { filter: brightness(.95); transform: translateY(-1px); }
         .btn-preset.gold { background: #8A008A; }
         .btn-preset.dark { background: #292524; }
         .btn-preset.soft { background: #BE185D; }
         .btn-preset.bw { background: #000; }
         
-        .smart-hint { padding: 10px 12px; border-radius: 8px; background: #FFF; border: 1px solid #E7E5E4; font-size: 8pt; font-weight: 700; color: #57534E; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .print-summary { padding: 10px 12px; border-radius: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .smart-hint { padding: 10px 12px; border-radius: 6px; background: #FFF; border: 1px solid #E7E5E4; font-size: 8pt; font-weight: 700; color: #57534E; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .print-summary { padding: 10px 12px; border-radius: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .print-summary.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
         
-        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #D6D3D1; border-radius: 8px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid #D6D3D1; border-radius: 6px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .operator-toggle input { width: 18px; height: 18px; accent-color: var(--c-border); }
+        
+        /* [PATCH] Cơ chế ẩn hiện Giao Diện Gọn cực mạnh */
         body.operator-mode .advanced-only { display: none !important; }
 
         @media screen {
@@ -204,36 +205,36 @@
 
     <aside id="qa-panel">
         <div class="p-head">
-            <h1>Print Config</h1>
-            <p>Layout 2x5 (10 vé/A4) • Bản Vá 100% Sạch Mã Vạch</p>
+            <h1>Cấu Hình In Vé</h1>
+            <p>Layout 2x5 (10 vé/A4) • Phản Hồi Rung Xúc Giác</p>
         </div>
         
         <div class="p-body">
             
-            <div class="section-title mobile-keep">Chế Độ Nhanh Điện Thoại & Mẫu Sẵn</div>
-            <div class="fg mobile-keep">
+            <div class="section-title">Chế Độ Điện Thoại</div>
+            <div class="fg">
                 <label class="operator-toggle">📱 Giao diện gọn cho điện thoại <input type="checkbox" id="ui-operatorMode" class="state-bind"></label>
             </div>
-            <div class="quick-grid mobile-keep">
+            <div class="quick-grid">
                 <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
                 <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
                 <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
                 <button type="button" class="btn-preset dark" data-preset="qrprod">Cổ Điển</button>
             </div>
-            <div class="fr mobile-keep" style="margin-top:10px;">
-                <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
-                <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Vé đầu</button></div>
+            <div class="fr" style="margin-top:10px;">
+                <div class="fg advanced-only"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
+                <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Về vé đầu tiên</button></div>
             </div>
 
-            <div class="section-title advanced-only">Kho Font Hệ Thống (Đã Nạp Nhanh)</div>
+            <div class="section-title advanced-only">Kho Font Hệ Thống</div>
             <div class="fg advanced-only"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
             <div class="fg advanced-only"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
             <div class="fg advanced-only"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
             <div class="fg advanced-only"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
             <div class="fg advanced-only"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
 
-            <div class="section-title">Hệ Màu & Logo Wedding (10 Mẫu)</div>
-            <div class="fr">
+            <div class="section-title advanced-only">Hệ Màu & Logo Wedding (10 Mẫu)</div>
+            <div class="fr advanced-only">
                 <div class="fg">
                     <select id="ui-colorMode" class="fc state-bind">
                         <option value="color">🖨️ In Màu</option>
@@ -241,39 +242,39 @@
                     </select>
                 </div>
                 <div class="fg">
-                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none; padding:9px;">🎲 Đổi Viền Góc</button>
+                    <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none; padding:7px;">🎲 Đổi Viền</button>
                 </div>
             </div>
             
-            <div class="fg">
+            <div class="fg advanced-only">
                 <select id="ui-logoPreset" class="fc state-bind">
                     <optgroup label="Biểu Tượng Cưới Truyền Thống">
                         <option value="hy_classic">囍 Song Hỷ Cổ Điển</option>
                         <option value="hy_circle">囍 Song Hỷ Ấn Triện</option>
                     </optgroup>
                     <optgroup label="Biểu Tượng Hiện Đại & Luxury">
-                        <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi (Cao/Thấp)</option>
+                        <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi</option>
                         <option value="ring_interlock">💍 Nhẫn Cưới Lồng Nhau</option>
                         <option value="ring_diamond">💎 Nhẫn Kim Cương</option>
                         <option value="heart_infinity">💖 Trái Tim Vô Cực</option>
                         <option value="heart_double">💕 Cặp Trái Tim</option>
                     </optgroup>
                     <optgroup label="Khung Chữ Lồng (Monogram N&Q)">
-                        <option value="wreath_laurel">🌿 Vòng Nguyệt Quế Hoàng Gia</option>
+                        <option value="wreath_laurel">🌿 Vòng Nguyệt Quế</option>
                         <option value="frame_vintage">🌸 Khung Hoa Vintage</option>
-                        <option value="frame_hex">⬡ Khung Lục Giác Hiện Đại</option>
+                        <option value="frame_hex">⬡ Khung Lục Giác</option>
                     </optgroup>
                     <optgroup label="Khác">
                         <option value="custom">📁 Ảnh Logo Khách Gửi (Upload)</option>
                     </optgroup>
                 </select>
             </div>
-            <div class="fg" id="box-custom-logo" style="display:none;">
+            <div class="fg advanced-only" id="box-custom-logo" style="display:none;">
                 <div class="file-up">
                     <span id="logo-status">📁 Tải Ảnh Logo (.PNG/.SVG)</span>
                     <input type="file" id="logo-uploader" accept="image/png, image/svg+xml">
                 </div>
-                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7.5pt; color:red; display:none;">Xóa Ảnh</a></div>
+                <div style="text-align:right;"><a href="#" id="clear-logo" style="font-size:7pt; color:red; display:none;">Xóa Ảnh</a></div>
             </div>
 
             <div class="section-title">Thông Tin Tên & Vé</div>
@@ -283,42 +284,32 @@
             <div class="fg"><label>Biển Số</label><input type="text" id="ui-plate" class="fc state-bind" value="Biển số:"></div>
             <div class="fg"><label>Lời chào (Footer căn trái)</label><input type="text" id="ui-foot" class="fc state-bind" value="Rất hân hạnh được đón tiếp !"></div>
 
-            <div class="section-title">Sản Xuất: Số Nhảy (Không Mã Vạch)</div>
+            <div class="section-title">Sản Xuất: Số Nhảy</div>
             <div class="fr">
                 <div class="fg"><label>Tổng Vé (Bội số 10)</label><input type="number" id="ui-total" class="fc state-bind" value="40" min="10" step="10"></div>
                 <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
             </div>
-            <div class="fg">
-                <select id="ui-barcode" class="fc state-bind">
-                    <option value="num">Hiển thị Số Nhảy</option>
-                    <option value="off">Tắt Số Nhảy</option>
-                </select>
-            </div>
-
-            <div class="fr">
+            
+            <div class="fr advanced-only">
                 <div class="fg"><label>Chế Độ Xuất</label><select id="ui-printScope" class="fc state-bind"><option value="all">In tất cả</option><option value="first">In thử 1 trang</option><option value="range">Dải số</option></select></div>
-                <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none; padding:9px;">🧮 Tính trang</button></div>
+                <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none; padding:7px;">🧮 Tính trang</button></div>
             </div>
-            <div class="fr" id="range-box">
+            <div class="fr advanced-only" id="range-box">
                 <div class="fg"><label>Từ số vé</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
                 <div class="fg"><label>Đến số vé</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="10" min="1"></div>
             </div>
             <div id="print-summary" class="print-summary">Sẵn sàng.</div>
 
-            <div class="section-title advanced-only">Hệ Thống: Căn Lề & Dữ Liệu</div>
+            <div class="section-title advanced-only">Hệ Thống & Sao Lưu</div>
             <div class="fr advanced-only">
-                <div class="fg"><label>Bù Trục X (mm)</label><input type="number" id="ui-offset-x" class="fc state-bind" value="0" step="0.5"></div>
-                <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
-            </div>
-            <div class="fr advanced-only">
-                <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; padding:9px; flex:1;">📥 Xuất Data</button>
-                <div class="file-up" style="flex:1; padding:8px; background:#44403C; border:none;">
-                    <span style="color:#FFF;">📤 Nhập Data</span>
+                <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; padding:7px; flex:1;">📥 Xuất Dữ Liệu</button>
+                <div class="file-up" style="flex:1; padding:6px; background:#44403C; border:none;">
+                    <span style="color:#FFF;">📤 Nhập Dữ Liệu</span>
                     <input type="file" id="btn-import-json" accept=".json">
                 </div>
             </div>
             <div class="fg advanced-only" style="margin-top: 5px;">
-                <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none; padding:9px;">🚨 Khôi Phục Gốc</button>
+                <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none; padding:7px;">🚨 Khôi Phục Cài Đặt Gốc</button>
             </div>
         </div>
 
@@ -335,7 +326,7 @@
     <script>
     /* =========================================================
        [QR ISO LIBRARY - OFFLINE EMBEDDED]
-       Niêm phong giữ nguyên khối an toàn theo chuẩn Zero Inference. 
+       Niêm phong bảo tồn (Zero Inference). Không sử dụng trong bản In Tĩnh này.
        ========================================================= */
     (function(){
         var modules = {
@@ -534,17 +525,6 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}${plan.blanks ? `, trang cuối trống ${plan.blanks} ô.` : '.'}`;
             };
 
-            const validateBeforePrint = () => {
-                const plan = getPrintPlan();
-                if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể. Vui lòng nhập đủ trước khi in.' };
-                if (!state.date) return { ok:false, msg:'Thiếu ngày. Vui lòng nhập ngày trước khi in.' };
-                if (plan.count <= 0) return { ok:false, msg:'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.' };
-                if (state.logoPreset === 'custom' && !state.logoBase64) return { ok:false, msg:'Đang chọn logo khách gửi nhưng chưa tải ảnh logo.' };
-                return { ok:true, plan };
-            };
-
-            const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-
             const loadLocalFonts = () => {
                 let optionsHtml = '<option value="">-- Mặc định --</option>';
                 if (typeof sysFonts !== 'undefined') {
@@ -580,16 +560,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
                     if(!colB) return;
                     const getRatio = (col, l1, l2) => {
-                        let ratio = 1.0; l1.style.fontSize = `11pt`; l2.style.fontSize = `16pt`;
+                        let ratio = 1.0; l1.style.fontSize = `10.5pt`; l2.style.fontSize = `15pt`;
                         const maxW = col.clientWidth * 1.05; let loops = 0;
                         while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
-                            ratio -= 0.05; l1.style.fontSize = `${11 * ratio}pt`; l2.style.fontSize = `${16 * ratio}pt`; loops++;
+                            ratio -= 0.05; l1.style.fontSize = `${10.5 * ratio}pt`; l2.style.fontSize = `${15 * ratio}pt`; loops++;
                         }
                         return ratio;
                     };
                     const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                    b1.style.fontSize = `${11 * finalRatio}pt`; b2.style.fontSize = `${16 * finalRatio}pt`;
-                    g1.style.fontSize = `${11 * finalRatio}pt`; g2.style.fontSize = `${16 * finalRatio}pt`;
+                    b1.style.fontSize = `${10.5 * finalRatio}pt`; b2.style.fontSize = `${15 * finalRatio}pt`;
+                    g1.style.fontSize = `${10.5 * finalRatio}pt`; g2.style.fontSize = `${15 * finalRatio}pt`;
                 });
             };
 
@@ -610,16 +590,16 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 } else {
                     centerHtml = premiumLogos[state.logoPreset] || premiumLogos['hy_classic'];
                     if(state.logoPreset.startsWith('wreath') || state.logoPreset.startsWith('frame')) {
-                        const m1 = escapeHtml((state.b2 || '').charAt(0).toUpperCase());
-                        const m2 = escapeHtml((state.g2 || '').charAt(0).toUpperCase());
+                        const m1 = (state.b2 || '').charAt(0).toUpperCase();
+                        const m2 = (state.g2 || '').charAt(0).toUpperCase();
                         centerHtml += `<div class="t-monogram-text">${m1}<span style="font-size: 0.7em; margin: 0 1px; color: var(--c-decor-stroke);">&</span>${m2}</div>`;
                     }
                 }
 
                 const cornerHtml = `<svg viewBox="0 0 100 100" style="color:var(--c-border)">${decors[state.decorIndex]}</svg>`;
                 const safe = {
-                    b1: escapeHtml(state.b1), b2: escapeHtml(state.b2), g1: escapeHtml(state.g1), g2: escapeHtml(state.g2),
-                    date: escapeHtml(state.date), plate: escapeHtml(state.plate), foot: escapeHtml(state.foot)
+                    b1: (state.b1), b2: (state.b2), g1: (state.g1), g2: (state.g2),
+                    date: (state.date), plate: (state.plate), foot: (state.foot)
                 };
 
                 for (let p = 0; p < pages; p++) {
@@ -706,7 +686,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     if (navigator.vibrate) navigator.vibrate(40); // Rung nhẹ khi mở cài đặt
                     const willOpen = !document.body.classList.contains('panel-open');
                     setPanelOpen(willOpen);
-                    if (willOpen) notify('Đã mở bảng cấu hình.', 'ok', 1800);
+                    if (willOpen) notify('Đã mở bảng cấu hình.');
                 });
 
                 overlay.addEventListener('click', closePanelOnMobile);
@@ -788,10 +768,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
                 document.getElementById('btn-print').addEventListener('click', () => { 
                     if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Rung nhịp kép khi in
-                    const check = validateBeforePrint(); 
-                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
                     closePanelOnMobile(); 
-                    const p = check.plan; 
+                    const p = getPrintPlan(); 
                     notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
                     setTimeout(() => window.print(), 350); 
                 });
