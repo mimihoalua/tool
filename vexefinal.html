@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Master Print Engine - ISO Standard 2x5 (Final Perfected)</title>
+    <title>Master Print Engine - ISO Standard 2x5 (BW Laser Optimized + Name/QR Clearance)</title>
     <style>
         /* =========================================================
            [CORE METRICS] HỆ MÉT A4 & BIẾN TOÀN CỤC
@@ -16,7 +16,37 @@
             --offset-x: 0mm; --offset-y: 0mm;
         }
         .bw-mode { --c-border: #000000; --c-title: #000000; --c-name: #000000; --c-decor-stroke: #000000; --c-text: #000000; }
-        
+
+        /* =========================================================
+           [BW LASER LOCK] PRESET ĐEN TRẮNG CHUYÊN IN LASER SỐ LƯỢNG LỚN
+           - Mục tiêu: nét đen rõ, QR tương phản cao, bỏ mọi sắc xám/màu lửng.
+           - Không đụng layout màu; chỉ kích hoạt khi body có .bw-mode.
+           ========================================================= */
+        .bw-mode .ticket-trim { border-color: #000 !important; border-width: 1.65pt !important; }
+        .bw-mode .t-title { color: #000 !important; letter-spacing: 2.35px; font-weight: 900; }
+        .bw-mode .serial-badge { color: #000 !important; background: #fff !important; font-weight: 900; }
+        .bw-mode .t-date-side { color: #000 !important; font-weight: 900; }
+        .bw-mode .t-bride, .bw-mode .t-groom, .bw-mode .t-footer { color: #000 !important; text-shadow: none !important; }
+        .bw-mode .t-bride .n-line1, .bw-mode .t-groom .n-line1 { font-weight: 700 !important; }
+        .bw-mode .t-bride .n-line2, .bw-mode .t-groom .n-line2 { font-weight: 900 !important; }
+        .bw-mode .t-plate-row, .bw-mode .t-plate-label { color: #000 !important; font-weight: 900; }
+        .bw-mode .t-plate-dots { border-bottom-color: #000 !important; border-bottom-width: 1.35pt !important; }
+        .bw-mode .corner-ornament svg, .bw-mode .t-decor svg { color: #000 !important; }
+        .bw-mode .corner-ornament svg *, .bw-mode .t-decor svg * { stroke: #000 !important; }
+        .bw-mode .corner-ornament svg *:not([fill="none"]), .bw-mode .t-decor svg *:not([fill="none"]) { fill: #000 !important; }
+        .bw-mode .qr-wrap {
+            right: 4.9mm; bottom: 1.1mm; width: 17.7mm; height: 17.7mm;
+            background: transparent !important; padding: 0 !important; z-index: 40;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        }
+        .bw-mode .qr-box { background: transparent !important; }
+        .bw-mode .qr-box svg, .bw-mode .qr-box img {
+            filter: grayscale(1) contrast(1.45); mix-blend-mode: normal !important;
+            image-rendering: pixelated; image-rendering: crisp-edges; shape-rendering: crispEdges;
+            background: transparent !important;
+        }
+        .bw-mode .t-footer { font-weight: 900; }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -84,14 +114,21 @@
 
         .t-title { font-family: var(--f-title); font-size: 13pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
 
-        /* CÁCH LY TUYỆT ĐỐI KHỐI TÊN: Ép khối này cách xa 2 lề chữ lật dọc */
-        .t-center-block { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 9mm; margin: 0 auto 1.5mm; gap: 1mm; flex: 1; }
+        /* [PATCH FIX] CÁCH LY TUYỆT ĐỐI KHỐI TÊN & GỠ BỎ OVERFLOW HIDDEN */
+        .t-center-block {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            padding: 0 9mm; margin: -0.4mm auto 0.85mm; gap: 1mm; flex: 1;
+            position: relative; z-index: 8; transform: translateY(-1.15mm);
+        }
         
         /* GỠ BỎ overflow: hidden; Line-height nới lỏng thành 1.15 để đuôi chữ g, q hiển thị đủ 100% */
         .t-bride, .t-groom { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; color: var(--c-name); font-family: var(--f-name); overflow: visible; }
         
         .t-bride .n-line1, .t-groom .n-line1 { font-size: 14pt !important; white-space: nowrap; margin-bottom: 6px; display: block; } 
-        .t-bride .n-line2, .t-groom .n-line2 { font-size: 24pt !important; font-weight: bold; white-space: nowrap; display: block; } 
+        .t-bride .n-line2, .t-groom .n-line2 {
+            font-size: 24pt !important; font-weight: bold; white-space: nowrap; display: block;
+            padding-bottom: 0.45mm;
+        } 
         
         .t-decor { width: 9mm; height: 9mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
@@ -103,11 +140,23 @@
         .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10.5pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
-        /* [PATCH FIX] KHÓA 1 DÒNG FOOTER VÀ GIAO CHO JS AUTO-SCALE */
-        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; min-height: 3.5mm; transition: padding 0.2s ease;}
-        .t-footer { flex: 1; text-align: left; padding-left: 8mm; color: var(--c-name); font-family: var(--f-foot); font-size: 10pt; font-style: italic; font-weight: bold; line-height: 1.2; overflow: hidden; white-space: nowrap; }
+        /* [FINAL PATCH] FOOTER 1 DÒNG - KHÓA VÙNG AN TOÀN QR
+           Mục tiêu: dòng "Rất hân hạnh được đón tiếp !" luôn nằm 1 dòng,
+           không chui vào vùng QR, không che biên/vạch an toàn, vẫn đọc rõ khi in. */
+        .t-footer-row {
+            display: block; width: 100%; position: relative; z-index: 5;
+            margin-bottom: 0.45mm; min-height: 4.1mm; transition: padding 0.2s ease;
+        }
+        .t-footer {
+            display: block; width: 100%; max-width: 100%; text-align: left;
+            padding-left: 2mm; color: var(--c-name); font-family: var(--f-foot);
+            font-size: 9.2pt; font-style: italic; font-weight: bold; line-height: 1;
+            white-space: nowrap; overflow: visible; text-overflow: clip;
+            transform-origin: left center; will-change: transform, font-size;
+        }
 
-        /* QR TRANSPARENT LAYOUT */
+        /* QR TRANSPARENT LAYOUT
+           [PATCH V2] QR clear-box removed in BW mode; name block lifted upward to preserve descenders. */
         .qr-wrap { position: absolute; right: 5.5mm; bottom: 1.5mm; width: 18mm; height: 18mm; z-index: 30; display: block; background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important; outline: 0 !important; box-shadow: none !important; pointer-events: none; }
         .qr-box { width: 100%; height: 100%; color: #000; background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important; outline: 0 !important; box-shadow: none !important; display: flex; align-items:center; justify-content:center; overflow: visible; }
         .qr-box svg, .qr-box img { width: 100%; height: 100%; display: block; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; shape-rendering: crispEdges; mix-blend-mode: multiply; background: transparent !important; }
@@ -208,6 +257,9 @@
             #workspace { padding: 0 !important; gap: 0; background: none; height: auto !important; overflow: visible !important; display: block !important; }
             .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; zoom: 1 !important; display: grid !important; }
             .qr-box { outline: none !important; box-shadow: none !important; }
+            .bw-mode .ticket-trim { border-color:#000 !important; }
+            .bw-mode .qr-wrap { background:#fff !important; }
+            .bw-mode .qr-box svg, .bw-mode .qr-box img { filter: grayscale(1) contrast(1.45) !important; mix-blend-mode: normal !important; }
         }
     </style>
 </head>
@@ -220,7 +272,7 @@
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Cấu Hình In Vé</h1>
-            <p>Layout 2x5 • ISO Standard Cực Sạch</p>
+            <p>Layout 2x5 • ISO Standard (QR + Tên Siêu Lớn)</p>
         </div>
         
         <div class="p-body">
@@ -229,7 +281,7 @@
             <div class="advanced-only">
                 <div class="quick-grid">
                     <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
-                    <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
+                    <button type="button" class="btn-preset bw" data-preset="bwlaser">Laser Đen Trắng</button>
                     <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
                     <button type="button" class="btn-preset dark" data-preset="qrprod">Cổ Điển</button>
                 </div>
@@ -252,7 +304,7 @@
                     <div class="fg">
                         <select id="ui-colorMode" class="fc state-bind">
                             <option value="color">🖨️ In Màu</option>
-                            <option value="bw">⚫ Đen Trắng</option>
+                            <option value="bw">⚫ Đen Trắng / Laser</option>
                         </select>
                     </div>
                     <div class="fg">
@@ -304,7 +356,7 @@
             <div class="fg">
                 <label>Chế độ QR & Số Nhảy</label>
                 <select id="ui-barcode" class="fc state-bind">
-                    <option value="qr">Số Nhảy + Bật QR Tự Động</option>
+                    <option value="qr">Số Nhảy + QR Tự Động</option>
                     <option value="num">Chỉ in Số Nhảy (Tắt QR)</option>
                     <option value="off">Tắt Tất Cả QR và Số nhảy</option>
                 </select>
@@ -374,7 +426,7 @@
             const binds = document.querySelectorAll('.state-bind');
             const fontSelects = document.querySelectorAll('.f-sel');
             
-            // Dữ liệu mặc định gọn gàng
+            // Dọn sạch rác theo đúng chuẩn ISO Zero Trash
             let state = {
                 b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: 'Ngày 23 & 24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
@@ -409,6 +461,7 @@
             const loadState = () => {
                 const saved = localStorage.getItem('WEDDING_TICKET_MASTER_FINAL');
                 if(saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch(e){} }
+                
                 state.total = Math.max(1, parseInt(state.total, 10) || 40);
                 state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
                 syncUIFromState();
@@ -431,7 +484,6 @@
                         else el.value = state[key];
                     }
                 });
-                
                 const boxCustom = document.getElementById('box-custom-logo');
                 if(state.logoPreset === 'custom') {
                     boxCustom.style.display = 'block';
@@ -439,7 +491,6 @@
                 } else {
                     boxCustom.style.display = 'none';
                 }
-
                 document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
                 document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
                 applyPreviewMode();
@@ -500,11 +551,11 @@
                     box.textContent = 'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.';
                     return;
                 }
-                const codeText = state.barcode === 'qr' ? 'có in QR' : (state.barcode === 'num' ? 'chỉ in Số Nhảy' : 'tắt QR/Số');
+                const codeText = state.barcode === 'qr' ? 'mã QR + Số Nhảy' : (state.barcode === 'num' ? 'chỉ Số Nhảy' : 'tắt QR/Số');
                 box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}.`;
             };
 
-            // VALIDATION CHỈ KIỂM TRA NHỮNG TRƯỜNG CÒN TỒN TẠI
+            // [PATCH] VALIDATION: Đã xoá các trường kiểm tra không cần thiết
             const validateBeforePrint = () => {
                 const plan = getPrintPlan();
                 if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể.' };
@@ -619,40 +670,52 @@
             const fitNames = () => {
                 const tickets = document.querySelectorAll('.ticket-trim');
                 tickets.forEach(ticket => {
-                    // 1. Căn Tên Cô Dâu Chú Rể
                     const colB = ticket.querySelector('.t-bride'), b1 = colB.querySelector('.n-line1'), b2 = colB.querySelector('.n-line2');
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
-                    if(colB) {
-                        const getRatio = (col, l1, l2) => {
-                            let ratio = 1.0; 
-                            l1.style.fontSize = `14pt`; 
-                            l2.style.fontSize = `24pt`;
-                            const maxW = col.clientWidth * 0.95; let loops = 0;
-                            while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.3 && loops < 40) {
-                                ratio -= 0.05; 
-                                l1.style.fontSize = `${14 * ratio}pt`; 
-                                l2.style.fontSize = `${24 * ratio}pt`; 
-                                loops++;
-                            }
-                            return ratio;
-                        };
-                        const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                        b1.style.fontSize = `${14 * finalRatio}pt`; b2.style.fontSize = `${24 * finalRatio}pt`;
-                        g1.style.fontSize = `${14 * finalRatio}pt`; g2.style.fontSize = `${24 * finalRatio}pt`;
-                    }
+                    if(!colB) return;
                     
-                    // 2. [PATCH] Căn Lời Chào (Footer) đảm bảo luôn 1 dòng và không rớt đè QR
-                    const footer = ticket.querySelector('.t-footer');
-                    if(footer) {
-                        let fRatio = 1.0;
-                        footer.style.fontSize = `9.5pt`; // Base size
-                        const fMaxW = footer.clientWidth; // Đo độ rộng an toàn thực tế
-                        let fLoops = 0;
-                        while (footer.scrollWidth > fMaxW && fRatio > 0.4 && fLoops < 30) {
-                            fRatio -= 0.05;
-                            footer.style.fontSize = `${9.5 * fRatio}pt`;
-                            fLoops++;
+                    const getRatio = (col, l1, l2) => {
+                        let ratio = 1.0; 
+                        l1.style.fontSize = `14pt`; 
+                        l2.style.fontSize = `24pt`;
+                        const maxW = col.clientWidth; // Sử dụng tối đa chiều rộng an toàn
+                        let loops = 0;
+                        while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.3 && loops < 40) {
+                            ratio -= 0.05; 
+                            l1.style.fontSize = `${14 * ratio}pt`; 
+                            l2.style.fontSize = `${24 * ratio}pt`; 
+                            loops++;
                         }
+                        return ratio;
+                    };
+                    const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
+                    b1.style.fontSize = `${14 * finalRatio}pt`; b2.style.fontSize = `${24 * finalRatio}pt`;
+                    g1.style.fontSize = `${14 * finalRatio}pt`; g2.style.fontSize = `${24 * finalRatio}pt`;
+                });
+            };
+
+            const fitFooters = () => {
+                // Co thông minh chỉ cho footer: ưu tiên giảm nhẹ font, sau đó nén ngang tối đa vừa đủ.
+                // Không dùng xuống dòng, không dùng ellipsis, không lấn vào QR-safe padding.
+                const footers = document.querySelectorAll('.t-footer');
+                footers.forEach(el => {
+                    el.style.fontSize = '9.2pt';
+                    el.style.letterSpacing = '0';
+                    el.style.transform = 'scaleX(1)';
+                    el.style.whiteSpace = 'nowrap';
+
+                    const minPt = 7.2;
+                    let size = 9.2;
+                    let loops = 0;
+                    while (el.scrollWidth > el.clientWidth && size > minPt && loops < 32) {
+                        size -= 0.1;
+                        el.style.fontSize = `${size.toFixed(1)}pt`;
+                        loops++;
+                    }
+
+                    if (el.scrollWidth > el.clientWidth) {
+                        const ratio = Math.max(0.88, el.clientWidth / el.scrollWidth);
+                        el.style.transform = `scaleX(${ratio.toFixed(3)})`;
                     }
                 });
             };
@@ -668,9 +731,10 @@
                 const pages = plan.pages;
                 let currentTicketNum = plan.renderStart;
                 
-                // Điều khiển padding-right linh hoạt dựa trên lựa chọn QR Code
+                // [FINAL PATCH] Điều khiển vùng né QR: đủ an toàn cho QR 18mm + mép phải + buffer,
+                // nhưng không bóp quá hẹp footer khiến lời chào bị xuống dòng.
                 const isQROn = state.barcode === 'qr';
-                const paddingRight = isQROn ? '28mm' : '12mm'; // Khoảng cách cách ly QR Code
+                const paddingRight = isQROn ? '26mm' : '10mm'; // QR-safe lock: không chạm QR, không hy sinh quá nhiều chiều ngang
 
                 let centerHtml = '';
                 if(state.logoPreset === 'custom') {
@@ -740,7 +804,7 @@
                     canvas.appendChild(pageDiv);
                 }
                 updatePrintSummary();
-                document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
+                document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(() => { fitNames(); fitFooters(); }), 100));
             };
 
             /* HỆ THỐNG SMART TOAST & UI MOBILE */
@@ -802,7 +866,7 @@
                 document.querySelectorAll('.btn-preset').forEach(btn => btn.addEventListener('click', () => {
                     const preset = btn.getAttribute('data-preset');
                     if (preset === 'luxury') Object.assign(state, { colorMode:'color', logoPreset:'glasses', barcode:'qr', decorIndex:0 });
-                    if (preset === 'bwsharp') Object.assign(state, { colorMode:'bw', logoPreset:'hy_circle', barcode:'qr', decorIndex:2 });
+                    if (preset === 'bwlaser' || preset === 'bwsharp') Object.assign(state, { colorMode:'bw', logoPreset:'ring_interlock', barcode:'qr', decorIndex:3 });
                     if (preset === 'romantic') Object.assign(state, { colorMode:'color', logoPreset:'heart_double', barcode:'qr', decorIndex:1 });
                     if (preset === 'qrprod') Object.assign(state, { colorMode:'bw', logoPreset:'ring_interlock', barcode:'qr', decorIndex:3 });
                     syncUIFromState(); saveState(); render(); notify('Đã áp preset: ' + btn.textContent.trim());
