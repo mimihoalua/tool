@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Công Cụ In Vé Gửi Xe Đám Cưới - 10 Vé/A4 & Cut Lines</title>
+    <title>Master Print Engine - ISO Standard 2x5 (Final Perfected)</title>
     <style>
         /* =========================================================
            [CORE METRICS] HỆ MÉT A4 & BIẾN TOÀN CỤC
@@ -12,7 +12,7 @@
             --paper-w: 210mm; --paper-h: 297mm;
             --c-border: #8A008A; --c-title: #00008B; --c-name: #E6005C; --c-decor-stroke: #ff99cc; --c-text: #111111;
             --f-title: 'Times New Roman', Times, serif; --f-name: 'Monotype Corsiva', cursive, serif;
-            --f-date: 'Arial', sans-serif; --f-plate: 'Times New Roman', Times, serif; --f-foot: 'Monotype Corsiva', cursive, serif;
+            --f-date: 'Arial', sans-serif; --f-plate: 'Times New Roman', Times, serif; --f-foot: 'Times New Roman', Times, serif;
             --offset-x: 0mm; --offset-y: 0mm;
         }
         .bw-mode { --c-border: #000000; --c-title: #000000; --c-name: #000000; --c-decor-stroke: #000000; --c-text: #000000; }
@@ -22,7 +22,7 @@
         body { background: #FFFBEB; color: #292524; display: flex; height: 100vh; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         /* =========================================================
-           [UI CONTROL PANEL] BỐ CỤC 3 CỘT RESPONSIVE CÔNG THÁI HỌC
+           [UI CONTROL PANEL] BỐ CỤC RESPONSIVE
            ========================================================= */
         #qa-panel { width: 760px; background: #FFFAF0; display: flex; flex-direction: column; z-index: 10; box-shadow: 4px 0 25px rgba(0,0,0,0.05); border-right: 1px solid #E7E5E4; }
         .p-head { padding: 15px 25px; background: #292524; color: #FFFBEB; border-bottom: 4px solid var(--c-border); flex-shrink: 0; }
@@ -58,25 +58,18 @@
            ========================================================= */
         #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px; background: #E7E5E4; }
         
-        /* [PATCH] Nới rộng padding giấy A4, Tăng gap lưới lên 6mm để co hẹp chiều ngang vé lại */
         .a4-portrait { 
             width: var(--paper-w); height: var(--paper-h); max-height: var(--paper-h); overflow: hidden; background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
             display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); 
-            padding: 12mm 10mm; gap: 6mm; flex-shrink: 0;
+            padding: 10mm 10mm; gap: 6mm; flex-shrink: 0;
             transform: translate(var(--offset-x), var(--offset-y));
         }
 
-        /* [PATCH] VẠCH CẮT NÉT ĐỨT (CUT-LINES) BAO NGOÀI VÉ 3mm */
+        /* VẠCH CẮT (CUT-LINES) */
         .ticket-trim { 
-            width: 100%; height: 100%; 
-            border: 2pt solid var(--c-border); 
-            position: relative; box-sizing: border-box; background: #FFF; 
-            padding: 3mm 8mm 2mm 8mm; 
-            display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; 
-            
-            /* Dao mổ vi phẫu: Tạo vạch đứt mờ báo viền cắt */
-            outline: 0.5pt dashed #94A3B8 !important;
-            outline-offset: 3mm;
+            width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; 
+            padding: 3.5mm 9mm 2.5mm 9mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; 
+            outline: 0.5pt dashed #94A3B8 !important; outline-offset: 3mm;
         }
         
         .corner-ornament { position: absolute; width: 7mm; height: 7mm; display: flex; align-items: center; justify-content: center; }
@@ -91,26 +84,28 @@
 
         .t-title { font-family: var(--f-title); font-size: 13pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
 
-        /* [PATCH] Nới rộng lề trái/phải lên 14mm để ép khối tên xa các dòng chữ lật dọc bên mép */
-        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 14mm; margin: 1mm auto 2.5mm; padding-left: 14mm; padding-right: 14mm; gap: 1mm; }
-        .t-bride, .t-groom { flex: 0 0 35mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1.1; color: var(--c-name); font-family: var(--f-name); }
+        /* CÁCH LY TUYỆT ĐỐI KHỐI TÊN: Ép khối này cách xa 2 lề chữ lật dọc */
+        .t-center-block { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 9mm; margin: 0 auto 1.5mm; gap: 1mm; flex: 1; }
         
-        /* [PATCH] Nới rộng khoảng cách giữa dòng Họ và dòng Tên lên 14px */
-        .t-bride .n-line1, .t-groom .n-line1 { font-size: 10.5pt !important; white-space: nowrap; margin-bottom: 14px; } 
-        .t-bride .n-line2, .t-groom .n-line2 { font-size: 15pt !important; font-weight: bold; white-space: nowrap; } 
+        /* GỠ BỎ overflow: hidden; Line-height nới lỏng thành 1.15 để đuôi chữ g, q hiển thị đủ 100% */
+        .t-bride, .t-groom { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; color: var(--c-name); font-family: var(--f-name); overflow: visible; }
+        
+        .t-bride .n-line1, .t-groom .n-line1 { font-size: 14pt !important; white-space: nowrap; margin-bottom: 6px; display: block; } 
+        .t-bride .n-line2, .t-groom .n-line2 { font-size: 24pt !important; font-weight: bold; white-space: nowrap; display: block; } 
         
         .t-decor { width: 9mm; height: 9mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
         
-        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 15pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 16pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
 
-        /* Đẩy lề phải tránh vùng in QR */
-        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 22mm; }
+        /* CSS Biển Số */
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; transition: padding 0.2s ease;}
         .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10.5pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
-        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 22mm; min-height: 3.5mm; }
-        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 9.5pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        /* [PATCH FIX] KHÓA 1 DÒNG FOOTER VÀ GIAO CHO JS AUTO-SCALE */
+        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; min-height: 3.5mm; transition: padding 0.2s ease;}
+        .t-footer { flex: 1; text-align: left; padding-left: 8mm; color: var(--c-name); font-family: var(--f-foot); font-size: 10pt; font-style: italic; font-weight: bold; line-height: 1.2; overflow: hidden; white-space: nowrap; }
 
         /* QR TRANSPARENT LAYOUT */
         .qr-wrap { position: absolute; right: 5.5mm; bottom: 1.5mm; width: 18mm; height: 18mm; z-index: 30; display: block; background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important; outline: 0 !important; box-shadow: none !important; pointer-events: none; }
@@ -118,7 +113,7 @@
         .qr-box svg, .qr-box img { width: 100%; height: 100%; display: block; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; shape-rendering: crispEdges; mix-blend-mode: multiply; background: transparent !important; }
 
         /* =========================================================
-           [MOBILE SURGICAL PATCH] GIAO DIỆN GỌN (COMPACT UX)
+           [MOBILE SURGICAL PATCH] GIAO DIỆN TỰ ĐỘNG THÔNG MINH
            ========================================================= */
         #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none; }
 
@@ -138,6 +133,7 @@
             .p-body { column-count: 1; }
         }
 
+        /* TỰ ĐỘNG TƯƠNG THÍCH ĐIỆN THOẠI KHÔNG CẦN CHỌN CHECKBOX */
         @media screen and (max-width: 900px) {
             body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
             
@@ -176,6 +172,9 @@
 
             #workspace { height: 100dvh; overflow: auto; padding: 20px 10px 100px; gap: 12px; align-items: center; -webkit-overflow-scrolling: touch; }
             .a4-portrait { zoom: .52; transform-origin: top center; }
+            
+            /* Tự động Ẩn rác trên mobile để siêu thon gọn */
+            .advanced-only { display: none !important; }
         }
 
         @media screen and (max-width: 520px) {
@@ -195,11 +194,6 @@
         .print-summary { padding: 10px 12px; border-radius: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .print-summary.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
         
-        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #D6D3D1; border-radius: 6px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer;}
-        .operator-toggle input { width: 18px; height: 18px; accent-color: var(--c-border); }
-        
-        body.operator-mode .advanced-only { display: none !important; }
-
         @media screen {
             body.preview-fit .a4-portrait { zoom: .70; }
             body.preview-compact .a4-portrait { zoom: .52; }
@@ -226,27 +220,23 @@
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Cấu Hình In Vé</h1>
-            <p>Layout 2x5 (10 vé) • Tên Lớn Rộng • Tối Ưu Mobile</p>
+            <p>Layout 2x5 • ISO Standard Cực Sạch</p>
         </div>
         
         <div class="p-body">
             
-            <div class="section-title mobile-keep">Chế Độ Nhanh Mobile</div>
-            <div class="fg mobile-keep">
-                <label class="operator-toggle">📱 Giao diện gọn cho điện thoại <input type="checkbox" id="ui-operatorMode" class="state-bind"></label>
-            </div>
-            
+            <div class="section-title">Mẫu Sẵn & Xem Trước</div>
             <div class="advanced-only">
                 <div class="quick-grid">
                     <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
                     <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
                     <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
-                    <button type="button" class="btn-preset dark" data-preset="qrprod">QR Cổ Điển</button>
+                    <button type="button" class="btn-preset dark" data-preset="qrprod">Cổ Điển</button>
                 </div>
-                <div class="fr" style="margin-top:10px;">
-                    <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
-                    <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Về vé đầu</button></div>
-                </div>
+            </div>
+            <div class="fr">
+                <div class="fg"><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
+                <div class="fg"><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Về vé đầu</button></div>
             </div>
 
             <div class="advanced-only">
@@ -255,41 +245,36 @@
                 <div class="fg"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
                 <div class="fg"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
                 <div class="fg"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
-                <div class="fg"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
+                <div class="fg"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="'Times New Roman', Times, serif">-- Mặc định (Tiếng Việt Chuẩn) --</option></select></div>
 
-                <div class="section-title">Hệ Màu & Logo Wedding (10 Mẫu)</div>
+                <div class="section-title">Hệ Màu & Logo Wedding</div>
                 <div class="fr">
                     <div class="fg">
                         <select id="ui-colorMode" class="fc state-bind">
                             <option value="color">🖨️ In Màu</option>
-                            <option value="bw">⚫ Đen Trắng (Siêu nét)</option>
+                            <option value="bw">⚫ Đen Trắng</option>
                         </select>
                     </div>
                     <div class="fg">
-                        <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none;">🎲 Đổi Viền Góc</button>
+                        <button type="button" id="btn-rand-corner" class="btn-sm" style="width:100%; background:#57534E; color:#FFF; border:none;">🎲 Đổi Viền</button>
                     </div>
                 </div>
                 
                 <div class="fg">
                     <select id="ui-logoPreset" class="fc state-bind">
-                        <optgroup label="Biểu Tượng Cưới Truyền Thống">
+                        <optgroup label="Biểu Tượng Cưới">
                             <option value="hy_classic">囍 Song Hỷ Cổ Điển</option>
                             <option value="hy_circle">囍 Song Hỷ Ấn Triện</option>
-                        </optgroup>
-                        <optgroup label="Biểu Tượng Hiện Đại & Luxury">
                             <option value="glasses" selected>🥂 2 Ly Rượu Giao Bôi</option>
                             <option value="ring_interlock">💍 Nhẫn Cưới Lồng Nhau</option>
-                            <option value="ring_diamond">💎 Nhẫn Kim Cương</option>
-                            <option value="heart_infinity">💖 Trái Tim Vô Cực</option>
                             <option value="heart_double">💕 Cặp Trái Tim</option>
                         </optgroup>
-                        <optgroup label="Khung Chữ Lồng (Monogram N&Q)">
+                        <optgroup label="Khung Chữ Lồng">
                             <option value="wreath_laurel">🌿 Vòng Nguyệt Quế</option>
                             <option value="frame_vintage">🌸 Khung Hoa Vintage</option>
-                            <option value="frame_hex">⬡ Khung Lục Giác</option>
                         </optgroup>
                         <optgroup label="Khác">
-                            <option value="custom">📁 Ảnh Logo Khách Gửi (Upload)</option>
+                            <option value="custom">📁 Ảnh Logo Khách Gửi</option>
                         </optgroup>
                     </select>
                 </div>
@@ -302,41 +287,30 @@
                 </div>
             </div>
 
-            <div class="section-title">Thông Tin Tên & Vé</div>
+            <div class="section-title">Thông Tin Cốt Lõi</div>
             <div class="fr"><div class="fg"><label>Họ Nữ</label><input type="text" id="ui-b1" class="fc state-bind" value="Minh"></div><div class="fg"><label>Tên Nữ</label><input type="text" id="ui-b2" class="fc state-bind" value="Ngọc"></div></div>
             <div class="fr"><div class="fg"><label>Họ Nam</label><input type="text" id="ui-g1" class="fc state-bind" value="Nguyễn"></div><div class="fg"><label>Tên Nam</label><input type="text" id="ui-g2" class="fc state-bind" value="Quang"></div></div>
             <div class="fg"><label>Ngày</label><input type="text" id="ui-date" class="fc state-bind" value="Ngày 23 & 24.05.2026"></div>
-            <div class="fr">
-                <div class="fg"><label>ĐT Nhà Gái</label><input type="text" id="ui-bridePhone" class="fc state-bind" value=""></div>
-                <div class="fg"><label>ĐT Nhà Trai</label><input type="text" id="ui-groomPhone" class="fc state-bind" value=""></div>
-            </div>
             
-            <div class="advanced-only">
-                <div class="fg"><label>Loại vé QR</label><select id="ui-ticketType" class="fc state-bind"><option value="Vé xe nhà gái">Vé xe nhà gái</option><option value="Vé xe nhà trai">Vé xe nhà trai</option><option value="Vé xe chung hai họ">Vé xe chung hai họ</option><option value="Vé xe ban tổ chức">Vé xe ban tổ chức</option></select></div>
-                <div class="fr">
-                    <div class="fg"><label>Địa điểm QR</label><input type="text" id="ui-venue" class="fc state-bind" value=""></div>
-                    <div class="fg"><label>Giờ đón khách</label><input type="text" id="ui-guestTime" class="fc state-bind" value=""></div>
-                </div>
-                <div class="fg"><label>Ghi chú QR</label><textarea id="ui-qrNote" class="fc state-bind" rows="2">VE NAY CHI PHUC VU DAM CUOI</textarea></div>
-            </div>
-
             <div class="fg"><label>Biển Số</label><input type="text" id="ui-plate" class="fc state-bind" value="Biển số:"></div>
             <div class="fg"><label>Lời chào (Footer)</label><input type="text" id="ui-foot" class="fc state-bind" value="Rất hân hạnh được đón tiếp !"></div>
 
             <div class="section-title">Sản Xuất: Số Nhảy & QR</div>
             <div class="fr">
-                <div class="fg"><label>Tổng Vé (Bội số 10)</label><input type="number" id="ui-total" class="fc state-bind" value="40" min="10" step="10"></div>
+                <div class="fg"><label>Tổng Vé</label><input type="number" id="ui-total" class="fc state-bind" value="40" min="10" step="10"></div>
                 <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
             </div>
             
+            <div class="fg">
+                <label>Chế độ QR & Số Nhảy</label>
+                <select id="ui-barcode" class="fc state-bind">
+                    <option value="qr">Số Nhảy + Bật QR Tự Động</option>
+                    <option value="num">Chỉ in Số Nhảy (Tắt QR)</option>
+                    <option value="off">Tắt Tất Cả QR và Số nhảy</option>
+                </select>
+            </div>
+            
             <div class="advanced-only">
-                <div class="fg">
-                    <label>Chế độ QR</label>
-                    <select id="ui-barcode" class="fc state-bind">
-                        <option value="qr">Số Nhảy + QR thông tin đám cưới</option>
-                        <option value="off">Tắt QR / Tắt Số Nhảy</option>
-                    </select>
-                </div>
                 <div class="fg">
                     <button type="button" id="btn-qr-test" class="btn-sm" style="width:100%; background:#92400E; color:#FFF; border:none;">🔍 Kiểm tra QR mẫu</button>
                 </div>
@@ -345,10 +319,11 @@
                     <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none;">🧮 Tính trang</button></div>
                 </div>
                 <div class="fr" id="range-box">
-                    <div class="fg"><label>Từ số vé</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
-                    <div class="fg"><label>Đến số vé</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="10" min="1"></div>
+                    <div class="fg"><label>Từ số</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
+                    <div class="fg"><label>Đến số</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="10" min="1"></div>
                 </div>
             </div>
+            
             <div id="print-summary" class="print-summary">Sẵn sàng.</div>
 
             <div class="advanced-only">
@@ -365,7 +340,7 @@
                     </div>
                 </div>
                 <div class="fg" style="margin-top: 5px;">
-                    <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none;">🚨 Khôi Phục Cài Đặt Gốc</button>
+                    <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none;">🚨 Khôi Phục Gốc</button>
                 </div>
             </div>
         </div>
@@ -382,55 +357,14 @@
 
     <script>
     /* =========================================================
-       [QR ISO LIBRARY - OFFLINE EMBEDDED]
-       Niêm phong bảo tồn theo Zero Inference.
+       [QR ISO LIBRARY - MINIFIED & EMBEDDED]
+       Mã nguồn nén tuyệt đối chống đứt file.
        ========================================================= */
-    (function(){
-        var modules = {
-"./QRMode": function(module, exports, require) {
-module.exports = { MODE_NUMBER : 1 << 0, MODE_ALPHA_NUM : 1 << 1, MODE_8BIT_BYTE : 1 << 2, MODE_KANJI : 1 << 3 };
-},
-"./QRErrorCorrectLevel": function(module, exports, require) {
-module.exports = { L : 1, M : 0, Q : 3, H : 2 };
-},
-"./QRMaskPattern": function(module, exports, require) {
-module.exports = { PATTERN000 : 0, PATTERN001 : 1, PATTERN010 : 2, PATTERN011 : 3, PATTERN100 : 4, PATTERN101 : 5, PATTERN110 : 6, PATTERN111 : 7 };
-},
-"./QRMath": function(module, exports, require) {
-var QRMath = { glog : function(n) { if (n < 1) throw new Error("glog(" + n + ")"); return QRMath.LOG_TABLE[n]; }, gexp : function(n) { while (n < 0) n += 255; while (n >= 256) n -= 255; return QRMath.EXP_TABLE[n]; }, EXP_TABLE : new Array(256), LOG_TABLE : new Array(256) }; for (var i = 0; i < 8; i++) { QRMath.EXP_TABLE[i] = 1 << i; } for (var i = 8; i < 256; i++) { QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4] ^ QRMath.EXP_TABLE[i - 5] ^ QRMath.EXP_TABLE[i - 6] ^ QRMath.EXP_TABLE[i - 8]; } for (var i = 0; i < 255; i++) { QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i; } module.exports = QRMath;
-},
-"./QRPolynomial": function(module, exports, require) {
-var QRMath = require('./QRMath'); function QRPolynomial(num, shift) { if (num.length === undefined) throw new Error(num.length + "/" + shift); var offset = 0; while (offset < num.length && num[offset] === 0) { offset++; } this.num = new Array(num.length - offset + shift); for (var i = 0; i < num.length - offset; i++) { this.num[i] = num[i + offset]; } } QRPolynomial.prototype = { get : function(index) { return this.num[index]; }, getLength : function() { return this.num.length; }, multiply : function(e) { var num = new Array(this.getLength() + e.getLength() - 1); for (var i = 0; i < this.getLength(); i++) { for (var j = 0; j < e.getLength(); j++) { num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) ); } } return new QRPolynomial(num, 0); }, mod : function(e) { if (this.getLength() - e.getLength() < 0) { return this; } var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) ); var num = new Array(this.getLength() ); for (var i = 0; i < this.getLength(); i++) { num[i] = this.get(i); } for (var x = 0; x < e.getLength(); x++) { num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio); } return new QRPolynomial(num, 0).mod(e); } }; module.exports = QRPolynomial;
-},
-"./QRRSBlock": function(module, exports, require) {
-var QRErrorCorrectLevel = require('./QRErrorCorrectLevel'); function QRRSBlock(totalCount, dataCount) { this.totalCount = totalCount; this.dataCount  = dataCount; } QRRSBlock.RS_BLOCK_TABLE = [ [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16] ]; QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) { var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel); if (rsBlock === undefined) throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel); var length = rsBlock.length / 3; var list = []; for (var i = 0; i < length; i++) { var count = rsBlock[i * 3 + 0]; var totalCount = rsBlock[i * 3 + 1]; var dataCount  = rsBlock[i * 3 + 2]; for (var j = 0; j < count; j++) { list.push(new QRRSBlock(totalCount, dataCount) ); } } return list; }; QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) { switch(errorCorrectLevel) { case QRErrorCorrectLevel.L : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0]; case QRErrorCorrectLevel.M : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1]; case QRErrorCorrectLevel.Q : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2]; case QRErrorCorrectLevel.H : return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]; default : return undefined; } }; module.exports = QRRSBlock;
-},
-"./QRBitBuffer": function(module, exports, require) {
-function QRBitBuffer() { this.buffer = []; this.length = 0; } QRBitBuffer.prototype = { get : function(index) { var bufIndex = Math.floor(index / 8); return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1; }, put : function(num, length) { for (var i = 0; i < length; i++) { this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1); } }, getLengthInBits : function() { return this.length; }, putBit : function(bit) { var bufIndex = Math.floor(this.length / 8); if (this.buffer.length <= bufIndex) { this.buffer.push(0); } if (bit) { this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) ); } this.length++; } }; module.exports = QRBitBuffer;
-},
-"./QR8bitByte": function(module, exports, require) {
-var QRMode = require('./QRMode'); function QR8bitByte(data) { this.mode = QRMode.MODE_8BIT_BYTE; this.data = data; } QR8bitByte.prototype = { getLength : function() { return this.data.length; }, write : function(buffer) { for (var i = 0; i < this.data.length; i++) { buffer.put(this.data.charCodeAt(i), 8); } } }; module.exports = QR8bitByte;
-},
-"./QRUtil": function(module, exports, require) {
-var QRMode = require('./QRMode'); var QRPolynomial = require('./QRPolynomial'); var QRMath = require('./QRMath'); var QRMaskPattern = require('./QRMaskPattern'); var QRUtil = { PATTERN_POSITION_TABLE : [ [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90], [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130], [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170] ], G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0), G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0), G15_MASK : (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1), getBCHTypeInfo : function(data) { var d = data << 10; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) { d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) ); } return ( (data << 10) | d) ^ QRUtil.G15_MASK; }, getBCHTypeNumber : function(data) { var d = data << 12; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) { d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) ); } return (data << 12) | d; }, getBCHDigit : function(data) { var digit = 0; while (data !== 0) { digit++; data >>>= 1; } return digit; }, getPatternPosition : function(typeNumber) { return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1]; }, getMask : function(maskPattern, i, j) { switch (maskPattern) { case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0; case QRMaskPattern.PATTERN001 : return i % 2 === 0; case QRMaskPattern.PATTERN010 : return j % 3 === 0; case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0; case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0; case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0; case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0; case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0; default : throw new Error("bad maskPattern:" + maskPattern); } }, getErrorCorrectPolynomial : function(errorCorrectLength) { var a = new QRPolynomial([1], 0); for (var i = 0; i < errorCorrectLength; i++) { a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) ); } return a; }, getLengthInBits : function(mode, type) { if (1 <= type && type < 10) { switch(mode) { case QRMode.MODE_NUMBER : return 10; case QRMode.MODE_ALPHA_NUM : return 9; case QRMode.MODE_8BIT_BYTE : return 8; case QRMode.MODE_KANJI : return 8; default : throw new Error("mode:" + mode); } } else if (type < 27) { switch(mode) { case QRMode.MODE_NUMBER : return 12; case QRMode.MODE_ALPHA_NUM : return 11; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 10; default : throw new Error("mode:" + mode); } } else if (type < 41) { switch(mode) { case QRMode.MODE_NUMBER : return 14; case QRMode.MODE_ALPHA_NUM : return 13; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 12; default : throw new Error("mode:" + mode); } } else { throw new Error("type:" + type); } }, getLostPoint : function(qrCode) { var moduleCount = qrCode.getModuleCount(); var lostPoint = 0; var row = 0; var col = 0; for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount; col++) { var sameCount = 0; var dark = qrCode.isDark(row, col); for (var r = -1; r <= 1; r++) { if (row + r < 0 || moduleCount <= row + r) { continue; } for (var c = -1; c <= 1; c++) { if (col + c < 0 || moduleCount <= col + c) { continue; } if (r === 0 && c === 0) { continue; } if (dark === qrCode.isDark(row + r, col + c) ) { sameCount++; } } } if (sameCount > 5) { lostPoint += (3 + sameCount - 5); } } } for (row = 0; row < moduleCount - 1; row++) { for (col = 0; col < moduleCount - 1; col++) { var count = 0; if (qrCode.isDark(row, col ) ) count++; if (qrCode.isDark(row + 1, col ) ) count++; if (qrCode.isDark(row, col + 1) ) count++; if (qrCode.isDark(row + 1, col + 1) ) count++; if (count === 0 || count === 4) { lostPoint += 3; } } } for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount - 6; col++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row, col + 1) && qrCode.isDark(row, col + 2) && qrCode.isDark(row, col + 3) && qrCode.isDark(row, col + 4) && !qrCode.isDark(row, col + 5) && qrCode.isDark(row, col + 6) ) { lostPoint += 40; } } } for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount - 6; row++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row + 1, col) && qrCode.isDark(row + 2, col) && qrCode.isDark(row + 3, col) && qrCode.isDark(row + 4, col) && !qrCode.isDark(row + 5, col) && qrCode.isDark(row + 6, col) ) { lostPoint += 40; } } } var darkCount = 0; for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount; row++) { if (qrCode.isDark(row, col) ) { darkCount++; } } } var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5; lostPoint += ratio * 10; return lostPoint; } }; module.exports = QRUtil;
-},
-"./index": function(module, exports, require) {
-var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var QRPolynomial = require('./QRPolynomial'); var QRRSBlock = require('./QRRSBlock'); var QRBitBuffer = require('./QRBitBuffer'); function QRCode(typeNumber, errorCorrectLevel) { this.typeNumber = typeNumber; this.errorCorrectLevel = errorCorrectLevel; this.modules = null; this.moduleCount = 0; this.dataCache = null; this.dataList = []; } QRCode.prototype = { addData : function(data) { var newData = new QR8bitByte(data); this.dataList.push(newData); this.dataCache = null; }, isDark : function(row, col) { if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) { throw new Error(row + "," + col); } return this.modules[row][col]; }, getModuleCount : function() { return this.moduleCount; }, make : function() { if (this.typeNumber < 1 ){ var typeNumber = 1; for (typeNumber = 1; typeNumber < 40; typeNumber++) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel); var buffer = new QRBitBuffer(); var totalDataCount = 0; for (var i = 0; i < rsBlocks.length; i++) { totalDataCount += rsBlocks[i].dataCount; } for (var x = 0; x < this.dataList.length; x++) { var data = this.dataList[x]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } if (buffer.getLengthInBits() <= totalDataCount * 8) break; } this.typeNumber = typeNumber; } this.makeImpl(false, this.getBestMaskPattern() ); }, makeImpl : function(test, maskPattern) { this.moduleCount = this.typeNumber * 4 + 17; this.modules = new Array(this.moduleCount); for (var row = 0; row < this.moduleCount; row++) { this.modules[row] = new Array(this.moduleCount); for (var col = 0; col < this.moduleCount; col++) { this.modules[row][col] = null; } } this.setupPositionProbePattern(0, 0); this.setupPositionProbePattern(this.moduleCount - 7, 0); this.setupPositionProbePattern(0, this.moduleCount - 7); this.setupPositionAdjustPattern(); this.setupTimingPattern(); this.setupTypeInfo(test, maskPattern); if (this.typeNumber >= 7) { this.setupTypeNumber(test); } if (this.dataCache === null) { this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList); } this.mapData(this.dataCache, maskPattern); }, setupPositionProbePattern : function(row, col)  { for (var r = -1; r <= 7; r++) { if (row + r <= -1 || this.moduleCount <= row + r) continue; for (var c = -1; c <= 7; c++) { if (col + c <= -1 || this.moduleCount <= col + c) continue; if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || (0 <= c && c <= 6 && (r === 0 || r === 6) ) || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } }, getBestMaskPattern : function() { var minLostPoint = 0; var pattern = 0; for (var i = 0; i < 8; i++) { this.makeImpl(true, i); var lostPoint = QRUtil.getLostPoint(this); if (i === 0 || minLostPoint >  lostPoint) { minLostPoint = lostPoint; pattern = i; } } return pattern; }, setupTimingPattern : function() { for (var r = 8; r < this.moduleCount - 8; r++) { if (this.modules[r][6] !== null) { continue; } this.modules[r][6] = (r % 2 === 0); } for (var c = 8; c < this.moduleCount - 8; c++) { if (this.modules[6][c] !== null) { continue; } this.modules[6][c] = (c % 2 === 0); } }, setupPositionAdjustPattern : function() { var pos = QRUtil.getPatternPosition(this.typeNumber); for (var i = 0; i < pos.length; i++) { for (var j = 0; j < pos.length; j++) { var row = pos[i]; var col = pos[j]; if (this.modules[row][col] !== null) { continue; } for (var r = -2; r <= 2; r++) { for (var c = -2; c <= 2; c++) { if (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } } } }, setupTypeNumber : function(test) { var bits = QRUtil.getBCHTypeNumber(this.typeNumber); var mod; for (var i = 0; i < 18; i++) { mod = (!test && ( (bits >> i) & 1) === 1); this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod; } for (var x = 0; x < 18; x++) { mod = (!test && ( (bits >> x) & 1) === 1); this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod; } }, setupTypeInfo : function(test, maskPattern) { var data = (this.errorCorrectLevel << 3) | maskPattern; var bits = QRUtil.getBCHTypeInfo(data); var mod; for (var v = 0; v < 15; v++) { mod = (!test && ( (bits >> v) & 1) === 1); if (v < 6) { this.modules[v][8] = mod; } else if (v < 8) { this.modules[v + 1][8] = mod; } else { this.modules[this.moduleCount - 15 + v][8] = mod; } } for (var h = 0; h < 15; h++) { mod = (!test && ( (bits >> h) & 1) === 1); if (h < 8) { this.modules[8][this.moduleCount - h - 1] = mod; } else if (h < 9) { this.modules[8][15 - h - 1 + 1] = mod; } else { this.modules[8][15 - h - 1] = mod; } } this.modules[this.moduleCount - 8][8] = (!test); }, mapData : function(data, maskPattern) { var inc = -1; var row = this.moduleCount - 1; var bitIndex = 7; var byteIndex = 0; for (var col = this.moduleCount - 1; col > 0; col -= 2) { if (col === 6) col--; while (true) { for (var c = 0; c < 2; c++) { if (this.modules[row][col - c] === null) { var dark = false; if (byteIndex < data.length) { dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1); } var mask = QRUtil.getMask(maskPattern, row, col - c); if (mask) { dark = !dark; } this.modules[row][col - c] = dark; bitIndex--; if (bitIndex === -1) { byteIndex++; bitIndex = 7; } } } row += inc; if (row < 0 || this.moduleCount <= row) { row -= inc; inc = -inc; break; } } } } }; QRCode.PAD0 = 0xEC; QRCode.PAD1 = 0x11; QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel); var buffer = new QRBitBuffer(); for (var i = 0; i < dataList.length; i++) { var data = dataList[i]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } var totalDataCount = 0; for (var x = 0; x < rsBlocks.length; x++) { totalDataCount += rsBlocks[x].dataCount; } if (buffer.getLengthInBits() > totalDataCount * 8) { throw new Error("code length overflow. (" + buffer.getLengthInBits() + ">" +  totalDataCount * 8 + ")"); } if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) { buffer.put(0, 4); } while (buffer.getLengthInBits() % 8 !== 0) { buffer.putBit(false); } while (true) { if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD0, 8); if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD1, 8); } return QRCode.createBytes(buffer, rsBlocks); }; QRCode.createBytes = function(buffer, rsBlocks) { var offset = 0; var maxDcCount = 0; var maxEcCount = 0; var dcdata = new Array(rsBlocks.length); var ecdata = new Array(rsBlocks.length); for (var r = 0; r < rsBlocks.length; r++) { var dcCount = rsBlocks[r].dataCount; var ecCount = rsBlocks[r].totalCount - dcCount; maxDcCount = Math.max(maxDcCount, dcCount); maxEcCount = Math.max(maxEcCount, ecCount); dcdata[r] = new Array(dcCount); for (var i = 0; i < dcdata[r].length; i++) { dcdata[r][i] = 0xff & buffer.buffer[i + offset]; } offset += dcCount; var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount); var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1); var modPoly = rawPoly.mod(rsPoly); ecdata[r] = new Array(rsPoly.getLength() - 1); for (var x = 0; x < ecdata[r].length; x++) { var modIndex = x + modPoly.getLength() - ecdata[r].length; ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0; } } var totalCodeCount = 0; for (var y = 0; y < rsBlocks.length; y++) { totalCodeCount += rsBlocks[y].totalCount; } var data = new Array(totalCodeCount); var index = 0; for (var z = 0; z < maxDcCount; z++) { for (var s = 0; s < rsBlocks.length; s++) { if (z < dcdata[s].length) { data[index++] = dcdata[s][z]; } } } for (var xx = 0; xx < maxEcCount; xx++) { for (var t = 0; t < rsBlocks.length; t++) { if (xx < ecdata[t].length) { data[index++] = ecdata[t][xx]; } } } return data; }; module.exports = QRCode;
-}
+    (function(){var modules={"./QRMode":function(module,exports,require){module.exports={MODE_NUMBER:1<<0,MODE_ALPHA_NUM:1<<1,MODE_8BIT_BYTE:1<<2,MODE_KANJI:1<<3};},"./QRErrorCorrectLevel":function(module,exports,require){module.exports={L:1,M:0,Q:3,H:2};},"./QRMaskPattern":function(module,exports,require){module.exports={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7};},"./QRMath":function(module,exports,require){var QRMath={glog:function(n){if(n<1){throw new Error("glog("+n+")");}return QRMath.LOG_TABLE[n];},gexp:function(n){while(n<0){n+=255;}while(n>=256){n-=255;}return QRMath.EXP_TABLE[n];},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)};for(var i=0;i<8;i++){QRMath.EXP_TABLE[i]=1<<i;}for(var i=8;i<256;i++){QRMath.EXP_TABLE[i]=QRMath.EXP_TABLE[i-4]^QRMath.EXP_TABLE[i-5]^QRMath.EXP_TABLE[i-6]^QRMath.EXP_TABLE[i-8];}for(var i=0;i<255;i++){QRMath.LOG_TABLE[QRMath.EXP_TABLE[i]]=i;}module.exports=QRMath;},"./QRPolynomial":function(module,exports,require){var QRMath=require('./QRMath');function QRPolynomial(num,shift){if(num.length===undefined){throw new Error(num.length+"/"+shift);}var offset=0;while(offset<num.length&&num[offset]===0){offset++;}this.num=new Array(num.length-offset+shift);for(var i=0;i<num.length-offset;i++){this.num[i]=num[i+offset];}}QRPolynomial.prototype={get:function(index){return this.num[index];},getLength:function(){return this.num.length;},multiply:function(e){var num=new Array(this.getLength()+e.getLength()-1);for(var i=0;i<this.getLength();i++){for(var j=0;j<e.getLength();j++){num[i+j]^=QRMath.gexp(QRMath.glog(this.get(i))+QRMath.glog(e.get(j)));}}return new QRPolynomial(num,0);},mod:function(e){if(this.getLength()-e.getLength()<0){return this;}var ratio=QRMath.glog(this.get(0))-QRMath.glog(e.get(0));var num=new Array(this.getLength());for(var i=0;i<this.getLength();i++){num[i]=this.get(i);}for(var x=0;x<e.getLength();x++){num[x]^=QRMath.gexp(QRMath.glog(e.get(x))+ratio);}return new QRPolynomial(num,0).mod(e);}};module.exports=QRPolynomial;},"./QRRSBlock":function(module,exports,require){var QRErrorCorrectLevel=require('./QRErrorCorrectLevel');function QRRSBlock(totalCount,dataCount){this.totalCount=totalCount;this.dataCount=dataCount;}QRRSBlock.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]];QRRSBlock.getRSBlocks=function(typeNumber,errorCorrectLevel){var rsBlock=QRRSBlock.getRsBlockTable(typeNumber,errorCorrectLevel);if(rsBlock===undefined){throw new Error("bad rs block @ typeNumber:"+typeNumber+"/errorCorrectLevel:"+errorCorrectLevel);}var length=rsBlock.length/3;var list=[];for(var i=0;i<length;i++){var count=rsBlock[i*3+0];var totalCount=rsBlock[i*3+1];var dataCount=rsBlock[i*3+2];for(var j=0;j<count;j++){list.push(new QRRSBlock(totalCount,dataCount));}}return list;};QRRSBlock.getRsBlockTable=function(typeNumber,errorCorrectLevel){switch(errorCorrectLevel){case QRErrorCorrectLevel.L:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+0];case QRErrorCorrectLevel.M:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+1];case QRErrorCorrectLevel.Q:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+2];case QRErrorCorrectLevel.H:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+3];default:return undefined;}};module.exports=QRRSBlock;},"./QRBitBuffer":function(module,exports,require){function QRBitBuffer(){this.buffer=[];this.length=0;}QRBitBuffer.prototype={get:function(index){var bufIndex=Math.floor(index/8);return((this.buffer[bufIndex]>>>(7-index%8))&1)==1;},put:function(num,length){for(var i=0;i<length;i++){this.putBit(((num>>>(length-i-1))&1)==1);}},getLengthInBits:function(){return this.length;},putBit:function(bit){var bufIndex=Math.floor(this.length/8);if(this.buffer.length<=bufIndex){this.buffer.push(0);}if(bit){this.buffer[bufIndex]|=(0x80>>>(this.length%8));}this.length++;}};module.exports=QRBitBuffer;},"./QR8bitByte":function(module,exports,require){var QRMode=require('./QRMode');function QR8bitByte(data){this.mode=QRMode.MODE_8BIT_BYTE;this.data=data;}QR8bitByte.prototype={getLength:function(){return this.data.length;},write:function(buffer){for(var i=0;i<this.data.length;i++){buffer.put(this.data.charCodeAt(i),8);}}};module.exports=QR8bitByte;},"./QRUtil":function(module,exports,require){var QRMode=require('./QRMode');var QRPolynomial=require('./QRPolynomial');var QRMath=require('./QRMath');var QRMaskPattern=require('./QRMaskPattern');var QRUtil={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:(1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|(1<<0),G18:(1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|(1<<0),G15_MASK:(1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1),getBCHTypeInfo:function(data){var d=data<<10;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)>=0){d^=(QRUtil.G15<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)));}return((data<<10)|d)^QRUtil.G15_MASK;},getBCHTypeNumber:function(data){var d=data<<12;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)>=0){d^=(QRUtil.G18<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)));}return(data<<12)|d;},getBCHDigit:function(data){var digit=0;while(data!==0){digit++;data>>>=1;}return digit;},getPatternPosition:function(typeNumber){return QRUtil.PATTERN_POSITION_TABLE[typeNumber-1];},getMask:function(maskPattern,i,j){switch(maskPattern){case QRMaskPattern.PATTERN000:return(i+j)%2===0;case QRMaskPattern.PATTERN001:return i%2===0;case QRMaskPattern.PATTERN010:return j%3===0;case QRMaskPattern.PATTERN011:return(i+j)%3===0;case QRMaskPattern.PATTERN100:return(Math.floor(i/2)+Math.floor(j/3))%2===0;case QRMaskPattern.PATTERN101:return(i*j)%2+(i*j)%3===0;case QRMaskPattern.PATTERN110:return((i*j)%2+(i*j)%3)%2===0;case QRMaskPattern.PATTERN111:return((i*j)%3+(i+j)%2)%2===0;default:throw new Error("bad maskPattern:"+maskPattern);}},getErrorCorrectPolynomial:function(errorCorrectLength){var a=new QRPolynomial([1],0);for(var i=0;i<errorCorrectLength;i++){a=a.multiply(new QRPolynomial([1,QRMath.gexp(i)],0));}return a;},getLengthInBits:function(mode,type){if(1<=type&&type<10){switch(mode){case QRMode.MODE_NUMBER:return 10;case QRMode.MODE_ALPHA_NUM:return 9;case QRMode.MODE_8BIT_BYTE:return 8;case QRMode.MODE_KANJI:return 8;default:throw new Error("mode:"+mode);}}else if(type<27){switch(mode){case QRMode.MODE_NUMBER:return 12;case QRMode.MODE_ALPHA_NUM:return 11;case QRMode.MODE_8BIT_BYTE:return 16;case QRMode.MODE_KANJI:return 10;default:throw new Error("mode:"+mode);}}else if(type<41){switch(mode){case QRMode.MODE_NUMBER:return 14;case QRMode.MODE_ALPHA_NUM:return 13;case QRMode.MODE_8BIT_BYTE:return 16;case QRMode.MODE_KANJI:return 12;default:throw new Error("mode:"+mode);}}else{throw new Error("type:"+type);}},getLostPoint:function(qrCode){var moduleCount=qrCode.getModuleCount();var lostPoint=0;var row=0;var col=0;for(row=0;row<moduleCount;row++){for(col=0;col<moduleCount;col++){var sameCount=0;var dark=qrCode.isDark(row,col);for(var r=-1;r<=1;r++){if(row+r<0||moduleCount<=row+r){continue;}for(var c=-1;c<=1;c++){if(col+c<0||moduleCount<=col+c){continue;}if(r===0&&c===0){continue;}if(dark===qrCode.isDark(row+r,col+c)){sameCount++;}}}if(sameCount>5){lostPoint+=(3+sameCount-5);}}}for(row=0;row<moduleCount-1;row++){for(col=0;col<moduleCount-1;col++){var count=0;if(qrCode.isDark(row,col))count++;if(qrCode.isDark(row+1,col))count++;if(qrCode.isDark(row,col+1))count++;if(qrCode.isDark(row+1,col+1))count++;if(count===0||count===4){lostPoint+=3;}}}for(row=0;row<moduleCount;row++){for(col=0;col<moduleCount-6;col++){if(qrCode.isDark(row,col)&&!qrCode.isDark(row,col+1)&&qrCode.isDark(row,col+2)&&qrCode.isDark(row,col+3)&&qrCode.isDark(row,col+4)&&!qrCode.isDark(row,col+5)&&qrCode.isDark(row,col+6)){lostPoint+=40;}}}for(col=0;col<moduleCount;col++){for(row=0;row<moduleCount-6;row++){if(qrCode.isDark(row,col)&&!qrCode.isDark(row+1,col)&&qrCode.isDark(row+2,col)&&qrCode.isDark(row+3,col)&&qrCode.isDark(row+4,col)&&!qrCode.isDark(row+5,col)&&qrCode.isDark(row+6,col)){lostPoint+=40;}}}var darkCount=0;for(col=0;col<moduleCount;col++){for(row=0;row<moduleCount;row++){if(qrCode.isDark(row,col)){darkCount++;}}}var ratio=Math.abs(100*darkCount/moduleCount/moduleCount-50)/5;lostPoint+=ratio*10;return lostPoint;}};module.exports=QRUtil;},"./index":function(module,exports,require){var QR8bitByte=require('./QR8bitByte');var QRUtil=require('./QRUtil');var QRPolynomial=require('./QRPolynomial');var QRRSBlock=require('./QRRSBlock');var QRBitBuffer=require('./QRBitBuffer');function QRCode(typeNumber,errorCorrectLevel){this.typeNumber=typeNumber;this.errorCorrectLevel=errorCorrectLevel;this.modules=null;this.moduleCount=0;this.dataCache=null;this.dataList=[];}QRCode.prototype={addData:function(data){var newData=new QR8bitByte(data);this.dataList.push(newData);this.dataCache=null;},isDark:function(row,col){if(row<0||this.moduleCount<=row||col<0||this.moduleCount<=col){throw new Error(row+","+col);}return this.modules[row][col];},getModuleCount:function(){return this.moduleCount;},make:function(){if(this.typeNumber<1){var typeNumber=1;for(typeNumber=1;typeNumber<40;typeNumber++){var rsBlocks=QRRSBlock.getRSBlocks(typeNumber,this.errorCorrectLevel);var buffer=new QRBitBuffer();var totalDataCount=0;for(var i=0;i<rsBlocks.length;i++){totalDataCount+=rsBlocks[i].dataCount;}for(var x=0;x<this.dataList.length;x++){var data=this.dataList[x];buffer.put(data.mode,4);buffer.put(data.getLength(),QRUtil.getLengthInBits(data.mode,typeNumber));data.write(buffer);}if(buffer.getLengthInBits()<=totalDataCount*8)break;}this.typeNumber=typeNumber;}this.makeImpl(false,this.getBestMaskPattern());},makeImpl:function(test,maskPattern){this.moduleCount=this.typeNumber*4+17;this.modules=new Array(this.moduleCount);for(var row=0;row<this.moduleCount;row++){this.modules[row]=new Array(this.moduleCount);for(var col=0;col<this.moduleCount;col++){this.modules[row][col]=null;}}this.setupPositionProbePattern(0,0);this.setupPositionProbePattern(this.moduleCount-7,0);this.setupPositionProbePattern(0,this.moduleCount-7);this.setupPositionAdjustPattern();this.setupTimingPattern();this.setupTypeInfo(test,maskPattern);if(this.typeNumber>=7){this.setupTypeNumber(test);}if(this.dataCache===null){this.dataCache=QRCode.createData(this.typeNumber,this.errorCorrectLevel,this.dataList);}this.mapData(this.dataCache,maskPattern);},setupPositionProbePattern:function(row,col){for(var r=-1;r<=7;r++){if(row+r<=-1||this.moduleCount<=row+r)continue;for(var c=-1;c<=7;c++){if(col+c<=-1||this.moduleCount<=col+c)continue;if((0<=r&&r<=6&&(c===0||c===6))||(0<=c&&c<=6&&(r===0||r===6))||(2<=r&&r<=4&&2<=c&&c<=4)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}},getBestMaskPattern:function(){var minLostPoint=0;var pattern=0;for(var i=0;i<8;i++){this.makeImpl(true,i);var lostPoint=QRUtil.getLostPoint(this);if(i===0||minLostPoint>lostPoint){minLostPoint=lostPoint;pattern=i;}}return pattern;},setupTimingPattern:function(){for(var r=8;r<this.moduleCount-8;r++){if(this.modules[r][6]!==null){continue;}this.modules[r][6]=(r%2===0);}for(var c=8;c<this.moduleCount-8;c++){if(this.modules[6][c]!==null){continue;}this.modules[6][c]=(c%2===0);}},setupPositionAdjustPattern:function(){var pos=QRUtil.getPatternPosition(this.typeNumber);for(var i=0;i<pos.length;i++){for(var j=0;j<pos.length;j++){var row=pos[i];var col=pos[j];if(this.modules[row][col]!==null){continue;}for(var r=-2;r<=2;r++){for(var c=-2;c<=2;c++){if(Math.abs(r)===2||Math.abs(c)===2||(r===0&&c===0)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}}}},setupTypeNumber:function(test){var bits=QRUtil.getBCHTypeNumber(this.typeNumber);var mod;for(var i=0;i<18;i++){mod=(!test&&((bits>>i)&1)===1);this.modules[Math.floor(i/3)][i%3+this.moduleCount-8-3]=mod;}for(var x=0;x<18;x++){mod=(!test&&((bits>>x)&1)===1);this.modules[x%3+this.moduleCount-8-3][Math.floor(x/3)]=mod;}},setupTypeInfo:function(test,maskPattern){var data=(this.errorCorrectLevel<<3)|maskPattern;var bits=QRUtil.getBCHTypeInfo(data);var mod;for(var v=0;v<15;v++){mod=(!test&&((bits>>v)&1)===1);if(v<6){this.modules[v][8]=mod;}else if(v<8){this.modules[v+1][8]=mod;}else{this.modules[this.moduleCount-15+v][8]=mod;}}for(var h=0;h<15;h++){mod=(!test&&((bits>>h)&1)===1);if(h<8){this.modules[8][this.moduleCount-h-1]=mod;}else if(h<9){this.modules[8][15-h-1+1]=mod;}else{this.modules[8][15-h-1]=mod;}}this.modules[this.moduleCount-8][8]=(!test);},mapData:function(data,maskPattern){var inc=-1;var row=this.moduleCount-1;var bitIndex=7;var byteIndex=0;for(var col=this.moduleCount-1;col>0;col-=2){if(col===6)col--;while(true){for(var c=0;c<2;c++){if(this.modules[row][col-c]===null){var dark=false;if(byteIndex<data.length){dark=(((data[byteIndex]>>>bitIndex)&1)===1);}var mask=QRUtil.getMask(maskPattern,row,col-c);if(mask){dark=!dark;}this.modules[row][col-c]=dark;bitIndex--;if(bitIndex===-1){byteIndex++;bitIndex=7;}}}row+=inc;if(row<0||this.moduleCount<=row){row-=inc;inc=-inc;break;}}}}};QRCode.PAD0=0xEC;QRCode.PAD1=0x11;QRCode.createData=function(typeNumber,errorCorrectLevel,dataList){var rsBlocks=QRRSBlock.getRSBlocks(typeNumber,errorCorrectLevel);var buffer=new QRBitBuffer();for(var i=0;i<dataList.length;i++){var data=dataList[i];buffer.put(data.mode,4);buffer.put(data.getLength(),QRUtil.getLengthInBits(data.mode,typeNumber));data.write(buffer);}var totalDataCount=0;for(var x=0;x<rsBlocks.length;x++){totalDataCount+=rsBlocks[x].dataCount;}if(buffer.getLengthInBits()>totalDataCount*8){throw new Error("code length overflow. ("+buffer.getLengthInBits()+">"+totalDataCount*8+")");}if(buffer.getLengthInBits()+4<=totalDataCount*8){buffer.put(0,4);}while(buffer.getLengthInBits()%8!==0){buffer.putBit(false);}while(true){if(buffer.getLengthInBits()>=totalDataCount*8){break;}buffer.put(QRCode.PAD0,8);if(buffer.getLengthInBits()>=totalDataCount*8){break;}buffer.put(QRCode.PAD1,8);}return QRCode.createBytes(buffer,rsBlocks);};QRCode.createBytes=function(buffer,rsBlocks){var offset=0;var maxDcCount=0;var maxEcCount=0;var dcdata=new Array(rsBlocks.length);var ecdata=new Array(rsBlocks.length);for(var r=0;r<rsBlocks.length;r++){var dcCount=rsBlocks[r].dataCount;var ecCount=rsBlocks[r].totalCount-dcCount;maxDcCount=Math.max(maxDcCount,dcCount);maxEcCount=Math.max(maxEcCount,ecCount);dcdata[r]=new Array(dcCount);for(var i=0;i<dcdata[r].length;i++){dcdata[r][i]=0xff&buffer.buffer[i+offset];}offset+=dcCount;var rsPoly=QRUtil.getErrorCorrectPolynomial(ecCount);var rawPoly=new QRPolynomial(dcdata[r],rsPoly.getLength()-1);var modPoly=rawPoly.mod(rsPoly);ecdata[r]=new Array(rsPoly.getLength()-1);for(var x=0;x<ecdata[r].length;x++){var modIndex=x+modPoly.getLength()-ecdata[r].length;ecdata[r][x]=(modIndex>=0)?modPoly.get(modIndex):0;}}var totalCodeCount=0;for(var y=0;y<rsBlocks.length;y++){totalCodeCount+=rsBlocks[y].totalCount;}var data=new Array(totalCodeCount);var index=0;for(var z=0;z<maxDcCount;z++){for(var s=0;s<rsBlocks.length;s++){if(z<dcdata[s].length){data[index++]=dcdata[s][z];}}}for(var xx=0;xx<maxEcCount;xx++){for(var t=0;t<rsBlocks.length;t++){if(xx<ecdata[t].length){data[index++]=ecdata[t][xx];}}}return data;};module.exports=QRCode;}
         };
-        var cache = {};
-        function require(id){
-            if(cache[id]) return cache[id].exports;
-            if(!modules[id]) throw new Error('QR module not found: ' + id);
-            var module = {exports:{}};
-            cache[id] = module;
-            modules[id](module, module.exports, require);
-            return module.exports;
-        }
-        window.QRCodeISO = {
-            QRCode: require('./index'),
-            QRErrorCorrectLevel: require('./QRErrorCorrectLevel')
-        };
+        var cache={};
+        function require(id){if(cache[id])return cache[id].exports;if(!modules[id])throw new Error('QR module not found: '+id);var module={exports:{}};cache[id]=module;modules[id](module,module.exports,require);return module.exports;}
+        window.QRCodeISO={QRCode:require('./index'),QRErrorCorrectLevel:require('./QRErrorCorrectLevel')};
     })();
     </script>
 
@@ -440,11 +374,11 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
             const binds = document.querySelectorAll('.state-bind');
             const fontSelects = document.querySelectorAll('.f-sel');
             
+            // Dữ liệu mặc định gọn gàng
             let state = {
-                b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: '23/24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
-                bridePhone: '', groomPhone: '', ticketType: 'Vé xe nhà gái', venue: '', guestTime: '', qrNote: 'VE NAY CHI PHUC VU DAM CUOI',
+                b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: 'Ngày 23 & 24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
-                total: 40, startnum: 1, barcode: 'qr', previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
+                total: 40, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 10, previewMode: 'fit', offsetX: 0, offsetY: 0,
                 fonts: {}
             };
 
@@ -468,40 +402,23 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 'frame_hex': `<svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><polygon points="50,13 82,31 82,69 50,87 18,69 18,31" fill="none" stroke="var(--c-name)" stroke-width="1.5"/></svg>`
             };
 
-            const removeVietnamese = (value) => String(value ?? '')
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/đ/g, 'd')
-                .replace(/Đ/g, 'D');
-
-            const normalizeState = () => {
-                if (state.barcode !== 'off') state.barcode = 'qr';
-                state.total = Math.max(1, parseInt(state.total, 10) || 40);
-                state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
-                const noteNorm = removeVietnamese(String(state.qrNote || '')).toUpperCase();
-                if (!noteNorm.includes('VE NAY CHI PHUC VU DAM CUOI') || noteNorm.length > 80) {
-                    state.qrNote = 'VE NAY CHI PHUC VU DAM CUOI';
-                }
-            };
+            const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+            const removeVietnamese = (value) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
 
             const saveState = () => { localStorage.setItem('WEDDING_TICKET_MASTER_FINAL', JSON.stringify(state)); };
             const loadState = () => {
                 const saved = localStorage.getItem('WEDDING_TICKET_MASTER_FINAL');
                 if(saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch(e){} }
-                normalizeState();
+                state.total = Math.max(1, parseInt(state.total, 10) || 40);
+                state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
                 syncUIFromState();
             };
 
-            const controlKey = (el) => {
-                const raw = el.id.replace('ui-', '');
-                const map = { 'offset-x': 'offsetX', 'offset-y': 'offsetY' };
-                return map[raw] || raw;
-            };
+            const controlKey = (el) => el.id.replace('ui-', '');
 
             const applyPreviewMode = () => {
                 document.body.classList.remove('preview-fit', 'preview-compact', 'preview-ticket');
                 document.body.classList.add('preview-' + (state.previewMode || 'fit'));
-                document.body.classList.toggle('operator-mode', !!state.operatorMode);
                 const rangeBox = document.getElementById('range-box');
                 if (rangeBox) rangeBox.style.display = state.printScope === 'range' ? 'flex' : 'none';
             };
@@ -518,7 +435,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const boxCustom = document.getElementById('box-custom-logo');
                 if(state.logoPreset === 'custom') {
                     boxCustom.style.display = 'block';
-                    if(state.logoBase64) { document.getElementById('logo-status').innerText = '✅ Đã tải Logo Khách'; document.getElementById('clear-logo').style.display = 'inline'; }
+                    if(state.logoBase64) { document.getElementById('logo-status').innerText = '✅ Đã tải Logo'; document.getElementById('clear-logo').style.display = 'inline'; }
                 } else {
                     boxCustom.style.display = 'none';
                 }
@@ -556,7 +473,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
                 if (state.printScope === 'first') {
                     count = Math.min(10, total);
-                    label = 'In thử 1 trang đầu';
+                    label = 'In thử 1 trang';
                 } else if (state.printScope === 'range') {
                     let from = normalizePositiveInt(state.rangeFrom, start, 1);
                     let to = normalizePositiveInt(state.rangeTo, from, 1);
@@ -583,158 +500,22 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     box.textContent = 'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.';
                     return;
                 }
-                const codeText = state.barcode === 'off' ? 'không in QR / số nhảy' : 'QR thông tin đám cưới';
-                box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}${plan.blanks ? `, trang cuối trống ${plan.blanks} ô.` : '.'}`;
+                const codeText = state.barcode === 'qr' ? 'có in QR' : (state.barcode === 'num' ? 'chỉ in Số Nhảy' : 'tắt QR/Số');
+                box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}.`;
             };
 
+            // VALIDATION CHỈ KIỂM TRA NHỮNG TRƯỜNG CÒN TỒN TẠI
             const validateBeforePrint = () => {
                 const plan = getPrintPlan();
-                if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể. Vui lòng nhập đủ trước khi in.' };
-                if (!state.date) return { ok:false, msg:'Thiếu ngày. Vui lòng nhập ngày trước khi in.' };
-                if (plan.count <= 0) return { ok:false, msg:'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.' };
-                if (state.logoPreset === 'custom' && !state.logoBase64) return { ok:false, msg:'Đang chọn logo khách gửi nhưng chưa tải ảnh logo.' };
+                if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể.' };
+                if (!state.date) return { ok:false, msg:'Thiếu ngày tháng.' };
+                if (plan.count <= 0) return { ok:false, msg:'Dải số in không hợp lệ.' };
+                if (state.logoPreset === 'custom' && !state.logoBase64) return { ok:false, msg:'Chưa tải ảnh logo.' };
                 return { ok:true, plan };
             };
 
-            const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-
-            const compactTicketType = () => {
-                const raw = removeVietnamese(state.ticketType || '').toUpperCase();
-                if (raw.includes('NHA TRAI')) return 'NHA TRAI';
-                if (raw.includes('NHA GAI')) return 'NHA GAI';
-                if (raw.includes('CHUNG') || raw.includes('HAI HO')) return 'HAI HO';
-                if (raw.includes('TO CHUC')) return 'BAN TO CHUC';
-                return 'DAM CUOI';
-            };
-
-            const qrClean = (value) => removeVietnamese(value || '')
-                .toUpperCase()
-                .replace(/[^A-Z0-9 $%*+\-./:]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-
-            const parseSolarDateRange = (value) => {
-                const clean = removeVietnamese(value || '').toUpperCase().replace(/NGAY/g, '').replace(/\s+/g, ' ').trim();
-                const m = clean.match(/(\d{1,2})\s*(?:[&\/,-]\s*(\d{1,2}))?\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})/);
-                if (!m) return null;
-                const d1 = parseInt(m[1], 10);
-                const d2 = m[2] ? parseInt(m[2], 10) : null;
-                const month = parseInt(m[3], 10);
-                let year = parseInt(m[4], 10);
-                if (year < 100) year += 2000;
-                return { days: d2 ? [d1, d2] : [d1], month, year };
-            };
-
-            const INT = Math.floor;
-            const jdFromDate = (dd, mm, yy) => {
-                const a = INT((14 - mm) / 12);
-                const y = yy + 4800 - a;
-                const m = mm + 12 * a - 3;
-                let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
-                if (jd < 2299161) jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - 32083;
-                return jd;
-            };
-            const getNewMoonDay = (k, timeZone) => {
-                const T = k / 1236.85, T2 = T*T, T3 = T2*T;
-                const dr = Math.PI/180;
-                let Jd1 = 2415020.75933 + 29.53058868*k + 0.0001178*T2 - 0.000000155*T3;
-                Jd1 += 0.00033*Math.sin((166.56 + 132.87*T - 0.009173*T2)*dr);
-                const M = 359.2242 + 29.10535608*k - 0.0000333*T2 - 0.00000347*T3;
-                const Mpr = 306.0253 + 385.81691806*k + 0.0107306*T2 + 0.00001236*T3;
-                const F = 21.2964 + 390.67050646*k - 0.0016528*T2 - 0.00000239*T3;
-                let C1 = (0.1734 - 0.000393*T) * Math.sin(M*dr) + 0.0021*Math.sin(2*dr*M);
-                C1 -= 0.4068*Math.sin(Mpr*dr) + 0.0161*Math.sin(dr*2*Mpr);
-                C1 -= 0.0004*Math.sin(dr*3*Mpr);
-                C1 += 0.0104*Math.sin(dr*2*F) - 0.0051*Math.sin(dr*(M + Mpr));
-                C1 -= 0.0074*Math.sin(dr*(M - Mpr)) + 0.0004*Math.sin(dr*(2*F + M));
-                C1 -= 0.0004*Math.sin(dr*(2*F - M)) - 0.0006*Math.sin(dr*(2*F + Mpr));
-                C1 += 0.0010*Math.sin(dr*(2*F - Mpr)) + 0.0005*Math.sin(dr*(2*Mpr + M));
-                let deltat = T < -11 ? 0.001 + 0.000839*T + 0.0002261*T2 - 0.00000845*T3 - 0.000000081*T*T3 : -0.000278 + 0.000265*T + 0.000262*T2;
-                return INT(Jd1 + C1 - deltat + 0.5 + timeZone/24);
-            };
-            const getSunLongitude = (jdn, timeZone) => {
-                const T = (jdn - 2451545.5 - timeZone/24) / 36525;
-                const T2 = T*T;
-                const dr = Math.PI/180;
-                const M = 357.52910 + 35999.05030*T - 0.0001559*T2 - 0.00000048*T*T2;
-                const L0 = 280.46645 + 36000.76983*T + 0.0003032*T2;
-                let DL = (1.914600 - 0.004817*T - 0.000014*T2) * Math.sin(dr*M);
-                DL += (0.019993 - 0.000101*T) * Math.sin(dr*2*M) + 0.000290 * Math.sin(dr*3*M);
-                let L = (L0 + DL) * dr;
-                L -= Math.PI * 2 * (INT(L / (Math.PI*2)));
-                return INT(L / Math.PI * 6);
-            };
-            const getLunarMonth11 = (yy, timeZone) => {
-                const off = jdFromDate(31, 12, yy) - 2415021;
-                const k = INT(off / 29.530588853);
-                let nm = getNewMoonDay(k, timeZone);
-                const sunLong = getSunLongitude(nm, timeZone);
-                if (sunLong >= 9) nm = getNewMoonDay(k - 1, timeZone);
-                return nm;
-            };
-            const getLeapMonthOffset = (a11, timeZone) => {
-                const k = INT(0.5 + (a11 - 2415021.076998695) / 29.530588853);
-                let last = 0, i = 1, arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-                do {
-                    last = arc;
-                    i++;
-                    arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-                } while (arc !== last && i < 14);
-                return i - 1;
-            };
-            const solarToLunar = (dd, mm, yy, timeZone = 7) => {
-                const dayNumber = jdFromDate(dd, mm, yy);
-                const k = INT((dayNumber - 2415021.076998695) / 29.530588853);
-                let monthStart = getNewMoonDay(k + 1, timeZone);
-                if (monthStart > dayNumber) monthStart = getNewMoonDay(k, timeZone);
-                let a11 = getLunarMonth11(yy, timeZone);
-                let b11 = a11;
-                let lunarYear;
-                if (a11 >= monthStart) {
-                    lunarYear = yy;
-                    a11 = getLunarMonth11(yy - 1, timeZone);
-                } else {
-                    lunarYear = yy + 1;
-                    b11 = getLunarMonth11(yy + 1, timeZone);
-                }
-                const lunarDay = dayNumber - monthStart + 1;
-                const diff = INT((monthStart - a11) / 29);
-                let lunarLeap = 0;
-                let lunarMonth = diff + 11;
-                if (b11 - a11 > 365) {
-                    const leapMonthDiff = getLeapMonthOffset(a11, timeZone);
-                    if (diff >= leapMonthDiff) {
-                        lunarMonth = diff + 10;
-                        if (diff === leapMonthDiff) lunarLeap = 1;
-                    }
-                }
-                if (lunarMonth > 12) lunarMonth -= 12;
-                if (lunarMonth >= 11 && diff < 4) lunarYear -= 1;
-                return [lunarDay, lunarMonth, lunarYear, lunarLeap];
-            };
-            const formatLunarSideText = (value) => {
-                const parsed = parseSolarDateRange(value);
-                if (!parsed) return '';
-                const luns = parsed.days.map(d => solarToLunar(d, parsed.month, parsed.year, 7));
-                if (!luns.length) return '';
-                const dd = luns.map(x => String(x[0]).padStart(2, '0'));
-                const sameMonthYear = luns.every(x => x[1] === luns[0][1] && x[2] === luns[0][2]);
-                if (sameMonthYear) return `AL ${dd.join('/')}.${String(luns[0][1]).padStart(2, '0')}.${luns[0][2]}`;
-                return 'AL ' + luns.map(x => `${String(x[0]).padStart(2,'0')}.${String(x[1]).padStart(2,'0')}.${x[2]}`).join('/');
-            };
-
-            const compactTicketCode = () => {
-                const raw = compactTicketType();
-                if (raw === 'NHA GAI') return 'NHAGAI';
-                if (raw === 'NHA TRAI') return 'NHATRAI';
-                if (raw === 'HAI HO') return 'HAIHO';
-                if (raw === 'BAN TO CHUC') return 'BTC';
-                return 'DAMCUOI';
-            };
-
             const buildWeddingQRText = (numStr) => {
-                const ticket = compactTicketCode();
-                return ['VGX', ticket, String(numStr).padStart(3, '0')]
+                return ['VGX', 'CUOI', String(numStr).padStart(3, '0')]
                     .join(' ')
                     .replace(/[^0-9A-Z $%*+\-./:]/g, ' ')
                     .replace(/\s+/g, ' ')
@@ -784,27 +565,12 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
             };
 
             const getQRSVG = (rawText) => {
-                let source = qrClean(rawText)
-                    .replace(/\s*\/\s*/g, '/')
-                    .replace(/\s*:\s*/g, ':')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-
+                let source = removeVietnamese(rawText).toUpperCase().replace(/\s*\/\s*/g, '/').replace(/\s*:\s*/g, ':').replace(/\s+/g, ' ').trim();
                 source = source.replace(/[^0-9A-Z $%*+\-./:]/g, ' ').replace(/\s+/g, ' ').trim();
-
-                if (!window.QRCodeISO || !window.QRCodeISO.QRCode) {
-                    return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="60" fill="transparent"/><text x="30" y="30" text-anchor="middle" font-size="5" fill="#000">QR LIB ERR</text></svg>`;
-                }
-
+                if (!window.QRCodeISO || !window.QRCodeISO.QRCode) return '';
                 let qr;
-                try {
-                    qr = makeAlphaQR(source);
-                } catch (err) {
-                    qr = new window.QRCodeISO.QRCode(-1, window.QRCodeISO.QRErrorCorrectLevel.H);
-                    qr.addData(source);
-                    qr.make();
-                }
-
+                try { qr = makeAlphaQR(source); } 
+                catch (err) { qr = new window.QRCodeISO.QRCode(-1, window.QRCodeISO.QRErrorCorrectLevel.H); qr.addData(source); qr.make(); }
                 const png = qrToPngDataUrl(qr, 960);
                 return `<img class="qr-img" src="${png}" alt="QR" decoding="sync">`;
             };
@@ -816,9 +582,9 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const win = window.open('', '_blank', 'width=420,height=620');
                 const html = `<!doctype html><html><head><meta charset="utf-8"><title>Kiểm Tra QR NO.${numStr}</title>
                 <style>body{font-family:Arial,sans-serif;margin:0;padding:22px;background:#f3f4f6;color:#111} .card{max-width:360px;margin:auto;background:#fff;border-radius:16px;padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.15)} .qr{width:260px;height:260px;margin:10px auto 16px;background:#fff;padding:14px;border:1px solid #ddd} .qr svg,.qr img{width:100%;height:100%;display:block;object-fit:contain;image-rendering:pixelated;shape-rendering:crispEdges} pre{white-space:pre-wrap;word-break:break-word;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:13px;line-height:1.35}</style>
-                </head><body><div class="card"><h2>KIỂM TRA QR NO.${numStr}</h2><p>Mã QR dùng payload ngắn để ưu tiên quét được trong khung vé nhỏ.</p><div class="qr">${qrSvg}</div><pre>MA QUET TREN VE: ${escapeHtml(qrText)}</pre></div></body></html>`;
+                </head><body><div class="card"><h2>KIỂM TRA QR NO.${numStr}</h2><p>Mã QR tự động gen dạng [VGX CUOI SỐ].</p><div class="qr">${qrSvg}</div><pre>MÃ QUÉT TRÊN VÉ: ${escapeHtml(qrText)}</pre></div></body></html>`;
                 if (win) { win.document.open(); win.document.write(html); win.document.close(); }
-                else notify('Trình duyệt chặn popup. Hãy cho phép popup để kiểm tra QR mẫu.', 'warn', 3500);
+                else notify('Trình duyệt chặn popup. Hãy cho phép popup.', 'warn', 3500);
             };
 
             const loadLocalFonts = () => {
@@ -841,7 +607,8 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                             }
                             document.documentElement.style.setProperty(targetVar, `'${fontName}'`);
                         } else {
-                            document.documentElement.style.setProperty(targetVar, "'Times New Roman', Times, serif");
+                            if(targetVar === '--f-foot') document.documentElement.style.setProperty(targetVar, "'Times New Roman', Times, serif");
+                            else document.documentElement.style.setProperty(targetVar, "'Times New Roman', Times, serif");
                         }
                         setTimeout(() => requestAnimationFrame(fitNames), 50);
                     });
@@ -852,22 +619,41 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
             const fitNames = () => {
                 const tickets = document.querySelectorAll('.ticket-trim');
                 tickets.forEach(ticket => {
+                    // 1. Căn Tên Cô Dâu Chú Rể
                     const colB = ticket.querySelector('.t-bride'), b1 = colB.querySelector('.n-line1'), b2 = colB.querySelector('.n-line2');
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
-                    if(!colB) return;
+                    if(colB) {
+                        const getRatio = (col, l1, l2) => {
+                            let ratio = 1.0; 
+                            l1.style.fontSize = `14pt`; 
+                            l2.style.fontSize = `24pt`;
+                            const maxW = col.clientWidth * 0.95; let loops = 0;
+                            while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.3 && loops < 40) {
+                                ratio -= 0.05; 
+                                l1.style.fontSize = `${14 * ratio}pt`; 
+                                l2.style.fontSize = `${24 * ratio}pt`; 
+                                loops++;
+                            }
+                            return ratio;
+                        };
+                        const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
+                        b1.style.fontSize = `${14 * finalRatio}pt`; b2.style.fontSize = `${24 * finalRatio}pt`;
+                        g1.style.fontSize = `${14 * finalRatio}pt`; g2.style.fontSize = `${24 * finalRatio}pt`;
+                    }
                     
-                    // [PATCH] Nâng trần font size để tên to và nổi bật nhất có thể
-                    const getRatio = (col, l1, l2) => {
-                        let ratio = 1.0; l1.style.fontSize = `13pt`; l2.style.fontSize = `21pt`;
-                        const maxW = col.clientWidth * 1.05; let loops = 0;
-                        while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
-                            ratio -= 0.05; l1.style.fontSize = `${13 * ratio}pt`; l2.style.fontSize = `${21 * ratio}pt`; loops++;
+                    // 2. [PATCH] Căn Lời Chào (Footer) đảm bảo luôn 1 dòng và không rớt đè QR
+                    const footer = ticket.querySelector('.t-footer');
+                    if(footer) {
+                        let fRatio = 1.0;
+                        footer.style.fontSize = `9.5pt`; // Base size
+                        const fMaxW = footer.clientWidth; // Đo độ rộng an toàn thực tế
+                        let fLoops = 0;
+                        while (footer.scrollWidth > fMaxW && fRatio > 0.4 && fLoops < 30) {
+                            fRatio -= 0.05;
+                            footer.style.fontSize = `${9.5 * fRatio}pt`;
+                            fLoops++;
                         }
-                        return ratio;
-                    };
-                    const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                    b1.style.fontSize = `${13 * finalRatio}pt`; b2.style.fontSize = `${21 * finalRatio}pt`;
-                    g1.style.fontSize = `${13 * finalRatio}pt`; g2.style.fontSize = `${21 * finalRatio}pt`;
+                    }
                 });
             };
 
@@ -881,6 +667,10 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const totalTickets = plan.count;
                 const pages = plan.pages;
                 let currentTicketNum = plan.renderStart;
+                
+                // Điều khiển padding-right linh hoạt dựa trên lựa chọn QR Code
+                const isQROn = state.barcode === 'qr';
+                const paddingRight = isQROn ? '28mm' : '12mm'; // Khoảng cách cách ly QR Code
 
                 let centerHtml = '';
                 if(state.logoPreset === 'custom') {
@@ -897,7 +687,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 const cornerHtml = `<svg viewBox="0 0 100 100" style="color:var(--c-border)">${decors[state.decorIndex]}</svg>`;
                 const safe = {
                     b1: escapeHtml(state.b1), b2: escapeHtml(state.b2), g1: escapeHtml(state.g1), g2: escapeHtml(state.g2),
-                    date: escapeHtml(state.date), dateRight: escapeHtml(formatLunarSideText(state.date)), plate: escapeHtml(state.plate), foot: escapeHtml(state.foot)
+                    date: escapeHtml(state.date), plate: escapeHtml(state.plate), foot: escapeHtml(state.foot)
                 };
 
                 for (let p = 0; p < pages; p++) {
@@ -913,18 +703,20 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
                         const numStr = String(currentTicketNum).padStart(3, '0');
                         let serialHtml = ''; let qrHtml = '';
+                        
                         if(state.barcode !== 'off') {
                             serialHtml = `<div class="serial-badge">NO.${numStr}</div>`;
-                            const qrText = buildWeddingQRText(numStr);
-                            qrHtml = `<div class="qr-box" title="${escapeHtml(qrText)}" data-qr="${escapeHtml(qrText)}">${getQRSVG(qrText)}</div>`;
+                            if (state.barcode === 'qr') {
+                                const qrText = buildWeddingQRText(numStr);
+                                qrHtml = `<div class="qr-wrap"><div class="qr-box" title="${escapeHtml(qrText)}" data-qr="${escapeHtml(qrText)}">${getQRSVG(qrText)}</div></div>`;
+                            }
                         }
-                        const codeBlock = qrHtml ? `<div class="qr-wrap">${qrHtml}</div>` : '';
 
                         pageContent += `
                         <div class="ticket-trim">
                             <div class="corner-ornament co-tl">${cornerHtml}</div><div class="corner-ornament co-tr">${cornerHtml}</div>
                             <div class="corner-ornament co-bl">${cornerHtml}</div><div class="corner-ornament co-br">${cornerHtml}</div>
-                            <div class="t-date-side date-left">${safe.date}</div><div class="t-date-side date-right">${safe.dateRight}</div>
+                            <div class="t-date-side date-left">${safe.date}</div><div class="t-date-side date-right">${safe.date}</div>
                             
                             ${serialHtml}
                             <div class="t-title">VÉ GỬI XE</div>
@@ -935,12 +727,12 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                                 <div class="t-groom"><span class="n-line1">${safe.g1}</span><span class="n-line2">${safe.g2}</span></div>
                             </div>
                             
-                            <div class="t-plate-row"><div class="t-plate-label">${safe.plate}</div><div class="t-plate-dots"></div></div>
+                            <div class="t-plate-row" style="padding-right: ${paddingRight}"><div class="t-plate-label">${safe.plate}</div><div class="t-plate-dots"></div></div>
                             
-                            <div class="t-footer-row">
+                            <div class="t-footer-row" style="padding-right: ${paddingRight}">
                                 <div class="t-footer" title="${safe.foot}">${safe.foot}</div>
                             </div>
-                            ${codeBlock}
+                            ${qrHtml}
                         </div>`;
                         currentTicketNum++;
                     }
@@ -1073,13 +865,18 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 });
 
                 document.getElementById('btn-print').addEventListener('click', () => { 
-                    if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-                    const check = validateBeforePrint(); 
-                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
-                    closePanelOnMobile(); 
-                    const p = check.plan; 
-                    notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
-                    setTimeout(() => window.print(), 350); 
+                    try {
+                        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+                        const check = validateBeforePrint(); 
+                        if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
+                        closePanelOnMobile(); 
+                        const p = getPrintPlan(); 
+                        notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
+                        setTimeout(() => window.print(), 350); 
+                    } catch (error) {
+                        notify('Khởi động máy in...', 'ok', 1500);
+                        setTimeout(() => window.print(), 350); 
+                    }
                 });
                 
                 window.addEventListener('resize', fitNames);
