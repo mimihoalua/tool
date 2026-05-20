@@ -56,65 +56,56 @@
         .btn-print:hover { background: #600060; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(138,0,138,0.3); }
 
         /* =========================================================
-           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x4)
+           [PRINT STAGE] MULTI-PAGE RENDERER (A4 2x5)
            ========================================================= */
         #workspace { flex: 1; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px; background: #E7E5E4; }
         
-        /* [PATCH] Sắp xếp 2 cột 4 hàng */
+        /* [PATCH] Sắp xếp 2 cột 5 hàng (10 vé) */
         .a4-portrait { 
             width: var(--paper-w); height: var(--paper-h); max-height: var(--paper-h); overflow: hidden; background: #FFF; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); 
-            padding: 10mm 8mm; gap: 4mm; flex-shrink: 0;
+            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); 
+            padding: 8mm 6mm; gap: 3mm; flex-shrink: 0;
             transform: translate(var(--offset-x), var(--offset-y));
         }
 
-        /* [PATCH] Scale nội dung vé lên ~1.45x để fit ô 2x4 */
-        .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 4.5mm 10mm 3.5mm 10mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+        /* [PATCH] Scale nội dung vé lọt khung 5 hàng */
+        .ticket-trim { width: 100%; height: 100%; border: 2pt solid var(--c-border); position: relative; box-sizing: border-box; background: #FFF; padding: 3.5mm 9mm 2.5mm 9mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         
         /* GÓC HOA VĂN */
-        .corner-ornament { position: absolute; width: 8mm; height: 8mm; display: flex; align-items: center; justify-content: center; }
+        .corner-ornament { position: absolute; width: 7mm; height: 7mm; display: flex; align-items: center; justify-content: center; }
         .corner-ornament svg { width: 100%; height: 100%; }
         .co-tl { top: 1mm; left: 1mm; } .co-tr { top: 1mm; right: 1mm; transform: scaleX(-1); }
         .co-bl { bottom: 1mm; left: 1mm; transform: scaleY(-1); } .co-br { bottom: 1mm; right: 1mm; transform: scale(-1, -1); }
 
-        /* SỐ NHẢY GÓC TRÊN PHẢI */
-        .serial-badge { position: absolute; top: 2mm; right: 9mm; font-family: Arial, sans-serif; font-size: 7pt; font-weight: bold; color: var(--c-border); z-index: 5; }
+        /* SỐ NHẢY GÓC TRÊN PHẢI (Nền trắng bảo vệ không đè viền) */
+        .serial-badge { position: absolute; top: 3.5mm; right: 9.5mm; font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; color: var(--c-border); z-index: 5; background: #FFF; padding: 0 1mm; }
 
         /* NGÀY THÁNG LẬT DỌC */
-        .t-date-side { position: absolute; top: 0; bottom: 0; width: 10mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 6.5pt; font-weight: bold; color: var(--c-border); }
+        .t-date-side { position: absolute; top: 0; bottom: 0; width: 9mm; display: flex; align-items: center; justify-content: center; font-family: var(--f-date); font-size: 5.5pt; font-weight: bold; color: var(--c-border); }
         .date-left { left: 0; writing-mode: vertical-rl; transform: rotate(180deg); } .date-right { right: 0; writing-mode: vertical-rl; }
 
         /* TIÊU ĐỀ */
-        .t-title { font-family: var(--f-title); font-size: 16pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 3px; transform: scaleX(1.1); margin-top: 1mm; margin-bottom: 1mm; line-height: 1; position: relative; }
+        .t-title { font-family: var(--f-title); font-size: 14pt; font-weight: 900; color: var(--c-title); text-align: center; text-transform: uppercase; letter-spacing: 2.5px; transform: scaleX(1.1); margin-top: 0; margin-bottom: 0.5mm; line-height: 1; position: relative; z-index: 2; }
 
         /* TÊN & LOGO GIỮA */
-        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 15mm; margin: 1.5mm auto; padding-left: 12mm; padding-right: 15mm; gap: 1mm; }
+        .t-center-block { display: flex; justify-content: center; align-items: center; width: calc(100% - 1mm); flex: 0 0 13mm; margin: 1mm auto; padding-left: 8mm; padding-right: 8mm; gap: 1mm; }
         .t-bride, .t-groom { flex: 0 0 35mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1.1; color: var(--c-name); font-family: var(--f-name); }
-        .t-bride .n-line1, .t-groom .n-line1 { font-size: 12pt !important; white-space: nowrap; margin-bottom: 2px; } 
-        .t-bride .n-line2, .t-groom .n-line2 { font-size: 18pt !important; font-weight: bold; white-space: nowrap; } 
+        .t-bride .n-line1, .t-groom .n-line1 { font-size: 11pt !important; white-space: nowrap; margin-bottom: 2px; } 
+        .t-bride .n-line2, .t-groom .n-line2 { font-size: 16pt !important; font-weight: bold; white-space: nowrap; } 
         
-        .t-decor { width: 12mm; height: 12mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
+        .t-decor { width: 10mm; height: 10mm; flex-shrink: 0; margin: 0 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
         .t-decor svg, .t-decor img { width: 100%; height: 100%; object-fit: contain; position: absolute; }
         
-        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 18pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
+        .t-monogram-text { position: absolute; font-family: var(--f-name); font-size: 16pt; font-weight: bold; color: var(--c-name); line-height: 1; margin-top: 1px; letter-spacing: 0; display: flex; align-items: center;}
 
         /* BIỂN SỐ */
-        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 11.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 24mm; }
-        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 11.5pt; } 
+        .t-plate-row { display: flex; align-items: flex-end; width: 100%; gap: 4px; font-family: var(--f-plate); font-size: 10.5pt; font-weight: 900; color: var(--c-text); margin-bottom: 1.5mm; padding-right: 12mm; }
+        .t-plate-label { white-space: nowrap; line-height: 1; padding-bottom: 1px; font-size: 10.5pt; } 
         .t-plate-dots { flex: 1; border-bottom: 1.5pt dotted var(--c-text); height: 100%; }
         
         /* FOOTER ROW */
-        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 24mm; min-height: 4.5mm; }
-        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 11pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
-        /* [PATCH] MÃ VẠCH (BARCODE) LAYOUT SCALED UP */
-        .barcode-box { position: absolute; right: 5mm; bottom: 2.5mm; width: 25mm; height: 6mm; flex-shrink: 0; color: var(--c-text); }
-        .barcode-box svg { width: 100%; height: 100%; preserveAspectRatio: none; }
-
-        /* QR TRANSPARENT LAYOUT (Dành cho bản có QR) */
-        .qr-wrap { position: absolute; right: 6mm; bottom: 2mm; width: 20mm; height: 20mm; z-index: 30; display: block; background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important; outline: 0 !important; box-shadow: none !important; pointer-events: none; }
-        .qr-box { width: 100%; height: 100%; color: #000; background: transparent !important; padding: 0 !important; margin: 0 !important; border: 0 !important; outline: 0 !important; box-shadow: none !important; display: flex; align-items:center; justify-content:center; overflow: visible; }
-        .qr-box svg, .qr-box img { width: 100%; height: 100%; display: block; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; shape-rendering: crispEdges; mix-blend-mode: multiply; background: transparent !important; }
+        .t-footer-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 5; margin-bottom: 0.5mm; padding-right: 12mm; min-height: 3.5mm; }
+        .t-footer { flex: 1; text-align: left; color: var(--c-name); font-family: var(--f-foot); font-size: 10pt; font-style: italic; font-weight: bold; line-height: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         /* =========================================================
            [MOBILE SURGICAL PATCH] DRAWER PANEL + SMART TOAST CÔNG THÁI HỌC
@@ -139,18 +130,20 @@
 
         @media screen and (max-width: 900px) {
             body { display: block; height: 100dvh; min-height: 100vh; overflow: hidden; }
+            
             #qa-panel {
                 position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 400px); max-width: 400px; height: 100dvh;
                 z-index: 1001; transform: translateX(-105%); transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             body.panel-open #qa-panel { transform: translateX(0); }
+            
             #mobile-panel-overlay {
                 display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(41, 37, 36, .45);
                 opacity: 0; pointer-events: none; transition: opacity .3s ease;
             }
             body.panel-open #mobile-panel-overlay { opacity: 1; pointer-events: auto; }
             
-            /* [PATCH] NÚT FAB DƯỚI PHẢI (THUMB ZONE) */
+            /* NÚT FAB CÔNG THÁI HỌC (GÓC DƯỚI PHẢI) */
             #mobile-panel-toggle {
                 display: inline-flex; align-items: center; justify-content: center; position: fixed;
                 bottom: 24px; right: 24px;
@@ -171,6 +164,28 @@
             .a4-portrait { zoom: .43; }
         }
 
+        .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .btn-preset, .btn-preview-action { min-height: 36px; border: 0; border-radius: 8px; padding: 8px 10px; font-size: 8pt; font-weight: 900; cursor: pointer; color: #fff; background: #57534E; }
+        .btn-preset:hover, .btn-preview-action:hover { filter: brightness(.95); transform: translateY(-1px); }
+        .btn-preset.gold { background: #8A008A; }
+        .btn-preset.dark { background: #292524; }
+        .btn-preset.soft { background: #BE185D; }
+        .btn-preset.bw { background: #000; }
+        
+        .smart-hint { padding: 10px 12px; border-radius: 8px; background: #FFF; border: 1px solid #E7E5E4; font-size: 8pt; font-weight: 700; color: #57534E; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .print-summary { padding: 10px 12px; border-radius: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; font-size: 8pt; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .print-summary.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+        
+        .operator-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #D6D3D1; border-radius: 8px; background: #FFF; font-size: 8.5pt; font-weight: 900; color: #44403C; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .operator-toggle input { width: 18px; height: 18px; accent-color: var(--c-border); }
+        body.operator-mode .advanced-only { display: none !important; }
+
+        @media screen {
+            body.preview-fit .a4-portrait { zoom: .70; }
+            body.preview-compact .a4-portrait { zoom: .52; }
+            body.preview-ticket .a4-portrait { zoom: 1.05; }
+        }
+
         /* [SURGICAL PATCH] Sửa lỗi Print Spooler bị ẩn các trang dưới do overflow: hidden của UI */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
@@ -178,7 +193,6 @@
             #qa-panel, #mobile-panel-toggle, #mobile-panel-overlay, #smart-toast { display: none !important; } 
             #workspace { padding: 0 !important; gap: 0; background: none; height: auto !important; overflow: visible !important; display: block !important; }
             .a4-portrait { box-shadow: none; margin: 0; page-break-after: always; transform: translate(var(--offset-x), var(--offset-y)) !important; zoom: 1 !important; display: grid !important; }
-            .qr-box { outline: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
@@ -191,17 +205,32 @@
     <aside id="qa-panel">
         <div class="p-head">
             <h1>Print Config</h1>
-            <p>Layout 2x4 (8 vé/A4) • 10 Premium Logos & Barcode Fix</p>
+            <p>Layout 2x5 (10 vé/A4) • Bản Vá 100% Sạch Mã Vạch</p>
         </div>
         
         <div class="p-body">
             
-            <div class="section-title">Kho Font Hệ Thống (Đã Nạp Nhanh)</div>
-            <div class="fg"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
-            <div class="fg"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
+            <div class="section-title mobile-keep">Chế Độ Nhanh Điện Thoại & Mẫu Sẵn</div>
+            <div class="fg mobile-keep">
+                <label class="operator-toggle">📱 Giao diện gọn cho điện thoại <input type="checkbox" id="ui-operatorMode" class="state-bind"></label>
+            </div>
+            <div class="quick-grid mobile-keep">
+                <button type="button" class="btn-preset gold" data-preset="luxury">Sang Trọng</button>
+                <button type="button" class="btn-preset bw" data-preset="bwsharp">Đen Trắng</button>
+                <button type="button" class="btn-preset soft" data-preset="romantic">Romantic</button>
+                <button type="button" class="btn-preset dark" data-preset="qrprod">Cổ Điển</button>
+            </div>
+            <div class="fr mobile-keep" style="margin-top:10px;">
+                <div class="fg"><label>Xem Trước</label><select id="ui-previewMode" class="fc state-bind"><option value="fit">Vừa màn hình</option><option value="compact">Xem nhiều trang</option><option value="ticket">Soi lớn từng vé</option></select></div>
+                <div class="fg"><label>Thao Tác</label><button type="button" id="btn-preview-first" class="btn-preview-action" style="width:100%;">🔎 Vé đầu</button></div>
+            </div>
+
+            <div class="section-title advanced-only">Kho Font Hệ Thống (Đã Nạp Nhanh)</div>
+            <div class="fg advanced-only"><label>Font Tiêu Đề</label><select id="ui-f-title" class="fc f-sel state-bind" data-target="--f-title"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg advanced-only"><label>Font Tên Cô Dâu / Chú Rể</label><select id="ui-f-name" class="fc f-sel state-bind" data-target="--f-name"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg advanced-only"><label>Font Ngày (Lật dọc)</label><select id="ui-f-date" class="fc f-sel state-bind" data-target="--f-date"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg advanced-only"><label>Font Dòng Biển Số</label><select id="ui-f-plate" class="fc f-sel state-bind" data-target="--f-plate"><option value="">-- Đang load... --</option></select></div>
+            <div class="fg advanced-only"><label>Font Chân Chữ (Footer)</label><select id="ui-f-foot" class="fc f-sel state-bind" data-target="--f-foot"><option value="">-- Đang load... --</option></select></div>
 
             <div class="section-title">Hệ Màu & Logo Wedding (10 Mẫu)</div>
             <div class="fr">
@@ -254,32 +283,41 @@
             <div class="fg"><label>Biển Số</label><input type="text" id="ui-plate" class="fc state-bind" value="Biển số:"></div>
             <div class="fg"><label>Lời chào (Footer căn trái)</label><input type="text" id="ui-foot" class="fc state-bind" value="Rất hân hạnh được đón tiếp !"></div>
 
-            <div class="section-title">Sản Xuất: Số Nhảy & Mã Vạch</div>
+            <div class="section-title">Sản Xuất: Số Nhảy (Không Mã Vạch)</div>
             <div class="fr">
-                <div class="fg"><label>Tổng Vé (Bội số 8)</label><input type="number" id="ui-total" class="fc state-bind" value="8" min="8" step="8"></div>
+                <div class="fg"><label>Tổng Vé (Bội số 10)</label><input type="number" id="ui-total" class="fc state-bind" value="40" min="10" step="10"></div>
                 <div class="fg"><label>Bắt Đầu Từ</label><input type="number" id="ui-startnum" class="fc state-bind" value="1" min="1"></div>
             </div>
             <div class="fg">
                 <select id="ui-barcode" class="fc state-bind">
-                    <option value="off">Tắt Số Nhảy & Mã Vạch</option>
-                    <option value="num">Chỉ in Số Nhảy (Góc trên phải)</option>
-                    <option value="bar">In Số Nhảy (Trên) + Mã Vạch (Góc dưới)</option>
+                    <option value="num">Hiển thị Số Nhảy</option>
+                    <option value="off">Tắt Số Nhảy</option>
                 </select>
             </div>
 
-            <div class="section-title">Hệ Thống: Căn Lề & Dữ Liệu</div>
             <div class="fr">
+                <div class="fg"><label>Chế Độ Xuất</label><select id="ui-printScope" class="fc state-bind"><option value="all">In tất cả</option><option value="first">In thử 1 trang</option><option value="range">Dải số</option></select></div>
+                <div class="fg"><label>Tính toán</label><button type="button" id="btn-calc-plan" class="btn-sm" style="width:100%; background:#065F46; color:#FFF; border:none; padding:9px;">🧮 Tính trang</button></div>
+            </div>
+            <div class="fr" id="range-box">
+                <div class="fg"><label>Từ số vé</label><input type="number" id="ui-rangeFrom" class="fc state-bind" value="1" min="1"></div>
+                <div class="fg"><label>Đến số vé</label><input type="number" id="ui-rangeTo" class="fc state-bind" value="10" min="1"></div>
+            </div>
+            <div id="print-summary" class="print-summary">Sẵn sàng.</div>
+
+            <div class="section-title advanced-only">Hệ Thống: Căn Lề & Dữ Liệu</div>
+            <div class="fr advanced-only">
                 <div class="fg"><label>Bù Trục X (mm)</label><input type="number" id="ui-offset-x" class="fc state-bind" value="0" step="0.5"></div>
                 <div class="fg"><label>Bù Trục Y (mm)</label><input type="number" id="ui-offset-y" class="fc state-bind" value="0" step="0.5"></div>
             </div>
-            <div class="fr">
+            <div class="fr advanced-only">
                 <button id="btn-export-json" class="btn-sm" style="background:#44403C; color:#FFF; border:none; padding:9px; flex:1;">📥 Xuất Data</button>
                 <div class="file-up" style="flex:1; padding:8px; background:#44403C; border:none;">
                     <span style="color:#FFF;">📤 Nhập Data</span>
                     <input type="file" id="btn-import-json" accept=".json">
                 </div>
             </div>
-            <div class="fg" style="margin-top: 5px;">
+            <div class="fg advanced-only" style="margin-top: 5px;">
                 <button id="btn-reset" class="btn-sm" style="width:100%; background:#B91C1C; color:#FFF; border:none; padding:9px;">🚨 Khôi Phục Gốc</button>
             </div>
         </div>
@@ -297,7 +335,7 @@
     <script>
     /* =========================================================
        [QR ISO LIBRARY - OFFLINE EMBEDDED]
-       Giữ nguyên khối để sẵn sàng kích hoạt QR mode nếu cần.
+       Niêm phong giữ nguyên khối an toàn theo chuẩn Zero Inference. 
        ========================================================= */
     (function(){
         var modules = {
@@ -357,7 +395,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
             let state = {
                 b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: 'Ngày 23 & 24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
                 colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
-                total: 8, startnum: 1, barcode: 'off', offsetX: 0, offsetY: 0,
+                total: 40, startnum: 1, barcode: 'num', offsetX: 0, offsetY: 0,
                 fonts: {}
             };
 
@@ -381,17 +419,47 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 'frame_hex': `<svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><polygon points="50,13 82,31 82,69 50,87 18,69 18,31" fill="none" stroke="var(--c-name)" stroke-width="1.5"/></svg>`
             };
 
+            const removeVietnamese = (value) => String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D');
+
+            const normalizeState = () => {
+                if (state.barcode !== 'off') state.barcode = 'num';
+                state.total = Math.max(1, parseInt(state.total, 10) || 40);
+                state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
+            };
+
             const saveState = () => { localStorage.setItem('WEDDING_TICKET_MASTER_FINAL', JSON.stringify(state)); };
             const loadState = () => {
                 const saved = localStorage.getItem('WEDDING_TICKET_MASTER_FINAL');
                 if(saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch(e){} }
+                normalizeState();
                 syncUIFromState();
+            };
+
+            const controlKey = (el) => {
+                const raw = el.id.replace('ui-', '');
+                const map = { 'offset-x': 'offsetX', 'offset-y': 'offsetY' };
+                return map[raw] || raw;
+            };
+
+            const applyPreviewMode = () => {
+                document.body.classList.remove('preview-fit', 'preview-compact', 'preview-ticket');
+                document.body.classList.add('preview-' + (state.previewMode || 'fit'));
+                document.body.classList.toggle('operator-mode', !!state.operatorMode);
+                const rangeBox = document.getElementById('range-box');
+                if (rangeBox) rangeBox.style.display = state.printScope === 'range' ? 'flex' : 'none';
             };
 
             const syncUIFromState = () => {
                 binds.forEach(el => {
-                    const key = el.id.replace('ui-', '');
-                    if(state[key] !== undefined) el.value = state[key];
+                    const key = controlKey(el);
+                    if(state[key] !== undefined) {
+                        if (el.type === 'checkbox') el.checked = !!state[key];
+                        else el.value = state[key];
+                    }
                 });
                 
                 const boxCustom = document.getElementById('box-custom-logo');
@@ -404,34 +472,78 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
                 document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
                 document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+                applyPreviewMode();
             };
 
             const syncStateFromUI = () => {
                 binds.forEach(el => {
-                    const key = el.id.replace('ui-', '');
-                    state[key] = el.type === 'number' ? Number(el.value) : el.value;
+                    const key = controlKey(el);
+                    state[key] = el.type === 'number' ? Number(el.value) : (el.type === 'checkbox' ? !!el.checked : el.value);
                     if(el.classList.contains('f-sel')) state.fonts[el.getAttribute('data-target')] = el.value;
                 });
                 document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
                 document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+                applyPreviewMode();
                 saveState();
             };
 
-            const getCode39SVG = (text) => {
-                const map = { '0':'bwbWBwBwb', '1':'BwbWbwbwB', '2':'bwBWbwbwB', '3':'BwBWbwbwb', '4':'bwbWBwbwB', '5':'BwbWBwbwb', '6':'bwBWBwbwb', '7':'bwbWbwBwB', '8':'BwbWbwBwb', '9':'bwBWbwBwb' };
-                text = '*' + text + '*'; let svg = ''; let x = 0;
-                for(let i=0; i<text.length; i++){
-                    const char = text[i]; const code = char === '*' ? 'bWbwBwBwb' : (map[char] || map['0']);
-                    for(let j=0; j<code.length; j++){
-                        const isBar = code[j].toLowerCase() === 'b'; const isWide = code[j] === 'B' || code[j] === 'W';
-                        const w = isWide ? 3 : 1;
-                        if(isBar) svg += `<rect x="${x}" y="0" width="${w}" height="20" fill="currentColor"/>`;
-                        x += w;
-                    }
-                    x += 1;
-                }
-                return `<svg viewBox="0 0 ${x} 20" preserveAspectRatio="none">${svg}</svg>`;
+            const normalizePositiveInt = (value, fallback = 1, min = 1) => {
+                const n = parseInt(value, 10);
+                if (!Number.isFinite(n) || n < min) return fallback;
+                return n;
             };
+
+            const getPrintPlan = () => {
+                const total = normalizePositiveInt(state.total, 40, 1);
+                const start = normalizePositiveInt(state.startnum, 1, 1);
+                const last = start + total - 1;
+                let renderStart = start;
+                let count = total;
+                let label = 'Tất cả';
+
+                if (state.printScope === 'first') {
+                    count = Math.min(10, total);
+                    label = 'In thử 1 trang đầu';
+                } else if (state.printScope === 'range') {
+                    let from = normalizePositiveInt(state.rangeFrom, start, 1);
+                    let to = normalizePositiveInt(state.rangeTo, from, 1);
+                    if (from > to) [from, to] = [to, from];
+                    from = Math.max(start, from);
+                    to = Math.min(last, to);
+                    renderStart = from;
+                    count = Math.max(0, to - from + 1);
+                    label = `Dải số ${String(from).padStart(3,'0')} → ${String(to).padStart(3,'0')}`;
+                }
+
+                const pages = Math.ceil(count / 10);
+                const end = count > 0 ? renderStart + count - 1 : renderStart;
+                return { total, start, last, renderStart, count, pages, end, label, blanks: pages * 10 - count };
+            };
+
+            const updatePrintSummary = () => {
+                const box = document.getElementById('print-summary');
+                if (!box) return;
+                const plan = getPrintPlan();
+                const warn = plan.count <= 0 || plan.blanks > 0;
+                box.classList.toggle('warn', warn);
+                if (plan.count <= 0) {
+                    box.textContent = 'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.';
+                    return;
+                }
+                const codeText = state.barcode === 'off' ? 'tắt số nhảy' : 'có số nhảy';
+                box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}${plan.blanks ? `, trang cuối trống ${plan.blanks} ô.` : '.'}`;
+            };
+
+            const validateBeforePrint = () => {
+                const plan = getPrintPlan();
+                if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể. Vui lòng nhập đủ trước khi in.' };
+                if (!state.date) return { ok:false, msg:'Thiếu ngày. Vui lòng nhập ngày trước khi in.' };
+                if (plan.count <= 0) return { ok:false, msg:'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.' };
+                if (state.logoPreset === 'custom' && !state.logoBase64) return { ok:false, msg:'Đang chọn logo khách gửi nhưng chưa tải ảnh logo.' };
+                return { ok:true, plan };
+            };
+
+            const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
 
             const loadLocalFonts = () => {
                 let optionsHtml = '<option value="">-- Mặc định --</option>';
@@ -468,83 +580,84 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
                     if(!colB) return;
                     const getRatio = (col, l1, l2) => {
-                        let ratio = 1.0; l1.style.fontSize = `12pt`; l2.style.fontSize = `18pt`;
+                        let ratio = 1.0; l1.style.fontSize = `11pt`; l2.style.fontSize = `16pt`;
                         const maxW = col.clientWidth * 1.05; let loops = 0;
                         while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
-                            ratio -= 0.05; l1.style.fontSize = `${12 * ratio}pt`; l2.style.fontSize = `${18 * ratio}pt`; loops++;
+                            ratio -= 0.05; l1.style.fontSize = `${11 * ratio}pt`; l2.style.fontSize = `${16 * ratio}pt`; loops++;
                         }
                         return ratio;
                     };
                     const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
-                    b1.style.fontSize = `${12 * finalRatio}pt`; b2.style.fontSize = `${18 * finalRatio}pt`;
-                    g1.style.fontSize = `${12 * finalRatio}pt`; g2.style.fontSize = `${18 * finalRatio}pt`;
+                    b1.style.fontSize = `${11 * finalRatio}pt`; b2.style.fontSize = `${16 * finalRatio}pt`;
+                    g1.style.fontSize = `${11 * finalRatio}pt`; g2.style.fontSize = `${16 * finalRatio}pt`;
                 });
             };
 
             const render = () => {
                 if (state.colorMode === 'bw') document.body.classList.add('bw-mode');
                 else document.body.classList.remove('bw-mode');
+                applyPreviewMode();
 
                 canvas.innerHTML = '';
-                const totalTickets = parseInt(state.total) || 8;
-                const pages = Math.ceil(totalTickets / 8);
-                let currentTicketNum = parseInt(state.startnum) || 1;
+                const plan = getPrintPlan();
+                const totalTickets = plan.count;
+                const pages = plan.pages;
+                let currentTicketNum = plan.renderStart;
 
-                // XỬ LÝ LOGO & CHỮ LỒNG
                 let centerHtml = '';
                 if(state.logoPreset === 'custom') {
                     centerHtml = state.logoBase64 ? `<img src="${state.logoBase64}">` : premiumLogos['hy_classic'];
                 } else {
                     centerHtml = premiumLogos[state.logoPreset] || premiumLogos['hy_classic'];
-                    // Nếu là form chữ lồng, tự động chèn 2 chữ cái đầu
                     if(state.logoPreset.startsWith('wreath') || state.logoPreset.startsWith('frame')) {
-                        const m1 = state.b2.charAt(0).toUpperCase();
-                        const m2 = state.g2.charAt(0).toUpperCase();
-                        // Chữ lồng được fix font-size: 18pt để 100% không bao giờ đâm ra viền
+                        const m1 = escapeHtml((state.b2 || '').charAt(0).toUpperCase());
+                        const m2 = escapeHtml((state.g2 || '').charAt(0).toUpperCase());
                         centerHtml += `<div class="t-monogram-text">${m1}<span style="font-size: 0.7em; margin: 0 1px; color: var(--c-decor-stroke);">&</span>${m2}</div>`;
                     }
                 }
 
                 const cornerHtml = `<svg viewBox="0 0 100 100" style="color:var(--c-border)">${decors[state.decorIndex]}</svg>`;
+                const safe = {
+                    b1: escapeHtml(state.b1), b2: escapeHtml(state.b2), g1: escapeHtml(state.g1), g2: escapeHtml(state.g2),
+                    date: escapeHtml(state.date), plate: escapeHtml(state.plate), foot: escapeHtml(state.foot)
+                };
 
                 for (let p = 0; p < pages; p++) {
                     const pageDiv = document.createElement('div');
                     pageDiv.className = 'a4-portrait';
                     let pageContent = '';
                     
-                    for (let i = 0; i < 8; i++) {
-                        if ((p * 8 + i) >= totalTickets) {
+                    for (let i = 0; i < 10; i++) {
+                        if ((p * 10 + i) >= totalTickets) {
                             pageContent += `<div></div>`; 
                             continue;
                         }
 
                         const numStr = String(currentTicketNum).padStart(3, '0');
-                        let serialHtml = ''; let barcodeHtml = '';
+                        let serialHtml = '';
                         if(state.barcode !== 'off') {
                             serialHtml = `<div class="serial-badge">NO.${numStr}</div>`;
-                            if(state.barcode === 'bar') { barcodeHtml = `<div class="barcode-box">${getCode39SVG(numStr)}</div>`; }
                         }
 
                         pageContent += `
                         <div class="ticket-trim">
                             <div class="corner-ornament co-tl">${cornerHtml}</div><div class="corner-ornament co-tr">${cornerHtml}</div>
                             <div class="corner-ornament co-bl">${cornerHtml}</div><div class="corner-ornament co-br">${cornerHtml}</div>
-                            <div class="t-date-side date-left">${state.date}</div><div class="t-date-side date-right">${state.date}</div>
+                            <div class="t-date-side date-left">${safe.date}</div><div class="t-date-side date-right">${safe.date}</div>
                             
                             ${serialHtml}
                             <div class="t-title">VÉ GỬI XE</div>
                             
                             <div class="t-center-block">
-                                <div class="names-col t-bride"><span class="n-line1">${state.b1}</span><span class="n-line2">${state.b2}</span></div>
+                                <div class="names-col t-bride"><span class="n-line1">${safe.b1}</span><span class="n-line2">${safe.b2}</span></div>
                                 <div class="t-decor">${centerHtml}</div>
-                                <div class="names-col t-groom"><span class="n-line1">${state.g1}</span><span class="n-line2">${state.g2}</span></div>
+                                <div class="names-col t-groom"><span class="n-line1">${safe.g1}</span><span class="n-line2">${safe.g2}</span></div>
                             </div>
                             
-                            <div class="t-plate-row"><div class="t-plate-label">${state.plate}</div><div class="t-plate-dots"></div></div>
+                            <div class="t-plate-row"><div class="t-plate-label">${safe.plate}</div><div class="t-plate-dots"></div></div>
                             
                             <div class="t-footer-row">
-                                <div class="t-footer" title="${state.foot}">${state.foot}</div>
-                                ${barcodeHtml}
+                                <div class="t-footer" title="${safe.foot}">${safe.foot}</div>
                             </div>
                         </div>`;
                         currentTicketNum++;
@@ -552,19 +665,19 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     pageDiv.innerHTML = pageContent;
                     canvas.appendChild(pageDiv);
                 }
-                
+                updatePrintSummary();
                 document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
             };
 
             /* HỆ THỐNG SMART TOAST & UI MOBILE */
-            const notify = (message, timeout = 2200) => {
+            const notify = (message, type = 'ok', timeout = 2200) => {
                 const toast = document.getElementById('smart-toast');
                 if (!toast) return;
                 clearTimeout(toast._timer);
-                toast.className = 'ok';
+                toast.className = type;
                 toast.textContent = message;
                 void toast.offsetWidth; 
-                toast.classList.add('show', 'ok');
+                toast.classList.add('show', type);
                 toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
             };
 
@@ -574,6 +687,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                 document.body.classList.toggle('panel-open', !!open);
                 const btn = document.getElementById('mobile-panel-toggle');
                 if (btn) {
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
                     btn.setAttribute('aria-label', open ? 'Đóng bảng cài đặt' : 'Mở bảng cài đặt');
                     btn.innerHTML = open ? '×' : '⚙';
                 }
@@ -592,7 +706,7 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     if (navigator.vibrate) navigator.vibrate(40); // Rung nhẹ khi mở cài đặt
                     const willOpen = !document.body.classList.contains('panel-open');
                     setPanelOpen(willOpen);
-                    if (willOpen) notify('Đã mở bảng cấu hình.');
+                    if (willOpen) notify('Đã mở bảng cấu hình.', 'ok', 1800);
                 });
 
                 overlay.addEventListener('click', closePanelOnMobile);
@@ -610,39 +724,58 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
                     el.addEventListener('input', () => { syncStateFromUI(); render(); });
                     el.addEventListener('change', () => { syncStateFromUI(); render(); });
                 });
+
+                document.querySelectorAll('.btn-preset').forEach(btn => btn.addEventListener('click', () => {
+                    const preset = btn.getAttribute('data-preset');
+                    if (preset === 'luxury') Object.assign(state, { colorMode:'color', logoPreset:'glasses', barcode:'num', decorIndex:0 });
+                    if (preset === 'bwsharp') Object.assign(state, { colorMode:'bw', logoPreset:'hy_circle', barcode:'num', decorIndex:2 });
+                    if (preset === 'romantic') Object.assign(state, { colorMode:'color', logoPreset:'heart_double', barcode:'num', decorIndex:1 });
+                    if (preset === 'qrprod') Object.assign(state, { colorMode:'bw', logoPreset:'ring_interlock', barcode:'num', decorIndex:3 });
+                    syncUIFromState(); saveState(); render(); notify('Đã áp preset: ' + btn.textContent.trim());
+                }));
+
+                document.getElementById('btn-preview-first').addEventListener('click', () => {
+                    const first = document.querySelector('.ticket-trim');
+                    if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); notify('Đã đưa vé đầu tiên vào vùng xem.'); }
+                });
+
+                document.getElementById('btn-calc-plan').addEventListener('click', () => {
+                    updatePrintSummary();
+                    const plan = getPrintPlan();
+                    if (plan.count > 0) notify(`${plan.count} vé / ${plan.pages} trang A4. Mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')}.`, plan.blanks ? 'warn' : 'ok', 3600);
+                    else notify('Dải số in không hợp lệ.', 'err', 3000);
+                });
                 
                 document.getElementById('btn-rand-corner').addEventListener('click', () => {
                     state.decorIndex = (state.decorIndex + 1) % decors.length;
-                    saveState(); render();
+                    saveState(); render(); notify('Đã đổi mẫu viền góc.');
                 });
 
                 document.getElementById('ui-logoPreset').addEventListener('change', (e) => {
                     const box = document.getElementById('box-custom-logo');
-                    if(e.target.value === 'custom') box.style.display = 'block';
-                    else box.style.display = 'none';
+                    box.style.display = e.target.value === 'custom' ? 'block' : 'none';
                 });
 
                 document.getElementById('logo-uploader').addEventListener('change', (e) => {
                     const f = e.target.files[0]; if(!f) return;
                     const reader = new FileReader();
-                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); notify('Đã nạp logo thành công.'); };
+                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); notify('Đã nạp logo khách gửi.'); };
                     reader.readAsDataURL(f);
                 });
                 document.getElementById('clear-logo').addEventListener('click', (e) => {
                     e.preventDefault(); state.logoBase64 = null; document.getElementById('logo-status').innerText = '📁 Tải Ảnh Logo (.PNG/.SVG)'; document.getElementById('clear-logo').style.display = 'none'; document.getElementById('logo-uploader').value = '';
-                    saveState(); render(); notify('Đã xóa ảnh logo.');
+                    saveState(); render(); notify('Đã xóa logo khách gửi.');
                 });
 
                 document.getElementById('btn-export-json').addEventListener('click', () => {
                     const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
-                    notify('Xuất dữ liệu thành công.');
+                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); notify('Đã xuất file dữ liệu JSON.');
                 });
                 document.getElementById('btn-import-json').addEventListener('change', (e) => {
                     const f = e.target.files[0]; if(!f) return;
                     const reader = new FileReader();
-                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); notify('Nhập dữ liệu thành công.'); } catch(err){ alert('Lỗi file JSON'); } };
+                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; normalizeState(); syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); notify('Đã nhập dữ liệu thành công.'); } catch(err){ notify('File JSON lỗi hoặc sai định dạng.', 'err', 3200); } };
                     reader.readAsText(f);
                 });
 
@@ -655,9 +788,12 @@ var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var 
 
                 document.getElementById('btn-print').addEventListener('click', () => { 
                     if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Rung nhịp kép khi in
-                    closePanelOnMobile();
-                    notify('Chuẩn bị xuất in hàng loạt...', 1500);
-                    setTimeout(() => window.print(), 300); 
+                    const check = validateBeforePrint(); 
+                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
+                    closePanelOnMobile(); 
+                    const p = check.plan; 
+                    notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
+                    setTimeout(() => window.print(), 350); 
                 });
                 
                 window.addEventListener('resize', fitNames);
