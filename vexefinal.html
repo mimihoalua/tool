@@ -413,4 +413,683 @@ var QRMode = require('./QRMode'); function QR8bitByte(data) { this.mode = QRMode
 var QRMode = require('./QRMode'); var QRPolynomial = require('./QRPolynomial'); var QRMath = require('./QRMath'); var QRMaskPattern = require('./QRMaskPattern'); var QRUtil = { PATTERN_POSITION_TABLE : [ [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90], [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130], [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170] ], G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0), G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0), G15_MASK : (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1), getBCHTypeInfo : function(data) { var d = data << 10; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) { d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) ); } return ( (data << 10) | d) ^ QRUtil.G15_MASK; }, getBCHTypeNumber : function(data) { var d = data << 12; while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) { d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) ); } return (data << 12) | d; }, getBCHDigit : function(data) { var digit = 0; while (data !== 0) { digit++; data >>>= 1; } return digit; }, getPatternPosition : function(typeNumber) { return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1]; }, getMask : function(maskPattern, i, j) { switch (maskPattern) { case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0; case QRMaskPattern.PATTERN001 : return i % 2 === 0; case QRMaskPattern.PATTERN010 : return j % 3 === 0; case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0; case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0; case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0; case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0; case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0; default : throw new Error("bad maskPattern:" + maskPattern); } }, getErrorCorrectPolynomial : function(errorCorrectLength) { var a = new QRPolynomial([1], 0); for (var i = 0; i < errorCorrectLength; i++) { a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) ); } return a; }, getLengthInBits : function(mode, type) { if (1 <= type && type < 10) { switch(mode) { case QRMode.MODE_NUMBER : return 10; case QRMode.MODE_ALPHA_NUM : return 9; case QRMode.MODE_8BIT_BYTE : return 8; case QRMode.MODE_KANJI : return 8; default : throw new Error("mode:" + mode); } } else if (type < 27) { switch(mode) { case QRMode.MODE_NUMBER : return 12; case QRMode.MODE_ALPHA_NUM : return 11; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 10; default : throw new Error("mode:" + mode); } } else if (type < 41) { switch(mode) { case QRMode.MODE_NUMBER : return 14; case QRMode.MODE_ALPHA_NUM : return 13; case QRMode.MODE_8BIT_BYTE : return 16; case QRMode.MODE_KANJI : return 12; default : throw new Error("mode:" + mode); } } else { throw new Error("type:" + type); } }, getLostPoint : function(qrCode) { var moduleCount = qrCode.getModuleCount(); var lostPoint = 0; var row = 0; var col = 0; for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount; col++) { var sameCount = 0; var dark = qrCode.isDark(row, col); for (var r = -1; r <= 1; r++) { if (row + r < 0 || moduleCount <= row + r) { continue; } for (var c = -1; c <= 1; c++) { if (col + c < 0 || moduleCount <= col + c) { continue; } if (r === 0 && c === 0) { continue; } if (dark === qrCode.isDark(row + r, col + c) ) { sameCount++; } } } if (sameCount > 5) { lostPoint += (3 + sameCount - 5); } } } for (row = 0; row < moduleCount - 1; row++) { for (col = 0; col < moduleCount - 1; col++) { var count = 0; if (qrCode.isDark(row, col ) ) count++; if (qrCode.isDark(row + 1, col ) ) count++; if (qrCode.isDark(row, col + 1) ) count++; if (qrCode.isDark(row + 1, col + 1) ) count++; if (count === 0 || count === 4) { lostPoint += 3; } } } for (row = 0; row < moduleCount; row++) { for (col = 0; col < moduleCount - 6; col++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row, col + 1) && qrCode.isDark(row, col + 2) && qrCode.isDark(row, col + 3) && qrCode.isDark(row, col + 4) && !qrCode.isDark(row, col + 5) && qrCode.isDark(row, col + 6) ) { lostPoint += 40; } } } for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount - 6; row++) { if (qrCode.isDark(row, col) && !qrCode.isDark(row + 1, col) && qrCode.isDark(row + 2, col) && qrCode.isDark(row + 3, col) && qrCode.isDark(row + 4, col) && !qrCode.isDark(row + 5, col) && qrCode.isDark(row + 6, col) ) { lostPoint += 40; } } } var darkCount = 0; for (col = 0; col < moduleCount; col++) { for (row = 0; row < moduleCount; row++) { if (qrCode.isDark(row, col) ) { darkCount++; } } } var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5; lostPoint += ratio * 10; return lostPoint; } }; module.exports = QRUtil;
 },
 "./index": function(module, exports, require) {
-var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var QRPolynomial = require('./QRPolynomial'); var QRRSBlock = require('./QRRSBlock'); var QRBitBuffer = require('./QRBitBuffer'); function QRCode(typeNumber, errorCorrectLevel) { this.typeNumber = typeNumber; this.errorCorrectLevel = errorCorrectLevel; this.modules = null; this.moduleCount = 0; this.dataCache = null; this.dataList = []; } QRCode.prototype = { addData : function(data) { var newData = new QR8bitByte(data); this.dataList.push(newData); this.dataCache = null; }, isDark : function(row, col) { if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) { throw new Error(row + "," + col); } return this.modules[row][col]; }, getModuleCount : function() { return this.moduleCount; }, make : function() { if (this.typeNumber < 1 ){ var typeNumber = 1; for (typeNumber = 1; typeNumber < 40; typeNumber++) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel); var buffer = new QRBitBuffer(); var totalDataCount = 0; for (var i = 0; i < rsBlocks.length; i++) { totalDataCount += rsBlocks[i].dataCount; } for (var x = 0; x < this.dataList.length; x++) { var data = this.dataList[x]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } if (buffer.getLengthInBits() <= totalDataCount * 8) break; } this.typeNumber = typeNumber; } this.makeImpl(false, this.getBestMaskPattern() ); }, makeImpl : function(test, maskPattern) { this.moduleCount = this.typeNumber * 4 + 17; this.modules = new Array(this.moduleCount); for (var row = 0; row < this.moduleCount; row++) { this.modules[row] = new Array(this.moduleCount); for (var col = 0; col < this.moduleCount; col++) { this.modules[row][col] = null; } } this.setupPositionProbePattern(0, 0); this.setupPositionProbePattern(this.moduleCount - 7, 0); this.setupPositionProbePattern(0, this.moduleCount - 7); this.setupPositionAdjustPattern(); this.setupTimingPattern(); this.setupTypeInfo(test, maskPattern); if (this.typeNumber >= 7) { this.setupTypeNumber(test); } if (this.dataCache === null) { this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList); } this.mapData(this.dataCache, maskPattern); }, setupPositionProbePattern : function(row, col)  { for (var r = -1; r <= 7; r++) { if (row + r <= -1 || this.moduleCount <= row + r) continue; for (var c = -1; c <= 7; c++) { if (col + c <= -1 || this.moduleCount <= col + c) continue; if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || (0 <= c && c <= 6 && (r === 0 || r === 6) ) || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } }, getBestMaskPattern : function() { var minLostPoint = 0; var pattern = 0; for (var i = 0; i < 8; i++) { this.makeImpl(true, i); var lostPoint = QRUtil.getLostPoint(this); if (i === 0 || minLostPoint >  lostPoint) { minLostPoint = lostPoint; pattern = i; } } return pattern; }, setupTimingPattern : function() { for (var r = 8; r < this.moduleCount - 8; r++) { if (this.modules[r][6] !== null) { continue; } this.modules[r][6] = (r % 2 === 0); } for (var c = 8; c < this.moduleCount - 8; c++) { if (this.modules[6][c] !== null) { continue; } this.modules[6][c] = (c % 2 === 0); } }, setupPositionAdjustPattern : function() { var pos = QRUtil.getPatternPosition(this.typeNumber); for (var i = 0; i < pos.length; i++) { for (var j = 0; j < pos.length; j++) { var row = pos[i]; var col = pos[j]; if (this.modules[row][col] !== null) { continue; } for (var r = -2; r <= 2; r++) { for (var c = -2; c <= 2; c++) { if (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } } } }, setupTypeNumber : function(test) { var bits = QRUtil.getBCHTypeNumber(this.typeNumber); var mod; for (var i = 0; i < 18; i++) { mod = (!test && ( (bits >> i) & 1) === 1); this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod; } for (var x = 0; x < 18; x++) { mod = (!test && ( (bits >> x) & 1) === 1); this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod; } }, setupTypeInfo : function(test, maskPattern) { var data = (this.errorCorrectLevel << 3) | maskPattern; var bits = QRUtil.getBCHTypeInfo(data); var mod; for (var v = 0; v < 15; v++) { mod = (!test && ( (bits >> v) & 1) === 1); if (v < 6) { this.modules[v][8] = mod; } else if (v < 8) { this.modules[v + 1][8] = mod; } else { this.modules[this.moduleCount - 15 + v][8] = mod; } } for (var h = 0; h < 15; h++) { mod = (!test && ( (bits >> h) & 1) === 1); if (h < 8) { this.modules[8][this.moduleCount - h - 1] = mod; } else if (h < 9) { this.modules[8][15 - h - 1 + 1] = mod; } else { this.modules[8][15 - h - 1] = mod; } } this.modules[this.moduleCount - 8][8] = (!test); }, mapData : function(data, maskPattern) { var inc = -1; var row = this.moduleCount - 1; var bitIndex = 7; var byteIndex = 0; for (var col = this.moduleCount - 1; col > 0; col -= 2) { if (col
+var QR8bitByte = require('./QR8bitByte'); var QRUtil = require('./QRUtil'); var QRPolynomial = require('./QRPolynomial'); var QRRSBlock = require('./QRRSBlock'); var QRBitBuffer = require('./QRBitBuffer'); function QRCode(typeNumber, errorCorrectLevel) { this.typeNumber = typeNumber; this.errorCorrectLevel = errorCorrectLevel; this.modules = null; this.moduleCount = 0; this.dataCache = null; this.dataList = []; } QRCode.prototype = { addData : function(data) { var newData = new QR8bitByte(data); this.dataList.push(newData); this.dataCache = null; }, isDark : function(row, col) { if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) { throw new Error(row + "," + col); } return this.modules[row][col]; }, getModuleCount : function() { return this.moduleCount; }, make : function() { if (this.typeNumber < 1 ){ var typeNumber = 1; for (typeNumber = 1; typeNumber < 40; typeNumber++) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel); var buffer = new QRBitBuffer(); var totalDataCount = 0; for (var i = 0; i < rsBlocks.length; i++) { totalDataCount += rsBlocks[i].dataCount; } for (var x = 0; x < this.dataList.length; x++) { var data = this.dataList[x]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } if (buffer.getLengthInBits() <= totalDataCount * 8) break; } this.typeNumber = typeNumber; } this.makeImpl(false, this.getBestMaskPattern() ); }, makeImpl : function(test, maskPattern) { this.moduleCount = this.typeNumber * 4 + 17; this.modules = new Array(this.moduleCount); for (var row = 0; row < this.moduleCount; row++) { this.modules[row] = new Array(this.moduleCount); for (var col = 0; col < this.moduleCount; col++) { this.modules[row][col] = null; } } this.setupPositionProbePattern(0, 0); this.setupPositionProbePattern(this.moduleCount - 7, 0); this.setupPositionProbePattern(0, this.moduleCount - 7); this.setupPositionAdjustPattern(); this.setupTimingPattern(); this.setupTypeInfo(test, maskPattern); if (this.typeNumber >= 7) { this.setupTypeNumber(test); } if (this.dataCache === null) { this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList); } this.mapData(this.dataCache, maskPattern); }, setupPositionProbePattern : function(row, col)  { for (var r = -1; r <= 7; r++) { if (row + r <= -1 || this.moduleCount <= row + r) continue; for (var c = -1; c <= 7; c++) { if (col + c <= -1 || this.moduleCount <= col + c) continue; if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || (0 <= c && c <= 6 && (r === 0 || r === 6) ) || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } }, getBestMaskPattern : function() { var minLostPoint = 0; var pattern = 0; for (var i = 0; i < 8; i++) { this.makeImpl(true, i); var lostPoint = QRUtil.getLostPoint(this); if (i === 0 || minLostPoint >  lostPoint) { minLostPoint = lostPoint; pattern = i; } } return pattern; }, setupTimingPattern : function() { for (var r = 8; r < this.moduleCount - 8; r++) { if (this.modules[r][6] !== null) { continue; } this.modules[r][6] = (r % 2 === 0); } for (var c = 8; c < this.moduleCount - 8; c++) { if (this.modules[6][c] !== null) { continue; } this.modules[6][c] = (c % 2 === 0); } }, setupPositionAdjustPattern : function() { var pos = QRUtil.getPatternPosition(this.typeNumber); for (var i = 0; i < pos.length; i++) { for (var j = 0; j < pos.length; j++) { var row = pos[i]; var col = pos[j]; if (this.modules[row][col] !== null) { continue; } for (var r = -2; r <= 2; r++) { for (var c = -2; c <= 2; c++) { if (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0) ) { this.modules[row + r][col + c] = true; } else { this.modules[row + r][col + c] = false; } } } } } }, setupTypeNumber : function(test) { var bits = QRUtil.getBCHTypeNumber(this.typeNumber); var mod; for (var i = 0; i < 18; i++) { mod = (!test && ( (bits >> i) & 1) === 1); this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod; } for (var x = 0; x < 18; x++) { mod = (!test && ( (bits >> x) & 1) === 1); this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod; } }, setupTypeInfo : function(test, maskPattern) { var data = (this.errorCorrectLevel << 3) | maskPattern; var bits = QRUtil.getBCHTypeInfo(data); var mod; for (var v = 0; v < 15; v++) { mod = (!test && ( (bits >> v) & 1) === 1); if (v < 6) { this.modules[v][8] = mod; } else if (v < 8) { this.modules[v + 1][8] = mod; } else { this.modules[this.moduleCount - 15 + v][8] = mod; } } for (var h = 0; h < 15; h++) { mod = (!test && ( (bits >> h) & 1) === 1); if (h < 8) { this.modules[8][this.moduleCount - h - 1] = mod; } else if (h < 9) { this.modules[8][15 - h - 1 + 1] = mod; } else { this.modules[8][15 - h - 1] = mod; } } this.modules[this.moduleCount - 8][8] = (!test); }, mapData : function(data, maskPattern) { var inc = -1; var row = this.moduleCount - 1; var bitIndex = 7; var byteIndex = 0; for (var col = this.moduleCount - 1; col > 0; col -= 2) { if (col === 6) col--; while (true) { for (var c = 0; c < 2; c++) { if (this.modules[row][col - c] === null) { var dark = false; if (byteIndex < data.length) { dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1); } var mask = QRUtil.getMask(maskPattern, row, col - c); if (mask) { dark = !dark; } this.modules[row][col - c] = dark; bitIndex--; if (bitIndex === -1) { byteIndex++; bitIndex = 7; } } } row += inc; if (row < 0 || this.moduleCount <= row) { row -= inc; inc = -inc; break; } } } } }; QRCode.PAD0 = 0xEC; QRCode.PAD1 = 0x11; QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) { var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel); var buffer = new QRBitBuffer(); for (var i = 0; i < dataList.length; i++) { var data = dataList[i]; buffer.put(data.mode, 4); buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) ); data.write(buffer); } var totalDataCount = 0; for (var x = 0; x < rsBlocks.length; x++) { totalDataCount += rsBlocks[x].dataCount; } if (buffer.getLengthInBits() > totalDataCount * 8) { throw new Error("code length overflow. (" + buffer.getLengthInBits() + ">" +  totalDataCount * 8 + ")"); } if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) { buffer.put(0, 4); } while (buffer.getLengthInBits() % 8 !== 0) { buffer.putBit(false); } while (true) { if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD0, 8); if (buffer.getLengthInBits() >= totalDataCount * 8) { break; } buffer.put(QRCode.PAD1, 8); } return QRCode.createBytes(buffer, rsBlocks); }; QRCode.createBytes = function(buffer, rsBlocks) { var offset = 0; var maxDcCount = 0; var maxEcCount = 0; var dcdata = new Array(rsBlocks.length); var ecdata = new Array(rsBlocks.length); for (var r = 0; r < rsBlocks.length; r++) { var dcCount = rsBlocks[r].dataCount; var ecCount = rsBlocks[r].totalCount - dcCount; maxDcCount = Math.max(maxDcCount, dcCount); maxEcCount = Math.max(maxEcCount, ecCount); dcdata[r] = new Array(dcCount); for (var i = 0; i < dcdata[r].length; i++) { dcdata[r][i] = 0xff & buffer.buffer[i + offset]; } offset += dcCount; var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount); var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1); var modPoly = rawPoly.mod(rsPoly); ecdata[r] = new Array(rsPoly.getLength() - 1); for (var x = 0; x < ecdata[r].length; x++) { var modIndex = x + modPoly.getLength() - ecdata[r].length; ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0; } } var totalCodeCount = 0; for (var y = 0; y < rsBlocks.length; y++) { totalCodeCount += rsBlocks[y].totalCount; } var data = new Array(totalCodeCount); var index = 0; for (var z = 0; z < maxDcCount; z++) { for (var s = 0; s < rsBlocks.length; s++) { if (z < dcdata[s].length) { data[index++] = dcdata[s][z]; } } } for (var xx = 0; xx < maxEcCount; xx++) { for (var t = 0; t < rsBlocks.length; t++) { if (xx < ecdata[t].length) { data[index++] = ecdata[t][xx]; } } } return data; }; module.exports = QRCode;
+}
+        };
+        var cache = {};
+        function require(id){
+            if(cache[id]) return cache[id].exports;
+            if(!modules[id]) throw new Error('QR module not found: ' + id);
+            var module = {exports:{}};
+            cache[id] = module;
+            modules[id](module, module.exports, require);
+            return module.exports;
+        }
+        window.QRCodeISO = {
+            QRCode: require('./index'),
+            QRErrorCorrectLevel: require('./QRErrorCorrectLevel')
+        };
+    })();
+    </script>
+
+    <script src="font_data.js"></script>
+
+    <script>
+        const UltimateEngine = (() => {
+            const canvas = document.getElementById('workspace');
+            const binds = document.querySelectorAll('.state-bind');
+            const fontSelects = document.querySelectorAll('.f-sel');
+            
+            let state = {
+                b1: 'Minh', b2: 'Ngọc', g1: 'Nguyễn', g2: 'Quang', date: '23/24.05.2026', plate: 'Biển số:', foot: 'Rất hân hạnh được đón tiếp !',
+                bridePhone: '', groomPhone: '', ticketType: 'Vé xe nhà gái', venue: '', guestTime: '', qrNote: 'VE NAY CHI PHUC VU DAM CUOI',
+                colorMode: 'color', decorIndex: 0, logoPreset: 'glasses', logoBase64: null,
+                total: 40, startnum: 1, barcode: 'qr', printScope: 'all', rangeFrom: 1, rangeTo: 10, previewMode: 'fit', operatorMode: false, offsetX: 0, offsetY: 0,
+                fonts: {}
+            };
+
+            const decors = [
+                `<path d="M10,10 Q40,10 50,30 Q60,10 90,10 Q70,40 90,70 Q60,50 50,90 Q40,50 10,70 Q30,40 10,10 Z" fill="none" stroke="currentColor" stroke-width="5"/>`,
+                `<path d="M10,90 A80,80 0 0,1 90,10" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="25" cy="25" r="8" fill="currentColor"/>`,
+                `<polyline points="10,90 10,10 90,10" fill="none" stroke="currentColor" stroke-width="8"/><polyline points="30,90 30,30 90,30" fill="none" stroke="currentColor" stroke-width="3"/>`,
+                `<polygon points="10,10 80,10 10,80" fill="currentColor"/><polygon points="90,10 100,10 100,20 20,100 10,100 10,90" fill="currentColor"/>`
+            ];
+
+            const premiumLogos = {
+                'hy_classic': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><path d="M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3" stroke-dasharray="2 4"/><text x="50" y="73" font-family="Arial" font-size="68" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
+                'hy_circle': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--c-name)" stroke-width="4" stroke-dasharray="8 4"/><circle cx="50" cy="50" r="38" fill="none" stroke="var(--c-decor-stroke)" stroke-width="1.5"/><text x="50" y="70" font-family="Arial" font-size="55" font-weight="bold" fill="var(--c-name)" text-anchor="middle">囍</text></svg>`,
+                'glasses': `<svg viewBox="0 0 100 100"><path d="M 28 15 C 28 15, 28 50, 28 50 C 28 65, 48 65, 48 50 C 48 50, 48 15, 48 15 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><line x1="38" y1="62" x2="38" y2="85" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><line x1="25" y1="85" x2="51" y2="85" stroke="var(--c-decor-stroke)" stroke-width="2.5" stroke-linecap="round"/><path d="M 52 35 C 52 35, 52 60, 52 60 C 52 72, 72 72, 72 60 C 72 60, 72 35, 72 35 Z" fill="none" stroke="var(--c-name)" stroke-width="2.5"/><line x1="62" y1="69" x2="62" y2="85" stroke="var(--c-name)" stroke-width="2.5"/><line x1="49" y1="85" x2="75" y2="85" stroke="var(--c-name)" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="35" r="1.5" fill="var(--c-decor-stroke)"/><circle cx="62" cy="50" r="1.5" fill="var(--c-name)"/></svg>`,
+                'ring_interlock': `<svg viewBox="0 0 100 100"><circle cx="38" cy="55" r="22" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3.5"/><circle cx="62" cy="45" r="22" fill="none" stroke="var(--c-name)" stroke-width="3.5"/><polygon points="62,23 69,13 55,13" fill="var(--c-name)"/></svg>`,
+                'ring_diamond': `<svg viewBox="0 0 100 100"><path d="M50 85 A 25 25 0 1 0 50 35 A 25 25 0 1 0 50 85" fill="none" stroke="var(--c-decor-stroke)" stroke-width="4"/><polygon points="40 35, 60 35, 55 20, 45 20" fill="var(--c-name)"/><line x1="45" y1="20" x2="55" y2="35" stroke="#FFF" stroke-width="1.5"/><line x1="55" y1="20" x2="45" y2="35" stroke="#FFF" stroke-width="1.5"/></svg>`,
+                'heart_infinity': `<svg viewBox="0 0 100 100"><path d="M50,85 C50,85 10,55 10,30 C10,15 25,5 40,15 C50,22 50,22 50,22 C50,22 50,22 60,15 C75,5 90,15 90,30 C90,55 50,85 50,85 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="4"/><path d="M50,75 C50,75 20,50 20,30 C20,20 30,15 40,22 C45,26 50,30 50,30 C50,30 55,26 60,22 C70,15 80,20 80,30 C80,50 50,75 50,75 Z" fill="none" stroke="var(--c-name)" stroke-width="2"/></svg>`,
+                'heart_double': `<svg viewBox="0 0 100 100"><path d="M40,65 C40,65 15,45 15,30 C15,20 25,15 35,20 C40,23 40,23 40,23 C40,23 40,23 45,20 C55,15 65,20 65,30 C65,45 40,65 40,65 Z" fill="none" stroke="var(--c-decor-stroke)" stroke-width="3.5"/><path d="M60,85 C60,85 35,65 35,50 C35,40 45,35 55,40 C60,43 60,43 60,43 C60,43 60,43 65,40 C75,35 85,40 85,50 C85,65 60,85 60,85 Z" fill="none" stroke="var(--c-name)" stroke-width="3.5"/></svg>`,
+                'wreath_laurel': `<svg viewBox="0 0 100 100"><path d="M 50 95 C 10 95, 0 35, 40 10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 50 95 C 90 95, 100 35, 60 10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 15 65 Q 25 60, 20 50 M 85 65 Q 75 60, 80 50 M 10 40 Q 25 35, 25 20 M 90 40 Q 75 35, 75 20" fill="none" stroke="var(--c-name)" stroke-width="2" stroke-linecap="round"/></svg>`,
+                'frame_vintage': `<svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" rx="10" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2.5"/><path d="M 15 30 C 5 20, 20 5, 30 15 M 70 15 C 80 5, 95 20, 85 30 M 85 70 C 95 80, 80 95, 70 85 M 30 85 C 20 95, 5 80, 15 70" fill="none" stroke="var(--c-name)" stroke-width="2"/></svg>`,
+                'frame_hex': `<svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="var(--c-decor-stroke)" stroke-width="2"/><polygon points="50,13 82,31 82,69 50,87 18,69 18,31" fill="none" stroke="var(--c-name)" stroke-width="1.5"/></svg>`
+            };
+
+            const removeVietnamese = (value) => String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D');
+
+            const normalizeState = () => {
+                if (state.barcode !== 'off') state.barcode = 'qr';
+                state.total = Math.max(1, parseInt(state.total, 10) || 40);
+                state.startnum = Math.max(1, parseInt(state.startnum, 10) || 1);
+                const noteNorm = removeVietnamese(String(state.qrNote || '')).toUpperCase();
+                if (!noteNorm.includes('VE NAY CHI PHUC VU DAM CUOI') || noteNorm.length > 80) {
+                    state.qrNote = 'VE NAY CHI PHUC VU DAM CUOI';
+                }
+            };
+
+            const saveState = () => { localStorage.setItem('WEDDING_TICKET_MASTER_FINAL', JSON.stringify(state)); };
+            const loadState = () => {
+                const saved = localStorage.getItem('WEDDING_TICKET_MASTER_FINAL');
+                if(saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch(e){} }
+                normalizeState();
+                syncUIFromState();
+            };
+
+            const controlKey = (el) => {
+                const raw = el.id.replace('ui-', '');
+                const map = { 'offset-x': 'offsetX', 'offset-y': 'offsetY' };
+                return map[raw] || raw;
+            };
+
+            const applyPreviewMode = () => {
+                document.body.classList.remove('preview-fit', 'preview-compact', 'preview-ticket');
+                document.body.classList.add('preview-' + (state.previewMode || 'fit'));
+                document.body.classList.toggle('operator-mode', !!state.operatorMode);
+                const rangeBox = document.getElementById('range-box');
+                if (rangeBox) rangeBox.style.display = state.printScope === 'range' ? 'flex' : 'none';
+            };
+
+            const syncUIFromState = () => {
+                binds.forEach(el => {
+                    const key = controlKey(el);
+                    if(state[key] !== undefined) {
+                        if (el.type === 'checkbox') el.checked = !!state[key];
+                        else el.value = state[key];
+                    }
+                });
+                
+                const boxCustom = document.getElementById('box-custom-logo');
+                if(state.logoPreset === 'custom') {
+                    boxCustom.style.display = 'block';
+                    if(state.logoBase64) { document.getElementById('logo-status').innerText = '✅ Đã tải Logo Khách'; document.getElementById('clear-logo').style.display = 'inline'; }
+                } else {
+                    boxCustom.style.display = 'none';
+                }
+
+                document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
+                document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+                applyPreviewMode();
+            };
+
+            const syncStateFromUI = () => {
+                binds.forEach(el => {
+                    const key = controlKey(el);
+                    state[key] = el.type === 'number' ? Number(el.value) : (el.type === 'checkbox' ? !!el.checked : el.value);
+                    if(el.classList.contains('f-sel')) state.fonts[el.getAttribute('data-target')] = el.value;
+                });
+                document.documentElement.style.setProperty('--offset-x', state.offsetX + 'mm');
+                document.documentElement.style.setProperty('--offset-y', state.offsetY + 'mm');
+                applyPreviewMode();
+                saveState();
+            };
+
+            const normalizePositiveInt = (value, fallback = 1, min = 1) => {
+                const n = parseInt(value, 10);
+                if (!Number.isFinite(n) || n < min) return fallback;
+                return n;
+            };
+
+            const getPrintPlan = () => {
+                const total = normalizePositiveInt(state.total, 40, 1);
+                const start = normalizePositiveInt(state.startnum, 1, 1);
+                const last = start + total - 1;
+                let renderStart = start;
+                let count = total;
+                let label = 'Tất cả';
+
+                if (state.printScope === 'first') {
+                    count = Math.min(10, total);
+                    label = 'In thử 1 trang đầu';
+                } else if (state.printScope === 'range') {
+                    let from = normalizePositiveInt(state.rangeFrom, start, 1);
+                    let to = normalizePositiveInt(state.rangeTo, from, 1);
+                    if (from > to) [from, to] = [to, from];
+                    from = Math.max(start, from);
+                    to = Math.min(last, to);
+                    renderStart = from;
+                    count = Math.max(0, to - from + 1);
+                    label = `Dải số ${String(from).padStart(3,'0')} → ${String(to).padStart(3,'0')}`;
+                }
+
+                const pages = Math.ceil(count / 10);
+                const end = count > 0 ? renderStart + count - 1 : renderStart;
+                return { total, start, last, renderStart, count, pages, end, label, blanks: pages * 10 - count };
+            };
+
+            const updatePrintSummary = () => {
+                const box = document.getElementById('print-summary');
+                if (!box) return;
+                const plan = getPrintPlan();
+                const warn = plan.count <= 0 || plan.blanks > 0;
+                box.classList.toggle('warn', warn);
+                if (plan.count <= 0) {
+                    box.textContent = 'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.';
+                    return;
+                }
+                const codeText = state.barcode === 'off' ? 'không in QR / số nhảy' : 'QR thông tin đám cưới';
+                box.textContent = `${plan.label}: ${plan.count} vé / ${plan.pages} trang A4, mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')} / ${codeText}${plan.blanks ? `, trang cuối trống ${plan.blanks} ô.` : '.'}`;
+            };
+
+            const validateBeforePrint = () => {
+                const plan = getPrintPlan();
+                if (!state.b1 || !state.b2 || !state.g1 || !state.g2) return { ok:false, msg:'Thiếu tên cô dâu/chú rể. Vui lòng nhập đủ trước khi in.' };
+                if (!state.date) return { ok:false, msg:'Thiếu ngày. Vui lòng nhập ngày trước khi in.' };
+                if (plan.count <= 0) return { ok:false, msg:'Dải số in không hợp lệ hoặc nằm ngoài tổng vé.' };
+                if (state.logoPreset === 'custom' && !state.logoBase64) return { ok:false, msg:'Đang chọn logo khách gửi nhưng chưa tải ảnh logo.' };
+                return { ok:true, plan };
+            };
+
+            const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+
+            const compactTicketType = () => {
+                const raw = removeVietnamese(state.ticketType || '').toUpperCase();
+                if (raw.includes('NHA TRAI')) return 'NHA TRAI';
+                if (raw.includes('NHA GAI')) return 'NHA GAI';
+                if (raw.includes('CHUNG') || raw.includes('HAI HO')) return 'HAI HO';
+                if (raw.includes('TO CHUC')) return 'BAN TO CHUC';
+                return 'DAM CUOI';
+            };
+
+            const qrClean = (value) => removeVietnamese(value || '')
+                .toUpperCase()
+                .replace(/[^A-Z0-9 $%*+\-./:]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const parseSolarDateRange = (value) => {
+                const clean = removeVietnamese(value || '').toUpperCase().replace(/NGAY/g, '').replace(/\s+/g, ' ').trim();
+                const m = clean.match(/(\d{1,2})\s*(?:[&\/,-]\s*(\d{1,2}))?\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})/);
+                if (!m) return null;
+                const d1 = parseInt(m[1], 10);
+                const d2 = m[2] ? parseInt(m[2], 10) : null;
+                const month = parseInt(m[3], 10);
+                let year = parseInt(m[4], 10);
+                if (year < 100) year += 2000;
+                return { days: d2 ? [d1, d2] : [d1], month, year };
+            };
+
+            const INT = Math.floor;
+            const jdFromDate = (dd, mm, yy) => {
+                const a = INT((14 - mm) / 12);
+                const y = yy + 4800 - a;
+                const m = mm + 12 * a - 3;
+                let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
+                if (jd < 2299161) jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - 32083;
+                return jd;
+            };
+            const getNewMoonDay = (k, timeZone) => {
+                const T = k / 1236.85, T2 = T*T, T3 = T2*T;
+                const dr = Math.PI/180;
+                let Jd1 = 2415020.75933 + 29.53058868*k + 0.0001178*T2 - 0.000000155*T3;
+                Jd1 += 0.00033*Math.sin((166.56 + 132.87*T - 0.009173*T2)*dr);
+                const M = 359.2242 + 29.10535608*k - 0.0000333*T2 - 0.00000347*T3;
+                const Mpr = 306.0253 + 385.81691806*k + 0.0107306*T2 + 0.00001236*T3;
+                const F = 21.2964 + 390.67050646*k - 0.0016528*T2 - 0.00000239*T3;
+                let C1 = (0.1734 - 0.000393*T) * Math.sin(M*dr) + 0.0021*Math.sin(2*dr*M);
+                C1 -= 0.4068*Math.sin(Mpr*dr) + 0.0161*Math.sin(dr*2*Mpr);
+                C1 -= 0.0004*Math.sin(dr*3*Mpr);
+                C1 += 0.0104*Math.sin(dr*2*F) - 0.0051*Math.sin(dr*(M + Mpr));
+                C1 -= 0.0074*Math.sin(dr*(M - Mpr)) + 0.0004*Math.sin(dr*(2*F + M));
+                C1 -= 0.0004*Math.sin(dr*(2*F - M)) - 0.0006*Math.sin(dr*(2*F + Mpr));
+                C1 += 0.0010*Math.sin(dr*(2*F - Mpr)) + 0.0005*Math.sin(dr*(2*Mpr + M));
+                let deltat = T < -11 ? 0.001 + 0.000839*T + 0.0002261*T2 - 0.00000845*T3 - 0.000000081*T*T3 : -0.000278 + 0.000265*T + 0.000262*T2;
+                return INT(Jd1 + C1 - deltat + 0.5 + timeZone/24);
+            };
+            const getSunLongitude = (jdn, timeZone) => {
+                const T = (jdn - 2451545.5 - timeZone/24) / 36525;
+                const T2 = T*T;
+                const dr = Math.PI/180;
+                const M = 357.52910 + 35999.05030*T - 0.0001559*T2 - 0.00000048*T*T2;
+                const L0 = 280.46645 + 36000.76983*T + 0.0003032*T2;
+                let DL = (1.914600 - 0.004817*T - 0.000014*T2) * Math.sin(dr*M);
+                DL += (0.019993 - 0.000101*T) * Math.sin(dr*2*M) + 0.000290 * Math.sin(dr*3*M);
+                let L = (L0 + DL) * dr;
+                L -= Math.PI * 2 * (INT(L / (Math.PI*2)));
+                return INT(L / Math.PI * 6);
+            };
+            const getLunarMonth11 = (yy, timeZone) => {
+                const off = jdFromDate(31, 12, yy) - 2415021;
+                const k = INT(off / 29.530588853);
+                let nm = getNewMoonDay(k, timeZone);
+                const sunLong = getSunLongitude(nm, timeZone);
+                if (sunLong >= 9) nm = getNewMoonDay(k - 1, timeZone);
+                return nm;
+            };
+            const getLeapMonthOffset = (a11, timeZone) => {
+                const k = INT(0.5 + (a11 - 2415021.076998695) / 29.530588853);
+                let last = 0, i = 1, arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
+                do {
+                    last = arc;
+                    i++;
+                    arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
+                } while (arc !== last && i < 14);
+                return i - 1;
+            };
+            const solarToLunar = (dd, mm, yy, timeZone = 7) => {
+                const dayNumber = jdFromDate(dd, mm, yy);
+                const k = INT((dayNumber - 2415021.076998695) / 29.530588853);
+                let monthStart = getNewMoonDay(k + 1, timeZone);
+                if (monthStart > dayNumber) monthStart = getNewMoonDay(k, timeZone);
+                let a11 = getLunarMonth11(yy, timeZone);
+                let b11 = a11;
+                let lunarYear;
+                if (a11 >= monthStart) {
+                    lunarYear = yy;
+                    a11 = getLunarMonth11(yy - 1, timeZone);
+                } else {
+                    lunarYear = yy + 1;
+                    b11 = getLunarMonth11(yy + 1, timeZone);
+                }
+                const lunarDay = dayNumber - monthStart + 1;
+                const diff = INT((monthStart - a11) / 29);
+                let lunarLeap = 0;
+                let lunarMonth = diff + 11;
+                if (b11 - a11 > 365) {
+                    const leapMonthDiff = getLeapMonthOffset(a11, timeZone);
+                    if (diff >= leapMonthDiff) {
+                        lunarMonth = diff + 10;
+                        if (diff === leapMonthDiff) lunarLeap = 1;
+                    }
+                }
+                if (lunarMonth > 12) lunarMonth -= 12;
+                if (lunarMonth >= 11 && diff < 4) lunarYear -= 1;
+                return [lunarDay, lunarMonth, lunarYear, lunarLeap];
+            };
+            const formatLunarSideText = (value) => {
+                const parsed = parseSolarDateRange(value);
+                if (!parsed) return '';
+                const luns = parsed.days.map(d => solarToLunar(d, parsed.month, parsed.year, 7));
+                if (!luns.length) return '';
+                const dd = luns.map(x => String(x[0]).padStart(2, '0'));
+                const sameMonthYear = luns.every(x => x[1] === luns[0][1] && x[2] === luns[0][2]);
+                if (sameMonthYear) return `AL ${dd.join('/')}.${String(luns[0][1]).padStart(2, '0')}.${luns[0][2]}`;
+                return 'AL ' + luns.map(x => `${String(x[0]).padStart(2,'0')}.${String(x[1]).padStart(2,'0')}.${x[2]}`).join('/');
+            };
+
+            const compactTicketCode = () => {
+                const raw = compactTicketType();
+                if (raw === 'NHA GAI') return 'NHAGAI';
+                if (raw === 'NHA TRAI') return 'NHATRAI';
+                if (raw === 'HAI HO') return 'HAIHO';
+                if (raw === 'BAN TO CHUC') return 'BTC';
+                return 'DAMCUOI';
+            };
+
+            const buildWeddingQRText = (numStr) => {
+                const ticket = compactTicketCode();
+                return ['VGX', ticket, String(numStr).padStart(3, '0')]
+                    .join(' ')
+                    .replace(/[^0-9A-Z $%*+\-./:]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            };
+
+            const makeAlphaQR = (source) => {
+                const ALPHA = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+                const qr = new window.QRCodeISO.QRCode(-1, window.QRCodeISO.QRErrorCorrectLevel.L);
+                qr.dataList.push({
+                    mode: 1 << 1,
+                    data: source,
+                    getLength: function(){ return this.data.length; },
+                    write: function(buffer){
+                        let i = 0;
+                        while (i + 1 < this.data.length) {
+                            buffer.put(ALPHA.indexOf(this.data.charAt(i)) * 45 + ALPHA.indexOf(this.data.charAt(i + 1)), 11);
+                            i += 2;
+                        }
+                        if (i < this.data.length) buffer.put(ALPHA.indexOf(this.data.charAt(i)), 6);
+                    }
+                });
+                qr.make();
+                return qr;
+            };
+
+            const qrToPngDataUrl = (qr, targetPx = 420) => {
+                const count = qr.getModuleCount();
+                const quiet = 4;
+                const scale = Math.max(4, Math.floor(targetPx / (count + quiet * 2)));
+                const size = (count + quiet * 2) * scale;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d', { alpha: true });
+                ctx.imageSmoothingEnabled = false;
+                ctx.clearRect(0, 0, size, size);
+                ctx.fillStyle = '#000';
+                for (let row = 0; row < count; row++) {
+                    for (let col = 0; col < count; col++) {
+                        if (qr.isDark(row, col)) {
+                            ctx.fillRect((col + quiet) * scale, (row + quiet) * scale, scale, scale);
+                        }
+                    }
+                }
+                return canvas.toDataURL('image/png');
+            };
+
+            const getQRSVG = (rawText) => {
+                let source = qrClean(rawText)
+                    .replace(/\s*\/\s*/g, '/')
+                    .replace(/\s*:\s*/g, ':')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+
+                source = source.replace(/[^0-9A-Z $%*+\-./:]/g, ' ').replace(/\s+/g, ' ').trim();
+
+                if (!window.QRCodeISO || !window.QRCodeISO.QRCode) {
+                    return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="60" fill="transparent"/><text x="30" y="30" text-anchor="middle" font-size="5" fill="#000">QR LIB ERR</text></svg>`;
+                }
+
+                let qr;
+                try {
+                    qr = makeAlphaQR(source);
+                } catch (err) {
+                    qr = new window.QRCodeISO.QRCode(-1, window.QRCodeISO.QRErrorCorrectLevel.H);
+                    qr.addData(source);
+                    qr.make();
+                }
+
+                const png = qrToPngDataUrl(qr, 960);
+                return `<img class="qr-img" src="${png}" alt="QR" decoding="sync">`;
+            };
+
+            const showQRTest = () => {
+                const numStr = String(normalizePositiveInt(state.startnum, 1, 1)).padStart(3, '0');
+                const qrText = buildWeddingQRText(numStr);
+                const qrSvg = getQRSVG(qrText);
+                const win = window.open('', '_blank', 'width=420,height=620');
+                const html = `<!doctype html><html><head><meta charset="utf-8"><title>Kiểm Tra QR NO.${numStr}</title>
+                <style>body{font-family:Arial,sans-serif;margin:0;padding:22px;background:#f3f4f6;color:#111} .card{max-width:360px;margin:auto;background:#fff;border-radius:16px;padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.15)} .qr{width:260px;height:260px;margin:10px auto 16px;background:#fff;padding:14px;border:1px solid #ddd} .qr svg,.qr img{width:100%;height:100%;display:block;object-fit:contain;image-rendering:pixelated;shape-rendering:crispEdges} pre{white-space:pre-wrap;word-break:break-word;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:13px;line-height:1.35}</style>
+                </head><body><div class="card"><h2>KIỂM TRA QR NO.${numStr}</h2><p>Mã QR dùng payload ngắn để ưu tiên quét được trong khung vé nhỏ.</p><div class="qr">${qrSvg}</div><pre>MA QUET TREN VE: ${escapeHtml(qrText)}</pre></div></body></html>`;
+                if (win) { win.document.open(); win.document.write(html); win.document.close(); }
+                else notify('Trình duyệt chặn popup. Hãy cho phép popup để kiểm tra QR mẫu.', 'warn', 3500);
+            };
+
+            const loadLocalFonts = () => {
+                let optionsHtml = '<option value="">-- Mặc định --</option>';
+                if (typeof sysFonts !== 'undefined') {
+                    sysFonts.forEach(f => { optionsHtml += `<option value="${f}">${f.replace(/\.[^/.]+$/, "")}</option>`; });
+                }
+                fontSelects.forEach(sel => {
+                    sel.innerHTML = optionsHtml;
+                    if(state.fonts && state.fonts[sel.getAttribute('data-target')]) sel.value = state.fonts[sel.getAttribute('data-target')];
+                    
+                    sel.addEventListener('change', function() {
+                        const filename = this.value; const targetVar = this.getAttribute('data-target');
+                        if (filename) {
+                            const fontName = 'Font_' + filename.replace(/\W/g, '');
+                            if (!document.getElementById('style_' + fontName)) {
+                                const style = document.createElement('style'); style.id = 'style_' + fontName;
+                                style.innerHTML = `@font-face { font-family: '${fontName}'; src: url("Wedding_Fonts_ISO/${filename}"); }`;
+                                document.head.appendChild(style);
+                            }
+                            document.documentElement.style.setProperty(targetVar, `'${fontName}'`);
+                        } else {
+                            document.documentElement.style.setProperty(targetVar, "'Times New Roman', Times, serif");
+                        }
+                        setTimeout(() => requestAnimationFrame(fitNames), 50);
+                    });
+                    sel.dispatchEvent(new Event('change'));
+                });
+            };
+
+            const fitNames = () => {
+                const tickets = document.querySelectorAll('.ticket-trim');
+                tickets.forEach(ticket => {
+                    const colB = ticket.querySelector('.t-bride'), b1 = colB.querySelector('.n-line1'), b2 = colB.querySelector('.n-line2');
+                    const colG = ticket.querySelector('.t-groom'), g1 = colG.querySelector('.n-line1'), g2 = colG.querySelector('.n-line2');
+                    if(!colB) return;
+                    
+                    // Nâng trần font size để tên to và nổi bật nhất có thể
+                    const getRatio = (col, l1, l2) => {
+                        let ratio = 1.0; l1.style.fontSize = `13pt`; l2.style.fontSize = `21pt`;
+                        const maxW = col.clientWidth * 1.05; let loops = 0;
+                        while (Math.max(l1.scrollWidth, l2.scrollWidth) > maxW && ratio > 0.4 && loops < 30) {
+                            ratio -= 0.05; l1.style.fontSize = `${13 * ratio}pt`; l2.style.fontSize = `${21 * ratio}pt`; loops++;
+                        }
+                        return ratio;
+                    };
+                    const finalRatio = Math.min(getRatio(colB, b1, b2), getRatio(colG, g1, g2));
+                    b1.style.fontSize = `${13 * finalRatio}pt`; b2.style.fontSize = `${21 * finalRatio}pt`;
+                    g1.style.fontSize = `${13 * finalRatio}pt`; g2.style.fontSize = `${21 * finalRatio}pt`;
+                });
+            };
+
+            const render = () => {
+                if (state.colorMode === 'bw') document.body.classList.add('bw-mode');
+                else document.body.classList.remove('bw-mode');
+                applyPreviewMode();
+
+                canvas.innerHTML = '';
+                const plan = getPrintPlan();
+                const totalTickets = plan.count;
+                const pages = plan.pages;
+                let currentTicketNum = plan.renderStart;
+
+                let centerHtml = '';
+                if(state.logoPreset === 'custom') {
+                    centerHtml = state.logoBase64 ? `<img src="${state.logoBase64}">` : premiumLogos['hy_classic'];
+                } else {
+                    centerHtml = premiumLogos[state.logoPreset] || premiumLogos['hy_classic'];
+                    if(state.logoPreset.startsWith('wreath') || state.logoPreset.startsWith('frame')) {
+                        const m1 = escapeHtml((state.b2 || '').charAt(0).toUpperCase());
+                        const m2 = escapeHtml((state.g2 || '').charAt(0).toUpperCase());
+                        centerHtml += `<div class="t-monogram-text">${m1}<span style="font-size: 0.7em; margin: 0 1px; color: var(--c-decor-stroke);">&</span>${m2}</div>`;
+                    }
+                }
+
+                const cornerHtml = `<svg viewBox="0 0 100 100" style="color:var(--c-border)">${decors[state.decorIndex]}</svg>`;
+                const safe = {
+                    b1: escapeHtml(state.b1), b2: escapeHtml(state.b2), g1: escapeHtml(state.g1), g2: escapeHtml(state.g2),
+                    date: escapeHtml(state.date), dateRight: escapeHtml(formatLunarSideText(state.date)), plate: escapeHtml(state.plate), foot: escapeHtml(state.foot)
+                };
+
+                for (let p = 0; p < pages; p++) {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'a4-portrait';
+                    let pageContent = '';
+                    
+                    for (let i = 0; i < 10; i++) {
+                        if ((p * 10 + i) >= totalTickets) {
+                            pageContent += `<div></div>`; 
+                            continue;
+                        }
+
+                        const numStr = String(currentTicketNum).padStart(3, '0');
+                        let serialHtml = ''; let qrHtml = '';
+                        if(state.barcode !== 'off') {
+                            serialHtml = `<div class="serial-badge">NO.${numStr}</div>`;
+                            const qrText = buildWeddingQRText(numStr);
+                            qrHtml = `<div class="qr-box" title="${escapeHtml(qrText)}" data-qr="${escapeHtml(qrText)}">${getQRSVG(qrText)}</div>`;
+                        }
+                        const codeBlock = qrHtml ? `<div class="qr-wrap">${qrHtml}</div>` : '';
+
+                        pageContent += `
+                        <div class="ticket-trim">
+                            <div class="corner-ornament co-tl">${cornerHtml}</div><div class="corner-ornament co-tr">${cornerHtml}</div>
+                            <div class="corner-ornament co-bl">${cornerHtml}</div><div class="corner-ornament co-br">${cornerHtml}</div>
+                            <div class="t-date-side date-left">${safe.date}</div><div class="t-date-side date-right">${safe.dateRight}</div>
+                            
+                            ${serialHtml}
+                            <div class="t-title">VÉ GỬI XE</div>
+                            
+                            <div class="t-center-block">
+                                <div class="names-col t-bride"><span class="n-line1">${safe.b1}</span><span class="n-line2">${safe.b2}</span></div>
+                                <div class="t-decor">${centerHtml}</div>
+                                <div class="names-col t-groom"><span class="n-line1">${safe.g1}</span><span class="n-line2">${safe.g2}</span></div>
+                            </div>
+                            
+                            <div class="t-plate-row"><div class="t-plate-label">${safe.plate}</div><div class="t-plate-dots"></div></div>
+                            
+                            <div class="t-footer-row">
+                                <div class="t-footer" title="${safe.foot}">${safe.foot}</div>
+                            </div>
+                            ${codeBlock}
+                        </div>`;
+                        currentTicketNum++;
+                    }
+                    pageDiv.innerHTML = pageContent;
+                    canvas.appendChild(pageDiv);
+                }
+                updatePrintSummary();
+                document.fonts.ready.then(() => setTimeout(() => requestAnimationFrame(fitNames), 100));
+            };
+
+            /* HỆ THỐNG SMART TOAST & UI MOBILE */
+            const notify = (message, type = 'ok', timeout = 2200) => {
+                const toast = document.getElementById('smart-toast');
+                if (!toast) return;
+                clearTimeout(toast._timer);
+                toast.className = type;
+                toast.textContent = message;
+                void toast.offsetWidth; 
+                toast.classList.add('show', type);
+                toast._timer = setTimeout(() => toast.classList.remove('show'), timeout);
+            };
+
+            const isMobilePanelMode = () => window.matchMedia('(max-width: 900px)').matches;
+
+            const setPanelOpen = (open) => {
+                document.body.classList.toggle('panel-open', !!open);
+                const btn = document.getElementById('mobile-panel-toggle');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    btn.setAttribute('aria-label', open ? 'Đóng bảng cài đặt' : 'Mở bảng cài đặt');
+                    btn.innerHTML = open ? '×' : '⚙';
+                }
+            };
+
+            const closePanelOnMobile = () => { if (isMobilePanelMode()) setPanelOpen(false); };
+
+            const initMobilePanel = () => {
+                const btn = document.getElementById('mobile-panel-toggle');
+                const overlay = document.getElementById('mobile-panel-overlay');
+                if (!btn || !overlay) return;
+
+                const syncByViewport = () => { if (!isMobilePanelMode()) setPanelOpen(false); };
+
+                btn.addEventListener('click', () => {
+                    if (navigator.vibrate) navigator.vibrate(40);
+                    const willOpen = !document.body.classList.contains('panel-open');
+                    setPanelOpen(willOpen);
+                    if (willOpen) notify('Đã mở bảng cấu hình.', 'ok', 1800);
+                });
+
+                overlay.addEventListener('click', closePanelOnMobile);
+                window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanelOnMobile(); });
+                window.addEventListener('resize', syncByViewport);
+                syncByViewport();
+            };
+
+            const init = () => {
+                loadState();
+                loadLocalFonts();
+                initMobilePanel();
+                
+                binds.forEach(el => {
+                    el.addEventListener('input', () => { syncStateFromUI(); render(); });
+                    el.addEventListener('change', () => { syncStateFromUI(); render(); });
+                });
+
+                document.querySelectorAll('.btn-preset').forEach(btn => btn.addEventListener('click', () => {
+                    const preset = btn.getAttribute('data-preset');
+                    if (preset === 'luxury') Object.assign(state, { colorMode:'color', logoPreset:'glasses', barcode:'qr', decorIndex:0 });
+                    if (preset === 'bwsharp') Object.assign(state, { colorMode:'bw', logoPreset:'hy_circle', barcode:'qr', decorIndex:2 });
+                    if (preset === 'romantic') Object.assign(state, { colorMode:'color', logoPreset:'heart_double', barcode:'qr', decorIndex:1 });
+                    if (preset === 'qrprod') Object.assign(state, { colorMode:'bw', logoPreset:'ring_interlock', barcode:'qr', decorIndex:3 });
+                    syncUIFromState(); saveState(); render(); notify('Đã áp preset: ' + btn.textContent.trim());
+                }));
+
+                document.getElementById('btn-preview-first').addEventListener('click', () => {
+                    const first = document.querySelector('.ticket-trim');
+                    if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); notify('Đã đưa vé đầu tiên vào vùng xem.'); }
+                });
+
+                document.getElementById('btn-calc-plan').addEventListener('click', () => {
+                    updatePrintSummary();
+                    const plan = getPrintPlan();
+                    if (plan.count > 0) notify(`${plan.count} vé / ${plan.pages} trang A4. Mã NO.${String(plan.renderStart).padStart(3,'0')} → NO.${String(plan.end).padStart(3,'0')}.`, plan.blanks ? 'warn' : 'ok', 3600);
+                    else notify('Dải số in không hợp lệ.', 'err', 3000);
+                });
+                
+                document.getElementById('btn-qr-test').addEventListener('click', () => {
+                    syncStateFromUI(); showQRTest(); notify('Đã mở QR mẫu lớn để quét thử.', 'ok', 2600);
+                });
+                
+                document.getElementById('btn-rand-corner').addEventListener('click', () => {
+                    state.decorIndex = (state.decorIndex + 1) % decors.length;
+                    saveState(); render(); notify('Đã đổi mẫu viền góc.');
+                });
+
+                document.getElementById('ui-logoPreset').addEventListener('change', (e) => {
+                    const box = document.getElementById('box-custom-logo');
+                    box.style.display = e.target.value === 'custom' ? 'block' : 'none';
+                });
+
+                document.getElementById('logo-uploader').addEventListener('change', (e) => {
+                    const f = e.target.files[0]; if(!f) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { state.logoBase64 = ev.target.result; saveState(); syncUIFromState(); render(); notify('Đã nạp logo khách gửi.'); };
+                    reader.readAsDataURL(f);
+                });
+                document.getElementById('clear-logo').addEventListener('click', (e) => {
+                    e.preventDefault(); state.logoBase64 = null; document.getElementById('logo-status').innerText = '📁 Tải Ảnh Logo (.PNG/.SVG)'; document.getElementById('clear-logo').style.display = 'none'; document.getElementById('logo-uploader').value = '';
+                    saveState(); render(); notify('Đã xóa logo khách gửi.');
+                });
+
+                document.getElementById('btn-export-json').addEventListener('click', () => {
+                    const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `Wedding_Ticket_Data_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); notify('Đã xuất file dữ liệu JSON.');
+                });
+                document.getElementById('btn-import-json').addEventListener('change', (e) => {
+                    const f = e.target.files[0]; if(!f) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { try { state = {...state, ...JSON.parse(ev.target.result)}; normalizeState(); syncUIFromState(); fontSelects.forEach(s=>s.dispatchEvent(new Event('change'))); render(); notify('Đã nhập dữ liệu thành công.'); } catch(err){ notify('File JSON lỗi hoặc sai định dạng.', 'err', 3200); } };
+                    reader.readAsText(f);
+                });
+
+                document.getElementById('btn-reset').addEventListener('click', () => {
+                    if(confirm("Bạn có chắc chắn muốn XÓA SẠCH cài đặt và đưa web về trạng thái gốc?")) {
+                        localStorage.removeItem('WEDDING_TICKET_MASTER_FINAL');
+                        location.reload();
+                    }
+                });
+
+                document.getElementById('btn-print').addEventListener('click', () => { 
+                    if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+                    const check = validateBeforePrint(); 
+                    if (!check.ok) { notify(check.msg, 'err', 3600); return; } 
+                    closePanelOnMobile(); 
+                    const p = check.plan; 
+                    notify(`Chuẩn bị xuất PDF/In: ${p.count} vé / ${p.pages} trang A4.`, p.blanks ? 'warn' : 'ok', 2400); 
+                    setTimeout(() => window.print(), 350); 
+                });
+                
+                window.addEventListener('resize', fitNames);
+
+                render();
+            };
+
+            return { init };
+        })();
+        document.addEventListener('DOMContentLoaded', UltimateEngine.init);
+    </script>
+</body>
+</html>
