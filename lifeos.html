@@ -27,7 +27,7 @@
 <script src="/tool/firebase-firestore-compat.js"></script>
 <script src="/tool/firebase-auth-compat.js"></script>
 <style>
-:root, [data-theme="light"] { --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
+:root, [data-theme="light"] { --lifeos-bottom-nav-h: 72px; --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
 [data-theme="rose"] { --c-primary: #f43f5e; --c-hover: #e11d48; --c-bg: #fff1f2; --c-card: #ffffff; --c-sub: #ffe4e6; --c-border: #fecdd3; --c-text: #881337; --c-mut: #e11d48; }
@@ -62,15 +62,8 @@ body { font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; 
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-            if(registration.active && registration.active.scriptURL.includes('sw.js')) {
-                // PWA Engine sẽ xử lý đăng ký lại bên dưới
-            }
-        }
-    });
-}
+// LifeOS service worker is registered by pwaEngine with /tool/ scope.
+// Avoid probing legacy root workers here to prevent accidental cross-app changes.
 </script>
 
 <audio id="mstq-player" preload="auto" playsinline webkit-playsinline></audio>
@@ -147,19 +140,74 @@ if ('serviceWorker' in navigator) {
 <div class="absolute inset-0 bg-primary opacity-5 pointer-events-none rounded-[2rem]"></div>
 <div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button onclick="window.toggleTimerSound()" id="timer-sound-btn" class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
 <div id="focus-task-card" class="hidden w-full bg-white border border-primary/30 p-4 rounded-2xl mb-6 text-center relative shadow-sm animate-scaleIn z-10"><span class="block text-[9px] font-black text-primary uppercase mb-1 tracking-widest flex justify-center items-center gap-1"><i class="ph-fill ph-target"></i> Đang tập trung vào</span><span id="focus-task-name" class="font-bold text-[15px] text-slate-800 line-clamp-2 leading-snug"></span><button onclick="window.unpinTask()" class="absolute top-2 right-2 p-2 sm:p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors active:scale-90"><i class="ph-bold ph-x text-sm"></i></button></div>
-<div class="grid grid-cols-3 w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200 gap-1"><button onclick="window.switchTimerMode('dateclock')" id="tab-dateclock" class="min-w-0 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95 truncate">Ngày giờ</button><button onclick="window.switchTimerMode('countdown')" id="tab-countdown" class="min-w-0 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white active:scale-95 truncate">Đếm ngược</button><button onclick="window.switchTimerMode('stopwatch')" id="tab-stopwatch" class="min-w-0 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-white active:scale-95 truncate">Bấm giờ</button></div>
+<div class="grid grid-cols-4 w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200 gap-1">
+<button onclick="window.switchTimerMode('dateclock')" id="tab-dateclock" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95 truncate">Ngày giờ</button>
+<button onclick="window.switchTimerMode('weather')" id="tab-weather" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Thời tiết</button>
+<button onclick="window.switchTimerMode('countdown')" id="tab-countdown" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Đếm ngược</button>
+<button onclick="window.switchTimerMode('stopwatch')" id="tab-stopwatch" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Bấm giờ</button>
+</div>
 <div id="mode-dateclock-ui" class="w-full flex flex-col items-center z-10 animate-fadeIn">
-<div class="w-full rounded-[1.5rem] border border-slate-200 bg-white/90 shadow-sm p-4 sm:p-5 text-center overflow-hidden">
-<div class="flex items-center justify-center gap-2 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.18em] mb-2"><i class="ph-bold ph-clock text-primary text-base"></i><span>Theo giờ hệ thống thiết bị</span></div>
-<div id="dateclock-time" class="font-time font-black text-slate-800 leading-none tracking-tight text-[clamp(2.35rem,12vw,4.25rem)] tabular-nums whitespace-nowrap overflow-hidden">--:--:--</div>
-<div id="dateclock-weekday" class="mt-2 text-sm sm:text-base font-extrabold text-primary break-words">--</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 w-full min-w-0">
-<div class="min-w-0 rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 overflow-hidden"><div class="flex items-center justify-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2"><i class="ph-bold ph-sun text-primary text-base"></i><span>Dương lịch</span></div><div id="dateclock-solar-short" class="text-xl sm:text-2xl font-black text-slate-800 leading-tight break-words">--/--/----</div><div id="dateclock-solar-long" class="mt-1 text-xs sm:text-sm font-semibold text-slate-500 leading-snug break-words">--</div></div>
-<div class="min-w-0 rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 overflow-hidden"><div class="flex items-center justify-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2"><i class="ph-bold ph-moon-stars text-primary text-base"></i><span>Âm lịch</span></div><div id="dateclock-lunar-short" class="text-xl sm:text-2xl font-black text-slate-800 leading-tight break-words">--/--/----</div><div id="dateclock-lunar-long" class="mt-1 text-xs sm:text-sm font-semibold text-slate-500 leading-snug break-words">--</div></div>
+    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0 text-center">
+        <div class="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3"><i class="ph-bold ph-clock text-primary text-lg"></i> Theo giờ hệ thống thiết bị</div>
+        <div id="dateclock-time" class="font-mono text-[clamp(2.35rem,12vw,4.25rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums whitespace-nowrap overflow-hidden text-center">--:--:--</div>
+        <div id="dateclock-weekday" class="text-base sm:text-lg font-black text-primary mt-3">--</div>
+        <div class="grid grid-cols-1 min-[460px]:grid-cols-2 gap-3 mt-5 w-full min-w-0">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden">
+                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-amber-600 mb-2"><i class="ph-fill ph-sun text-base sm:text-lg"></i> Dương lịch</div>
+                <div id="dateclock-solar-short" class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center">--/--/----</div>
+                <div id="dateclock-solar-long" class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center">--</div>
+            </div>
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden">
+                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-indigo-600 mb-2"><i class="ph-fill ph-moon-stars text-base sm:text-lg"></i> Âm lịch</div>
+                <div id="dateclock-lunar-short" class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center">--/--/----</div>
+                <div id="dateclock-lunar-long" class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center">--</div>
+            </div>
+        </div>
+        <div class="mt-4 text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1"><i class="ph-bold ph-device-mobile"></i> Theo giờ hệ thống thiết bị</div>
+    </div>
 </div>
+<div id="mode-weather-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
+    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0">
+        <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="min-w-0">
+                <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500"><i class="ph-bold ph-cloud-sun text-primary text-lg"></i> Thời tiết</div>
+                <div id="weather-updated" class="text-[11px] font-semibold text-slate-400 mt-1 truncate">Chưa cập nhật</div>
+            </div>
+            <button onclick="window.refreshWeather()" id="weather-refresh-btn" class="shrink-0 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-primary font-bold text-xs active:scale-95 hover:brightness-95 flex items-center gap-1">
+                <i class="ph-bold ph-arrow-clockwise"></i><span class="hidden min-[390px]:inline">Làm mới</span>
+            </button>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 mb-4" id="weather-location-tabs">
+            <button onclick="window.setWeatherLocation('hanoi')" id="weather-loc-hanoi" class="weather-loc-btn py-2 px-1 rounded-xl bg-primary text-white border border-primary text-[11px] font-black active:scale-95 truncate">Hà Nội</button>
+            <button onclick="window.setWeatherLocation('noibai')" id="weather-loc-noibai" class="weather-loc-btn py-2 px-1 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 text-[11px] font-black active:scale-95 truncate">Nội Bài</button>
+            <button onclick="window.setWeatherLocation('socson')" id="weather-loc-socson" class="weather-loc-btn py-2 px-1 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 text-[11px] font-black active:scale-95 truncate">Sóc Sơn</button>
+        </div>
+        <div id="weather-status" class="hidden mb-3 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2"></div>
+        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-4 sm:p-5 shadow-inner min-w-0 overflow-hidden">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <div id="weather-location-name" class="text-sm font-black text-slate-700 truncate">Hà Nội</div>
+                    <div id="weather-desc" class="text-xs font-bold text-slate-500 mt-1">Đang tải...</div>
+                    <div id="weather-temp" class="font-mono text-[clamp(2.5rem,11vw,4rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums mt-3 whitespace-nowrap">--°C</div>
+                </div>
+                <div class="shrink-0 w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm">
+                    <i id="weather-icon" class="ph-bold ph-cloud-sun text-4xl"></i>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Cảm giác</div><div id="weather-feels" class="text-sm font-black text-slate-800 mt-1">--°C</div></div>
+                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Độ ẩm</div><div id="weather-humidity" class="text-sm font-black text-slate-800 mt-1">--%</div></div>
+                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Gió</div><div id="weather-wind" class="text-sm font-black text-slate-800 mt-1">-- km/h</div></div>
+                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Mưa</div><div id="weather-rain" class="text-sm font-black text-slate-800 mt-1">-- mm</div></div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2"><i class="ph-bold ph-calendar-dots text-primary"></i> Dự báo 5 ngày</div>
+            <div id="weather-daily-list" class="flex gap-2 overflow-x-auto custom-scroll-area pb-1"></div>
+        </div>
+    </div>
 </div>
-</div>
-<div id="mode-countdown-ui" class="hidden w-full flex flex-col items-center z-10 animate-fadeIn">
+<div id="mode-countdown-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
 <div id="cd-setup-area" class="w-full flex flex-col items-center">
 <div class="flex gap-2 w-full mb-6 overflow-x-auto hide-scrollbar custom-scroll-area pb-1"><button onclick="window.applyTimerPreset(5)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">5p</button><button onclick="window.applyTimerPreset(15)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">15p</button><button onclick="window.applyTimerPreset(25)" class="flex-1 min-w-[60px] py-2 bg-white border border-primary rounded-xl text-xs font-bold text-primary shadow-sm transition-all active:scale-95">25p</button><button onclick="window.applyTimerPreset(60)" class="flex-1 min-w-[60px] py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-primary hover:text-primary shadow-sm transition-all active:scale-95">1h</button></div>
 <div class="flex items-center justify-center gap-2 sm:gap-4 mb-4 w-full px-2">
@@ -181,7 +229,6 @@ if ('serviceWorker' in navigator) {
 <div class="flex gap-2 w-full sm:w-auto">
 <button onclick="window.VaultApp.exportBackup()" class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center backdrop-blur-sm" title="Sao lưu"><i class="ph-bold ph-download-simple text-lg"></i></button>
 <label class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center cursor-pointer backdrop-blur-sm" title="Phục hồi JSON"><i class="ph-bold ph-upload-simple text-lg"></i><input type="file" class="hidden" accept=".json" onchange="window.VaultApp.importBackup(event)"></label>
-<button onclick="window.forcePullVaultFromFirebase()" class="flex-1 sm:flex-none bg-cyan-50 hover:bg-cyan-100 text-cyan-700 p-2.5 rounded-xl font-bold transition-all active:scale-90 shadow-sm border border-cyan-200 flex items-center justify-center gap-1 backdrop-blur-sm" title="Kéo Cloud"><i class="ph-bold ph-cloud-arrow-down text-lg"></i><span class="hidden xl:inline text-xs">Kéo Cloud</span></button>
 <button onclick="window.VaultUI.openModal()" class="hidden lg:flex flex-1 sm:flex-none bg-primary text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg items-center justify-center gap-2 hover:brightness-110"><i class="ph-bold ph-plus text-lg"></i> Thêm mới</button>
 </div></div></div>
 <div class="flex overflow-x-auto hide-scrollbar gap-2 mb-6 bg-white/30 p-1.5 rounded-xl backdrop-blur-sm border border-white/40 w-full md:w-fit custom-scroll-area whitespace-nowrap" id="vaultCategoryFilters">
@@ -253,8 +300,8 @@ if ('serviceWorker' in navigator) {
     </div>
 </div>
 
-<div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-all duration-300">
-<form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]">
+<div id="mobile-input" class="lg:hidden fixed inset-x-0 z-[60] px-3 transition-all duration-300" style="bottom: calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom));">
+<form id="form-mobile" class="w-full max-w-3xl mx-auto flex flex-col bg-white/80 backdrop-blur-2xl rounded-2xl p-1.5 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] border border-white/70">
     <div class="flex items-center w-full gap-1">
         <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
         <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
@@ -299,9 +346,6 @@ window.showToast=(m,i='ph-info')=>{
     t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`;
     c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000);
 };
-
-window.LIFEOS_BUILD_ID = 'VAULT_CLOUD_FIRST_RECONCILIATION_FINAL_20260521_01';
-console.log('[BUILD]', window.LIFEOS_BUILD_ID);
 
 window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.sentinelLogs=[];window.filterMode='all';
@@ -536,7 +580,7 @@ window.startBackgroundWorker = () => {
 
 document.addEventListener('visibilitychange', () => { 
     if (document.visibilityState === 'hidden') window.unlockAudio(); 
-    if (document.visibilityState === 'visible') { window.renderTasksOnly(); if(window.VaultUI){ window.VaultUI._c='all'; window.VaultUI._cat='all'; window.VaultUI._q=''; const vsi=document.getElementById('vaultSearchInput'); if(vsi) vsi.value=''; window.VaultUI.renderVaultCards(); } }
+    if (document.visibilityState === 'visible') { window.renderTasksOnly(); if(window.VaultUI) window.VaultUI.renderVaultCards(); }
 });
 
 window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
@@ -576,7 +620,7 @@ window.loadUserData=()=>{
 window.switchTab=(id,b)=>{
     window.vibrate([15]); window.unlockAudio();
     if(id==='view-tasks') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else if(id==='view-focus') { el('view-focus').scrollIntoView({behavior:'smooth'}); setTimeout(()=>window.switchTimerMode&&window.switchTimerMode('dateclock'),0); }
+    else if(id==='view-focus') { el('view-focus').scrollIntoView({behavior:'smooth'}); window.switchTimerMode?.('dateclock'); }
     else if(id==='view-vault') el('view-vault').scrollIntoView({behavior:'smooth'});
     else if(id==='view-music') { el('view-music').scrollIntoView({behavior:'smooth'}); if(window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine(); }
 
@@ -758,7 +802,7 @@ window.stopGlobalAlarm = (actionType) => {
         else if (actionType === 'snooze') window.showToast('Sẽ báo lại sau 5 phút', 'ph-clock');
         else if (actionType === 'dismiss') window.showToast('Đã tạm ẩn báo thức.', 'ph-eye-closed');
 
-        if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'task-or-generic-sync' }); }
+        if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }
     }
     window.activeAlarmTaskIds = [];
 };
@@ -804,7 +848,7 @@ window.toggleAlarm = (e, id) => {
         if(t.alarmEnabled && t.alarmTime <= Date.now()) { t.alarmTime += 86400000; t.alerted = false; window.notifiedTasks.delete(String(id)); }
         if(!t.alarmEnabled) { t.alerted = true; window.notifiedTasks.add(String(id)); } 
         window.saveLocalTodos(); window.renderTasksOnly();
-        if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'task-or-generic-sync' });
+        if(window.FirebaseSync) window.FirebaseSync.pushAll();
         window.showToast(t.alarmEnabled ? 'Đã bật báo thức' : 'Đã tắt báo thức', t.alarmEnabled ? 'ph-bell-ringing' : 'ph-bell-slash');
     }
 };
@@ -862,10 +906,7 @@ window.mergeVaultById = function(localVault, cloudVault) {
             _source: source
         };
         const old = map.get(id);
-        if (!old) {
-            map.set(id, normalized);
-            return;
-        }
+        if (!old) { map.set(id, normalized); return; }
         const oldTime = Number(old.updatedAt || old.createdAt || 0);
         const newTime = Number(normalized.updatedAt || normalized.createdAt || 0);
         if (newTime >= oldTime) map.set(id, normalized);
@@ -891,12 +932,8 @@ window.reconcileVaultData = function(localVault, cloudVault, options = {}) {
     const cloudHash = window.hashVaultData(cloud);
     console.log('[VAULT RECONCILE INPUT]', { localLen, cloudLen, localMaxTime, cloudMaxTime, localHash, cloudHash, options });
 
-    if (cloudLen > 0 && localLen === 0) {
-        return { action: 'PULL_CLOUD', reason: 'Local empty, cloud has data', data: cloud };
-    }
-    if (cloudLen === 0 && localLen === 0) {
-        return { action: 'BOTH_EMPTY', reason: 'Both local and cloud empty', data: [] };
-    }
+    if (cloudLen > 0 && localLen === 0) return { action: 'PULL_CLOUD', reason: 'Local empty, cloud has data', data: cloud };
+    if (cloudLen === 0 && localLen === 0) return { action: 'BOTH_EMPTY', reason: 'Both local and cloud empty', data: [] };
     if (cloudLen === 0 && localLen > 0) {
         if (options.cloudReadOk === true && options.allowLocalPushAfterCloudRead === true) {
             return { action: 'PUSH_LOCAL', reason: 'Cloud empty but local has valid data after confirmed cloud read', data: local };
@@ -904,17 +941,12 @@ window.reconcileVaultData = function(localVault, cloudVault, options = {}) {
         return { action: 'KEEP_LOCAL_NO_PUSH', reason: 'Cloud empty or not confirmed; keep local, do not push yet', data: local };
     }
     if (cloudLen > 0 && localLen > 0) {
-        if (localHash === cloudHash) {
-            return { action: 'NOOP', reason: 'Local and cloud are identical', data: local };
-        }
-        if (cloudMaxTime > localMaxTime) {
-            return { action: 'PULL_CLOUD', reason: 'Cloud newer than local', data: cloud };
-        }
+        if (localHash === cloudHash) return { action: 'NOOP', reason: 'Local and cloud are identical', data: local };
+        if (cloudMaxTime > localMaxTime) return { action: 'PULL_CLOUD', reason: 'Cloud newer than local', data: cloud };
         if (localMaxTime > cloudMaxTime && options.cloudReadOk === true) {
             return { action: 'PUSH_LOCAL', reason: 'Local newer than cloud after confirmed cloud read', data: local };
         }
-        const merged = window.mergeVaultById(local, cloud);
-        return { action: 'MERGE', reason: 'Conflict or unclear timestamp; merged by id and updatedAt', data: merged };
+        return { action: 'MERGE', reason: 'Conflict or unclear timestamp; merged by id and updatedAt', data: window.mergeVaultById(local, cloud) };
     }
     return { action: 'UNKNOWN_SAFE_KEEP_LOCAL', reason: 'Unexpected state; keep local safely', data: local };
 };
@@ -962,9 +994,7 @@ window.applyVaultReconciliation = async function(cloudVault, context = {}) {
 
     if (decision.action === 'PUSH_LOCAL') {
         console.log('[VAULT RECONCILE PUSH LOCAL]');
-        if (window.FirebaseSync?._i) {
-            await window.FirebaseSync.pushAll({ reason: 'local-newer-after-cloud-read', allowEmptyVaultPush: false });
-        }
+        if (window.FirebaseSync?._i) await window.FirebaseSync.pushAll({ reason: 'local-newer-after-cloud-read', allowEmptyVaultPush: false });
         if (window.VaultUI) window.VaultUI.renderVaultCards();
         return decision;
     }
@@ -986,10 +1016,7 @@ window.FirebaseSync={
         this._k=k;
         window.cloudSyncCompleted = false;
         try{
-            if(this._u){
-                try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe old listener failed]', e); }
-                this._u=null;
-            }
+            if(this._u){ try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe old listener failed]', e); } this._u=null; }
             if(!firebase.apps.length) firebase.initializeApp({
                 apiKey: "AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q",
                 authDomain: "tool-mimishop.firebaseapp.com",
@@ -1004,9 +1031,7 @@ window.FirebaseSync={
                 const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block';
                 this._listen();
                 setTimeout(() => {
-                    if (window.viewingUser === this._k && window.forcePullVaultFromFirebase) {
-                        window.forcePullVaultFromFirebase();
-                    }
+                    if (window.viewingUser === this._k && window.forcePullVaultFromFirebase) window.forcePullVaultFromFirebase();
                 }, 800);
             };
             firebase.auth().signInAnonymously().then(startFS).catch(startFS);
@@ -1020,36 +1045,25 @@ window.FirebaseSync={
         if(!this._d||!this._k)return;
         console.log('[FB:listen] doc=', this._k);
         try{
-            if(this._u){
-                try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe before listen failed]', e); }
-                this._u=null;
-            }
+            if(this._u){ try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe before listen failed]', e); } this._u=null; }
             this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(async d=>{
                 console.log('[FB:snapshot exists]', d.exists);
                 if(!d.exists) { window.cloudSyncCompleted = true; return; }
                 const c=d.data();
-                console.log('[FB:data]', c);
                 console.log('[FB:data keys]', Object.keys(c || {}));
                 if(!c) return;
                 let cloudTime = 0;
                 if (c.updatedAt) cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : (parseInt(c.updatedAt) || 0);
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0') || 0;
-                console.log('[FB:cloudTime]', cloudTime);
-                console.log('[FB:localTime]', localTime);
-                console.log('[FB:vaultData raw]', c.vaultData);
-                console.log('[FB:vaultData isArray]', Array.isArray(c.vaultData));
-                console.log('[FB:vaultData length]', Array.isArray(c.vaultData) ? c.vaultData.length : 'NO_ARRAY');
-                console.log('[VAULT key before]', window.VaultStorageLayer?._k);
-                console.log('[VAULT count before]', window.VaultStorageLayer?.getData?.()?.length);
+                console.log('[FB:cloudTime/localTime]', cloudTime, localTime);
+                console.log('[FB:vaultData isArray]', Array.isArray(c.vaultData), 'len=', Array.isArray(c.vaultData) ? c.vaultData.length : 'NO_ARRAY');
 
                 let skipTodoPullBecausePendingPush = false;
                 if(window._pendingPush) {
                     if(cloudTime <= localTime) {
                         skipTodoPullBecausePendingPush = true;
                         console.warn('[FB:pendingPush] Skip TODO pull only, Vault still allowed');
-                    } else {
-                        window._pendingPush = false;
-                    }
+                    } else window._pendingPush = false;
                 }
 
                 const cloudData = c.data;
@@ -1071,44 +1085,36 @@ window.FirebaseSync={
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
 
                 if(Array.isArray(c.vaultData)){
-                    await window.applyVaultReconciliation(c.vaultData, {
-                        cloudReadOk: true,
-                        allowLocalPushAfterCloudRead: false,
-                        profile: this._k,
-                        source: 'onSnapshot'
-                    });
+                    await window.applyVaultReconciliation(c.vaultData, { cloudReadOk: true, allowLocalPushAfterCloudRead: false, profile: this._k, source: 'onSnapshot' });
                 } else {
                     console.warn('[VAULT RECONCILE SKIP] snapshot vaultData is not array', c.vaultData);
                     if(window.VaultUI) window.VaultUI.renderVaultCards();
                 }
                 window.cloudSyncCompleted = true;
                 const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-green mt-0.5 hidden md:inline-block';
-            },e=>{
-                console.error('[FB:snapshot error]', e);
-                const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block';
-            });
+            },e=>{ console.error('[FB:snapshot error]', e); const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-red mt-0.5 hidden md:inline-block'; });
         }catch(e){ console.error('[FB:listen error]', e); }
     },
     async pushAll(options = {}){
         if(!this._i||!this._d||!this._k) return;
-        const vaultLocal = window.VaultStorageLayer?.getData?.() || [];
-        if(!window.cloudSyncCompleted && vaultLocal.length === 0 && options.reason !== 'user-delete-vault'){
-            console.warn('[SAFE-GUARD] Block pushAll before first cloud pull with empty vault', options);
-            return;
-        }
-        if(vaultLocal.length === 0 && !options.allowEmptyVaultPush){
-            console.warn('[SAFE-GUARD] Block empty vault push without explicit allowEmptyVaultPush', options);
-            return;
-        }
         window._pendingPush = true;
-        const currentTs = Date.now(); localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
+        const currentTs = Date.now();
+        localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
         const safeTodos = (window.todos||[]).map(t => { const cleanT = {...t, id: String(t.id)}; Object.keys(cleanT).forEach(key => cleanT[key] === undefined && delete cleanT[key]); return cleanT; });
-        const safeVault = vaultLocal.map(v => { const cleanV = {...v, id: String(v.id)}; Object.keys(cleanV).forEach(key => cleanV[key] === undefined && delete cleanV[key]); return cleanV; });
-        console.log('[FB:pushAll]', { profile:this._k, todoLen:safeTodos.length, vaultLen:safeVault.length, cloudSyncCompleted:window.cloudSyncCompleted, options });
+        const vaultLocal = window.VaultStorageLayer?.getData?.() || [];
+        let includeVaultData = true;
+        let safeVault = vaultLocal.map(v => { const cleanV = {...v, id: String(v.id)}; Object.keys(cleanV).forEach(key => cleanV[key] === undefined && delete cleanV[key]); return cleanV; });
+        const allowEmptyVaultPush = options.allowEmptyVaultPush === true || options.reason === 'user-delete-vault';
+        if(vaultLocal.length === 0 && !allowEmptyVaultPush){
+            includeVaultData = false;
+            if(!window.cloudSyncCompleted) console.warn('[SAFE-GUARD] Omit vaultData before first cloud pull with empty vault; task sync still allowed', options);
+            else console.warn('[SAFE-GUARD] Omit empty vaultData without explicit allowEmptyVaultPush; task sync still allowed', options);
+        }
+        console.log('[FB:pushAll]', { profile:this._k, todoLen:safeTodos.length, vaultLen:safeVault.length, includeVaultData, cloudSyncCompleted:window.cloudSyncCompleted, options });
+        const payload = { data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[], updatedAt: currentTs };
+        if(includeVaultData) payload.vaultData = safeVault;
         try{
-            await this._d.collection('LifeOS_Profiles').doc(this._k).set({
-                data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[], vaultData:safeVault, updatedAt: currentTs
-            },{merge:true});
+            await this._d.collection('LifeOS_Profiles').doc(this._k).set(payload,{merge:true});
             setTimeout(() => { window._pendingPush = false; }, 1500);
         }catch(e){
             console.error('[FB:pushAll error]', e);
@@ -1138,7 +1144,6 @@ window.debugVaultNow = async function() {
         console.log('vaultCardsContainer exists=', !!container);
         console.log('vaultCardsContainer children=', container ? container.children.length : 'NO_CONTAINER');
         console.log('vaultCardsContainer html=', container ? container.innerHTML.slice(0, 500) : 'NO_CONTAINER');
-        console.log('vaultEmptyState class=', empty ? empty.className : 'NO_EMPTY_STATE');
         console.log('vaultEmptyState display=', empty ? getComputedStyle(empty).display : 'NO_EMPTY_STATE');
         try {
             if (window.FirebaseSync?._d && window.FirebaseSync?._k) {
@@ -1149,15 +1154,9 @@ window.debugVaultNow = async function() {
                 console.log('[DIRECT GET vaultData isArray]', Array.isArray(data?.vaultData));
                 console.log('[DIRECT GET vaultData length]', Array.isArray(data?.vaultData) ? data.vaultData.length : 'NO_ARRAY');
                 console.log('[DIRECT GET vaultData]', data?.vaultData);
-            } else {
-                console.warn('[DIRECT GET skipped] Firebase not ready or missing key');
-            }
-        } catch (err) {
-            console.error('[DIRECT GET error]', err);
-        }
-    } finally {
-        console.groupEnd();
-    }
+            } else console.warn('[DIRECT GET skipped] Firebase not ready or missing key');
+        } catch (err) { console.error('[DIRECT GET error]', err); }
+    } finally { console.groupEnd(); }
 };
 
 window.forcePullVaultFromFirebase = async function() {
@@ -1181,12 +1180,7 @@ window.forcePullVaultFromFirebase = async function() {
         if (!Array.isArray(c?.vaultData)) throw new Error('vaultData is not array');
         const cleanCloudVault = window.VaultUtils.migrateLegacyData(c.vaultData);
         console.log('[FORCE] cleanCloudVault length=', cleanCloudVault.length);
-        const decision = await window.applyVaultReconciliation(cleanCloudVault, {
-            cloudReadOk: true,
-            allowLocalPushAfterCloudRead: true,
-            profile: k,
-            source: 'forcePullVaultFromFirebase'
-        });
+        const decision = await window.applyVaultReconciliation(cleanCloudVault, { cloudReadOk: true, allowLocalPushAfterCloudRead: true, profile: k, source: 'forcePullVaultFromFirebase' });
         console.log('[FORCE] decision=', decision);
         console.log('[FORCE] after replace count=', window.VaultStorageLayer.getData().length);
         console.log('[FORCE] localStorage=', localStorage.getItem('lifeos_v8_vault_' + k));
@@ -1200,9 +1194,7 @@ window.forcePullVaultFromFirebase = async function() {
     } catch (err) {
         console.error('[FORCE PULL ERROR]', err);
         window.showToast?.('Force pull Vault lỗi: ' + err.message, 'ph-warning');
-    } finally {
-        console.groupEnd();
-    }
+    } finally { console.groupEnd(); }
 };
 
 // ==============================================================================
@@ -1270,7 +1262,7 @@ window.confirmDeleteTask=id=>{
     const confirmHTML = `<div id="deleteTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex-grow overflow-y-auto custom-scroll-area min-h-0 p-2"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200 shrink-0"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800 shrink-0">Xóa nhiệm vụ?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(t.text)}"</p></div><div class="flex gap-3 flex-shrink-0 mt-2"><button onclick="window.vibrate(10); document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200">Hủy</button><button onclick="window.execDeleteTask('${id}'); document.getElementById('deleteTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button></div></div></div>`;
     document.body.insertAdjacentHTML('beforeend', confirmHTML);
 };
-window.execDeleteTask=id=>{ window.todos=(window.todos||[]).filter(x=>String(x.id)!==String(id)); window.vibrate([30,50]); window.saveLocalTodos(); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'task-or-generic-sync' }); window.renderTasksOnly(); window.showToast('Đã xóa nhiệm vụ','ph-trash'); };
+window.execDeleteTask=id=>{ window.todos=(window.todos||[]).filter(x=>String(x.id)!==String(id)); window.vibrate([30,50]); window.saveLocalTodos(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); window.renderTasksOnly(); window.showToast('Đã xóa nhiệm vụ','ph-trash'); };
 
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return; window.vibrate(15);
@@ -1289,31 +1281,50 @@ window.syncManualDateToInput = (inputEl, targetId) => {
 window.saveEditTask=id=>{
     const v=el('editTaskInput')?.value.trim(); if(!v){ window.showToast('Không được để trống!','ph-warning'); return; }
     const t=(window.todos||[]).find(x=>String(x.id)===String(id));
-    if(t){ Object.assign(t, window.parseTaskNLP(v)); t.alerted = false; window.notifiedTasks.delete(String(t.id)); if(t.alarmTime && t.alarmTime <= Date.now()) { window.triggerGlobalAlarm(String(t.id), t.text); } window.vibrate([20,30]); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'task-or-generic-sync' }); window.showToast('Đã lưu chỉnh sửa','ph-check-circle'); }
+    if(t){ Object.assign(t, window.parseTaskNLP(v)); t.alerted = false; window.notifiedTasks.delete(String(t.id)); if(t.alarmTime && t.alarmTime <= Date.now()) { window.triggerGlobalAlarm(String(t.id), t.text); } window.vibrate([20,30]); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); window.showToast('Đã lưu chỉnh sửa','ph-check-circle'); }
     el('editTaskModal')?.remove();
 };
 
-
-window.dateClockInterval=null;
-window.formatDate2=n=>String(n).padStart(2,'0');
-window.getVietnameseWeekday=date=>['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][date.getDay()]||'';
-window.jdFromDate=function(dd,mm,yy){const a=Math.floor((14-mm)/12);const y=yy+4800-a;const m=mm+12*a-3;let jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;if(jd<2299161)jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-32083;return jd;};
-window.jdToDate=function(jd){let a,b,c;if(jd>2299160){a=jd+32044;b=Math.floor((4*a+3)/146097);c=a-Math.floor((b*146097)/4);}else{b=0;c=jd+32082;}const d=Math.floor((4*c+3)/1461);const e=c-Math.floor((1461*d)/4);const m=Math.floor((5*e+2)/153);const day=e-Math.floor((153*m+2)/5)+1;const month=m+3-12*Math.floor(m/10);const year=b*100+d-4800+Math.floor(m/10);return[day,month,year];};
-window.NewMoon=function(k){const T=k/1236.85,T2=T*T,T3=T2*T,dr=Math.PI/180;let Jd1=2415020.75933+29.53058868*k+0.0001178*T2-0.000000155*T3;Jd1+=0.00033*Math.sin((166.56+132.87*T-0.009173*T2)*dr);const M=359.2242+29.10535608*k-0.0000333*T2-0.00000347*T3;const Mpr=306.0253+385.81691806*k+0.0107306*T2+0.00001236*T3;const F=21.2964+390.67050646*k-0.0016528*T2-0.00000239*T3;let C1=(0.1734-0.000393*T)*Math.sin(M*dr)+0.0021*Math.sin(2*dr*M)-0.4068*Math.sin(Mpr*dr)+0.0161*Math.sin(2*dr*Mpr)-0.0004*Math.sin(3*dr*Mpr)+0.0104*Math.sin(2*dr*F)-0.0051*Math.sin((M+Mpr)*dr)-0.0074*Math.sin((M-Mpr)*dr)+0.0004*Math.sin((2*F+M)*dr)-0.0004*Math.sin((2*F-M)*dr)-0.0006*Math.sin((2*F+Mpr)*dr)+0.0010*Math.sin((2*F-Mpr)*dr)+0.0005*Math.sin((2*Mpr+M)*dr);let deltaT;if(T<-11)deltaT=0.001+0.000839*T+0.0002261*T2-0.00000845*T3-0.000000081*T*T3;else deltaT=-0.000278+0.000265*T+0.000262*T2;return Jd1+C1-deltaT;};
-window.SunLongitude=function(jdn){const T=(jdn-2451545.0)/36525,T2=T*T,dr=Math.PI/180;const M=357.52910+35999.05030*T-0.0001559*T2-0.00000048*T*T2;const L0=280.46645+36000.76983*T+0.0003032*T2;let DL=(1.914600-0.004817*T-0.000014*T2)*Math.sin(dr*M)+(0.019993-0.000101*T)*Math.sin(2*dr*M)+0.000290*Math.sin(3*dr*M);let L=(L0+DL)*dr;L=L-Math.PI*2*Math.floor(L/(Math.PI*2));return L;};
-window.getSunLongitude=function(dayNumber,timeZone){return Math.floor(window.SunLongitude(dayNumber-0.5-timeZone/24)/Math.PI*6);};
-window.getNewMoonDay=function(k,timeZone){return Math.floor(window.NewMoon(k)+0.5+timeZone/24);};
-window.getLunarMonth11=function(yy,timeZone){const off=window.jdFromDate(31,12,yy)-2415021;const k=Math.floor(off/29.530588853);let nm=window.getNewMoonDay(k,timeZone);const sunLong=window.getSunLongitude(nm,timeZone);if(sunLong>=9)nm=window.getNewMoonDay(k-1,timeZone);return nm;};
-window.getLeapMonthOffset=function(a11,timeZone){const k=Math.floor((a11-2415021.076998695)/29.530588853+0.5);let last=0,i=1,arc=window.getSunLongitude(window.getNewMoonDay(k+i,timeZone),timeZone);do{last=arc;i++;arc=window.getSunLongitude(window.getNewMoonDay(k+i,timeZone),timeZone);}while(arc!==last&&i<14);return i-1;};
-window.convertSolar2Lunar=function(dd,mm,yy,timeZone=7){const dayNumber=window.jdFromDate(dd,mm,yy);const k=Math.floor((dayNumber-2415021.076998695)/29.530588853);let monthStart=window.getNewMoonDay(k+1,timeZone);if(monthStart>dayNumber)monthStart=window.getNewMoonDay(k,timeZone);let a11=window.getLunarMonth11(yy,timeZone);let b11=a11,lunarYear;if(a11>=monthStart){lunarYear=yy;a11=window.getLunarMonth11(yy-1,timeZone);}else{lunarYear=yy+1;b11=window.getLunarMonth11(yy+1,timeZone);}const lunarDay=dayNumber-monthStart+1;let diff=Math.floor((monthStart-a11)/29);let lunarLeap=0;let lunarMonth=diff+11;if(b11-a11>365){const leapMonthDiff=window.getLeapMonthOffset(a11,timeZone);if(diff>=leapMonthDiff){lunarMonth=diff+10;if(diff===leapMonthDiff)lunarLeap=1;}}if(lunarMonth>12)lunarMonth-=12;if(lunarMonth>=11&&diff<4)lunarYear-=1;return[lunarDay,lunarMonth,lunarYear,lunarLeap];};
-window.getLunarDateInfo=function(date){try{const tz=7;const d=date instanceof Date?date:new Date();const r=window.convertSolar2Lunar(d.getDate(),d.getMonth()+1,d.getFullYear(),tz);const text=`${window.formatDate2(r[0])}/${window.formatDate2(r[1])}/${r[2]} âm lịch${r[3]?' (tháng nhuận)':''}`;return{lunarDay:r[0],lunarMonth:r[1],lunarYear:r[2],lunarLeap:!!r[3],text};}catch(e){console.warn('[DATECLOCK lunar error]',e);return{lunarDay:0,lunarMonth:0,lunarYear:0,lunarLeap:false,text:'Không tính được âm lịch'};}};
-window.updateDateClock=function(){const now=new Date();const weekday=window.getVietnameseWeekday(now);const dd=window.formatDate2(now.getDate()),mm=window.formatDate2(now.getMonth()+1),yyyy=now.getFullYear();const hh=window.formatDate2(now.getHours()),mi=window.formatDate2(now.getMinutes()),ss=window.formatDate2(now.getSeconds());const lunar=window.getLunarDateInfo(now);setTxt('dateclock-time',`${hh}:${mi}:${ss}`);setTxt('dateclock-weekday',weekday);setTxt('dateclock-solar-short',`${dd}/${mm}/${yyyy}`);setTxt('dateclock-solar-long',`${weekday}, ngày ${dd} tháng ${mm} năm ${yyyy}`);setTxt('dateclock-lunar-short',`${window.formatDate2(lunar.lunarDay)}/${window.formatDate2(lunar.lunarMonth)}/${lunar.lunarYear}`);setTxt('dateclock-lunar-long',lunar.text);};
-window.startDateClock=function(){window.stopDateClock();window.updateDateClock();window.dateClockInterval=setInterval(window.updateDateClock,1000);};
-window.stopDateClock=function(){if(window.dateClockInterval){clearInterval(window.dateClockInterval);window.dateClockInterval=null;}};
-window.WEATHER_LOCATIONS={hanoi:{label:'Hà Nội',lat:21.0285,lon:105.8542},noibai:{label:'Sân bay Nội Bài',lat:21.2187,lon:105.8042},socson:{label:'Sóc Sơn',lat:21.2578,lon:105.8480}};
-window.testWeatherSources=async function(){const results={};console.group('=== LIFEOS WEATHER SOURCES POC ===');for(const [key,loc] of Object.entries(window.WEATHER_LOCATIONS)){const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&forecast_days=5&timezone=Asia%2FBangkok`;try{console.log(`[WEATHER TEST] ${key} source=open-meteo START`,loc);const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const dailyLen=raw?.daily?.time?.length||0;const current=raw?.current||null;const ok=!!current&&dailyLen>=3;results[key]={ok,source:'open-meteo',current,dailyLen,raw};localStorage.setItem(`lifeos_weather_cache_${key}`,JSON.stringify({ts:Date.now(),source:'open-meteo',raw}));console.log(`[WEATHER TEST] ${key} source=open-meteo ${ok?'OK':'FAIL'}`);console.log(`[WEATHER TEST] ${key} current=`,current);console.log(`[WEATHER TEST] ${key} daily length=`,dailyLen);}catch(err){results[key]={ok:false,source:'open-meteo',error:String(err?.message||err)};console.warn(`[WEATHER TEST] ${key} source=open-meteo FAIL`,err);const cache=localStorage.getItem(`lifeos_weather_cache_${key}`);console.log(`[WEATHER TEST] ${key} cache=`,cache?'AVAILABLE':'EMPTY');}}console.log('[WEATHER TEST] summary=',results);console.groupEnd();return results;};
 window.timerState={mode:'dateclock',cd:null,sw:null,cdTime:0,swTime:0,cdRun:false,swRun:false};
-window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;const du=el('mode-dateclock-ui'),cu=el('mode-countdown-ui'),su=el('mode-stopwatch-ui'),td=el('tab-dateclock'),tc=el('tab-countdown'),ts=el('tab-stopwatch');if(du)du.classList.toggle('hidden',m!=='dateclock');if(cu)cu.classList.toggle('hidden',m!=='countdown');if(su)su.classList.toggle('hidden',m!=='stopwatch');const base='min-w-0 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all active:scale-95 truncate';if(td)td.className=`${base} ${m==='dateclock'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-white'}`;if(tc)tc.className=`${base} ${m==='countdown'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-white'}`;if(ts)ts.className=`${base} ${m==='stopwatch'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-white'}`;if(m==='dateclock')window.startDateClock();else window.stopDateClock();};
+window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;const cu=el('mode-countdown-ui'),su=el('mode-stopwatch-ui'),du=el('mode-dateclock-ui'),wu=el('mode-weather-ui'),tc=el('tab-countdown'),ts=el('tab-stopwatch'),td=el('tab-dateclock'),tw=el('tab-weather');if(cu)cu.classList.toggle('hidden',m!=='countdown');if(su)su.classList.toggle('hidden',m!=='stopwatch');if(du)du.classList.toggle('hidden',m!=='dateclock');if(wu)wu.classList.toggle('hidden',m!=='weather');const base='py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all active:scale-95 truncate';if(td)td.className=`${base} ${m==='dateclock'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tw)tw.className=`${base} ${m==='weather'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tc)tc.className=`${base} ${m==='countdown'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(ts)ts.className=`${base} ${m==='stopwatch'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(m==='dateclock')window.startDateClock?.();else window.stopDateClock?.();if(m==='weather')window.startWeatherPanel?.();};
+
+
+window.formatDate2=function(n){return String(n).padStart(2,'0')};
+window.getVietnameseWeekday=function(date){return ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][date.getDay()]||''};
+window.jdFromDate=function(dd,mm,yy){const a=Math.floor((14-mm)/12);const y=yy+4800-a;const m=mm+12*a-3;let jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;if(jd<2299161){jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-32083}return jd};
+window.jdToDate=function(jd){let a,b,c;if(jd>2299160){a=jd+32044;b=Math.floor((4*a+3)/146097);c=a-Math.floor((b*146097)/4)}else{b=0;c=jd+32082}const d=Math.floor((4*c+3)/1461);const e=c-Math.floor((1461*d)/4);const m=Math.floor((5*e+2)/153);const day=e-Math.floor((153*m+2)/5)+1;const month=m+3-12*Math.floor(m/10);const year=b*100+d-4800+Math.floor(m/10);return [day,month,year]};
+window.NewMoon=function(k){const T=k/1236.85;const T2=T*T;const T3=T2*T;const dr=Math.PI/180;let Jd1=2415020.75933+29.53058868*k+0.0001178*T2-0.000000155*T3;Jd1+=0.00033*Math.sin((166.56+132.87*T-0.009173*T2)*dr);const M=359.2242+29.10535608*k-0.0000333*T2-0.00000347*T3;const Mpr=306.0253+385.81691806*k+0.0107306*T2+0.00001236*T3;const F=21.2964+390.67050646*k-0.0016528*T2-0.00000239*T3;let C1=(0.1734-0.000393*T)*Math.sin(M*dr)+0.0021*Math.sin(2*dr*M)-0.4068*Math.sin(Mpr*dr)+0.0161*Math.sin(2*dr*Mpr)-0.0004*Math.sin(3*dr*Mpr)+0.0104*Math.sin(2*dr*F)-0.0051*Math.sin((M+Mpr)*dr)-0.0074*Math.sin((M-Mpr)*dr)+0.0004*Math.sin((2*F+M)*dr)-0.0004*Math.sin((2*F-M)*dr)-0.0006*Math.sin((2*F+Mpr)*dr)+0.0010*Math.sin((2*F-Mpr)*dr)+0.0005*Math.sin((2*Mpr+M)*dr);let deltat;if(T<-11)deltat=0.001+0.000839*T+0.0002261*T2-0.00000845*T3-0.000000081*T*T3;else deltat=-0.000278+0.000265*T+0.000262*T2;return Math.floor(Jd1+C1-deltat+0.5)};
+window.SunLongitude=function(jdn){const T=(jdn-2451545.5)/36525;const T2=T*T;const dr=Math.PI/180;const M=357.52910+35999.05030*T-0.0001559*T2-0.00000048*T*T2;const L0=280.46645+36000.76983*T+0.0003032*T2;let DL=(1.914600-0.004817*T-0.000014*T2)*Math.sin(dr*M)+(0.019993-0.000101*T)*Math.sin(2*dr*M)+0.000290*Math.sin(3*dr*M);let L=L0+DL;L=L*dr;L=L-Math.PI*2*Math.floor(L/(Math.PI*2));return Math.floor(L/Math.PI*6)};
+window.getLunarMonth11=function(yy,timeZone){const off=window.jdFromDate(31,12,yy)-2415021;const k=Math.floor(off/29.530588853);let nm=window.NewMoon(k);const sunLong=window.SunLongitude(nm+timeZone/24);if(sunLong>=9)nm=window.NewMoon(k-1);return nm};
+window.getLeapMonthOffset=function(a11,timeZone){const k=Math.floor((a11-2415021.076998695)/29.530588853+0.5);let last=0;let i=1;let arc=window.SunLongitude(window.NewMoon(k+i)+timeZone/24);do{last=arc;i++;arc=window.SunLongitude(window.NewMoon(k+i)+timeZone/24)}while(arc!==last&&i<14);return i-1};
+window.convertSolar2Lunar=function(dd,mm,yy,timeZone=7){const dayNumber=window.jdFromDate(dd,mm,yy);const k=Math.floor((dayNumber-2415021.076998695)/29.530588853);let monthStart=window.NewMoon(k+1);if(monthStart>dayNumber)monthStart=window.NewMoon(k);let a11=window.getLunarMonth11(yy,timeZone);let b11=a11;let lunarYear;if(a11>=monthStart){lunarYear=yy;a11=window.getLunarMonth11(yy-1,timeZone)}else{lunarYear=yy+1;b11=window.getLunarMonth11(yy+1,timeZone)}const lunarDay=dayNumber-monthStart+1;const diff=Math.floor((monthStart-a11)/29);let lunarLeap=0;let lunarMonth=diff+11;if(b11-a11>365){const leapMonthDiff=window.getLeapMonthOffset(a11,timeZone);if(diff>=leapMonthDiff){lunarMonth=diff+10;if(diff===leapMonthDiff)lunarLeap=1}}if(lunarMonth>12)lunarMonth-=12;if(lunarMonth>=11&&diff<4)lunarYear-=1;return [lunarDay,lunarMonth,lunarYear,lunarLeap]};
+window.getLunarDateInfo=function(date){try{const rs=window.convertSolar2Lunar(date.getDate(),date.getMonth()+1,date.getFullYear(),7);const text=`${window.formatDate2(rs[0])}/${window.formatDate2(rs[1])}/${rs[2]} âm lịch${rs[3]?' (tháng nhuận)':''}`;return{lunarDay:rs[0],lunarMonth:rs[1],lunarYear:rs[2],lunarLeap:!!rs[3],text}}catch(e){console.warn('Lunar date failed:',e);return{lunarDay:'--',lunarMonth:'--',lunarYear:'----',lunarLeap:false,text:'--/--/---- âm lịch'}}};
+window.updateDateClock=function(){const now=new Date();const wd=window.getVietnameseWeekday(now);const hh=window.formatDate2(now.getHours()),mi=window.formatDate2(now.getMinutes()),ss=window.formatDate2(now.getSeconds());const dd=window.formatDate2(now.getDate()),mm=window.formatDate2(now.getMonth()+1),yy=now.getFullYear();const lunar=window.getLunarDateInfo(now);setTxt('dateclock-time',`${hh}:${mi}:${ss}`);setTxt('dateclock-weekday',wd);setTxt('dateclock-solar-short',`${dd}/${mm}/${yy}`);setTxt('dateclock-solar-long',`${wd}, ngày ${dd} tháng ${mm} năm ${yy}`);setTxt('dateclock-lunar-short',`${window.formatDate2(lunar.lunarDay)}/${window.formatDate2(lunar.lunarMonth)}/${lunar.lunarYear}`);setTxt('dateclock-lunar-long',lunar.text)};
+window.startDateClock=function(){window.stopDateClock?.();window.updateDateClock?.();const now=new Date();const delay=Math.max(0,1000 - now.getMilliseconds());window.dateClockTimeout=setTimeout(()=>{window.updateDateClock?.();window.dateClockInterval=setInterval(()=>{window.updateDateClock?.()},1000)},delay)};
+window.stopDateClock=function(){if(window.dateClockTimeout){clearTimeout(window.dateClockTimeout);window.dateClockTimeout=null}if(window.dateClockInterval){clearInterval(window.dateClockInterval);window.dateClockInterval=null}};
+window.WEATHER_LOCATIONS={hanoi:{key:'hanoi',name:'Hà Nội',lat:21.0285,lon:105.8542},noibai:{key:'noibai',name:'Sân bay Nội Bài',lat:21.2187,lon:105.8042},socson:{key:'socson',name:'Sóc Sơn',lat:21.2578,lon:105.8480}};
+window.WEATHER_CACHE_KEYS={hanoi:'lifeos_weather_cache_hanoi',noibai:'lifeos_weather_cache_noibai',socson:'lifeos_weather_cache_socson'};
+window.testWeatherSources=async function(){const results={};for(const key of Object.keys(window.WEATHER_LOCATIONS)){const loc=window.WEATHER_LOCATIONS[key];const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&timezone=Asia%2FBangkok&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,precipitation,rain,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,weather_code&forecast_days=5`;try{console.log(`[WEATHER TEST] ${key} source=open-meteo START`,loc);const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();const dailyLen=Array.isArray(data?.daily?.time)?data.daily.time.length:0;const current=data?.current||null;const ok=!!current&&dailyLen>=3;console.log(`[WEATHER TEST] ${key} source=open-meteo ${ok?'OK':'FAIL'}`);console.log(`[WEATHER TEST] ${key} current`,current);console.log(`[WEATHER TEST] ${key} daily length`,dailyLen);results[key]={ok,current,dailyLength:dailyLen,data}}catch(err){console.error(`[WEATHER TEST] ${key} source=open-meteo FAIL`,err);results[key]={ok:false,error:String(err?.message||err)}}}console.log('[WEATHER TEST] SUMMARY',results);return results};
+
+window.WEATHER_CACHE_TTL_MS=20*60*1000;
+window.weatherState={selected:'hanoi',loading:false,lastData:null};
+window.weatherApiUrl=function(loc){return `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Asia%2FBangkok&forecast_days=5`};
+window.weatherCodeToText=function(code){code=Number(code);if(code===0)return'Trời quang';if([1,2,3].includes(code))return code===1?'Ít mây':'Nhiều mây';if([45,48].includes(code))return'Sương mù';if([51,53,55].includes(code))return'Mưa phùn';if([61,63,65].includes(code))return'Mưa';if([66,67].includes(code))return'Mưa đóng băng';if([71,73,75].includes(code))return'Tuyết';if([80,81,82].includes(code))return'Mưa rào';if(code===95)return'Dông';if([96,99].includes(code))return'Dông kèm mưa đá';return'Theo dữ liệu hiện tại'};
+window.weatherCodeToIcon=function(code){code=Number(code);if(code===0)return'ph-sun';if([1,2].includes(code))return'ph-cloud-sun';if(code===3)return'ph-cloud';if([45,48].includes(code))return'ph-cloud-fog';if([51,53,55,61,63,65,66,67,80,81,82].includes(code))return'ph-cloud-rain';if([95,96,99].includes(code))return'ph-cloud-lightning';return'ph-cloud-sun'};
+window.weatherFmtNum=function(v,d=1){const n=Number(v);return Number.isFinite(n)?n.toFixed(d).replace(/\.0$/,''):'--'};
+window.weatherFmtDate=function(s){try{const d=new Date(s+'T00:00:00');return `${window.formatDate2(d.getDate())}/${window.formatDate2(d.getMonth()+1)}`}catch(e){return s||'--'}};
+window.getWeatherCache=function(locationKey){try{const raw=localStorage.getItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey));if(!raw)return null;const obj=JSON.parse(raw);return obj&&obj.data?obj:null}catch(e){console.warn('[WEATHER CACHE READ FAIL]',locationKey,e);return null}};
+window.setWeatherCache=function(locationKey,data){try{localStorage.setItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey),JSON.stringify({savedAt:Date.now(),data}))}catch(e){console.warn('[WEATHER CACHE WRITE FAIL]',locationKey,e)}};
+window.normalizeOpenMeteoWeather=function(raw,location){const c=raw?.current||{};const d=raw?.daily||{};const len=Array.isArray(d.time)?Math.min(d.time.length,5):0;const daily=[];for(let i=0;i<len;i++){daily.push({date:d.time?.[i],code:d.weather_code?.[i],tempMax:d.temperature_2m_max?.[i],tempMin:d.temperature_2m_min?.[i],precipSum:d.precipitation_sum?.[i],precipProb:d.precipitation_probability_max?.[i],text:window.weatherCodeToText(d.weather_code?.[i]),icon:window.weatherCodeToIcon(d.weather_code?.[i])})}return{source:'open-meteo',fetchedAt:Date.now(),location:{...location},current:{time:c.time,temperature:c.temperature_2m,apparent:c.apparent_temperature,humidity:c.relative_humidity_2m,wind:c.wind_speed_10m,precipitation:c.precipitation,rain:c.rain,code:c.weather_code,text:window.weatherCodeToText(c.weather_code),icon:window.weatherCodeToIcon(c.weather_code)},daily,raw}};
+window.setWeatherStatus=function(msg,type='info'){const box=el('weather-status');if(!box)return;if(!msg){box.classList.add('hidden');box.textContent='';return}box.classList.remove('hidden');box.textContent=msg;box.className=`mb-3 text-xs font-bold rounded-xl px-3 py-2 ${type==='error'?'text-rose-700 bg-rose-50 border border-rose-100':'text-amber-700 bg-amber-50 border border-amber-100'}`};
+window.renderWeatherLocationTabs=function(selected){Object.keys(window.WEATHER_LOCATIONS||{}).forEach(k=>{const b=el('weather-loc-'+k);if(!b)return;b.className=`weather-loc-btn py-2 px-1 rounded-xl border text-[11px] font-black active:scale-95 truncate ${k===selected?'bg-primary text-white border-primary':'bg-slate-50 text-slate-500 border-slate-200'}`})};
+window.renderWeather=function(data,opts={}){if(!data)return;window.weatherState.lastData=data;window.renderWeatherLocationTabs(data.location.key);setTxt('weather-location-name',data.location.name);setTxt('weather-desc',data.current.text||'Theo dữ liệu hiện tại');setTxt('weather-temp',`${window.weatherFmtNum(data.current.temperature)}°C`);setTxt('weather-feels',`${window.weatherFmtNum(data.current.apparent)}°C`);setTxt('weather-humidity',`${window.weatherFmtNum(data.current.humidity,0)}%`);setTxt('weather-wind',`${window.weatherFmtNum(data.current.wind)} km/h`);const rain=Number(data.current.rain||data.current.precipitation||0);setTxt('weather-rain',Number.isFinite(rain)?`${window.weatherFmtNum(rain)} mm`:'Theo dữ liệu');const ico=el('weather-icon');if(ico)ico.className=`ph-bold ${data.current.icon||'ph-cloud-sun'} text-4xl`;const tm=data.fetchedAt?new Date(data.fetchedAt):new Date();setTxt('weather-updated',`${opts.fromCache?'Dữ liệu gần nhất':'Cập nhật lúc'} ${window.formatDate2(tm.getHours())}:${window.formatDate2(tm.getMinutes())}`);const list=el('weather-daily-list');if(list){list.innerHTML=(data.daily||[]).slice(0,5).map(x=>`<div class="min-w-[112px] flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center shadow-inner"><div class="text-[11px] font-black text-slate-500 mb-1">${window.weatherFmtDate(x.date)}</div><i class="ph-bold ${x.icon||'ph-cloud-sun'} text-2xl text-primary"></i><div class="text-[10px] font-bold text-slate-500 leading-tight mt-1 min-h-[28px]">${x.text||'--'}</div><div class="text-xs font-black text-slate-800 mt-1">${window.weatherFmtNum(x.tempMax,0)}° / ${window.weatherFmtNum(x.tempMin,0)}°</div><div class="text-[10px] font-bold text-slate-400 mt-1">Mưa ${x.precipProb!=null?window.weatherFmtNum(x.precipProb,0)+'%':window.weatherFmtNum(x.precipSum)+' mm'}</div></div>`).join('')}window.setWeatherStatus(opts.fromCache?'Đang dùng dữ liệu gần nhất': '', opts.fromCache?'warn':'info')};
+window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');const res=await fetch(window.weatherApiUrl(loc),{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
+window.setWeatherLocation=function(locationKey){window.vibrate?.(10);return window.fetchWeather(locationKey,{force:false})};
+window.refreshWeather=function(){window.vibrate?.(10);return window.fetchWeather(window.weatherState?.selected||'hanoi',{force:true})};
+window.startWeatherPanel=function(){if(!window.weatherState)window.weatherState={selected:'hanoi'};window.fetchWeather(window.weatherState.selected||'hanoi',{force:false}).catch(e=>console.warn('[WEATHER PANEL START FAIL]',e))};
+
+
 window.applyTimerPreset=m=>{window.vibrate(10);setVal('in-hr','');setVal('in-min',m);setVal('in-sec','00')};
 window.validateTimerInput=(e,m)=>{if(e.value>m)e.value=m;if(e.value<0)e.value=0;if(e.value.length>2)e.value=e.value.slice(0,2)};
 
@@ -1391,22 +1402,10 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
     _tU(){document.querySelectorAll('.vault-totp-code').forEach(e=>{const s=e.dataset.secret;if(!s)return;const c=window.VaultUtils.generateTOTP(s);if(c)e.textContent=c});const n=Math.floor(Date.now()/1000),p=((n%30)/30)*100;document.querySelectorAll('.totp-progress').forEach(e=>{e.style.width=p+'%'})},
     renderVaultCards(){
         const c=el('vaultCardsContainer'),es=el('vaultEmptyState');if(!c||!es)return;
-        let source=window.VaultStorageLayer.getData()||[];
-        console.log('[VAULT RENDER START]', {
-            key: window.VaultStorageLayer?._k,
-            count: source.length,
-            cat: window.VaultUI?._c || window.VaultUI?._cat,
-            q: window.VaultUI?._q
-        });
-        let d=source.slice();
+        let d=window.VaultStorageLayer.getData();
         if(this._c!=='all'){d=d.filter(e=>{if(this._c==='custom')return e.category==='custom'||!['account','crypto','note','service'].includes(e.category);return e.category===this._c})}
         if(this._q){const q=this._q.toLowerCase();d=d.filter(e=>(e.name||'').toLowerCase().includes(q)||((e.content||'').toLowerCase().includes(q)))}
-        console.log('[VAULT RENDER FILTERED]', {
-            sourceCount: source.length,
-            filteredCount: d.length,
-            names: d.map(x=>x.name)
-        });
-        if(!d.length){c.innerHTML='';showFlex('vaultEmptyState');this.stopTOTPUpdater();console.log('[VAULT RENDER DONE]', {containerChildren:c.children.length,emptyHidden:es.classList.contains('hidden'),firstHtml:c.innerHTML.slice(0,500)});return}
+        if(!d.length){c.innerHTML='';showFlex('vaultEmptyState');this.stopTOTPUpdater();return}
         hideEl('vaultEmptyState');
         const ht=d.some(e=>{const p=window.VaultUtils.parseSmartContent(e.content);return!!p.totp});
         if(ht)this.startTOTPUpdater();else this.stopTOTPUpdater();
@@ -1423,11 +1422,6 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
             
             return `<div onclick="window.VaultUI.openModal('${e.id}')" class="cursor-pointer break-inside-avoid mb-6 bg-white backdrop-blur-md rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full"><div class="flex items-start justify-between mb-4 border-b border-slate-100 pb-3 flex-shrink-0"><div class="min-w-0 flex-grow pr-2"><h3 class="font-bold text-slate-800 text-base lg:text-lg leading-tight break-words">${sn}</h3><span class="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1 border border-primary/20">${ci} ${window.escapeHTML(dc)}</span></div><div class="flex gap-2 flex-shrink-0"><button type="button" onclick="event.stopPropagation();window.VaultApp.copyEntry('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary bg-slate-50 hover:bg-primary/10 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Copy nội dung"><i class="ph-bold ph-copy text-lg"></i></button><button type="button" onclick="event.stopPropagation();window.VaultUI.openModal('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Sửa"><i class="ph-bold ph-pencil-simple text-lg"></i></button><button type="button" onclick="event.stopPropagation();window.VaultApp.confirmDeleteEntry('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Xóa"><i class="ph-bold ph-trash text-lg"></i></button></div></div><div onclick="event.stopPropagation()" class="flex-grow">${f}</div></div>`
         }).join('');
-        console.log('[VAULT RENDER DONE]', {
-            containerChildren: c.children.length,
-            emptyHidden: es.classList.contains('hidden'),
-            firstHtml: c.innerHTML.slice(0,500)
-        });
     }
 };
 
@@ -1489,14 +1483,14 @@ window.VaultApp={
         if(c==='custom') d.customCategory = cc||'Khác';
         if(id){ const oldItem = window.VaultStorageLayer.getData().find(x=>String(x.id)===String(id)); if(oldItem && oldItem.createdAt) d.createdAt = oldItem.createdAt; else d.createdAt = Date.now(); window.VaultStorageLayer.update(id, d); window.showToast('Đã lưu chỉnh sửa!','ph-check-circle'); }
         else{ d.createdAt=Date.now(); window.VaultStorageLayer.add(d); window.showToast('Đã thêm mới!','ph-vault'); }
-        window.VaultUI.closeModal(); this.filterData(window.VaultUI._q); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'user-save-vault' });
+        window.VaultUI.closeModal(); this.filterData(window.VaultUI._q); if(window.FirebaseSync) window.FirebaseSync.pushAll();
     },
     confirmDeleteEntry(id){
         window.vibrate(20); const e=window.VaultStorageLayer.getData().find(x=>String(x.id)===String(id)); if(!e) return;
         const confirmHTML = `<div id="deleteModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex-grow overflow-y-auto custom-scroll-area min-h-0 p-2"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200 shrink-0"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800 shrink-0">Xóa vĩnh viễn?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(e.name)}"</p></div><div class="flex gap-3 flex-shrink-0 mt-2"><button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Giữ lại</button><button onclick="window.VaultApp.execDeleteEntry('${id}'); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button></div></div></div>`;
         document.body.insertAdjacentHTML('beforeend', confirmHTML);
     },
-    execDeleteEntry(id){ window.vibrate([30,50,30]); window.VaultStorageLayer.remove(id); this.filterData(window.VaultUI._q); window.showToast('Đã xóa dữ liệu!','ph-trash'); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'user-delete-one-vault' }); },
+    execDeleteEntry(id){ window.vibrate([30,50,30]); window.VaultStorageLayer.remove(id); this.filterData(window.VaultUI._q); window.showToast('Đã xóa dữ liệu!','ph-trash'); if(window.FirebaseSync) window.FirebaseSync.pushAll(); },
     exportBackup(){
         window.vibrate(20); const d=window.VaultStorageLayer.getData(); if(!d.length){ window.showToast('Kho lưu trữ đang trống!','ph-warning-circle'); return; }
         const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}), u=URL.createObjectURL(b), a=document.createElement('a');
@@ -1504,7 +1498,7 @@ window.VaultApp={
     },
     importBackup(e){
         window.vibrate(20); const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-        r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); if(!Array.isArray(d)) throw new Error(); window.VaultStorageLayer.replaceAll(d); this.filterData(''); window.showToast(`Phục hồi thành công ${d.length} mục!`,'ph-upload-simple'); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'user-import-vault', allowEmptyVaultPush: d.length === 0 }); }catch(err){ window.showToast('File JSON không hợp lệ!','ph-warning-circle'); } }; r.readAsText(f); e.target.value='';
+        r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); if(!Array.isArray(d)) throw new Error(); window.VaultStorageLayer.replaceAll(d); this.filterData(''); window.showToast(`Phục hồi thành công ${d.length} mục!`,'ph-upload-simple'); if(window.FirebaseSync) window.FirebaseSync.pushAll(); }catch(err){ window.showToast('File JSON không hợp lệ!','ph-warning-circle'); } }; r.readAsText(f); e.target.value='';
     }
 };
 
@@ -1519,7 +1513,7 @@ window.MusicApp = {
         if(this.isInitialized) return; window.vibrate(15); this.isInitialized = true;
         const anchor = el('mstq-silence'); if(anchor && anchor.paused) anchor.play().catch(()=>{});
         
-        const mi = el('mobile-input'); if(mi) mi.style.bottom = '145px';
+        const mi = el('mobile-input'); if(mi) mi.style.bottom = 'calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom))';
         const fab = el('fab-add-vault'); if(fab) fab.style.bottom = '160px';
         
         this.refetch();
@@ -1665,7 +1659,7 @@ window.MusicApp = {
             const anchor = el('mstq-silence'); if(anchor && anchor.paused) anchor.play().catch(()=>{});
         }
         const mp = el('mini-player'); if(mp && mp.style.display === 'none') mp.style.display = 'block';
-        const mi = el('mobile-input'); if(mi) mi.style.bottom = '145px';
+        const mi = el('mobile-input'); if(mi) mi.style.bottom = 'calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom))';
         const fab = el('fab-add-vault'); if(fab) fab.style.bottom = '160px';
 
         window.vibrate(10); this.currentIndex = idx; if(document.visibilityState === 'visible') this.playing = true;
@@ -1717,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(dateVal) { const d = new Date(dateVal); parsed.dueDate = window.getIsoDate(d); parsed.alarmTime = d.getTime(); parsed.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
         const newId = String(Date.now())+Math.floor(Math.random()*1000).toString();
         window.todos.unshift({ id: newId, text: parsed.text.charAt(0).toUpperCase() + parsed.text.slice(1), completed: false, priority: parsed.priority, tags: parsed.tags, alarmTime: parsed.alarmTime, timeStr: parsed.timeStr, isDaily: parsed.isDaily, dueDate: parsed.dueDate, alerted: false, createdAt: Date.now(), alarmEnabled: true });
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'task-or-generic-sync' });
+        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
         window.vibrate(15);
         if(parsed.alarmTime && parsed.alarmTime <= Date.now()) { window.triggerGlobalAlarm(newId, parsed.text); } else if(parsed.timeStr) { window.showToast(`Đã hẹn lúc ${parsed.timeStr}`, 'ph-speaker-high'); } else { window.showToast('Đã lưu!', 'ph-check-circle'); }
     };
@@ -1816,9 +1810,17 @@ window.pwaEngine = {
         isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
     },
     init: function() {
-        // ĐĂNG KÝ SERVICE WORKER - LINH HỒN CỦA PWA
+        // ĐĂNG KÝ SERVICE WORKER RIÊNG CHO LIFEOS TRONG /tool/
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Reg Failed:', err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/tool/sw_lifeos.js', {
+                    scope: '/tool/'
+                }).then((registration) => {
+                    console.log('[LifeOS SW] registered:', registration.scope);
+                }).catch((err) => {
+                    console.warn('[LifeOS SW] registration failed:', err);
+                });
+            }, { once: true });
         }
 
         const fab = document.getElementById('btnInstall');
@@ -1894,8 +1896,7 @@ window.pwaEngine = {
     }
 };
 
-<script>
-try{setTimeout(()=>{if(window.switchTimerMode)window.switchTimerMode('dateclock');},400);}catch(e){console.warn('[DATECLOCK default start error]',e);}
+setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}catch(e){console.warn('DateClock initial start failed:',e)}},0);
 </script>
 </body>
 </html>
