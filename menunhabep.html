@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thực Đơn Đa Năng - Bản Thiết Kế v14 Hoàn Mỹ</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        @page { size: A4 portrait; margin: 0; }
+        body {
+            margin: 0; padding: 0;
+            background-color: #f0f4f8; color: #000000;
+        }
+        
+        .control-panel {
+            text-align: center; padding: 12px;
+            background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px;
+        }
+        .btn-print {
+            background-color: #000000; color: white; border: 2px solid #000000;
+            padding: 12px 60px; font-size: 13pt; font-weight: bold;
+            border-radius: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+        .btn-print:hover { background-color: #ffffff; color: #000000; }
+
+        .a4-page {
+            width: 210mm; height: 297mm; margin: 0 auto 40px auto;
+            background-color: #ffffff; padding: 6mm 5mm; box-shadow: 0 0 20px rgba(0,0,0,0.15);
+        }
+
+        /* Lưới cắt giấy */
+        table.grid-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        table.grid-layout > tbody > tr > td {
+            border: 1px dashed #666666; width: 25%; height: 33.333%; 
+            vertical-align: top; padding: 3mm 2mm; overflow: hidden;
+        }
+
+        .menu-card { width: 100%; height: 100%; display: flex; flex-direction: column; background: #ffffff; }
+
+        /* Tiêu đề "THỰC ĐƠN" - Font chữ đồng bộ, đậm đà, sang trọng */
+        .card-header { text-align: center; margin-bottom: 6px; }
+        .card-title {
+            font-family: 'UVN Thuong Ngang', 'Cambria', 'Sitka Text', 'Times New Roman', serif;
+            font-size: 14.5pt; font-weight: bold; text-transform: uppercase;
+            color: #000000; letter-spacing: 4px; margin: 0; display: inline-block;
+        }
+        .decor-line { height: 1.5px; background: #000000; width: 100%; margin-top: 4px; position: relative; }
+        .decor-line::after {
+            content: "◆"; font-size: 5pt; position: absolute;
+            top: -5px; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px;
+        }
+
+        /* Bảng kẻ thẳng liền nét hoàn toàn, kết cấu vững chãi không rối mắt */
+        .menu-list-table { 
+            width: 100%; border-collapse: collapse; flex-grow: 1; 
+            border: 1.5px solid #000000; 
+        }
+        .menu-list-table tr { height: 7.4mm; }
+        
+        /* Thay thế toàn bộ nét đứt thành nét liền mảnh sạch sẽ */
+        .menu-list-table td { 
+            border-bottom: 1px solid #000000; 
+            padding: 0; 
+            vertical-align: middle; 
+        }
+        .menu-list-table tr:last-child td { border-bottom: none; }
+        
+        /* Cột STT để bình thường, phân tách bằng nét dọc liền đậm */
+        .col-stt {
+            width: 18%; text-align: center; font-size: 12pt; font-weight: bold;
+            font-family: 'UVN Thuong Ngang', 'Cambria', 'Sitka Text', 'Times New Roman', serif;
+            color: #000000; background-color: #fcfcfc;
+            border-right: 1.5px solid #000000;
+        }
+        
+        .col-name { width: 82%; padding: 0; }
+        
+        /* Font chữ siêu đậm đà, sửa triệt để lỗi tiếng Việt, dãn cách STT hợp lý */
+        .editable-input {
+            width: 100%; height: 100%; border: none; background: transparent;
+            padding-left: 16px; padding-right: 6px; /* Món ăn dãn xa STT 16px cực kỳ thoáng */
+            font-size: 12pt; font-weight: bold;
+            font-family: 'UVN Thuong Ngang', 'Cambria', 'Sitka Text', 'Times New Roman', serif; 
+            color: #000000; outline: none;
+        }
+        .editable-input:hover { background-color: #f5f5f5; }
+        .editable-input:focus { background-color: #e6f7ff; }
+        .menu-list-table tr:nth-child(even) .col-name { background-color: #fafafa; }
+
+        @media print {
+            body { background-color: #ffffff; }
+            .control-panel { display: none !important; }
+            .a4-page { width: 210mm; height: 297mm; margin: 0; padding: 6mm 5mm; box-shadow: none; }
+            .editable-input { border: none !important; padding-left: 16px !important; }
+            .menu-list-table { border: 1.5px solid #000000 !important; }
+            .menu-list-table td { border-bottom: 1px solid #000000 !important; }
+            .col-stt { background-color: #fcfcfc !important; color: #000000 !important; border-right: 1.5px solid #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <button class="btn-print" onclick="window.print()">BẤM ĐỂ IN RA MÁY IN</button>
+    </div>
+
+    <div class="a4-page">
+        <table class="grid-layout">
+            <tbody>
+                <script>
+                    const dishes = ["Thịt gà", "Tôm", "Thịt nướng", "Giò", "Bê xào", "Nộm thập cẩm", "Rau xào", "Canh măng", "Canh cải", "Bánh dầy", "Quýt"];
+                    let html = "";
+                    for(let r=0; r<3; r++) {
+                        html += "<tr>";
+                        for(let c=0; c<4; c++) {
+                            html += "<td><div class='menu-card'>";
+                            html += "<div class='card-header'><h3 class='card-title'>Thực Đơn</h3><div class='decor-line'></div></div>";
+                            html += "<table class='menu-list-table'>";
+                            dishes.forEach((dish, i) => {
+                                html += `<tr><td class='col-stt'>${i+1}</td><td class='col-name'><input type='text' class='editable-input dish-idx-${i+1}' value='${dish}' data-idx='${i+1}' oninput='syncDishes(this)'></td></tr>`;
+                            });
+                            html += "</table></div></td>";
+                        }
+                        html += "</tr>";
+                    }
+                    document.write(html);
+
+                    function syncDishes(inputElement) {
+                        var idx = inputElement.getAttribute('data-idx');
+                        var newValue = inputElement.value;
+                        var targets = document.querySelectorAll('.dish-idx-' + idx);
+                        targets.forEach(function(el) { if (el !== inputElement) el.value = newValue; });
+                    }
+                </script>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
