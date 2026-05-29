@@ -10,7 +10,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="application-name" content="LifeOS">
 <title>LifeOS V65 - The Absolute Masterpiece</title>
-<meta name="build-tag" content="LIFEOS_MUSIC_COMPACT_PLAYER_V3_20260529_01">
+<meta name="build-tag" content="LIFEOS_PWA_PILL_GLASS_NHIP_2_1_FINAL_20260529_01">
 
 <link id="manifest-link" rel="manifest" href="/mimihoalua/manifest_qlycuocsong.json">
 
@@ -100,20 +100,37 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-/* NÚT PWA NEON GRADIENT V65 */
+/* V65: NÚT PWA KÍNH MỜ ÔM SÁT CHỮ & DRAGGABLE */
 .install-fab { 
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
     display: none; 
     z-index: 999999; 
-    background: linear-gradient(135deg, #FF007A, #7928CA) !important;
-    color: #ffffff !important;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-right: none;
-    box-shadow: -4px 4px 15px rgba(255, 0, 122, 0.4);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: transparent !important; 
+    border: none !important;
+    box-shadow: none !important;
+    touch-action: none;
+    cursor: grab;
+    padding: 12px !important; 
+    transition: opacity 0.3s;
 }
+.install-fab:active { cursor: grabbing; }
 .install-fab.visible { display: flex !important; }
-.install-fab:active { transform: translateX(5px); }
+
+/* Lớp lõi tím mờ ôm sát chữ */
+.install-fab-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(168, 85, 247, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+    transition: transform 0.2s;
+}
+.install-fab:active .install-fab-inner { transform: scale(0.95); }
 .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
 .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
 
@@ -143,6 +160,15 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 #mini-player .music-player-bar{display:grid;grid-template-columns:minmax(82px,110px) 1fr minmax(82px,110px);align-items:center;gap:8px;width:100%;}
 #mini-player .music-player-meta{min-width:0;max-width:110px;text-align:left;padding-left:2px;justify-self:start;}
 #mini-player .music-player-actions{display:flex;align-items:center;justify-content:center;gap:8px;justify-self:center;flex-shrink:0;}
+#mode-news-ui{min-width:0;}
+.news-filter-btn{white-space:nowrap;}
+.news-card{transition:transform .18s ease, box-shadow .18s ease, background .18s ease;}
+.news-card:active{transform:scale(.985);}
+.news-title-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.news-summary-clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+#news-list-container{max-height:52dvh;overflow-y:auto;overscroll-behavior:contain;}
+@media(min-width:1024px){#news-list-container{max-height:430px;}}
+
 #mini-player .music-player-spacer{min-width:82px;justify-self:end;}
 #mini-player .music-player-progress-wrap{margin:8px 2px 0 2px;height:4px;opacity:.95;}
 #mini-player #music-status{line-height:1.1;opacity:.92;}
@@ -200,9 +226,9 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     <div class="flex items-center gap-2 sm:gap-3">
         <div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
         <div>
-            <h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
+            <h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">Quản Lý Cuộc Sống gia đình Xiêm Thắm</h1>
             <div class="flex items-center gap-2 mt-0.5">
-                <span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> Voice Guard</span>
+                <span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> Bảo vệ giọng nói</span>
             </div>
         </div>
     </div>
@@ -255,11 +281,14 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
             <div class="absolute inset-0 bg-primary opacity-5 pointer-events-none rounded-[2rem]"></div>
             <div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button onclick="window.toggleTimerSound()" id="timer-sound-btn" class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
             <div id="focus-task-card" class="hidden w-full bg-white border border-primary/30 p-4 rounded-2xl mb-6 text-center relative shadow-sm animate-scaleIn z-10"><span class="block text-[9px] font-black text-primary uppercase mb-1 tracking-widest flex justify-center items-center gap-1"><i class="ph-fill ph-target"></i> Đang tập trung vào</span><span id="focus-task-name" class="font-bold text-[15px] text-slate-800 line-clamp-2 leading-snug"></span><button onclick="window.unpinTask()" class="absolute top-2 right-2 p-2 sm:p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors active:scale-90"><i class="ph-bold ph-x text-sm"></i></button></div>
-            <div class="grid grid-cols-4 w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200 gap-1">
-                <button onclick="window.switchTimerMode('dateclock')" id="tab-dateclock" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95 truncate">Ngày giờ</button>
-                <button onclick="window.switchTimerMode('weather')" id="tab-weather" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Thời tiết</button>
-                <button onclick="window.switchTimerMode('countdown')" id="tab-countdown" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Đếm ngược</button>
-                <button onclick="window.switchTimerMode('stopwatch')" id="tab-stopwatch" class="py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Bấm giờ</button>
+            <div class="w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200 overflow-x-auto hide-scrollbar custom-scroll-area">
+                <div class="flex gap-1 min-w-max">
+                    <button onclick="window.switchTimerMode('dateclock')" id="tab-dateclock" class="min-w-[78px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95 truncate">Ngày giờ</button>
+                    <button onclick="window.switchTimerMode('weather')" id="tab-weather" class="min-w-[78px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Thời tiết</button>
+                    <button onclick="window.switchTimerMode('news')" id="tab-news" class="min-w-[84px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate"><i class="ph-bold ph-newspaper text-sm align-[-1px]"></i> Nhịp Sống</button>
+                    <button onclick="window.switchTimerMode('countdown')" id="tab-countdown" class="min-w-[84px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Đếm ngược</button>
+                    <button onclick="window.switchTimerMode('stopwatch')" id="tab-stopwatch" class="min-w-[78px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate">Bấm giờ</button>
+                </div>
             </div>
             
             <div id="mode-dateclock-ui" class="w-full flex flex-col items-center z-10 animate-fadeIn">
@@ -320,6 +349,34 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
                     <div class="mt-4">
                         <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2"><i class="ph-bold ph-calendar-dots text-primary"></i> Dự báo 5 ngày</div>
                         <div id="weather-daily-list" class="flex gap-2 overflow-x-auto custom-scroll-area pb-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mode-news-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
+                <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0">
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500"><i class="ph-bold ph-newspaper text-primary text-lg"></i> Nhịp Sống</div>
+                            <div id="news-group-title" class="text-sm font-black text-slate-800 mt-1 truncate">Tin gần Nội Bài · Sóc Sơn · Hà Nội</div>
+                            <div id="news-updated" class="text-[11px] font-semibold text-slate-400 mt-1 truncate">Chưa cập nhật</div>
+                        </div>
+                        <button onclick="window.NewsApp?.refresh()" id="news-refresh-btn" class="shrink-0 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-primary font-bold text-xs active:scale-95 hover:brightness-95 flex items-center gap-1">
+                            <i class="ph-bold ph-arrow-clockwise"></i><span class="hidden min-[390px]:inline">Làm mới</span>
+                        </button>
+                    </div>
+                    <div id="news-status" class="hidden mb-3 text-xs font-bold rounded-xl px-3 py-2"></div>
+                    <div class="flex gap-1.5 overflow-x-auto hide-scrollbar custom-scroll-area bg-slate-50 border border-slate-200 rounded-2xl p-1.5 mb-4" id="news-filter-tabs">
+                        <button onclick="window.NewsApp?.setFilter('all')" data-news-filter="all" class="news-filter-btn px-3 py-2 rounded-xl bg-primary text-white text-[11px] font-black active:scale-95">Tất cả</button>
+                        <button onclick="window.NewsApp?.setFilter('noibai')" data-news-filter="noibai" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Nội Bài</button>
+                        <button onclick="window.NewsApp?.setFilter('socson')" data-news-filter="socson" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Sóc Sơn</button>
+                        <button onclick="window.NewsApp?.setFilter('hanoi')" data-news-filter="hanoi" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Hà Nội</button>
+                        <button onclick="window.NewsApp?.setFilter('traffic')" data-news-filter="traffic" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Giao thông</button>
+                        <button onclick="window.NewsApp?.setFilter('alert')" data-news-filter="alert" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Cảnh báo</button>
+                        <button onclick="window.NewsApp?.setFilter('policy')" data-news-filter="policy" class="news-filter-btn px-3 py-2 rounded-xl bg-white text-slate-500 border border-slate-100 text-[11px] font-black active:scale-95">Chính sách</button>
+                    </div>
+                    <div id="news-list-container" class="space-y-3 custom-scroll-area pr-1">
+                        <div class="p-5 text-center text-primary font-bold animate-pulse">Đang tải Nhịp Sống...</div>
                     </div>
                 </div>
             </div>
@@ -402,7 +459,12 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 
 </main>
 
-<button id="btnInstall" class="install-fab fixed top-[60%] lg:top-1/2 right-0 -translate-y-1/2 pl-4 pr-3 py-3 rounded-l-2xl hidden items-center gap-2 z-[9999] text-sm font-bold border-y-2 border-l-2 hover:scale-105 active:scale-95 cursor-pointer"><i class="ph-bold ph-download-simple text-lg animate-bounce"></i> Cài App</button>
+<button id="btnInstall" class="install-fab fixed top-[60%] lg:top-1/2 right-0 -translate-y-1/2 hidden">
+    <div class="install-fab-inner">
+        <i class="ph-bold ph-download-simple text-lg animate-bounce"></i>
+        <span class="text-sm font-bold whitespace-nowrap">Cài App</span>
+    </div>
+</button>
 
 <div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
     <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
@@ -770,7 +832,7 @@ window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 // 3. TAB TẬP TRUNG (CLOCK, WEATHER, TIMERS)
 // ==============================================================================
 window.timerState={mode:'dateclock',cd:null,sw:null,cdTime:0,swTime:0,cdRun:false,swRun:false};
-window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;const cu=el('mode-countdown-ui'),su=el('mode-stopwatch-ui'),du=el('mode-dateclock-ui'),wu=el('mode-weather-ui'),tc=el('tab-countdown'),ts=el('tab-stopwatch'),td=el('tab-dateclock'),tw=el('tab-weather');if(cu)cu.classList.toggle('hidden',m!=='countdown');if(su)su.classList.toggle('hidden',m!=='stopwatch');if(du)du.classList.toggle('hidden',m!=='dateclock');if(wu)wu.classList.toggle('hidden',m!=='weather');const base='py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all active:scale-95 truncate';if(td)td.className=`${base} ${m==='dateclock'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tw)tw.className=`${base} ${m==='weather'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tc)tc.className=`${base} ${m==='countdown'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(ts)ts.className=`${base} ${m==='stopwatch'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(m==='dateclock')window.startDateClock?.();else window.stopDateClock?.();if(m==='weather')window.startWeatherPanel?.();};
+window.switchTimerMode=m=>{window.vibrate(10);window.timerState.mode=m;const cu=el('mode-countdown-ui'),su=el('mode-stopwatch-ui'),du=el('mode-dateclock-ui'),wu=el('mode-weather-ui'),nu=el('mode-news-ui'),tc=el('tab-countdown'),ts=el('tab-stopwatch'),td=el('tab-dateclock'),tw=el('tab-weather'),tn=el('tab-news');if(cu)cu.classList.toggle('hidden',m!=='countdown');if(su)su.classList.toggle('hidden',m!=='stopwatch');if(du)du.classList.toggle('hidden',m!=='dateclock');if(wu)wu.classList.toggle('hidden',m!=='weather');if(nu)nu.classList.toggle('hidden',m!=='news');const base='min-w-[78px] px-3 py-2 text-[11px] sm:text-sm font-bold rounded-lg transition-all active:scale-95 truncate';if(td)td.className=`${base} ${m==='dateclock'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tw)tw.className=`${base} ${m==='weather'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tn)tn.className=`${base} ${m==='news'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(tc)tc.className=`${base} ${m==='countdown'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(ts)ts.className=`${base} ${m==='stopwatch'?'shadow-sm bg-white text-primary':'text-slate-500 hover:bg-slate-50'}`;if(m==='dateclock')window.startDateClock?.();else window.stopDateClock?.();if(m==='weather')window.startWeatherPanel?.();if(m==='news')window.NewsApp?.init?.();};
 window.formatDate2=function(n){return String(n).padStart(2,'0')};
 window.getVietnameseWeekday=function(date){return ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][date.getDay()]||''};
 window.jdFromDate=function(dd,mm,yy){const a=Math.floor((14-mm)/12);const y=yy+4800-a;const m=mm+12*a-3;let jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;if(jd<2299161){jd=dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-32083}return jd};
@@ -1301,6 +1363,269 @@ window.forcePullAllFromFirebase = async function() {
 // ==============================================================================
 // 5. MUSIC APP
 // ==============================================================================
+
+// ==============================================================================
+// 5B. MODULE NHỊP SỐNG (NEWS-HTML-1) - CACHE LOCAL, FILTER NỘI BỘ, KHÔNG IFRAME
+// ==============================================================================
+window.NewsApp = {
+    endpoint: 'https://lifeos-news.xiemsansang.workers.dev/',
+    ttlMs: 5 * 60 * 1000,
+    group: 'all',
+    itemsByGroup: {},
+    initializedGroups: {},
+    loadingGroups: {},
+    lastMetaByGroup: {},
+    initialized: false,
+
+    groupMap: {
+        all: {
+            title: 'Tin gần Nội Bài · Sóc Sơn · Hà Nội',
+            cacheKey: 'lifeos_news_cache_v1_3_all',
+            paths: ['?mode=local&limit=20']
+        },
+        noibai: {
+            title: 'Tin Nội Bài · Sân bay · Cao tốc',
+            cacheKey: 'lifeos_news_cache_v1_3_noibai',
+            paths: ['?q=Nội%20Bài&limit=20']
+        },
+        socson: {
+            title: 'Tin Sóc Sơn · Xã · Dân sinh',
+            cacheKey: 'lifeos_news_cache_v1_3_socson',
+            paths: ['?q=Sóc%20Sơn&limit=20']
+        },
+        hanoi: {
+            title: 'Tin Hà Nội · Giao thông · Đời sống',
+            cacheKey: 'lifeos_news_cache_v1_3_hanoi',
+            paths: ['?q=Hà%20Nội%20giao%20thông&limit=20']
+        },
+        traffic: {
+            title: 'Giao thông · Đường sá · Phân luồng',
+            cacheKey: 'lifeos_news_cache_v1_3_traffic',
+            paths: ['?mode=preset&key=hanoi_traffic&limit=20']
+        },
+        alert: {
+            title: 'Cảnh báo · Mưa ngập · Cháy nổ',
+            cacheKey: 'lifeos_news_cache_v1_3_alert',
+            paths: ['?q=Hà%20Nội%20mưa%20ngập&limit=20', '?q=Hà%20Nội%20cháy%20nổ&limit=20']
+        },
+        policy: {
+            title: 'Chính sách · Chính phủ · Dân sinh',
+            cacheKey: 'lifeos_news_cache_v1_3_policy',
+            paths: [
+                '?mode=preset&key=policy&limit=20&force=1',
+                '?q=Chính%20phủ%20chính%20sách%20mới&limit=20&force=1',
+                '?q=nghị%20định%20mới%20chính%20phủ&limit=20&force=1',
+                '?q=căn%20cước%20bảo%20hiểm%20chính%20sách%20mới&limit=20&force=1',
+                '?q=giá%20xăng%20hôm%20nay&limit=20&force=1'
+            ]
+        }
+    },
+
+    esc(v) { return window.escapeHTML ? window.escapeHTML(String(v ?? '')) : String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); },
+    nowTime() { try { return new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }); } catch(e) { return ''; } },
+    groupCfg(group) { return this.groupMap[group] || this.groupMap.all; },
+    cacheRead(group) { try { const raw = localStorage.getItem(this.groupCfg(group).cacheKey); return raw ? JSON.parse(raw) : null; } catch(e) { return null; } },
+    cacheWrite(group, items) { try { localStorage.setItem(this.groupCfg(group).cacheKey, JSON.stringify({ ts: Date.now(), group, items: Array.isArray(items) ? items : [] })); } catch(e) {} },
+    buildUrl(path, force = false) {
+        const sep = path.includes('?') ? '&' : '?';
+        const hasForce = /[?&]force=1(?:&|$)/.test(path);
+        return this.endpoint + path + (force && !hasForce ? sep + 'force=1' : '');
+    },
+    normalize(raw) {
+        return (Array.isArray(raw) ? raw : []).map((x, idx) => ({
+            id: String(x.id || x.link || x.title || idx),
+            title: String(x.title || 'Không có tiêu đề'),
+            source: String(x.source || 'Nguồn tin'),
+            link: String(x.link || ''),
+            pubDate: x.pubDate || '',
+            publishedAt: x.publishedAt || '',
+            ageMinutes: Number(x.ageMinutes ?? 0),
+            summary: String(x.summary || ''),
+            area: String(x.area || 'hanoi'),
+            areaLabel: String(x.areaLabel || x.area || 'Hà Nội'),
+            category: String(x.category || 'local'),
+            categoryLabel: String(x.categoryLabel || x.category || 'Tin địa phương'),
+            hotScore: Number(x.hotScore || 0),
+            freshness: String(x.freshness || ''),
+            isFresh: !!x.isFresh,
+            expanded: false
+        })).filter(x => x.title);
+    },
+    init() {
+        this.initialized = true;
+        return this.loadGroup(this.group || 'all', { force: false });
+    },
+    setFilter(group) {
+        window.vibrate?.(8);
+        this.group = group || 'all';
+        document.querySelectorAll('[data-news-filter]').forEach(btn => {
+            const active = btn.getAttribute('data-news-filter') === this.group;
+            btn.className = 'news-filter-btn px-3 py-2 rounded-xl text-[11px] font-black active:scale-95 ' + (active ? 'bg-primary text-white' : 'bg-white text-slate-500 border border-slate-100');
+        });
+        return this.loadGroup(this.group, { force: false });
+    },
+    async loadGroup(group = 'all', { force = false, silent = false } = {}) {
+        const cfg = this.groupCfg(group);
+        this.updateTitle(group);
+        const cache = this.cacheRead(group);
+        if (!force && cache && Array.isArray(cache.items) && cache.items.length) {
+            this.itemsByGroup[group] = this.normalize(cache.items);
+            this.initializedGroups[group] = true;
+            this.render(group, { fromCache: true, cacheTs: cache.ts });
+            if (Date.now() - Number(cache.ts || 0) < this.ttlMs) return;
+            this.fetchGroup(group, { force: false, silent: true });
+            return;
+        }
+        if (!this.initializedGroups[group]) this.renderLoading(group);
+        return this.fetchGroup(group, { force, silent });
+    },
+    async fetchGroup(group = 'all', { force = false, silent = false } = {}) {
+        if (this.loadingGroups[group]) return;
+        this.loadingGroups[group] = true;
+        this.updateTitle(group);
+        const cfg = this.groupCfg(group);
+        const btn = el('news-refresh-btn');
+        if (btn) btn.classList.add('opacity-60');
+        if (!silent) this.setStatus('Đang cập nhật: ' + cfg.title, 'info');
+        let lastErr = null;
+        try {
+            for (const path of cfg.paths) {
+                try {
+                    const url = this.buildUrl(path, force);
+                    if (group === 'policy') console.log('[NEWS policy try]', url);
+                    const res = await fetch(url, { cache: (force || url.includes('force=1')) ? 'no-store' : 'default' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const json = await res.json();
+                    const rawItems = Array.isArray(json?.items) ? json.items : (Array.isArray(json?.data) ? json.data : []);
+                    const items = this.normalize(rawItems);
+                    if (group === 'policy') console.log('[NEWS policy result]', 'ok=' + !!json?.ok, 'count=' + items.length, url);
+                    if (json && json.ok === false) throw new Error(json.error || 'Worker trả lỗi');
+                    if (items.length > 0) {
+                        if (group === 'policy') console.log('[NEWS policy selected]', url);
+                        this.itemsByGroup[group] = items;
+                        this.initializedGroups[group] = true;
+                        this.lastMetaByGroup[group] = { url, count: items.length };
+                        this.cacheWrite(group, items);
+                        this.render(group, { fromCache: false });
+                        this.setStatus('', 'hidden');
+                        if (!silent) window.showToast?.('Đã cập nhật ' + cfg.title, 'ph-newspaper');
+                        return;
+                    }
+                    lastErr = new Error('Endpoint rỗng: ' + url);
+                } catch (err) {
+                    lastErr = err;
+                    if (group === 'policy') console.warn('[NEWS policy result]', 'ok=false', 'count=0', this.buildUrl(path, force), err);
+                    console.warn('[NEWS FETCH GROUP FAIL]', group, path, err);
+                }
+            }
+            if (group === 'policy') console.warn('[NEWS policy empty] all fallbacks failed');
+            throw lastErr || new Error('Không có dữ liệu');
+        } catch (err) {
+            const cache = this.cacheRead(group);
+            if (cache && Array.isArray(cache.items) && cache.items.length) {
+                this.itemsByGroup[group] = this.normalize(cache.items);
+                this.initializedGroups[group] = true;
+                this.render(group, { fromCache: true, cacheTs: cache.ts });
+                this.setStatus(group === 'policy' ? ('Đang xem dữ liệu lưu tạm nhóm Chính sách từ ' + this.formatCacheTime(cache.ts)) : ('Đang xem dữ liệu lưu tạm từ ' + this.formatCacheTime(cache.ts)), 'warn');
+            } else {
+                this.itemsByGroup[group] = [];
+                this.renderEmpty('Chưa có tin mới trong nhóm này. Bấm Làm mới hoặc xem Tất cả.');
+                this.setStatus('Chưa có dữ liệu cho nhóm: ' + cfg.title, 'warn');
+            }
+            if (!silent) window.showToast?.('Chưa lấy được nhóm tin này, dùng cache nếu có', 'ph-warning-circle');
+        } finally {
+            this.loadingGroups[group] = false;
+            if (btn) btn.classList.remove('opacity-60');
+        }
+    },
+    refresh() { window.vibrate?.(10); return this.loadGroup(this.group || 'all', { force: true }); },
+    updateTitle(group) {
+        const cfg = this.groupCfg(group);
+        const titleEl = el('news-group-title');
+        if (titleEl) titleEl.textContent = cfg.title;
+    },
+    formatCacheTime(ts) { try { return new Date(Number(ts || Date.now())).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }); } catch(e) { return '--:--'; } },
+    setStatus(msg, type = 'info') {
+        const st = el('news-status');
+        if (!st) return;
+        if (!msg || type === 'hidden') { st.classList.add('hidden'); st.textContent = ''; return; }
+        st.className = 'mb-3 text-xs font-bold rounded-xl px-3 py-2 ' + (type === 'error' ? 'bg-rose-50 text-rose-700 border border-rose-100' : type === 'warn' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-slate-50 text-primary border border-slate-200');
+        st.textContent = msg;
+    },
+    freshnessText(item) {
+        if (item.freshness) return item.freshness;
+        const min = Number(item.ageMinutes || 0);
+        if (!min) return 'Mới cập nhật';
+        if (min < 60) return Math.max(1, Math.round(min)) + ' phút trước';
+        if (min < 1440) return Math.round(min / 60) + ' giờ trước';
+        return Math.round(min / 1440) + ' ngày trước';
+    },
+    renderLoading(group = this.group) {
+        const c = el('news-list-container');
+        if (c) c.innerHTML = '<div class="p-5 text-center text-primary font-bold animate-pulse">Đang tải Nhịp Sống...</div>';
+        this.updateTitle(group);
+    },
+    renderEmpty(msg = 'Chưa có tin mới trong nhóm này. Bấm Làm mới hoặc xem Tất cả.') {
+        const c = el('news-list-container');
+        if (c) c.innerHTML = `<div class="p-5 text-center text-slate-500 font-bold bg-slate-50 border border-slate-200 rounded-2xl">${this.esc(msg)}</div>`;
+        const up = el('news-updated');
+        if (up) up.textContent = 'Chưa có tin mới';
+    },
+    toggleItem(id) {
+        const group = this.group || 'all';
+        const arr = this.itemsByGroup[group] || [];
+        this.itemsByGroup[group] = arr.map(x => x.id === id ? { ...x, expanded: !x.expanded } : x);
+        this.render(group);
+    },
+    async copyLink(id) {
+        window.vibrate?.(10);
+        const arr = this.itemsByGroup[this.group || 'all'] || [];
+        const item = arr.find(x => x.id === id);
+        if (!item || !item.link) { window.showToast?.('Tin này chưa có link nguồn', 'ph-warning'); return; }
+        try {
+            await navigator.clipboard.writeText(item.link);
+            window.showToast?.('Đã copy link nguồn', 'ph-link');
+        } catch(e) {
+            window.showToast?.('Không copy được link nguồn', 'ph-warning-circle');
+        }
+    },
+    render(group = this.group || 'all', meta = {}) {
+        const c = el('news-list-container');
+        if (!c) return;
+        this.updateTitle(group);
+        const up = el('news-updated');
+        if (up) up.textContent = meta.fromCache ? ('Dữ liệu lưu tạm · ' + this.formatCacheTime(meta.cacheTs)) : ('Cập nhật lúc ' + this.nowTime());
+        const list = this.itemsByGroup[group] || [];
+        if (!list.length) { this.renderEmpty(); return; }
+        c.innerHTML = list.map(item => {
+            const id = this.esc(item.id);
+            const title = this.esc(item.title);
+            const source = this.esc(item.source);
+            const summary = this.esc(item.summary || 'Chưa có tóm tắt nhanh.');
+            const area = this.esc(item.areaLabel || item.area);
+            const cat = this.esc(item.categoryLabel || item.category);
+            const fresh = this.esc(this.freshnessText(item));
+            const expanded = !!item.expanded;
+            return `<article class="news-card bg-slate-50/80 border border-slate-200 rounded-2xl p-3 shadow-sm overflow-hidden min-w-0">
+                <button type="button" onclick="window.NewsApp.toggleItem('${id}')" class="w-full text-left min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap mb-2 min-w-0">
+                        <span class="px-2 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-black text-primary">${cat}</span>
+                        <span class="px-2 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-black text-slate-600">${area}</span>
+                        <span class="px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-black text-emerald-700">${fresh}</span>
+                    </div>
+                    <h3 class="news-title-clamp text-sm font-black text-slate-800 leading-snug min-w-0">${title}</h3>
+                    <div class="mt-2 text-[11px] font-bold text-slate-500 truncate min-w-0">${source}</div>
+                    <div class="${expanded ? '' : 'hidden'} mt-3 text-xs leading-relaxed text-slate-600 bg-white/70 border border-white rounded-xl p-3 news-summary-clamp">${summary}</div>
+                </button>
+                <div class="mt-2 flex justify-end gap-2">
+                    <button type="button" onclick="window.NewsApp.copyLink('${id}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-primary active:scale-95"><i class="ph-bold ph-link"></i> Copy link</button>
+                </div>
+            </article>`;
+        }).join('');
+    }
+};
+
+
 window.MusicDB = {
     init() { return new Promise((resolve) => { const req = indexedDB.open('LifeOS_Music', 1); req.onupgradeneeded = e => e.target.result.createObjectStore('cache'); req.onsuccess = e => resolve(e.target.result); req.onerror = () => resolve(null); }); },
     async get() { try { const db=await this.init(); if(!db) return null; return new Promise(r=>{ const tx=db.transaction('cache','readonly'); const req=tx.objectStore('cache').get('playlist'); req.onsuccess=()=>r(req.result); req.onerror=()=>r(null); }); } catch(e){return null;} },
@@ -1498,12 +1823,124 @@ window.startBackgroundWorker = () => {
 // ==============================================================================
 // KHỞI ĐỘNG HỆ THỐNG
 // ==============================================================================
+
+// ==============================================================================
+// DRAGGABLE PWA BUTTON LOGIC
+// ==============================================================================
+window.initDraggableFab = function() {
+    const fab = el('btnInstall');
+    if (!fab || fab.dataset.dragReady === '1') return;
+    fab.dataset.dragReady = '1';
+
+    let isDragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let initialX = 0;
+    let initialY = 0;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    function setTranslate(xPos, yPos, target) {
+        target.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
+
+    function clampPosition(x, y) {
+        const rect = fab.getBoundingClientRect();
+        const maxLeft = Math.max(0, window.innerWidth - rect.width);
+        const maxTop = Math.max(0, window.innerHeight - rect.height);
+        const defaultLeft = window.innerWidth - rect.width;
+        const defaultTop = Math.round(window.innerHeight * 0.60 - rect.height / 2);
+        const absoluteLeft = Math.min(Math.max(defaultLeft + x, 0), maxLeft);
+        const absoluteTop = Math.min(Math.max(defaultTop + y, 0), maxTop);
+        return { x: absoluteLeft - defaultLeft, y: absoluteTop - defaultTop };
+    }
+
+    const savedPos = localStorage.getItem('lifeos_fab_position');
+    if (savedPos) {
+        try {
+            const pos = JSON.parse(savedPos);
+            const clamped = clampPosition(Number(pos.x) || 0, Number(pos.y) || 0);
+            xOffset = clamped.x;
+            yOffset = clamped.y;
+            setTranslate(xOffset, yOffset, fab);
+        } catch(e) {}
+    }
+
+    function pointerXY(e) {
+        if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        if (e.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    function dragStart(e) {
+        const p = pointerXY(e);
+        startX = p.x;
+        startY = p.y;
+        initialX = p.x - xOffset;
+        initialY = p.y - yOffset;
+        moved = false;
+        isDragging = true;
+        fab.style.transition = 'none';
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        const p = pointerXY(e);
+        const rawX = p.x - initialX;
+        const rawY = p.y - initialY;
+        if (Math.abs(p.x - startX) > 5 || Math.abs(p.y - startY) > 5) moved = true;
+        if (moved) e.preventDefault();
+        const clamped = clampPosition(rawX, rawY);
+        xOffset = clamped.x;
+        yOffset = clamped.y;
+        setTranslate(xOffset, yOffset, fab);
+    }
+
+    function dragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        fab.style.transition = 'background-color 0.2s, opacity 0.3s';
+        localStorage.setItem('lifeos_fab_position', JSON.stringify({ x: xOffset, y: yOffset }));
+        if (moved) {
+            fab.dataset.justDragged = '1';
+            setTimeout(() => { delete fab.dataset.justDragged; }, 180);
+        }
+    }
+
+    fab.addEventListener('click', function(e) {
+        if (fab.dataset.justDragged === '1') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            delete fab.dataset.justDragged;
+        }
+    }, true);
+
+    fab.addEventListener('touchstart', dragStart, { passive: false });
+    fab.addEventListener('touchmove', drag, { passive: false });
+    fab.addEventListener('touchend', dragEnd, { passive: false });
+    fab.addEventListener('touchcancel', dragEnd, { passive: false });
+
+    fab.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    window.addEventListener('resize', function() {
+        const clamped = clampPosition(xOffset, yOffset);
+        xOffset = clamped.x;
+        yOffset = clamped.y;
+        setTranslate(xOffset, yOffset, fab);
+        localStorage.setItem('lifeos_fab_position', JSON.stringify({ x: xOffset, y: yOffset }));
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ép cứng đường dẫn SW tuyệt đối để tránh lỗi 404 trên GitHub Pages
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/mimihoalua/sw_qlycuocsong.js').catch(()=>{});
     
     // Kích hoạt PWA Engine
-    window.pwaEngine.init(); 
+    window.pwaEngine.init();
+        window.initDraggableFab(); 
     
     setTimeout(()=>{ window.startBackgroundWorker(); window.MusicApp.setupListeners(); window.syncMusicLayout?.(); }, 1500);
     if(window.innerWidth >= 1024) { setTimeout(() => { if(window.MusicApp) window.MusicApp.initAudioEngine(); }, 1000); }
