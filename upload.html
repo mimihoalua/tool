@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
+    
+    <link id="manifest-link" rel="manifest" href="/tool/manifest_upload.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    
+    <title>Archive Manager V40.1 - BULK DELETE + PWA FIX</title>
+    
+    <style>
+        :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 15px; background: #e2e8f0; color: #333; -webkit-tap-highlight-color: transparent; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 16px; }
+        h2 { margin-top: 0; font-weight: 800; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; font-size: 18px; }
+        label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-bottom: 6px; }
+        input[type="text"], input[type="file"], select { width: 100%; padding: 14px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: var(--bg); font-family: inherit; font-size: 15px; }
+        
+        .btn { border: none; padding: 14px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); } 
+        .btn-danger { background: var(--danger); width: auto; padding: 10px 14px;} 
+        .btn-warning { background: var(--warning); color: #000; width: auto; padding: 10px 14px;} 
+        .btn-dark { background: var(--dark); margin-bottom: 0; }
+
+        .identifier-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .identifier-group select { margin-bottom: 0; }
+        .identifier-group input { margin-bottom: 0; display: none; }
+
+        .server-list { max-height: 60vh; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 10px; background: #fff; }
+        .file-item { display: flex; flex-direction: column; padding: 16px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .file-item:last-child { border-bottom: none; }
+        
+        .file-header { display: flex; flex-direction: column; gap: 10px; }
+        .file-info { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
+        .file-index { background: var(--dark); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; font-family: monospace; margin-top: 2px;}
+        .file-name { font-weight: 700; font-size: 14px; color: var(--dark); word-break: break-all; }
+        .file-meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+        
+        .file-actions { display: flex; gap: 8px; width: 100%; justify-content: flex-end; }
+        .audio-player { width: 100%; height: 40px; outline: none; }
+        .empty-state { padding: 30px; text-align: center; color: #94a3b8; font-style: italic; font-size: 14px; }
+
+        .progress-wrapper { display: none; margin-bottom: 20px; padding: 15px; background: var(--bg); border: 1px solid #e2e8f0; border-radius: 8px; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: bold; color: #334155; }
+        .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #3b82f6, #2563eb); width: 0%; height: 100%; transition: width 0.1s linear; }
+
+        .tts-toggle { display: flex; align-items: center; gap: 10px; background: #e2e8f0; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .tts-toggle input { width: 20px; height: 20px; margin: 0; }
+
+        .xray-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: white; margin-bottom: 0; border-bottom: none; padding-bottom: 0;}
+        #log-panel { display: flex; background: #1e293b; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; height: 250px; overflow-y: auto; color: #a7f3d0; margin-top: 15px; border: 1px solid #475569; flex-direction: column; gap: 4px; }
+        .log-time { color: #94a3b8; margin-right: 6px; }
+        .log-info { color: #60a5fa; }
+        .log-success { color: #34d399; }
+        .log-warn { color: #fbbf24; }
+        .log-error { color: #f87171; font-weight: bold; }
+        .log-api { color: #c084fc; }
+        .log-event { color: #f472b6; }
+        .log-hardware { color: #facc15; font-weight: bold; }
+
+        #toast-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px;}
+        .toast { background: white; color: #333; padding: 14px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; border-left: 5px solid; animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); word-wrap: break-word; line-height: 1.4; }
+        .toast.success { border-color: var(--success); } .toast.error { border-color: var(--danger); } .toast.info { border-color: var(--primary); } .toast.warning { border-color: var(--warning); }
+        
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        .pwa-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box; backdrop-filter: blur(4px); }
+        .pwa-modal-overlay.active { display: flex; animation: slideDown 0.3s ease-out; }
+        .pwa-modal-content { width: 100%; max-width: 360px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 2px solid #ee4d2d; }
+        .pwa-modal-header { background: #ee4d2d; padding: 20px; color: white; text-align: center; }
+        .pwa-modal-body { padding: 24px; color: #333; text-align: center;}
+        .pwa-modal-footer { padding: 16px; background: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb; }
+        .pwa-close-btn { color: #6b7280; font-weight: bold; font-size: 14px; background: none; border: none; cursor: pointer; padding: 8px 16px;}
+        
+        .guide-step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; text-align: left; background: #fefce8; padding: 12px; border-radius: 8px; border: 1px solid #fef08a;}
+        .step-num { background: #ee4d2d; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+        
+        .install-fab { position: fixed; bottom: 20px; right: 20px; background: #ee4d2d; color: white; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 4px solid white; box-shadow: 0 4px 15px rgba(238, 77, 45, 0.4); display: none; align-items: center; gap: 8px; cursor: pointer; z-index: 9999; animation: animate-pop-in 0.5s ease-out; }
+        .install-fab:active { transform: scale(0.95); }
+        @keyframes animate-pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+        
+        .in-app-blocker { display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .in-app-blocker.active { display: flex; }
+        
+        #offline-banner { display: none; background: #dc2626; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .upload-controls { display: flex; gap: 10px; }
+        .upload-controls .btn { margin-bottom: 0; }
+        #stopBtn { display: none; flex: 1; }
+        #uploadBtn { flex: 2; }
+
+        /* V40: BULK DELETE + SMART SELECT */
+        .server-toolbar { display: none; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; margin: 10px 0 12px; }
+        .server-toolbar.active { display: flex; }
+        .select-all-wrap { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13px; color: #334155; cursor: pointer; user-select: none; }
+        .select-all-wrap input, .file-select-box { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+        .bulk-status { font-size: 13px; font-weight: 800; color: #475569; }
+        .bulk-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-mini { width: auto; padding: 10px 12px; margin: 0; font-size: 13px; border-radius: 999px; }
+        .btn-ghost { background: #e2e8f0; color: #0f172a; }
+        .file-item.is-selected { background: #eff6ff; box-shadow: inset 4px 0 0 var(--primary); }
+        .file-item.is-deleting { opacity: 0.55; pointer-events: none; filter: grayscale(0.2); }
+        .file-select-wrap { padding-top: 2px; }
+        .file-info-main { min-width: 0; flex: 1; }
+
+        /* V40: compact draggable PWA floating button */
+        .install-fab { bottom: calc(16px + env(safe-area-inset-bottom)); right: 16px; padding: 9px 12px; border-radius: 999px; font-size: 13px; border: 1px solid rgba(255,255,255,0.7); background: rgba(37, 99, 235, 0.78); box-shadow: 0 10px 28px rgba(37, 99, 235, 0.28); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); gap: 6px; touch-action: none; user-select: none; cursor: grab; }
+        .install-fab:active { cursor: grabbing; transform: scale(0.98); }
+        .install-fab.is-dragging { transition: none !important; opacity: 0.92; cursor: grabbing; }
+        .install-fab .pwa-icon { font-size: 17px !important; line-height: 1; }
+        .install-fab .pwa-label { white-space: nowrap; font-weight: 900; letter-spacing: 0.01em; }
+
+        @media (max-width: 520px) {
+            .server-toolbar { align-items: stretch; }
+            .bulk-actions { width: 100%; }
+            .bulk-actions .btn-mini { flex: 1; }
+            .file-actions { justify-content: stretch; }
+            .file-actions .btn { flex: 1; }
+            .install-fab { padding: 8px 10px; font-size: 12px; }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="offline-banner">MẤT KẾT NỐI MẠNG. ỨNG DỤNG ĐANG NGỦ ĐÔNG...</div>
+
+    <div id="inAppBlocker" class="in-app-blocker">
+        <h1 style="color: #f87171; font-size: 24px; margin-bottom: 10px;">⚠️ CẢNH BÁO</h1>
+        <p style="font-size: 16px; line-height: 1.5; color: #cbd5e1;">Hệ thống không thể hoạt động trong trình duyệt nhúng của Zalo/Facebook/TikTok.</p>
+        <p style="margin-top: 20px; font-weight: bold; color: white;">Vui lòng bấm vào Menu (⋮) góc phải và chọn<br><br><span style="background: #2563eb; padding: 8px 16px; border-radius: 6px;">Mở bằng trình duyệt (Chrome/Safari)</span></p>
+    </div>
+
+    <div id="pwaHealthModal" class="pwa-modal-overlay">
+        <div class="pwa-modal-content">
+            <div class="pwa-modal-header">
+                <div style="font-weight: bold; font-size: 20px; margin-bottom: 4px; text-transform: uppercase;">Cài đặt Ứng dụng</div>
+                <div style="font-size: 12px; opacity: 0.9;">Truy cập nhanh hơn - Mượt mà hơn</div>
+            </div>
+            <div id="smartGuideContent" class="pwa-modal-body"></div>
+            <div class="pwa-modal-footer">
+                <button onclick="document.getElementById('pwaHealthModal').classList.remove('active')" class="pwa-close-btn">Đóng lại</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🚀 Tải lên Dữ liệu - V39 LOGIC MASTER</h2>
+        
+        <label class="tts-toggle">
+            <input type="checkbox" id="ttsToggle" checked>
+            🎙️ Trợ lý ảo AI & Haptic Feedback
+        </label>
+
+        <label>Thư mục đích: <span id="scanStatus" style="font-weight:normal; color:#2563eb; font-size:12px;">Đang quét...</span></label>
+        <div class="identifier-group">
+            <select id="idSelect" onchange="toggleCustomInput(); window.isCacheLoaded = false;">
+                <option value="">-- Đang nạp danh sách... --</option>
+            </select>
+            <input type="text" id="idInput" placeholder="Nhập mã Identifier mới...">
+            <button class="btn btn-primary" onclick="loadServerFiles()" id="btnSync">🔄 Nạp Dữ Liệu</button>
+        </div>
+
+        <label style="margin-top: 10px;">Chọn file để tải lên (Hỗ trợ file siêu lớn):</label>
+        <input type="file" id="fileInput" multiple accept=".mp3,audio/mpeg,video/mp4,video/x-m4v,audio/mp4,audio/x-m4a">
+
+        <div id="progressUI" class="progress-wrapper">
+            <div class="progress-header">
+                <span id="progressName">Đang chuẩn bị...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+        </div>
+
+        <div class="upload-controls">
+            <button id="uploadBtn" class="btn btn-dark" onclick="startUpload()">Bắt Đầu Upload Đa Luồng</button>
+            <button id="stopBtn" class="btn btn-danger" onclick="stopUpload()">🛑 DỪNG KHẨN CẤP</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🗂️ Server Storage</h2>
+        <div id="serverToolbar" class="server-toolbar">
+            <label class="select-all-wrap" title="Chọn hoặc bỏ chọn toàn bộ file đang hiển thị">
+                <input type="checkbox" id="selectAllFiles" onchange="toggleSelectAllFiles(this.checked)">
+                <span>Chọn tất cả</span>
+            </label>
+            <div class="bulk-status" id="bulkStatus">Chưa chọn file nào</div>
+            <div class="bulk-actions">
+                <button class="btn btn-ghost btn-mini" onclick="clearFileSelection()">Bỏ chọn</button>
+                <button class="btn btn-danger btn-mini" id="bulkDeleteBtn" onclick="deleteSelectedFiles()" disabled>🗑️ Xóa đã chọn</button>
+            </div>
+        </div>
+        <div class="server-list" id="serverList">
+            <div class="empty-state">Bấm "Nạp Dữ Liệu" để xem.</div>
+        </div>
+    </div>
+
+    <div class="card" style="background: #0f172a; padding: 15px 20px;">
+        <h2 class="xray-header" onclick="toggleXRay()">
+            <span>📡 Trạm Giám Sát (X-Ray)</span>
+            <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
+        </h2>
+        <div id="log-panel">
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V39 khởi động. Đã tích hợp Định Danh Bất Biến (Hash) & Watchdog 180s.</span></div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <audio id="debug-audio-player" style="display: none;" playsinline preload="auto"></audio>
+    <audio id="tts-player" style="display: none;" playsinline autoplay></audio>
+
+    <button id="btnInstall" class="install-fab" onclick="logicCore.handleInstallClick()" aria-label="Tải App PWA" style="display:flex">
+        <span class="pwa-icon">📲</span>
+        <span class="pwa-label">Cài App</span>
+    </button>
+
+    <script>
+        window.isNetworkOnline = navigator.onLine;
+
+        window.addEventListener('offline', () => {
+            window.isNetworkOnline = false;
+            document.getElementById('offline-banner').style.display = 'block';
+            addLog("MẤT KẾT NỐI MẠNG. Hệ thống chuyển sang trạng thái ngủ đông chờ khôi phục...", "error", true);
+            showToast("Mất mạng! Tạm dừng...", "error");
+        });
+
+        window.addEventListener('online', () => {
+            window.isNetworkOnline = true;
+            document.getElementById('offline-banner').style.display = 'none';
+            addLog("ĐÃ KHÔI PHỤC KẾT NỐI MẠNG. Hệ thống tự động thức giấc và tiếp tục tiến trình.", "success", true);
+            showToast("Đã có mạng! Tiếp tục...", "success");
+        });
+
+        async function waitForNetwork() {
+            while (!window.isNetworkOnline) {
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+
+        const logicCore = {
+            deferredPrompt: null,
+            state: {
+                isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
+                isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
+                isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
+                isInApp: /FBAN|FBAV|Instagram|Zalo|TikTok|Messenger/i.test(navigator.userAgent),
+                isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+            },
+            init: function() {
+                if (this.state.isInApp) {
+                    document.getElementById('inAppBlocker').classList.add('active');
+                    return;
+                }
+                const installFab = document.getElementById('btnInstall');
+                if (!this.state.isStandalone) {
+                    // V40.1: luôn hiện nút PWA như nút hướng dẫn/cài app nổi.
+                    // beforeinstallprompt chỉ quyết định bấm sẽ cài trực tiếp hay mở hướng dẫn, không quyết định ẩn/hiện nút.
+                    if (installFab) installFab.style.display = 'flex';
+                    if (!this.state.isIOS) {
+                        window.addEventListener('beforeinstallprompt', (e) => {
+                            e.preventDefault();
+                            this.deferredPrompt = e;
+                            if (installFab) installFab.style.display = 'flex';
+                        });
+                    }
+                } else if (installFab) {
+                    installFab.style.display = 'none';
+                }
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register(`/tool/sw_upload.js?v=${Date.now()}`).catch(()=>{});
+                }
+            },
+            handleInstallClick: async function() {
+                const modal = document.getElementById('pwaHealthModal');
+                const content = document.getElementById('smartGuideContent');
+                
+                modal.classList.add('active');
+                
+                if (this.state.isStandalone) {
+                    content.innerHTML = `<div style="font-size: 40px; margin-bottom: 10px;">🎉</div><h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Đã cài đặt!</h3><p>Bạn đang sử dụng phiên bản Ứng dụng PWA Native.</p>`;
+                    return;
+                }
+                if (this.deferredPrompt) {
+                    modal.classList.remove('active');
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        this.deferredPrompt = null;
+                        document.getElementById('btnInstall').style.display = 'none';
+                    }
+                    return;
+                }
+                if (this.state.isIOS) {
+                    content.innerHTML = `
+                        <div style="font-weight: bold; color: #2563eb; margin-bottom: 15px;">Dành cho iPhone/iPad</div>
+                        <div class="guide-step"><div class="step-num">1</div><div>Bấm nút <b>Chia sẻ (Share)</b> ở mép dưới Safari.</div></div>
+                        <div class="guide-step"><div class="step-num">2</div><div>Kéo lên chọn <b>Thêm vào MH chính (Add to Home Screen)</b>.</div></div>
+                        <div class="guide-step"><div class="step-num">3</div><div>Bấm nút <b>Thêm</b> ở góc trên cùng.</div></div>`;
+                    return;
+                }
+                if (this.state.isAndroid) {
+                    content.innerHTML = `
+                        <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">Dành cho Android</div>
+                        <div class="guide-step"><div class="step-num">1</div><div>Bấm dấu <b>3 chấm</b> ở mép phải Chrome.</div></div>
+                        <div class="guide-step"><div class="step-num">2</div><div>Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
+                    return;
+                }
+                if (this.state.isPC) {
+                    content.innerHTML = `<div style="font-weight: bold; margin-bottom: 15px;">Cài đặt trên Máy tính</div><div class="guide-step"><div class="step-num">+</div><div>Bấm biểu tượng <b>Cài đặt</b> ở góc phải thanh địa chỉ.</div></div>`;
+                    return;
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => { logicCore.init(); initDraggableInstallFab(); setTimeout(() => { const fab = document.getElementById('btnInstall'); if (fab && !logicCore.state.isStandalone && !logicCore.state.isInApp) fab.style.display = 'flex'; }, 50); });
+
+        const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
+        const SECRET_KEY = "4mXmgt0qKjZOi2g2";
+        const ACCOUNT_QUERY = "xiemsansang";
+        
+        window.serverCache = new Set();
+        window.selectedFiles = new Set();
+        window.visibleServerFiles = [];
+        window.isCacheLoaded = false; 
+        
+        window.isUploading = false;
+        window.activeXHRs = new Set(); 
+
+        let wakeLockObj = null;
+
+        function fireHaptic(type) {
+            if (!document.getElementById('ttsToggle').checked || !navigator.vibrate) return;
+            try {
+                if (type === 'success') navigator.vibrate(50);
+                else if (type === 'error') navigator.vibrate([200, 100, 200]);
+                else if (type === 'warn') navigator.vibrate([50, 50, 50]);
+                else if (type === 'tap') navigator.vibrate(18);
+                else if (type === 'select') navigator.vibrate([18, 30, 18]);
+            } catch(e){}
+        }
+
+        async function activateWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLockObj = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {}
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockObj) wakeLockObj.release().then(() => { wakeLockObj = null; });
+        }
+
+        const ttsPlayer = document.getElementById('tts-player');
+        let ttsQueue = [];
+        let isTTSPlaying = false;
+
+        function playTTS(text) {
+            if (!document.getElementById('ttsToggle').checked) return;
+            let cleanText = text.replace(/_/g, " ").replace(/.mp3|.mp4|.m4a/gi, "");
+            ttsQueue.push(cleanText);
+            if (!isTTSPlaying) processTTSQueue();
+        }
+
+        function processTTSQueue() {
+            if (ttsQueue.length === 0) { isTTSPlaying = false; return; }
+            isTTSPlaying = true;
+            const textToSpeak = ttsQueue.shift();
+            ttsPlayer.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(textToSpeak)}`;
+            ttsPlayer.onended = () => processTTSQueue();
+            ttsPlayer.onerror = () => { 
+                ttsPlayer.src = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(textToSpeak)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
+                ttsPlayer.onended = () => processTTSQueue();
+            };
+            ttsPlayer.play().catch(() => { isTTSPlaying = false; });
+        }
+
+        function toggleXRay() {
+            const panel = document.getElementById('log-panel');
+            const icon = document.getElementById('xray-icon');
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+                icon.innerText = '▶️ Mở';
+            } else {
+                panel.style.display = 'flex';
+                icon.innerText = '🔽 Đóng';
+            }
+        }
+
+        const MAX_LOG_LINES = 100;
+
+        function addLog(msg, type = 'info', speak = false) {
+            const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            const logPanel = document.getElementById('log-panel');
+            const div = document.createElement('div');
+            
+            let colorClass = 'log-info';
+            if (type === 'success') colorClass = 'log-success';
+            if (type === 'warn') colorClass = 'log-warn';
+            if (type === 'error') {
+                colorClass = 'log-error';
+                document.getElementById('log-panel').style.display = 'flex';
+                document.getElementById('xray-icon').innerText = '🔽 Đóng';
+            }
+            if (type === 'api') colorClass = 'log-api';
+            if (type === 'event') colorClass = 'log-event';
+            if (type === 'hardware') colorClass = 'log-hardware';
+
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${msg}</span>`;
+            logPanel.appendChild(div);
+            
+            while (logPanel.children.length > MAX_LOG_LINES + 1) { 
+                logPanel.removeChild(logPanel.children[1]);
+            }
+            
+            logPanel.scrollTop = logPanel.scrollHeight; 
+            if(speak) playTTS(msg);
+        }
+
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toast-container');
+            if(!container) return; 
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            if(type === 'error') fireHaptic('error');
+            else if(type === 'success') fireHaptic('success');
+            else if(type === 'warning') fireHaptic('warn');
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, duration);
+        }
+
+        // ==========================================
+        // V39: ĐỊNH DANH BẤT BIẾN (DETERMINISTIC HASH)
+        // ==========================================
+        // Hàm băm tên gốc thành một mã HEX cố định (Cùng 1 tên file luôn ra đúng 1 mã)
+        function generateFixedHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; 
+            }
+            return Math.abs(hash).toString(36); // Chuyển thành chuỗi chữ/số ngắn
+        }
+
+        function toAscii(str, originalExtension = "", rawOriginalName = "") {
+            let s = str.normalize("NFD").replace(/[̀-ͯ]/g, ""); 
+            s = s.replace(/đ/g, "d").replace(/Đ/g, "D"); 
+            s = s.replace(/[^a-zA-Z0-9\.\-\_]/g, "_"); 
+            s = s.replace(/_+/g, "_").replace(/^_|_$/g, ""); 
+            
+            let nameWithoutExt = s.replace(/\.[^/.]+$/, "");
+            const fixedHash = generateFixedHash(rawOriginalName || str);
+            
+            // Cấp cứu nếu rỗng do rặt tiếng Trung: Ghép chữ Audio + Mã Hash bất biến
+            if (nameWithoutExt.length < 2 || !/[a-zA-Z0-9]/.test(nameWithoutExt)) {
+                return `Audio_An_Toan_${fixedHash}${originalExtension}`;
+            }
+            
+            // Cắt gọt nếu dài quá: Lấy 40 ký tự đầu + Mã Hash bất biến
+            if (nameWithoutExt.length > 50) {
+                nameWithoutExt = nameWithoutExt.substring(0, 40) + `_${fixedHash}`;
+            }
+            
+            return nameWithoutExt + originalExtension; 
+        }
+
+        function toggleCustomInput() {
+            const select = document.getElementById('idSelect');
+            const input = document.getElementById('idInput');
+            if (select.value === "CUSTOM") {
+                input.style.display = "block"; input.focus();
+            } else { input.style.display = "none"; }
+        }
+
+        function getActiveIdentifier() {
+            const selectVal = document.getElementById('idSelect').value;
+            return selectVal === "CUSTOM" ? document.getElementById('idInput').value.trim() : selectVal;
+        }
+
+        async function scanUserIdentifiers() {
+            await waitForNetwork();
+            addLog("Đang quét mã Identifier...", "api", false);
+            try {
+                const url = `https://archive.org/advancedsearch.php?q=uploader:(${ACCOUNT_QUERY}) OR creator:(${ACCOUNT_QUERY})&fl[]=identifier,title&sort[]=publicdate+desc&output=json&rows=100`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const docs = data.response?.docs || [];
+                
+                const select = document.getElementById('idSelect');
+                select.innerHTML = '';
+                
+                if (docs.length > 0) {
+                    docs.forEach(doc => {
+                        const opt = document.createElement('option');
+                        opt.value = doc.identifier;
+                        opt.textContent = `${doc.title || doc.identifier} (${doc.identifier})`;
+                        select.appendChild(opt);
+                    });
+                }
+                
+                const optCustom = document.createElement('option');
+                optCustom.value = "CUSTOM";
+                optCustom.textContent = "➕ Nhập mã mới (Tạo Album)...";
+                select.appendChild(optCustom);
+
+                document.getElementById('scanStatus').innerText = `Đã tìm thấy ${docs.length} mục.`;
+                toggleCustomInput();
+            } catch (error) {
+                document.getElementById('scanStatus').innerText = `Lỗi mạng chặn quét API.`;
+                document.getElementById('idSelect').innerHTML = `<option value="CUSTOM">➕ Nhập tay Identifier...</option>`;
+                toggleCustomInput();
+            }
+        }
+
+        document.body.addEventListener('click', function initAudio() {
+            ttsPlayer.load();
+            document.body.removeEventListener('click', initAudio);
+        }, { once: true });
+
+        scanUserIdentifiers();
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function resetBulkSelectionState() {
+            window.selectedFiles = new Set();
+            window.visibleServerFiles = [];
+            const toolbar = document.getElementById('serverToolbar');
+            if (toolbar) toolbar.classList.remove('active');
+            const selectAll = document.getElementById('selectAllFiles');
+            if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+            updateBulkToolbar();
+        }
+
+        function updateBulkToolbar() {
+            const toolbar = document.getElementById('serverToolbar');
+            const status = document.getElementById('bulkStatus');
+            const btn = document.getElementById('bulkDeleteBtn');
+            const selectAll = document.getElementById('selectAllFiles');
+            const total = window.visibleServerFiles.length;
+            const selected = window.selectedFiles.size;
+
+            if (toolbar) toolbar.classList.toggle('active', total > 0);
+            if (status) status.innerText = selected > 0 ? `Đã chọn ${selected}/${total} file` : `Có ${total} file — chưa chọn file nào`;
+            if (btn) btn.disabled = selected === 0;
+            if (selectAll) {
+                selectAll.checked = total > 0 && selected === total;
+                selectAll.indeterminate = selected > 0 && selected < total;
+            }
+
+            document.querySelectorAll('.file-item').forEach(item => {
+                const filename = item.getAttribute('data-filename');
+                const checked = filename && window.selectedFiles.has(filename);
+                item.classList.toggle('is-selected', !!checked);
+                const cb = item.querySelector('.file-select-box');
+                if (cb) cb.checked = !!checked;
+            });
+        }
+
+        function toggleFileSelection(filename, checked) {
+            if (!filename) return;
+            if (checked) window.selectedFiles.add(filename);
+            else window.selectedFiles.delete(filename);
+            fireHaptic('tap');
+            updateBulkToolbar();
+        }
+
+        function toggleSelectAllFiles(checked) {
+            if (checked) {
+                window.visibleServerFiles.forEach(name => window.selectedFiles.add(name));
+                showToast(`Đã chọn ${window.visibleServerFiles.length} file`, 'info', 1800);
+            } else {
+                window.selectedFiles.clear();
+                showToast('Đã bỏ chọn tất cả', 'info', 1800);
+            }
+            fireHaptic('select');
+            updateBulkToolbar();
+        }
+
+        function clearFileSelection() {
+            window.selectedFiles.clear();
+            fireHaptic('tap');
+            updateBulkToolbar();
+            showToast('Đã bỏ chọn file', 'info', 1500);
+        }
+
+        async function deleteFileRequest(identifier, filename) {
+            const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(filename)}`;
+            const res = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
+            return res.ok || res.status === 204;
+        }
+
+        async function deleteSelectedFiles() {
+            const identifier = getActiveIdentifier();
+            const files = Array.from(window.selectedFiles);
+            if (!identifier) { showToast('Chưa chọn thư mục đích', 'error'); return; }
+            if (files.length === 0) { showToast('Chưa chọn file để xóa', 'warning'); return; }
+
+            const preview = files.slice(0, 5).join('\n');
+            const more = files.length > 5 ? `\n... và ${files.length - 5} file khác` : '';
+            if (!confirm(`⚠️ XÓA VĨNH VIỄN ${files.length} FILE?\n\n${preview}${more}\n\nKhông thể hoàn tác.`)) return;
+
+            await waitForNetwork();
+            fireHaptic('warn');
+            addLog(`Bắt đầu xóa hàng loạt ${files.length} file...`, 'warn', true);
+            showToast(`Đang xóa ${files.length} file...`, 'warning', 2500);
+
+            const bulkBtn = document.getElementById('bulkDeleteBtn');
+            if (bulkBtn) bulkBtn.disabled = true;
+            let ok = 0, fail = 0;
+
+            for (const filename of files) {
+                const item = document.getElementById(`item-${filename}`);
+                if (item) item.classList.add('is-deleting');
+                try {
+                    const success = await deleteFileRequest(identifier, filename);
+                    if (success) {
+                        ok++;
+                        window.serverCache.delete(filename);
+                        window.selectedFiles.delete(filename);
+                        window.visibleServerFiles = window.visibleServerFiles.filter(n => n !== filename);
+                        if (item) item.remove();
+                        addLog(`Đã xóa: ${filename}`, 'success');
+                    } else {
+                        fail++;
+                        if (item) item.classList.remove('is-deleting');
+                        addLog(`Xóa thất bại: ${filename}`, 'error');
+                    }
+                } catch (e) {
+                    fail++;
+                    if (item) item.classList.remove('is-deleting');
+                    addLog(`Lỗi mạng khi xóa: ${filename}`, 'error');
+                }
+                updateBulkToolbar();
+            }
+
+            if (window.visibleServerFiles.length === 0) {
+                document.getElementById('serverList').innerHTML = `<div class="empty-state">Thư mục hiện không còn file truyền thông nào.</div>`;
+            }
+
+            if (fail === 0) {
+                fireHaptic('success');
+                showToast(`Đã xóa ${ok}/${files.length} file`, 'success', 4000);
+                addLog(`Xóa hàng loạt hoàn tất: ${ok}/${files.length} file.`, 'success', true);
+            } else {
+                fireHaptic('error');
+                showToast(`Xóa xong ${ok}, lỗi ${fail} file`, 'error', 5000);
+                addLog(`Xóa hàng loạt có lỗi: thành công ${ok}, lỗi ${fail}.`, 'error', true);
+            }
+            updateBulkToolbar();
+        }
+
+        function initDraggableInstallFab() {
+            const fab = document.getElementById('btnInstall');
+            if (!fab || fab.dataset.dragReady === '1') return;
+            fab.dataset.dragReady = '1';
+            const storageKey = 'archive_manager_pwa_fab_pos_v40';
+            let startX = 0, startY = 0, startLeft = 0, startTop = 0, dragging = false;
+
+            function clamp(left, top) {
+                const rect = fab.getBoundingClientRect();
+                const margin = 8;
+                const maxLeft = window.innerWidth - rect.width - margin;
+                const maxTop = window.innerHeight - rect.height - margin;
+                return {
+                    left: Math.max(margin, Math.min(left, maxLeft)),
+                    top: Math.max(margin, Math.min(top, maxTop))
+                };
+            }
+
+            function applyPosition(pos) {
+                if (!pos || typeof pos.left !== 'number' || typeof pos.top !== 'number') return;
+                const fixed = clamp(pos.left, pos.top);
+                fab.style.left = fixed.left + 'px';
+                fab.style.top = fixed.top + 'px';
+                fab.style.right = 'auto';
+                fab.style.bottom = 'auto';
+            }
+
+            try { applyPosition(JSON.parse(localStorage.getItem(storageKey) || 'null')); } catch(e) {}
+
+            fab.addEventListener('pointerdown', (e) => {
+                const rect = fab.getBoundingClientRect();
+                startX = e.clientX; startY = e.clientY;
+                startLeft = rect.left; startTop = rect.top;
+                dragging = false;
+                fab.setPointerCapture?.(e.pointerId);
+            });
+
+            fab.addEventListener('pointermove', (e) => {
+                if (startX === null) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                if (!dragging && Math.hypot(dx, dy) > 6) {
+                    dragging = true;
+                    fab.classList.add('is-dragging');
+                }
+                if (dragging) {
+                    e.preventDefault();
+                    const pos = clamp(startLeft + dx, startTop + dy);
+                    fab.style.left = pos.left + 'px';
+                    fab.style.top = pos.top + 'px';
+                    fab.style.right = 'auto';
+                    fab.style.bottom = 'auto';
+                }
+            });
+
+            function endDrag(e) {
+                fab.releasePointerCapture?.(e.pointerId);
+                if (dragging) {
+                    const rect = fab.getBoundingClientRect();
+                    localStorage.setItem(storageKey, JSON.stringify({ left: rect.left, top: rect.top }));
+                    window.__suppressInstallClick = true;
+                    setTimeout(() => window.__suppressInstallClick = false, 250);
+                    showToast('Đã lưu vị trí nút Cài App', 'success', 1500);
+                    fireHaptic('tap');
+                }
+                fab.classList.remove('is-dragging');
+                startX = startY = null;
+                dragging = false;
+            }
+
+            fab.addEventListener('pointerup', endDrag);
+            fab.addEventListener('pointercancel', endDrag);
+            fab.addEventListener('click', (e) => {
+                if (window.__suppressInstallClick) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    window.__suppressInstallClick = false;
+                }
+            }, true);
+
+            window.addEventListener('resize', () => {
+                const rect = fab.getBoundingClientRect();
+                if (fab.style.left && fab.style.top) applyPosition({ left: rect.left, top: rect.top });
+            });
+        }
+
+        async function loadServerFiles() {
+            const identifier = getActiveIdentifier();
+            if (!identifier) { showToast("Xác định Identifier!", "error"); return; }
+
+            await waitForNetwork();
+
+            addLog(`Đang đồng bộ dữ liệu...`, "api", true);
+            const listEl = document.getElementById('serverList');
+            resetBulkSelectionState();
+            listEl.innerHTML = `<div class="empty-state">⏳ Đang lấy dữ liệu...</div>`;
+
+            try {
+                const url = `https://archive.org/metadata/${identifier}?t=${Date.now()}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                window.serverCache.clear();
+                window.isCacheLoaded = true; 
+
+                if (!data.files || data.files.length === 0) {
+                    listEl.innerHTML = `<div class="empty-state">Thư mục trống.</div>`;
+                    return;
+                }
+
+                const audioFiles = data.files.filter(f => f.name.endsWith('.mp3') || f.name.endsWith('.mp4') || f.name.endsWith('.m4a') || String(f.format || '').includes('Audio') || String(f.format || '').includes('Video'));
+
+                if (audioFiles.length === 0) {
+                    listEl.innerHTML = `<div class="empty-state">Không có file truyền thông nào.</div>`;
+                    return;
+                }
+
+                audioFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+                let html = '';
+                audioFiles.forEach((file, index) => {
+                    window.serverCache.add(file.name);
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    const fileUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(file.name)}`;
+                    const cleanTitle = file.title || file.name.replace(/\.[^/.]+$/, "");
+                    
+                    html += `
+                        <div class="file-item" id="item-${file.name}" data-filename="${escapeHtml(file.name)}">
+                            <div class="file-header">
+                                <div class="file-info">
+                                    <label class="file-select-wrap" title="Chọn file này">
+                                        <input type="checkbox" class="file-select-box" onchange='toggleFileSelection(${JSON.stringify(file.name)}, this.checked)'>
+                                    </label>
+                                    <span class="file-index">${index + 1}</span>
+                                    <div class="file-info-main">
+                                        <div class="file-name">${escapeHtml(cleanTitle)}</div>
+                                        <div class="file-meta">${sizeMB} MB</div>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="btn btn-warning" onclick='renameFile(${JSON.stringify(file.name)})'>✏️ Đổi tên</button>
+                                    <button class="btn btn-danger" onclick='deleteFile(${JSON.stringify(file.name)})'>🗑️ Xóa</button>
+                                </div>
+                            </div>
+                            <audio class="audio-player" controls preload="none" src="${fileUrl}"></audio>
+                        </div>
+                    `;
+                });
+                window.visibleServerFiles = audioFiles.map(f => f.name);
+                listEl.innerHTML = html;
+                updateBulkToolbar();
+                addLog(`Đồng bộ xong ${audioFiles.length} file.`, "success", true);
+
+            } catch (error) {
+                addLog(`Lỗi mạng. Không thể gọi API.`, "error", true);
+                listEl.innerHTML = `<div class="empty-state" style="color: red;">❌ Lỗi kết nối</div>`;
+            }
+        }
+
+        async function deleteFile(filename) {
+            const identifier = getActiveIdentifier();
+            if (!confirm(`⚠️ XÓA VĨNH VIỄN: ${filename} ?`)) return;
+
+            await waitForNetwork();
+
+            addLog(`Đang xóa file`, "warn", true);
+            try {
+                const ok = await deleteFileRequest(identifier, filename);
+                if (ok) {
+                    showToast("Đã xóa vĩnh viễn", "success");
+                    const item = document.getElementById(`item-${filename}`);
+                    if (item) item.remove();
+                    window.serverCache.delete(filename);
+                    window.selectedFiles.delete(filename);
+                    window.visibleServerFiles = window.visibleServerFiles.filter(n => n !== filename);
+                    updateBulkToolbar();
+                } else {
+                    showToast("Xóa thất bại", "error");
+                }
+            } catch (e) { showToast("Lỗi mạng", "error"); }
+        }
+
+        async function renameFile(oldName) {
+            const identifier = getActiveIdentifier();
+            const newName = prompt(`Nhập tên file mới (Bao gồm đuôi):`, oldName);
+            if (!newName || newName === oldName) return;
+
+            await waitForNetwork();
+
+            // Vẫn dùng Hash để đảm bảo tên an toàn
+            const safeNewName = toAscii(newName, newName.substring(newName.lastIndexOf('.')), newName);
+            addLog(`Đang đổi tên file`, "api", true);
+
+            const sourcePath = `/${identifier}/${encodeURIComponent(oldName)}`;
+            const targetUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeNewName)}`;
+            const oldUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(oldName)}`;
+
+            try {
+                addLog("Đang sao chép...", "info");
+                const copyRes = await fetch(targetUrl, { method: 'PUT', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}`, 'x-amz-copy-source': sourcePath } });
+                if (!copyRes.ok) throw new Error();
+                await fetch(oldUrl, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
+
+                showToast("Đổi tên hoàn tất.", "success");
+                setTimeout(loadServerFiles, 1000); 
+            } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
+        }
+
+        const elProgressUI = document.getElementById('progressUI');
+        const elProgressName = document.getElementById('progressName');
+        const elProgressPercent = document.getElementById('progressPercent');
+        const elProgressBar = document.getElementById('progressBar');
+
+        function updateOverallProgress(completed, total) {
+            const pct = Math.floor((completed / total) * 100);
+            elProgressName.innerText = `Đang xử lý ${completed}/${total} tệp...`;
+            elProgressPercent.innerText = `${pct}%`;
+            elProgressBar.style.width = `${pct}%`;
+        }
+
+        function probeFileInnerData(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
+                    let hex = "";
+                    for(let i = 0; i < arr.length; i++) {
+                        hex += arr[i].toString(16).padStart(2, '0').toUpperCase() + " ";
+                    }
+                    if(hex.includes("00 00 00")) resolve('.mp4'); 
+                    else resolve('.mp3'); 
+                };
+                reader.onerror = () => resolve('.mp3'); 
+                reader.readAsArrayBuffer(file.slice(0, 4));
+            });
+        }
+
+        function stopUpload() {
+            if (!window.isUploading) return;
+            
+            window.isUploading = false; 
+            addLog("ĐANG HỦY CÁC LUỒNG TẢI LÊN...", "warn", true);
+            
+            window.activeXHRs.forEach(xhr => xhr.abort());
+            window.activeXHRs.clear();
+            
+            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('stopBtn').style.display = 'none';
+            
+            addLog("Đã chủ động Dừng tiến trình.", "error", true);
+            showToast("Đã dừng tải lên!", "error");
+            releaseWakeLock();
+        }
+
+        function uploadSingleFileWithXHR(identifier, file, maxRetries = 3) {
+            return new Promise(async (resolve) => {
+                const trueExtension = await probeFileInnerData(file);
+                const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                
+                // V39: TRUYỀN VÀO TÊN GỐC (file.name) ĐỂ BĂM MÃ HASH
+                let safeUrlName = toAscii(baseName, trueExtension, file.name);
+                
+                if (window.serverCache.has(safeUrlName)) {
+                    addLog(`Đã bỏ qua ${safeUrlName}`, "warn");
+                    return resolve(true); 
+                }
+
+                const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeUrlName)}`;
+                addLog(`Đang tải lên ${safeUrlName} (${(file.size/1024/1024).toFixed(1)} MB)`, "info"); 
+
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    if (!window.isUploading) return resolve(false);
+
+                    await waitForNetwork(); 
+                    try {
+                        const success = await new Promise((innerResolve, innerReject) => {
+                            const xhr = new XMLHttpRequest();
+                            window.activeXHRs.add(xhr); 
+                            
+                            // V39: NỚI LỎNG CHÓ SĂN LÊN 3 PHÚT (180s) CHO MẠNG YẾU/FILE LỚN
+                            let idleWatchdog;
+                            const resetWatchdog = () => {
+                                clearTimeout(idleWatchdog);
+                                idleWatchdog = setTimeout(() => {
+                                    addLog(`[ULTRA DEBUG] Trình duyệt đơ/Mất mạng câm 180s. Chém đứt luồng!`, "error");
+                                    xhr.abort();
+                                    innerReject(new Error("Idle Timeout"));
+                                }, 180000); 
+                            };
+                            resetWatchdog(); 
+                            
+                            xhr.upload.addEventListener('progress', (e) => {
+                                resetWatchdog(); 
+                            });
+                            
+                            xhr.open('PUT', url, true);
+                            xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
+                            xhr.setRequestHeader('x-amz-auto-make-bucket', '1');
+                            
+                            xhr.onload = () => {
+                                clearTimeout(idleWatchdog);
+                                window.activeXHRs.delete(xhr);
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    innerResolve(true);
+                                } else {
+                                    let errorDetail = `Lỗi HTTP ${xhr.status}`;
+                                    if(xhr.responseText) {
+                                        addLog(`[S3 RAW] ${xhr.responseText}`, "error");
+                                        const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/);
+                                        if(match) errorDetail = `S3: ${match[1]}`;
+                                    }
+                                    innerReject(new Error(errorDetail));
+                                }
+                            };
+                            
+                            xhr.onerror = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Mất kết nối mạng")); };
+                            xhr.onabort = () => { clearTimeout(idleWatchdog); window.activeXHRs.delete(xhr); innerReject(new Error("Bị hủy")); };
+                            
+                            try {
+                                xhr.send(file);
+                            } catch(err) {
+                                clearTimeout(idleWatchdog);
+                                window.activeXHRs.delete(xhr);
+                                innerReject(err);
+                            }
+                        });
+
+                        if (success) { 
+                            addLog(`Tải xong: ${safeUrlName}`, "success");
+                            window.serverCache.add(safeUrlName); 
+                            return resolve(true); 
+                        }
+                        
+                    } catch (error) {
+                        if (error.message.includes("bị hủy")) return resolve(false); 
+
+                        if (attempt === maxRetries) { 
+                            addLog(`Tải thất bại hoàn toàn file: ${safeUrlName} - Lý do: ${error.message}`, "error", true); 
+                            return resolve(false); 
+                        }
+                        
+                        const baseDelay = 3000 * Math.pow(2, attempt - 1); 
+                        const jitter = Math.random() * 1000; 
+                        const finalDelay = baseDelay + jitter;
+                        addLog(`Nghẽn mạng. Lùi bước... Thử lại sau ${(finalDelay/1000).toFixed(1)}s`, "warn"); 
+                        await new Promise(r => setTimeout(r, finalDelay));
+                    }
+                }
+            });
+        }
+
+        async function startUpload() {
+            const identifier = getActiveIdentifier();
+            const files = document.getElementById('fileInput').files;
+
+            if (!identifier) { showToast("Xác định Thư mục đích!", "error"); return; }
+            if (files.length === 0) { showToast("Chọn ít nhất 1 file!", "error"); return; }
+
+            await activateWakeLock();
+
+            if (!window.isCacheLoaded) {
+                addLog("Tự động đồng bộ dữ liệu.", "warn", true);
+                await loadServerFiles();
+            }
+
+            document.getElementById('uploadBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            elProgressUI.style.display = 'block';
+            
+            window.isUploading = true;
+            addLog(`Bắt đầu tải lên ĐA LUỒNG (${files.length} files)`, "api", true);
+
+            window.completedFilesCount = 0;
+            window.totalFilesCount = files.length;
+            const queue = Array.from(files);
+            let activeUploads = 0;
+            const MAX_CONCURRENT = 3; 
+
+            updateOverallProgress(0, window.totalFilesCount);
+
+            await new Promise((resolve) => {
+                const processNext = async () => {
+                    if ((queue.length === 0 || !window.isUploading) && activeUploads === 0) {
+                        resolve();
+                        return;
+                    }
+                    while (activeUploads < MAX_CONCURRENT && queue.length > 0 && window.isUploading) {
+                        const file = queue.shift();
+                        activeUploads++;
+                        
+                        uploadSingleFileWithXHR(identifier, file).finally(() => {
+                            activeUploads--;
+                            if (window.isUploading) {
+                                window.completedFilesCount++;
+                                updateOverallProgress(window.completedFilesCount, window.totalFilesCount);
+                            }
+                            processNext();
+                        });
+                    }
+                };
+                processNext();
+            });
+
+            if (window.isUploading) {
+                addLog("Tuyệt vời. Toàn bộ tiến trình đa luồng đã hoàn tất.", "success", true);
+                updateOverallProgress(window.totalFilesCount, window.totalFilesCount);
+                elProgressBar.style.background = '#10b981';
+                
+                document.getElementById('uploadBtn').style.display = 'block';
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('stopBtn').style.display = 'none';
+                
+                document.getElementById('fileInput').value = ''; 
+                releaseWakeLock();
+                setTimeout(loadServerFiles, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
