@@ -12,7 +12,7 @@
 <title>LifeOS V65 - The Absolute Masterpiece</title>
 <meta name="build-tag" content="LIFEOS_PWA_PILL_GLASS_NHIP_2_1_FINAL_20260529_01">
 
-<link id="manifest-link" rel="manifest" href="/mimihoalua/manifest_qlycuocsong.json">
+<link id="manifest-link" rel="manifest" href="/tool/manifest_qlycuocsong.json">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -214,7 +214,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     <div class="bg-white p-6 rounded-3xl w-full max-w-sm shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh] overflow-y-auto custom-scroll-area">
         <div class="w-16 h-16 rounded-full bg-slate-100 mx-auto flex items-center justify-center mb-4 text-3xl shadow-inner flex-shrink-0" id="pwd-icon">🔒</div>
         <h3 id="pwd-title" class="text-xl font-black text-center mb-6 text-slate-800 flex-shrink-0"></h3>
-        <input type="password" id="pwd-input" class="w-full bg-slate-50 border border-slate-200 px-4 py-4 rounded-xl mb-6 text-center text-xl font-bold outline-none focus:border-primary transition-all shadow-inner flex-shrink-0" placeholder="Nhập mật khẩu">
+        <input type="password" id="pwd-input" class="w-full bg-slate-50 border border-slate-200 px-4 py-4 rounded-xl mb-6 text-center text-xl font-bold outline-none focus:border-primary transition-all shadow-inner flex-shrink-0" placeholder="Nhập mật khẩu" onkeydown="if(event.key === 'Enter') window.submitPassword()">
         <div class="flex gap-3 flex-shrink-0">
             <button onclick="window.vibrate(10); window.closePasswordModal()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold text-slate-600 active:scale-95 transition border border-slate-200 hover:brightness-95">Hủy</button>
             <button onclick="window.submitPassword()" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg hover:brightness-110 flex justify-center items-center gap-2"><i class="ph-bold ph-sign-in"></i> Vào</button>
@@ -226,7 +226,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     <div class="flex items-center gap-2 sm:gap-3">
         <div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
         <div>
-            <h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">Quản Lý Cuộc Sống gia đình Xiêm Thắm</h1>
+            <h1 class="text-[15px] sm:text-xl md:text-2xl font-black text-primary tracking-tight leading-tight cursor-pointer" onclick="window.initTTS()">Quản Lý Cuộc Sống <br class="sm:hidden">gia đình Xiêm Thắm</h1>
             <div class="flex items-center gap-2 mt-0.5">
                 <span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> Bảo vệ giọng nói</span>
             </div>
@@ -267,6 +267,20 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
                     <input type="datetime-local" id="dt-pc" onchange="window.syncManualDateToInput(this, 'input-pc')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
                 </div>
                 <button type="submit" class="bg-primary text-white px-8 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition flex justify-center items-center gap-2 hover:brightness-110">Thêm</button>
+            </form>
+        </div>
+
+        <div class="lg:hidden bg-white p-4 rounded-3xl shadow-sm border border-slate-200 mb-4 relative z-10">
+            <form id="form-mobile" class="flex items-center w-full gap-2" onsubmit="event.preventDefault();">
+                <button type="button" class="btn-voice p-2.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl active:scale-90 border border-slate-200 shadow-sm shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"><i class="ph-fill ph-microphone text-[20px]"></i></button>
+                <div class="relative flex-grow min-w-0">
+                    <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch..." class="w-full bg-slate-50 border border-slate-200 outline-none py-2.5 pl-3 pr-2 rounded-xl text-sm font-semibold text-slate-800 focus:border-primary transition-all shadow-inner min-h-[44px]" autocomplete="off">
+                </div>
+                <div class="relative flex items-center justify-center w-11 h-11 bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden cursor-pointer hover:brightness-95 transition shrink-0" title="Chọn ngày giờ thủ công">
+                    <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
+                    <input type="datetime-local" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
+                </div>
+                <button type="submit" class="bg-primary text-white w-11 h-11 flex items-center justify-center rounded-xl active:scale-90 shadow-md transition-transform hover:brightness-110 shrink-0"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
             </form>
         </div>
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-4">
@@ -410,7 +424,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
                     <div class="flex gap-2 w-full sm:w-auto">
                         <button onclick="window.VaultApp.exportBackup()" class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center backdrop-blur-sm" title="Sao lưu"><i class="ph-bold ph-download-simple text-lg"></i></button>
                         <label class="flex-1 sm:flex-none bg-white/70 hover:bg-white text-slate-700 p-2.5 rounded-xl font-medium transition-all active:scale-90 shadow-sm border border-white/50 flex items-center justify-center cursor-pointer backdrop-blur-sm" title="Phục hồi JSON"><i class="ph-bold ph-upload-simple text-lg"></i><input type="file" class="hidden" accept=".json" onchange="window.VaultApp.importBackup(event)"></label>
-                        <button onclick="window.VaultUI.openModal()" class="hidden lg:flex flex-1 sm:flex-none bg-primary text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg items-center justify-center gap-2 hover:brightness-110"><i class="ph-bold ph-plus text-lg"></i> Thêm mới</button>
+                        <button onclick="window.VaultUI.openModal()" class="flex flex-[2] sm:flex-none bg-primary text-white px-2 sm:px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg items-center justify-center gap-1.5 sm:gap-2 hover:brightness-110" title="Thêm mới"><i class="ph-bold ph-plus text-base sm:text-lg shrink-0"></i> <span class="text-[13px] sm:text-base whitespace-nowrap">Thêm mới</span></button>
                     </div>
                 </div>
             </div>
@@ -438,12 +452,16 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
             <div class="px-4 pt-6 pb-4 border-b border-slate-200 bg-slate-50/50 mb-4 rounded-xl">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Nghe Nhạc Cả Ngày</h2>
-                    <div class="flex items-center gap-2">
-                        <select id="music-timer-select" onchange="window.MusicApp.handleTimerChange(this.value)" class="timer-dropdown text-xs">
-                            <option value="0">🕒 Hẹn giờ tắt</option><option value="15">15 Phút</option><option value="30">30 Phút</option><option value="45">45 Phút</option><option value="60">1 Giờ</option><option value="120">2 Giờ</option>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <select id="music-timer-select" onchange="window.MusicApp.handleTimerChange(this.value)" class="timer-dropdown text-[10px] sm:text-xs">
+                            <option value="0">🕒 Tắt</option><option value="15">15p</option><option value="30">30p</option><option value="45">45p</option><option value="60">1h</option><option value="120">2h</option>
                         </select>
-                        <button onclick="window.MusicApp.clearCache()" class="w-9 h-9 flex justify-center items-center rounded-full bg-rose-50 text-rose-500 active:scale-90 transition-transform shadow-sm" title="Xóa bộ nhớ đệm"><i class="ph-bold ph-trash text-base"></i></button>
-                        <button onclick="window.MusicApp.refetch()" class="w-9 h-9 flex justify-center items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 active:scale-90 transition-transform shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-base"></i></button>
+                        <button onclick="window.MusicApp.clearCache()" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 flex justify-center items-center rounded-full bg-rose-50 text-rose-500 active:scale-90 transition-transform shadow-sm border border-rose-100" title="Xóa bộ nhớ đệm"><i class="ph-bold ph-trash text-sm sm:text-base"></i></button>
+                        <button onclick="window.MusicApp.refetch()" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 flex justify-center items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 active:scale-90 transition-transform shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-sm sm:text-base"></i></button>
+                        <a href="https://mimihoalua.github.io/tool/upload.html" target="_blank" rel="noopener noreferrer" class="h-8 sm:h-9 px-2 sm:px-3 shrink-0 flex justify-center items-center rounded-full bg-purple-50 text-purple-600 border border-purple-200 active:scale-90 transition-transform shadow-sm gap-1 hover:bg-purple-100" title="Admin Nhạc">
+                            <i class="ph-bold ph-cloud-arrow-up text-sm sm:text-base"></i>
+                            <span class="hidden md:inline text-xs font-bold whitespace-nowrap">Admin</span>
+                        </a>
                     </div>
                 </div>
                 <div id="music-timer-display" class="hidden mt-2 text-center text-xs font-bold text-rose-500 animate-pulse"></div>
@@ -466,19 +484,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     </div>
 </button>
 
-<div id="mobile-input" class="lg:hidden fixed bottom-[85px] left-0 w-full px-4 z-[60] transition-transform duration-300">
-    <form id="form-mobile" class="w-full flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-[0_-5px_20px_rgba(0,0,0,.05)] border border-slate-200 pb-[env(safe-area-inset-bottom)]" onsubmit="event.preventDefault();">
-        <div class="flex items-center w-full gap-1">
-            <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
-            <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
-            <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
-                <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
-                <input type="datetime-local" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
-            </div>
-            <button type="submit" class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
-        </div>
-    </form>
-</div>
+
 
 <div id="mini-player" class="rounded-[1.65rem] px-3 py-2" aria-live="polite">
     <div class="music-player-bar">
@@ -613,7 +619,7 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 // ==============================================================================
 // LÕI HỆ THỐNG: QUẢN LÝ PROFILE & UI
 // ==============================================================================
-window.PROFILES={"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
+window.PROFILES={"live":{pin:"",name:"Live",icon:'🌱'},"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
 window.currentUser=null;window.viewingUser=null;window.todos=[];window.stats={streak:0};window.filterMode='all';
 window.LIFEOS_BUILD_ID='LIFEOS_FIREBASE_RUNTIME_LOADER_CLOUD_FIRST_FINAL_20260529_03';
 console.log('[BUILD]', window.LIFEOS_BUILD_ID);
@@ -641,10 +647,44 @@ window.addEventListener('orientationchange',()=>setTimeout(()=>window.syncMusicL
 window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
 
 window.showLoginGate=()=>{showFlex('login-gate');setHtml('login-profiles',Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all"><div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div><span class="font-black text-slate-800">${v.name}</span></button>`).join(''))};
-window.requestPin=k=>{window.vibrate(15);window.tempProfile=k;setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100)};
+window.requestPin=k=>{
+    window.vibrate(15);window.tempProfile=k;
+    if(k==='live'){
+        localStorage.setItem('lifeos_v8_session','live');
+        localStorage.setItem('lifeos_v8_viewing','live');
+        window.currentUser='live';window.viewingUser='live';
+        hideEl('login-gate');window.loadUserData();
+        window.showToast('Chào mừng Live!','ph-hand-waving');
+        return;
+    }
+    setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);showFlex('password-modal');setVal('pwd-input','');setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100);
+};
 window.closePasswordModal=()=>hideEl('password-modal');
 window.submitPassword=()=>{const u=window.tempProfile,p=getVal('pwd-input');if(window.PROFILES[u]&&(window.PROFILES[u].pin===p||p==='9999')){window.unlockAudio();window.vibrate([20,30]);localStorage.setItem('lifeos_v8_session',u);localStorage.setItem('lifeos_v8_viewing',u);window.currentUser=u;window.viewingUser=u;window.closePasswordModal();hideEl('login-gate');window.loadUserData();window.showToast(`Chào mừng ${window.PROFILES[u].name}!`,'ph-hand-waving');if(window.soundEnabled)window.playSpeechTTS('Xin chào', true)}else{window.vibrate([50,50]);window.highlightError('pwd-input');window.showToast('Sai mật khẩu!','ph-warning-circle')}};
-window.toggleProfileMenu=()=>{window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');if(!m.classList.contains('hidden')){let o='';if(window.currentUser==='admin'){o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('')}else{o=`<div class="px-4 py-3 font-bold text-sm text-slate-500">Chỉ Admin xem chéo</div>`}setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`)}};
+window.switchProfileOrViewing=k=>{
+    window.vibrate(15);
+    if(k==='live'||window.currentUser==='admin'){
+        localStorage.setItem('lifeos_v8_session',k);
+        localStorage.setItem('lifeos_v8_viewing',k);
+        window.currentUser=k;window.viewingUser=k;
+        el('profile-menu').classList.add('hidden');
+        window.loadUserData();
+        window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye');
+    }else{
+        window.tempProfile=k;
+        setTxt('pwd-title',`Mật khẩu của ${window.PROFILES[k].name}`);
+        showFlex('password-modal');setVal('pwd-input','');
+        el('profile-menu').classList.add('hidden');
+        setTimeout(()=>{const i=el('pwd-input');if(i)i.focus()},100);
+    }
+};
+window.toggleProfileMenu=()=>{
+    window.vibrate(10);const m=el('profile-menu');if(!m)return;m.classList.toggle('hidden');
+    if(!m.classList.contains('hidden')){
+        let o=Object.entries(window.PROFILES).map(([k,v])=>`<button onclick="window.switchProfileOrViewing('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${window.viewingUser===k?'text-primary':'text-slate-600'}">${v.icon} ${v.name} ${window.viewingUser===k?'<i class="ph-bold ph-check ml-2"></i>':''}</button>`).join('');
+        setHtml('profile-menu',o+`<div class="h-px bg-slate-200 my-1"></div><button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm"><i class="ph-bold ph-sign-out mr-1"></i> Đăng xuất</button>`);
+    }
+};
 window.switchViewing=k=>{window.vibrate(15);localStorage.setItem('lifeos_v8_viewing',k);window.viewingUser=k;el('profile-menu').classList.add('hidden');window.loadUserData();window.showToast(`Đang xem ${window.PROFILES[k].name}`,'ph-eye'); window.unlockAudio();};
 window.logout=()=>{window.vibrate(20);localStorage.removeItem('lifeos_v8_session');localStorage.removeItem('lifeos_v8_viewing');location.reload()};
 
@@ -1798,13 +1838,27 @@ window.pwaEngine = {
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); this.deferredPrompt = e; this.setFabVisible(true); });
     },
     handleInstallClick: async function() {
-        const modal = document.getElementById('pwaHealthModal'), content = document.getElementById('smartGuideContent'); if(!modal || !content) return; modal.classList.remove('hidden');
-        if (this.state.isStandalone) { content.innerHTML = `<div class="text-center"><div class="text-emerald-500 text-5xl mb-3">🎉</div><h3 class="text-xl font-bold text-slate-800 mb-2">Đã cài đặt thành công!</h3></div>`; return; }
-        if (this.deferredPrompt) { modal.classList.add('hidden'); this.deferredPrompt.prompt(); const { outcome } = await this.deferredPrompt.userChoice; if (outcome === 'accepted') { this.deferredPrompt = null; this.setFabVisible(false); } return; }
-        if (this.state.isInApp) { content.innerHTML = `<div class="text-center text-rose-600 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 font-medium">Bạn đang mở bằng Zalo/Facebook nên hệ thống bị chặn cài đặt trực tiếp.</p><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">1</div><div class="text-sm font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">2</div><div class="text-sm font-medium">Chọn <b>Mở bằng trình duyệt</b> Chrome/Safari rồi quay lại bấm Cài App.</div></div>`; return; }
-        if (this.state.isIOS) { content.innerHTML = `<div class="text-center font-bold mb-4 text-blue-600 text-lg">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Chia sẻ</b> ở thanh Safari.</div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm font-medium text-slate-700">Chọn <b>Thêm vào Màn hình chính</b>.</div></div><div class="guide-step"><div class="step-num">3</div><div class="text-sm font-medium text-slate-700">Bấm <b>Thêm</b>.</div></div>`; return; }
-        if (this.state.isAndroid) { content.innerHTML = `<div class="text-center font-bold mb-4 text-emerald-600 text-lg">Dành cho Android</div><div class="guide-step"><div class="step-num bg-emerald-500">1</div><div class="text-sm font-medium text-slate-700">Bấm dấu <b>3 chấm</b> ở góc trên bên phải.</div></div><div class="guide-step"><div class="step-num bg-emerald-500">2</div><div class="text-sm font-medium text-slate-700">Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`; return; }
-        content.innerHTML = `<div class="text-center"><p class="mb-4 font-bold text-lg text-primary">Cài đặt trên Máy tính</p><div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 inline-block mb-3 text-left w-full"><div class="flex items-start gap-3 mb-2"><span class="text-xl text-primary mt-0.5">💻</span><span class="text-sm font-medium text-slate-700 leading-relaxed">Bấm biểu tượng <b>Cài đặt</b> ở góc phải thanh địa chỉ, hoặc menu 3 chấm → <b>Cài đặt LifeOS</b>.</span></div></div></div>`;
+        // 1-Click Install cho môi trường chuẩn (Đọc được Manifest, HTTPS/Localhost)
+        if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') { this.deferredPrompt = null; this.setFabVisible(false); window.showToast?.('Đang tiến hành cài đặt...', 'ph-download'); }
+            return;
+        }
+
+        // Bảng Backup nếu môi trường chưa chuẩn hoặc iOS
+        const modal = document.getElementById('pwaHealthModal'), content = document.getElementById('smartGuideContent'); 
+        if(!modal || !content) return; 
+        modal.classList.remove('hidden');
+
+        // Gắn icon mạng cực đẹp
+        const appIconHtml = `<div class="mx-auto w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-lg mb-5 border border-slate-100 overflow-hidden p-2"><img src="https://cdn-icons-png.flaticon.com/512/4364/4364448.png" alt="App Icon" class="w-full h-full object-contain drop-shadow-sm"></div>`;
+
+        if (this.state.isStandalone) { content.innerHTML = `${appIconHtml}<div class="text-center"><h3 class="text-2xl font-black text-emerald-600 mb-2">Đã cài App!</h3></div>`; return; }
+        if (this.state.isInApp) { content.innerHTML = `${appIconHtml}<div class="text-center text-rose-600 font-black text-xl mb-3">⚠️ Mở bằng trình duyệt gốc</div><p class="mb-3 text-sm text-slate-600 font-semibold leading-relaxed">Zalo/Facebook chặn cài đặt. Vui lòng chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari) ở menu góc phải để cài App.</p>`; return; }
+        if (this.state.isIOS) { content.innerHTML = `${appIconHtml}<div class="text-center font-black mb-5 text-blue-600 text-xl">Dành cho iPhone/iPad</div><div class="guide-step bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="step-num bg-blue-500 shadow-sm">1</div><div class="text-sm font-semibold text-slate-700">Bấm nút <b>Chia sẻ</b> ở thanh dưới cùng Safari.</div></div><div class="guide-step bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="step-num bg-blue-500 shadow-sm">2</div><div class="text-sm font-semibold text-slate-700">Chọn <b>Thêm vào MH chính</b>.</div></div>`; return; }
+
+        content.innerHTML = `${appIconHtml}<div class="text-center"><p class="mb-4 font-black text-xl text-primary">Cài đặt Ứng dụng</p><p class="text-sm text-slate-600 mb-4 font-medium leading-relaxed">Nếu Popup không tự hiện, hãy bấm menu 3 chấm (Chrome) góc trên phải ➜ <b>Cài đặt ứng dụng</b>.</p></div>`;
     }
 };
 
@@ -1936,7 +1990,7 @@ window.initDraggableFab = function() {
 
 document.addEventListener('DOMContentLoaded', () => {
     // Ép cứng đường dẫn SW tuyệt đối để tránh lỗi 404 trên GitHub Pages
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/mimihoalua/sw_qlycuocsong.js').catch(()=>{});
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/tool/sw_qlycuocsong.js').catch(()=>{});
     
     // Kích hoạt PWA Engine
     window.pwaEngine.init();
@@ -1964,8 +2018,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let sS = localStorage.getItem('lifeos_v8_session');
-    if(sS && window.PROFILES[sS]){ window.currentUser=sS; window.viewingUser=localStorage.getItem('lifeos_v8_viewing')||sS; hideEl('login-gate'); window.loadUserData(); }
-    else window.showLoginGate();
+    if(!sS || !window.PROFILES[sS]){
+        sS = 'live';
+        localStorage.setItem('lifeos_v8_session', 'live');
+        localStorage.setItem('lifeos_v8_viewing', 'live');
+    }
+    window.currentUser = sS;
+    window.viewingUser = localStorage.getItem('lifeos_v8_viewing') || sS;
+    if(!window.PROFILES[window.viewingUser]) window.viewingUser = sS;
+    hideEl('login-gate');
+    window.loadUserData();
 });
 </script>
 </body>
