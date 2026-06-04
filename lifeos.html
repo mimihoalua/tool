@@ -3477,7 +3477,8 @@ window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
             <button onclick="window.testVoiceGuard()" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
-            <button id="lifeos-alarm-anchor-btn" onclick="window.activateLifeOSAlarmAnchor && window.activateLifeOSAlarmAnchor()" class="col-span-2 py-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm active:scale-95 border border-emerald-200 flex justify-center items-center gap-2 transition-all hover:bg-emerald-100"><i class="ph-bold ph-broadcast"></i> Kích hoạt báo thức nền</button>
+            <button id="lifeos-alarm-anchor-btn" type="button" onclick="window.activateLifeOSAlarmAnchor && window.activateLifeOSAlarmAnchor()" class="col-span-2 py-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm active:scale-95 border border-emerald-200 flex justify-center items-center gap-2 transition-all hover:bg-emerald-100"><i class="ph-bold ph-broadcast"></i> Kích hoạt báo thức nền</button>
+            <button id="lifeos-alarm-test15-btn" type="button" onclick="window.lifeosTestAlarm15s && window.lifeosTestAlarm15s()" class="col-span-2 py-3.5 rounded-xl bg-amber-50 text-amber-700 font-black text-sm active:scale-95 border border-amber-200 flex justify-center items-center gap-2 transition-all hover:bg-amber-100"><i class="ph-bold ph-timer"></i> Test báo thức 15 giây</button>
         </div>
     </div>
 </div>
@@ -7494,23 +7495,26 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 
 
 
-<!-- PHA12A_GOOGLE_TTS_FIX2_START -->
-<audio id="lifeos-tts-audio" playsinline webkit-playsinline preload="auto"></audio>
-<audio id="lifeos-alarm-anchor" playsinline webkit-playsinline loop preload="auto" src="https://actions.google.com/sounds/v1/water/water_leak.ogg"></audio>
 
-<style id="pha12a-google-tts-fix2-style">
-/* PHA 12A FIX2 — chỉ modal + audio anchor. Không khóa scroll toàn app. */
+<!-- PHA12C_ALARM_LOOP_VOICE_ANCHOR_START -->
+<audio id="lifeos-bg-anchor" playsinline webkit-playsinline preload="auto" loop src="./silence_30min.mp3"></audio>
+<audio id="lifeos-anchor-audio" playsinline webkit-playsinline preload="auto" loop src="./silence_30min.mp3"></audio>
+<audio id="lifeos-tts-audio" playsinline webkit-playsinline preload="auto"></audio>
+
+<style id="pha12c-alarm-loop-voice-anchor-style">
+/* PHA 12C — chỉ modal báo thức + nút Voice Guard. Không khóa scroll toàn app. */
 #lifeos-task-alarm-modal.hidden { display: none !important; pointer-events: none !important; }
 #lifeos-task-alarm-modal { pointer-events: auto; }
 #lifeos-task-alarm-card { max-height: min(92vh, 620px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
-#lifeos-alarm-anchor-btn { min-height: 48px; }
+#lifeos-alarm-anchor-btn, #lifeos-alarm-test15-btn { min-height: 48px; }
 #lifeos-alarm-anchor-status.lifeos-anchor-ready { color: #059669 !important; }
 #lifeos-alarm-anchor-status.lifeos-anchor-warn { color: #d97706 !important; }
 #lifeos-alarm-anchor-status.lifeos-anchor-error { color: #e11d48 !important; }
+#lifeos-alarm-cycle-badge { font-variant-numeric: tabular-nums; }
 @media (max-width: 1023px) {
   #lifeos-task-alarm-card { width: calc(100vw - 28px) !important; border-radius: 28px !important; }
   #lifeos-task-alarm-modal .lifeos-alarm-action-grid { grid-template-columns: 1fr !important; }
-  #lifeos-alarm-anchor-btn { grid-column: 1 / -1 !important; }
+  #lifeos-alarm-anchor-btn, #lifeos-alarm-test15-btn { grid-column: 1 / -1 !important; }
 }
 </style>
 
@@ -7520,64 +7524,74 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       <i class="ph-fill ph-bell-ringing text-5xl text-rose-500 animate-bounce"></i>
     </div>
     <div class="text-[11px] font-black uppercase tracking-[0.22em] text-rose-500 mb-2">LifeOS báo thức nhiệm vụ</div>
-    <h2 class="text-2xl font-black text-slate-900 mb-3">Đến giờ rồi!</h2>
+    <h2 class="text-2xl font-black text-slate-900 mb-3">Đến giờ làm việc</h2>
     <p id="lifeos-task-alarm-message" class="text-base font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-2xl p-4 leading-relaxed break-words">Bạn có nhiệm vụ.</p>
-    <div id="lifeos-alarm-anchor-status" class="lifeos-anchor-warn text-[11px] font-bold mt-3">Chưa kích hoạt mỏ neo âm thanh.</div>
+    <div id="lifeos-alarm-cycle-badge" class="text-xs font-black text-rose-500 mt-3">Đang báo vòng 0</div>
+    <div id="lifeos-alarm-anchor-status" class="lifeos-anchor-warn text-[11px] font-bold mt-2">Chưa kích hoạt mỏ neo âm thanh.</div>
     <div class="lifeos-alarm-action-grid grid grid-cols-2 gap-3 mt-5">
-      <button type="button" onclick="window.stopGlobalAlarm && window.stopGlobalAlarm('dismiss')" class="py-4 rounded-2xl bg-slate-800 text-white font-black active:scale-95 transition flex items-center justify-center gap-2"><i class="ph-bold ph-stop-circle text-2xl"></i> Dừng</button>
+      <button type="button" onclick="window.stopGlobalAlarm && window.stopGlobalAlarm('dismiss')" class="py-4 rounded-2xl bg-slate-800 text-white font-black active:scale-95 transition flex items-center justify-center gap-2"><i class="ph-bold ph-stop-circle text-2xl"></i> Dừng báo thức</button>
       <button type="button" onclick="window.stopGlobalAlarm && window.stopGlobalAlarm('snooze')" class="py-4 rounded-2xl bg-amber-500 text-white font-black active:scale-95 transition flex items-center justify-center gap-2"><i class="ph-bold ph-clock-afternoon text-2xl"></i> Nhắc lại 5 phút</button>
     </div>
   </div>
 </div>
 
-<script id="pha12a-google-tts-fix2-script">
+<script id="pha12c-alarm-loop-voice-anchor-script">
 (function(){
-  if (window.__lifeosPha12aGoogleTtsFix2) return;
-  window.__lifeosPha12aGoogleTtsFix2 = true;
+  if (window.__lifeosPha12cAlarmLoopVoiceAnchor) return;
+  window.__lifeosPha12cAlarmLoopVoiceAnchor = true;
 
+  var SILENCE_URL = './silence_30min.mp3';
   var GOOGLE_TTS = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=';
   var RESPONSIVE_TTS = 'https://texttospeech.responsivevoice.org/v1/text:synthesize?lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback&text=';
-  var ANCHOR_URL = 'https://actions.google.com/sounds/v1/water/water_leak.ogg';
-  var PRELOAD_WINDOW_MS = 45000;
-  var oldTrigger = window.triggerGlobalAlarm;
-  var oldStop = window.stopGlobalAlarm;
+  var PRELOAD_WINDOW_MS = 30000;
+  var LOOP_RESTART_DELAY_MS = 900;
+  var oldTriggerGlobalAlarm = window.triggerGlobalAlarm;
+  var oldStopGlobalAlarm = window.stopGlobalAlarm;
   var oldCheckAlarms = window.checkAlarms;
   var oldInitTTS = window.initTTS;
 
-  var state = window.LifeOSAlarmAnchor = window.LifeOSAlarmAnchor || {};
+  var state = window.LifeOSAlarmLoop = window.LifeOSAlarmLoop || {};
   state.activated = !!state.activated;
+  state.active = false;
   state.voiceGuardActive = !!state.voiceGuardActive || !!window.ttsActive;
   state.ttsReady = false;
-  state.ttsUnlocked = false;
+  state.ttsPrimed = false;
+  state.ttsSpeaking = false;
   state.ttsPhrase = '';
   state.ttsProvider = 'google';
   state.loadedKey = '';
-  state.currentTaskId = '';
+  state.loopToken = 0;
+  state.cycle = 0;
+  state.preloaded = state.preloaded || new Set();
   state.worker = state.worker || null;
   state.fallbackTimer = state.fallbackTimer || null;
-  state.beepTimer = null;
-  state.preloaded = state.preloaded || new Set();
-  state.active = false;
-  state.previousMusicVolume = null;
+  state.beepInterval = null;
+  state.nextLoopTimer = null;
+  state.ttsWatchdog = null;
+  state.testWorker = null;
+  state.snoozeWorker = null;
   state.wakeLock = state.wakeLock || null;
+  state.previousMusicVolume = null;
 
   function $(id){ return document.getElementById(id); }
-  function toast(msg, icon){ try { if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-bell-ringing'); } catch(e) {} }
-  function vibrate(p){ try { if (typeof window.vibrate === 'function') window.vibrate(p); } catch(e) {} }
-  function status(msg, cls){
+  function safeText(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  function toast(msg, icon){ try { if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-bell-ringing'); } catch(e){} }
+  function vibrate(p){ try { if (typeof window.vibrate === 'function') window.vibrate(p); else if (navigator.vibrate) navigator.vibrate(p); } catch(e){} }
+  function setStatus(msg, cls){
     var el = $('lifeos-alarm-anchor-status');
     if (!el) return;
     el.textContent = msg;
     el.classList.remove('lifeos-anchor-ready','lifeos-anchor-warn','lifeos-anchor-error');
     el.classList.add(cls || 'lifeos-anchor-warn');
   }
-  function safeText(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
-  function phraseForTaskText(text){ return 'Đến giờ rồi. Bạn có nhiệm vụ: ' + (safeText(text) || 'một nhiệm vụ cần làm') + '.'; }
-  function ttsUrl(text, provider){
-    var q = encodeURIComponent(safeText(text).slice(0, 180));
-    return provider === 'responsive' ? (RESPONSIVE_TTS + q) : (GOOGLE_TTS + q);
+  function setCycleLabel(){
+    var el = $('lifeos-alarm-cycle-badge');
+    if (el) el.textContent = state.active ? ('Đang báo vòng ' + state.cycle) : 'Đang báo vòng 0';
   }
   function voiceGuardOn(){ return !!(state.voiceGuardActive || window.ttsActive || window.soundEnabled || window.audioInitialized); }
+  function phraseForTask(text){ return 'Đến giờ rồi. Bạn có nhiệm vụ: ' + (safeText(text) || 'một nhiệm vụ cần làm') + '.'; }
+  function makeGoogleUrl(text){ return GOOGLE_TTS + encodeURIComponent(safeText(text).slice(0, 190)) + '&ttsspeed=1'; }
+  function makeResponsiveUrl(text){ return RESPONSIVE_TTS + encodeURIComponent(safeText(text).slice(0, 190)); }
 
   function ensureAudioContext(){
     try {
@@ -7586,49 +7600,59 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       return window.audioCtx;
     } catch(e) { return null; }
   }
-
-  function ensureTtsAudio(){
-    var a = $('lifeos-tts-audio');
+  function ensureAudioEl(id, src, loop){
+    var a = $(id);
     if (!a) return null;
-    a.preload = 'auto';
-    a.playsInline = true;
+    a.removeAttribute('crossorigin');
     a.setAttribute('playsinline','');
     a.setAttribute('webkit-playsinline','');
-    a.crossOrigin = null;
-    a.volume = 1;
-    a.muted = false;
+    a.preload = 'auto';
+    if (src && (!a.getAttribute('src') || a.getAttribute('src') !== src)) a.src = src;
+    if (loop) a.loop = true;
     return a;
   }
+  function ttsAudio(){ return ensureAudioEl('lifeos-tts-audio', '', false); }
+  function bgAnchor(){ return ensureAudioEl('lifeos-bg-anchor', SILENCE_URL, true); }
+  function sideAnchor(){ return ensureAudioEl('lifeos-anchor-audio', SILENCE_URL, true); }
 
-  function installAudioEvents(){
-    var a = ensureTtsAudio();
-    if (!a || a.__pha12aFix2Events) return;
-    a.__pha12aFix2Events = true;
-    ['loadedmetadata','loadeddata','canplay','canplaythrough','playing','ended','suspend','stalled'].forEach(function(evt){
-      a.addEventListener(evt, function(){
+  function installTtsEvents(){
+    var tts = ttsAudio();
+    if (!tts || tts.__lifeos12cEvents) return;
+    tts.__lifeos12cEvents = true;
+    ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','playing','pause','ended','waiting','stalled','suspend','error'].forEach(function(evt){
+      tts.addEventListener(evt, function(){
         if (evt === 'loadeddata' || evt === 'canplay' || evt === 'canplaythrough') {
           state.ttsReady = true;
-          status('Google TTS đã nạp sẵn.', 'lifeos-anchor-ready');
+          setStatus('Google TTS đã nạp sẵn.', 'lifeos-anchor-ready');
         }
         if (evt === 'playing') {
-          state.ttsUnlocked = true;
-          status('Google TTS đang phát.', 'lifeos-anchor-ready');
+          state.ttsSpeaking = true;
+          state.ttsReady = true;
+          setStatus('Google TTS đang đọc.', 'lifeos-anchor-ready');
+        }
+        if (evt === 'ended') {
+          state.ttsSpeaking = false;
+          clearTimeout(state.ttsWatchdog);
+          if (state.active) scheduleNextTtsLoop(LOOP_RESTART_DELAY_MS);
+        }
+        if (evt === 'pause' && !state.active) state.ttsSpeaking = false;
+        if (evt === 'error') {
+          state.ttsSpeaking = false;
+          state.ttsReady = false;
+          if (state.active && state.ttsProvider === 'google' && state.ttsPhrase) {
+            setStatus('Google TTS lỗi, đổi sang audio dự phòng.', 'lifeos-anchor-warn');
+            loadTtsAudio(state.ttsPhrase, 'responsive', false);
+            scheduleNextTtsLoop(900);
+          } else if (state.active) {
+            setStatus('TTS lỗi, báo thức vẫn beep và sẽ thử lại.', 'lifeos-anchor-error');
+            scheduleNextTtsLoop(4500);
+          }
         }
       });
     });
-    a.addEventListener('error', function(){
-      var src = String(a.currentSrc || a.src || '');
-      state.ttsReady = false;
-      if (src.indexOf('translate.googleapis.com') >= 0 && state.ttsPhrase) {
-        status('Google TTS lỗi, đổi sang audio dự phòng.', 'lifeos-anchor-warn');
-        loadTtsAudio(state.ttsPhrase, 'responsive');
-      } else {
-        status('Audio TTS chưa sẵn sàng, sẽ chỉ beep + modal.', 'lifeos-anchor-error');
-      }
-    });
   }
 
-  function waitAudioReady(audio, ms){
+  function waitReady(audio, ms){
     return new Promise(function(resolve){
       if (!audio) return resolve(false);
       if (audio.readyState >= 2) return resolve(true);
@@ -7648,204 +7672,293 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       audio.addEventListener('canplay', yes, {once:true});
       audio.addEventListener('canplaythrough', yes, {once:true});
       audio.addEventListener('error', no, {once:true});
-      setTimeout(function(){ finish(audio.readyState >= 2); }, ms || 6000);
+      setTimeout(function(){ finish(audio.readyState >= 2); }, ms || 6500);
     });
   }
 
-  function loadTtsAudio(phrase, provider){
-    var a = ensureTtsAudio();
-    if (!a) return false;
-    installAudioEvents();
-    provider = provider || 'google';
+  function loadTtsAudio(phrase, provider, doLoad){
+    var tts = ttsAudio();
+    if (!tts) return false;
+    installTtsEvents();
     phrase = safeText(phrase);
     if (!phrase) return false;
+    provider = provider || 'google';
+    var key = provider + ':' + phrase;
     try {
-      var key = provider + ':' + phrase;
       state.ttsPhrase = phrase;
       state.ttsProvider = provider;
-      state.ttsReady = false;
       state.loadedKey = key;
-      a.pause();
-      a.removeAttribute('crossorigin');
-      a.src = ttsUrl(phrase, provider);
-      a.load();
-      status((provider === 'google' ? 'Đang nạp Google TTS...' : 'Đang nạp TTS dự phòng...'), 'lifeos-anchor-warn');
+      state.ttsReady = false;
+      tts.pause();
+      tts.removeAttribute('crossorigin');
+      tts.preload = 'auto';
+      tts.muted = false;
+      tts.volume = 1;
+      tts.src = provider === 'responsive' ? makeResponsiveUrl(phrase) : makeGoogleUrl(phrase);
+      if (doLoad !== false) tts.load();
+      setStatus(provider === 'google' ? 'Đang nạp Google TTS...' : 'Đang nạp TTS dự phòng...', 'lifeos-anchor-warn');
       return true;
     } catch(e) { return false; }
   }
 
-  async function primeGoogleTTS(){
-    var phrase = 'LifeOS báo thức nền đã sẵn sàng.';
-    var a = ensureTtsAudio();
-    if (!a) return false;
-    installAudioEvents();
+  async function primeTtsMuted(){
+    var tts = ttsAudio();
+    if (!tts || tts.readyState < 2) return false;
     try {
-      loadTtsAudio(phrase, 'google');
-      await waitAudioReady(a, 7000);
-      a.currentTime = 0;
-      a.volume = 1;
-      var p = a.play();
+      tts.muted = true;
+      tts.volume = 0;
+      var p = tts.play();
       if (p && p.then) await p;
-      state.ttsUnlocked = true;
-      status('Google TTS đã mở khóa và sẵn sàng.', 'lifeos-anchor-ready');
+      await new Promise(function(r){ setTimeout(r, 150); });
+      tts.pause();
+      try { tts.currentTime = 0; } catch(e) {}
+      tts.muted = false;
+      tts.volume = 1;
+      state.ttsPrimed = true;
+      setStatus('Google TTS đã prime muted, sẵn sàng chạy nền.', 'lifeos-anchor-ready');
       return true;
     } catch(e) {
-      try {
-        loadTtsAudio(phrase, 'responsive');
-        await waitAudioReady(a, 5000);
-        a.currentTime = 0;
-        var p2 = a.play();
-        if (p2 && p2.then) await p2;
-        state.ttsUnlocked = true;
-        status('TTS dự phòng đã mở khóa.', 'lifeos-anchor-ready');
-        return true;
-      } catch(err) {
-        status('Chưa mở được Google TTS, beep vẫn hoạt động.', 'lifeos-anchor-error');
-        return false;
-      }
+      try { tts.muted = false; tts.volume = 1; } catch(err) {}
+      setStatus('TTS đã nạp, prime muted chưa chắc chắn.', 'lifeos-anchor-warn');
+      return false;
     }
   }
 
-  function preloadTts(phrase, taskId){
-    if (!voiceGuardOn()) return false;
-    phrase = safeText(phrase);
-    if (!phrase) return false;
-    state.currentTaskId = String(taskId || '');
-    return loadTtsAudio(phrase, 'google');
+  async function loadAndPrimeTts(phrase, provider){
+    var tts = ttsAudio();
+    provider = provider || 'google';
+    if (!loadTtsAudio(phrase, provider, true)) return false;
+    var ok = await waitReady(tts, provider === 'google' ? 8000 : 5000);
+    if (!ok && provider === 'google') return loadAndPrimeTts(phrase, 'responsive');
+    if (ok) await primeTtsMuted();
+    return ok;
   }
 
-  function nativeFallback(text){
+  async function startAnchorAudio(){
+    var bg = bgAnchor();
+    var an = sideAnchor();
+    var mstqSilence = $('mstq-silence');
+    var ok = true;
     try {
-      if (typeof window.lifeosSpeak === 'function') return window.lifeosSpeak(text, {force:true});
-      if (typeof window.playSpeechTTS === 'function') return window.playSpeechTTS(text, {force:true});
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        u.lang = 'vi-VN'; u.rate = 1.05; u.pitch = 1; u.volume = 1;
-        window.speechSynthesis.speak(u);
-        return true;
-      }
-    } catch(e) {}
-    return false;
-  }
-
-  async function playTtsNow(phrase){
-    if (!voiceGuardOn()) return false;
-    phrase = safeText(phrase);
-    var a = ensureTtsAudio();
-    if (!a) return nativeFallback(phrase);
-    installAudioEvents();
-    try { ensureAudioContext(); } catch(e) {}
-    try { var anchor = $('lifeos-alarm-anchor'); if (anchor) anchor.play().catch(function(){}); } catch(e) {}
-
-    async function tryPlay(provider, waitMs){
-      if (state.ttsPhrase !== phrase || state.ttsProvider !== provider || !a.src) {
-        loadTtsAudio(phrase, provider);
-      }
-      var okReady = await waitAudioReady(a, waitMs || 2200);
-      if (!okReady) return false;
-      try {
-        a.pause();
-        a.currentTime = 0;
-        a.muted = false;
-        a.volume = 1;
-        var p = a.play();
-        if (p && p.then) await p;
-        state.ttsUnlocked = true;
-        return true;
-      } catch(e) { return false; }
-    }
-
-    if (await tryPlay('google', 2600)) return true;
-    if (await tryPlay('responsive', 2600)) return true;
-    return nativeFallback(phrase);
-  }
-
-  function fireBeep(){
-    var ctx = ensureAudioContext();
-    if (!ctx) return;
+      if (bg) { bg.volume = 0.01; bg.loop = true; await bg.play(); }
+    } catch(e) { ok = false; }
     try {
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(1108.73, ctx.currentTime + 0.10);
-      gain.gain.setValueAtTime(0.9, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + 0.45);
-    } catch(e) {}
-  }
-  function startBeeps(){ stopBeeps(); fireBeep(); state.beepTimer = setInterval(fireBeep, 1000); }
-  function stopBeeps(){ if (state.beepTimer) clearInterval(state.beepTimer); state.beepTimer = null; }
-
-  function duckMusic(){
+      if (an) { an.volume = 0.01; an.loop = true; await an.play(); }
+    } catch(e) { ok = false; }
     try {
-      var music = $('mstq-player');
-      if (music && !music.paused) { state.previousMusicVolume = music.volume; music.volume = Math.max(0.04, (state.previousMusicVolume || 1) * 0.12); }
-      var bg = $('lifeos-alarm-anchor'); if (bg) bg.volume = 0.01;
+      if (mstqSilence) { mstqSilence.volume = 0.001; mstqSilence.loop = true; mstqSilence.play().catch(function(){}); }
     } catch(e) {}
-  }
-  function restoreMusic(){
-    try { var music = $('mstq-player'); if (music && state.previousMusicVolume != null) music.volume = state.previousMusicVolume; } catch(e) {}
-    state.previousMusicVolume = null;
-  }
-  function showAlarmModal(msg){
-    var m = $('lifeos-task-alarm-modal');
-    var p = $('lifeos-task-alarm-message');
-    if (p) p.textContent = msg || 'Đến giờ rồi.';
-    if (m) { m.classList.remove('hidden'); m.style.display = 'flex'; }
-    var old = $('alarm-overlay');
-    if (old) { old.classList.add('hidden'); old.style.display = 'none'; }
-  }
-  function hideAlarmModal(){
-    var m = $('lifeos-task-alarm-modal');
-    if (m) { m.classList.add('hidden'); m.style.display = 'none'; }
+    return ok;
   }
 
   window.activateLifeOSAlarmAnchor = async function(){
-    try { if (typeof oldInitTTS === 'function') oldInitTTS.call(window, {silentToast:true}); } catch(e) {}
-    window.ttsActive = true;
-    window.soundEnabled = true;
-    window.audioInitialized = true;
-    state.voiceGuardActive = true;
-    installAudioEvents();
-    var ok = true;
     try {
+      try { if (typeof oldInitTTS === 'function') oldInitTTS.call(window, {silentToast:true}); } catch(e) {}
+      window.ttsActive = true;
+      window.soundEnabled = true;
+      window.audioInitialized = true;
+      state.voiceGuardActive = true;
+      installTtsEvents();
       var ctx = ensureAudioContext();
       if (ctx && ctx.state === 'suspended') await ctx.resume();
-      var anchor = $('lifeos-alarm-anchor');
-      if (anchor) {
-        anchor.src = anchor.src || ANCHOR_URL;
-        anchor.loop = true; anchor.volume = 0.01; anchor.muted = false;
-        anchor.setAttribute('playsinline',''); anchor.setAttribute('webkit-playsinline','');
-        await anchor.play();
-      }
-      var silence = $('mstq-silence');
-      if (silence) { silence.volume = 0.001; silence.loop = true; silence.play().catch(function(){}); }
+      await startAnchorAudio();
       if ('mediaSession' in navigator) {
         try {
-          navigator.mediaSession.metadata = new MediaMetadata({ title: 'LifeOS Voice Guard', artist: 'Đang canh báo thức nhiệm vụ' });
+          navigator.mediaSession.metadata = new MediaMetadata({ title: 'LifeOS Alarm Anchor', artist: 'Đang canh báo thức nhiệm vụ' });
           navigator.mediaSession.playbackState = 'playing';
         } catch(e) {}
       }
       if ('wakeLock' in navigator) {
         try { state.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
       }
-      startScanWorker();
-      var ttsOk = await primeGoogleTTS();
       state.activated = true;
-      status(ttsOk ? 'Báo thức nền + Google TTS đã sẵn sàng.' : 'Báo thức nền đã bật, TTS sẽ thử lại khi báo.', ttsOk ? 'lifeos-anchor-ready' : 'lifeos-anchor-warn');
-      toast(ttsOk ? 'Báo thức nền đã kích hoạt' : 'Báo thức nền đã bật một phần', ttsOk ? 'ph-broadcast' : 'ph-warning-circle');
+      startScanWorker();
+      await loadAndPrimeTts('LifeOS báo thức nền đã sẵn sàng.', 'google');
+      setStatus('Báo thức nền + mỏ neo âm thanh đã sẵn sàng.', 'lifeos-anchor-ready');
+      toast('Báo thức nền đã kích hoạt', 'ph-broadcast');
       vibrate(20);
       return true;
     } catch(e) {
-      ok = false;
       state.activated = false;
-      status('Chưa kích hoạt được mỏ neo âm thanh.', 'lifeos-anchor-error');
+      setStatus('Chưa kích hoạt được báo thức nền: ' + e.message, 'lifeos-anchor-error');
       toast('Chưa kích hoạt được báo thức nền', 'ph-warning-circle');
       return false;
     }
+  };
+
+  function firePhysicalBeep(){
+    var ctx = ensureAudioContext();
+    if (!ctx) return;
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var high = !state.ttsSpeaking;
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(high ? 880 : 740, ctx.currentTime);
+      osc.frequency.setValueAtTime(high ? 1320 : 880, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(high ? 0.95 : 0.16, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (high ? 0.34 : 0.18));
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + (high ? 0.36 : 0.20));
+    } catch(e) {}
+  }
+  function startPhysicalAlarmLoop(){
+    stopPhysicalAlarmLoop();
+    firePhysicalBeep();
+    state.beepInterval = setInterval(firePhysicalBeep, 850);
+  }
+  function stopPhysicalAlarmLoop(){
+    if (state.beepInterval) clearInterval(state.beepInterval);
+    state.beepInterval = null;
+  }
+
+  function duckMusic(){
+    try {
+      var player = $('mstq-player');
+      if (player && !player.paused) {
+        state.previousMusicVolume = player.volume;
+        player.volume = Math.max(0.04, (state.previousMusicVolume || 1) * 0.10);
+      }
+      var bg = bgAnchor(); var an = sideAnchor();
+      if (bg) bg.volume = 0.01;
+      if (an) an.volume = 0.01;
+    } catch(e) {}
+  }
+  function restoreMusic(){
+    try {
+      var player = $('mstq-player');
+      if (player && state.previousMusicVolume != null) player.volume = state.previousMusicVolume;
+    } catch(e) {}
+    state.previousMusicVolume = null;
+  }
+  function showAlarmModal(text){
+    var m = $('lifeos-task-alarm-modal');
+    var p = $('lifeos-task-alarm-message');
+    if (p) p.textContent = safeText(text) || 'Đến giờ rồi.';
+    if (m) { m.classList.remove('hidden'); m.style.display = 'flex'; }
+    var old = $('alarm-overlay');
+    if (old) { old.classList.add('hidden'); old.style.display = 'none'; }
+    setCycleLabel();
+  }
+  function hideAlarmModal(){
+    var m = $('lifeos-task-alarm-modal');
+    if (m) { m.classList.add('hidden'); m.style.display = 'none'; }
+  }
+
+  function scheduleNextTtsLoop(delay){
+    clearTimeout(state.nextLoopTimer);
+    var token = state.loopToken;
+    state.nextLoopTimer = setTimeout(function(){
+      if (state.active && token === state.loopToken) playGoogleTTSLoop(token);
+    }, delay == null ? LOOP_RESTART_DELAY_MS : delay);
+  }
+
+  async function playGoogleTTSLoop(token){
+    if (!state.active || token !== state.loopToken) return;
+    var tts = ttsAudio();
+    if (!tts) return scheduleNextTtsLoop(5000);
+    state.cycle += 1;
+    setCycleLabel();
+    setStatus('Đang báo vòng ' + state.cycle + ': beep + Google TTS.', 'lifeos-anchor-ready');
+    try { await startAnchorAudio(); } catch(e) {}
+    try { if (ensureAudioContext() && window.audioCtx.state === 'suspended') await window.audioCtx.resume(); } catch(e) {}
+
+    if (!state.ttsPhrase) state.ttsPhrase = phraseForTask('một nhiệm vụ cần làm');
+    var expectedKey = state.ttsProvider + ':' + state.ttsPhrase;
+    if (!state.loadedKey || state.loadedKey !== expectedKey || !tts.src) {
+      loadTtsAudio(state.ttsPhrase, 'google', true);
+    }
+    var ready = await waitReady(tts, 5000);
+    if (!ready && state.ttsProvider !== 'responsive') {
+      loadTtsAudio(state.ttsPhrase, 'responsive', true);
+      ready = await waitReady(tts, 3500);
+    }
+    if (!state.active || token !== state.loopToken) return;
+    if (!ready) {
+      setStatus('TTS chưa sẵn sàng, tiếp tục beep và thử lại.', 'lifeos-anchor-warn');
+      return scheduleNextTtsLoop(5000);
+    }
+    try {
+      tts.muted = false;
+      tts.volume = 1;
+      tts.pause();
+      try { tts.currentTime = 0; } catch(e) {}
+      var p = tts.play();
+      if (p && p.then) await p;
+      clearTimeout(state.ttsWatchdog);
+      state.ttsWatchdog = setTimeout(function(){
+        if (state.active && token === state.loopToken && state.ttsSpeaking) {
+          state.ttsSpeaking = false;
+          scheduleNextTtsLoop(1200);
+        }
+      }, 35000);
+    } catch(e) {
+      state.ttsSpeaking = false;
+      setStatus('Google TTS play lỗi, sẽ thử lại vòng sau.', 'lifeos-anchor-warn');
+      scheduleNextTtsLoop(4500);
+    }
+  }
+
+  function startAlarmLoop(taskIds, taskText){
+    if (state.active || window.isAlarmRinging) return;
+    var ids = Array.isArray(taskIds) ? taskIds : (taskIds == null ? [] : [taskIds]);
+    var raw = safeText(taskText || 'một nhiệm vụ cần làm');
+    var phrase = /^Đến giờ rồi/i.test(raw) ? raw : phraseForTask(raw);
+    window.activeAlarmTaskIds = ids;
+    window.alarmTextToSpeak = phrase;
+    window.isAlarmRinging = true;
+    state.active = true;
+    state.loopToken += 1;
+    state.cycle = 0;
+    state.ttsPhrase = phrase;
+    state.ttsProvider = 'google';
+    showAlarmModal(phrase);
+    toast('Đến giờ làm việc', 'ph-bell-ringing');
+    vibrate([300,150,300]);
+
+    if (!voiceGuardOn() || !state.activated) {
+      setStatus('Voice Guard chưa bật: chỉ hiện modal/toast.', 'lifeos-anchor-warn');
+      return;
+    }
+
+    duckMusic();
+    startPhysicalAlarmLoop();
+    if (!state.loadedKey || state.loadedKey !== ('google:' + phrase)) loadTtsAudio(phrase, 'google', true);
+    setTimeout(function(){ playGoogleTTSLoop(state.loopToken); }, 700);
+  }
+
+  window.triggerGlobalAlarm = function(taskIds, taskText){
+    startAlarmLoop(taskIds, taskText);
+  };
+
+  window.stopGlobalAlarm = function(actionType){
+    clearTimeout(state.nextLoopTimer); state.nextLoopTimer = null;
+    clearTimeout(state.ttsWatchdog); state.ttsWatchdog = null;
+    stopPhysicalAlarmLoop();
+    state.active = false;
+    state.ttsSpeaking = false;
+    state.loopToken += 1;
+    try { var tts = ttsAudio(); if (tts) { tts.pause(); try { tts.currentTime = 0; } catch(e) {} } } catch(e) {}
+    restoreMusic();
+    hideAlarmModal();
+    setCycleLabel();
+    try { startAnchorAudio(); } catch(e) {}
+
+    var result;
+    if (typeof oldStopGlobalAlarm === 'function') result = oldStopGlobalAlarm.apply(this, arguments);
+    else {
+      window.isAlarmRinging = false;
+      if (actionType === 'snooze' && Array.isArray(window.activeAlarmTaskIds)) {
+        window.activeAlarmTaskIds.forEach(function(id){
+          var t = (window.todos || []).find(function(x){ return String(x.id) === String(id); });
+          if (t) { t.alarmTime = Date.now() + 5 * 60000; t.alerted = false; }
+        });
+      }
+      window.activeAlarmTaskIds = [];
+    }
+    if (actionType === 'snooze') toast('Đã nhắc lại sau 5 phút', 'ph-clock-afternoon');
+    else toast('Đã dừng báo thức', 'ph-stop-circle');
+    return result;
   };
 
   function normalizeTime(v){
@@ -7862,7 +7975,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   function taskAlarmTime(t){
     if (!t) return 0;
     var fields = ['alarmTime','dueAt','datetime','dateTime','timestamp','remindAt','scheduledAt','dueTime'];
-    for (var i=0;i<fields.length;i++) { var ms = normalizeTime(t[fields[i]]); if (ms) return ms; }
+    for (var i=0; i<fields.length; i++) { var ms = normalizeTime(t[fields[i]]); if (ms) return ms; }
     if (t.dueDate && t.timeStr) {
       var m = String(t.timeStr).match(/(\d{1,2})\D(\d{1,2})/);
       if (m) {
@@ -7874,39 +7987,6 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   }
   function taskTitle(t){ return safeText((t && (t.text || t.title || t.name || t.content)) || 'nhiệm vụ cần làm'); }
   function taskId(t, i){ return String((t && t.id != null ? t.id : '') || ('idx_' + i)); }
-
-  window.triggerGlobalAlarm = function(taskIds, taskText){
-    if (state.active || window.isAlarmRinging) return;
-    var ids = Array.isArray(taskIds) ? taskIds : (taskIds == null ? [] : [taskIds]);
-    var raw = safeText(taskText || 'một nhiệm vụ cần làm');
-    var phrase = /^Đến giờ rồi/i.test(raw) ? raw : phraseForTaskText(raw);
-    window.activeAlarmTaskIds = ids;
-    window.alarmTextToSpeak = phrase;
-    window.isAlarmRinging = true;
-    state.active = true;
-    showAlarmModal(phrase);
-    toast('Đến giờ nhiệm vụ', 'ph-bell-ringing');
-    vibrate([300,150,300]);
-
-    startBeeps();
-    duckMusic();
-    if (voiceGuardOn()) playTtsNow(phrase);
-    else status('Voice Guard đang tắt: chỉ beep + modal.', 'lifeos-anchor-warn');
-  };
-
-  window.stopGlobalAlarm = function(actionType){
-    stopBeeps();
-    restoreMusic();
-    state.active = false;
-    try { var a = ensureTtsAudio(); if (a) { a.pause(); a.currentTime = 0; } } catch(e) {}
-    hideAlarmModal();
-    var result;
-    if (typeof oldStop === 'function') result = oldStop.apply(this, arguments);
-    else { window.isAlarmRinging = false; window.activeAlarmTaskIds = []; }
-    if (actionType === 'snooze') toast('Sẽ nhắc lại sau 5 phút', 'ph-clock');
-    else if (actionType === 'dismiss') toast('Đã dừng báo thức', 'ph-stop-circle');
-    return result;
-  };
 
   window.checkAlarms = function(){
     var todos = Array.isArray(window.todos) ? window.todos : [];
@@ -7932,11 +8012,11 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       if (!ms) return;
       var id = taskId(t, idx);
       var diff = ms - now;
-      var preloadKey = id + ':' + ms;
-      if (diff > 0 && diff <= PRELOAD_WINDOW_MS && !state.preloaded.has(preloadKey)) {
-        state.preloaded.add(preloadKey);
+      var key = id + ':' + ms;
+      if (diff > 0 && diff <= PRELOAD_WINDOW_MS && !state.preloaded.has(key) && voiceGuardOn() && state.activated) {
+        state.preloaded.add(key);
         try { if (window.preloadedTTS && window.preloadedTTS.add) window.preloadedTTS.add(id); } catch(e) {}
-        preloadTts(phraseForTaskText(taskTitle(t)), id);
+        loadAndPrimeTts(phraseForTask(taskTitle(t)), 'google');
       }
       if (diff <= 0 && !t.alerted && !(window.notifiedTasks && window.notifiedTasks.has(String(id)))) {
         if (window.notifiedTasks && window.notifiedTasks.add) window.notifiedTasks.add(String(id));
@@ -7949,7 +8029,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       try { if (typeof window.saveLocalTodos === 'function') window.saveLocalTodos(); } catch(e) {}
       try { if (typeof window.renderTasksOnly === 'function') window.renderTasksOnly(); } catch(e) {}
     }
-    if (dueIds.length) window.triggerGlobalAlarm(dueIds, dueTexts.join(' + '));
+    if (dueIds.length) startAlarmLoop(dueIds, dueTexts.join(' + '));
   };
 
   function startScanWorker(){
@@ -7957,12 +8037,34 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     try {
       var code = "let timer=null;self.onmessage=function(e){if(e.data==='start'){clearInterval(timer);timer=setInterval(function(){self.postMessage('tick')},1000)}else if(e.data==='stop'){clearInterval(timer);timer=null}}";
       state.worker = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
-      state.worker.onmessage = function(e){ if (e.data === 'tick') { try { window.checkAlarms(); } catch(err) { console.warn('[PHA12A FIX2 checkAlarms]', err); } } };
+      state.worker.onmessage = function(e){ if (e.data === 'tick') { try { window.checkAlarms(); } catch(err) { console.warn('[PHA12C checkAlarms]', err); } } };
       state.worker.postMessage('start');
     } catch(e) {
       if (!state.fallbackTimer) state.fallbackTimer = setInterval(function(){ try { window.checkAlarms(); } catch(err){} }, 1000);
     }
   }
+
+  function startOneShotWorker(seconds, cb){
+    var code = "let left=0,t=null;self.onmessage=function(e){if(e.data.cmd==='start'){left=e.data.sec;clearInterval(t);t=setInterval(function(){left--;self.postMessage({type:'tick',left:left});if(left<=0){clearInterval(t);self.postMessage({type:'fire'});}},1000)}else if(e.data.cmd==='stop'){clearInterval(t)}}";
+    var w = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
+    w.onmessage = function(e){ if (e.data.type === 'fire') { try { w.terminate(); } catch(err){} cb(); } };
+    w.postMessage({cmd:'start', sec: seconds});
+    return w;
+  }
+
+  window.lifeosTestAlarm15s = async function(){
+    if (!state.activated) {
+      var ok = await window.activateLifeOSAlarmAnchor();
+      if (!ok) return;
+    }
+    var text = 'bài test báo thức sau mười lăm giây';
+    var phrase = phraseForTask(text);
+    await loadAndPrimeTts(phrase, 'google');
+    try { if (state.testWorker) state.testWorker.terminate(); } catch(e) {}
+    state.testWorker = startOneShotWorker(15, function(){ startAlarmLoop(['__lifeos_test_15s__'], text); });
+    toast('Đã hẹn test báo thức 15 giây', 'ph-timer');
+    setStatus('Đã hẹn test 15 giây. Hãy tắt màn hình để kiểm tra.', 'lifeos-anchor-ready');
+  };
 
   window.initTTS = function(){
     state.voiceGuardActive = true;
@@ -7972,15 +8074,20 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   };
 
   document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState === 'visible') { try { window.checkAlarms(); } catch(e) {} }
+    if (document.visibilityState === 'visible') {
+      if (state.activated && 'wakeLock' in navigator) {
+        try { if (!state.wakeLock) navigator.wakeLock.request('screen').then(function(w){ state.wakeLock = w; }).catch(function(){}); } catch(e) {}
+      }
+      try { window.checkAlarms(); } catch(e) {}
+    }
   });
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ installAudioEvents(); startScanWorker(); }, {once:true});
-  } else { installAudioEvents(); startScanWorker(); }
+    document.addEventListener('DOMContentLoaded', function(){ installTtsEvents(); }, {once:true});
+  } else { installTtsEvents(); }
 })();
 </script>
-<!-- PHA12A_GOOGLE_TTS_FIX2_END -->
+<!-- PHA12C_ALARM_LOOP_VOICE_ANCHOR_END -->
 
 </body>
 </html>
