@@ -542,12 +542,41 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
             </div>
             <button onclick="window.closeSentinelPanel()" class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
         </div>
-        <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
+        <div class="text-sm text-slate-600 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
             <b>Industrial Grade V65:</b> Hệ thống sử dụng Base64 RAM để báo động xuyên Doze Mode.
         </div>
+
+        <div id="sentinel-live-status" class="mb-5 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2">
+                <div class="font-black text-slate-800 text-sm flex items-center gap-2">
+                    <i class="ph-bold ph-activity text-primary text-lg"></i>
+                    Trạng thái hiện tại
+                </div>
+                <span id="sentinel-status-dot" class="text-[10px] font-black px-2 py-1 rounded-full bg-slate-100 text-slate-500">Đang kiểm tra</span>
+            </div>
+            <div class="p-3 space-y-2">
+                <div id="sentinel-status-alarm-bg" class="sentinel-status-row flex items-center justify-between gap-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <span class="text-xs font-bold text-slate-600 flex items-center gap-2"><i class="ph-bold ph-bell-ringing"></i> Báo thức nền</span>
+                    <span class="sentinel-status-value text-[11px] font-black px-2 py-1 rounded-full bg-slate-200 text-slate-500 whitespace-nowrap">Chưa kích hoạt</span>
+                </div>
+                <div id="sentinel-status-media" class="sentinel-status-row flex items-center justify-between gap-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <span class="text-xs font-bold text-slate-600 flex items-center gap-2"><i class="ph-bold ph-waveform"></i> Media anchor</span>
+                    <span class="sentinel-status-value text-[11px] font-black px-2 py-1 rounded-full bg-slate-200 text-slate-500 whitespace-nowrap">Chưa sẵn sàng</span>
+                </div>
+                <div id="sentinel-status-tts" class="sentinel-status-row flex items-center justify-between gap-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                    <span class="text-xs font-bold text-slate-600 flex items-center gap-2"><i class="ph-bold ph-speaker-high"></i> Giọng AI / TTS</span>
+                    <span class="sentinel-status-value text-[11px] font-black px-2 py-1 rounded-full bg-slate-200 text-slate-500 whitespace-nowrap">Chưa sẵn sàng</span>
+                </div>
+                <div id="sentinel-status-overall" class="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2 text-xs font-black text-amber-700 flex items-center gap-2">
+                    <i class="ph-bold ph-hand-tap"></i>
+                    Cần chạm màn hình để hoàn tất kích hoạt
+                </div>
+            </div>
+        </div>
         <div class="grid grid-cols-2 gap-3 flex-shrink-0">
-            <button onclick="window.triggerGlobalAlarm(null, 'Kiểm tra chuông oscillator vật lý.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
-            <button onclick="window.playSpeechTTS('Hệ thống hoạt động tốt. Xin chào bạn.'); window.showToast('Đang phát...','ph-speaker-high')" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
+            <button onclick="window.primeSentinelEngine?.({manual:true,testAlarm:true})" class="py-3.5 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-sm active:scale-95 border border-emerald-100 flex justify-center items-center gap-2 transition-all hover:bg-emerald-100 min-h-[44px]"><i class="ph-bold ph-shield-check"></i> Kích hoạt nền</button>
+            <button onclick="window.primeSentinelEngine?.({manual:true,testTTS:true})" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95 min-h-[44px]"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
+            <button onclick="window.testLifeOSRealAlarm15s?.()" class="col-span-2 py-3.5 rounded-xl bg-rose-50 text-rose-600 font-black text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100 min-h-[44px]"><i class="ph-bold ph-bell-ringing"></i> Test báo thức 15 giây</button>
         </div>
     </div>
 </div>
@@ -640,7 +669,7 @@ window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||
 window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 window.getTodayStr=()=>window.getIsoDate(); 
 window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
-window.showToast=(m,i='ph-info')=>{ const c=el('toast-container');if(!c)return;const t=document.createElement('div'); t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]'; t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`; c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000); };
+window.showToast=(m,i='ph-info')=>{ try{ window.lifeosSpeakNow?.(String(m||''), {source:'toast'}); }catch(e){} const c=el('toast-container');if(!c)return;const t=document.createElement('div'); t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]'; t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`; c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000); };
 window.syncMusicLayout=()=>{try{const root=document.documentElement;const nav=el('bottom-nav');const player=el('mini-player');const list=el('music-list-container');const navH=(window.innerWidth>=1024)?0:((nav&&getComputedStyle(nav).display!=='none')?Math.ceil(nav.getBoundingClientRect().height):76);if(root)root.style.setProperty('--lifeos-bottom-nav-h',navH+'px');if(player){const wasHidden=getComputedStyle(player).display==='none';if(wasHidden){player.style.display='block';player.style.visibility='hidden';}const ph=Math.ceil(player.getBoundingClientRect().height||82);if(root)root.style.setProperty('--music-player-h',ph+'px');if(wasHidden){player.style.display='none';player.style.visibility='';}}const bottomSpace=(parseInt(getComputedStyle(root).getPropertyValue('--music-player-h'))||82)+navH+42;if(list){list.style.paddingBottom=bottomSpace+'px';list.style.scrollPaddingBottom=bottomSpace+'px';}}catch(e){console.warn('[MUSIC layout]',e)}};
 window.addEventListener('resize',()=>window.syncMusicLayout?.());
 window.addEventListener('orientationchange',()=>setTimeout(()=>window.syncMusicLayout?.(),250));
@@ -857,16 +886,304 @@ window.ensureFirebaseCompat = async function(){
 // ==============================================================================
 window.synth=window.speechSynthesis;window.audioCtx = null; window.audioInitialized = false; window.notifiedTasks = new Set(); window.alarmTTSInterval = null; window.activeAlarmTaskIds = []; window.alarmTextToSpeak = "";
 
-window.unlockAudio=()=>{
-    if(window.audioInitialized) return;
-    window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const a = el('mstq-silence'), b = el('mstq-alarm');
-    if(a) { a.play().catch(()=>{}); } if(b) { b.muted = true; b.play().catch(()=>{}); }
-    window.audioInitialized = true;
+window.sentinelEngineState = window.sentinelEngineState || {
+    alarmReady: localStorage.getItem('lifeos_sentinel_alarm_ready') === '1',
+    mediaReady: false,
+    ttsReady: false,
+    lastPrimeAt: Number(localStorage.getItem('lifeos_sentinel_last_prime_at') || 0),
+    autoToastDone: false
 };
+
+window.getSentinelSnapshot=()=>{
+    const voices = window.synth && window.synth.getVoices ? window.synth.getVoices() : [];
+    const audioState = window.audioCtx ? window.audioCtx.state : 'none';
+    const mediaReady = !!window.audioInitialized && audioState !== 'suspended';
+    const ttsReady = !!window.synth && (!!window.voice || voices.length > 0 || !!window.ttsActive);
+    const alarmReady = !!(window.sentinelEngineState?.alarmReady || localStorage.getItem('lifeos_sentinel_alarm_ready') === '1');
+    return { alarmReady, mediaReady, ttsReady, overallReady: alarmReady && mediaReady && ttsReady, audioState, voiceName: window.voice?.name || (voices[0]?.name || '') };
+};
+
+window.setSentinelRow=(id, ok, okText, badText, warn=false)=>{
+    const row = el(id); if(!row) return;
+    const badge = row.querySelector('.sentinel-status-value'); if(!badge) return;
+    row.className = 'sentinel-status-row flex items-center justify-between gap-3 rounded-xl px-3 py-2 border ' + (ok ? 'bg-emerald-50 border-emerald-100' : (warn ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100'));
+    badge.className = 'sentinel-status-value text-[11px] font-black px-2 py-1 rounded-full whitespace-nowrap ' + (ok ? 'bg-emerald-100 text-emerald-700' : (warn ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'));
+    badge.textContent = ok ? okText : badText;
+};
+
+window.updateSentinelStatus=()=>{
+    const s = window.getSentinelSnapshot ? window.getSentinelSnapshot() : {alarmReady:false,mediaReady:false,ttsReady:false,overallReady:false};
+    window.setSentinelRow?.('sentinel-status-alarm-bg', s.alarmReady, 'Đã kích hoạt', 'Chưa kích hoạt');
+    window.setSentinelRow?.('sentinel-status-media', s.mediaReady, 'Sẵn sàng', 'Chưa sẵn sàng', s.alarmReady);
+    window.setSentinelRow?.('sentinel-status-tts', s.ttsReady, 'Sẵn sàng', 'Chưa sẵn sàng', s.alarmReady);
+    const overall = el('sentinel-status-overall');
+    const dot = el('sentinel-status-dot');
+    if(overall){
+        if(s.overallReady){
+            overall.className='rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2 text-xs font-black text-emerald-700 flex items-center gap-2';
+            overall.innerHTML='<i class="ph-bold ph-check-circle"></i> Hệ thống đã sẵn sàng báo thức';
+        }else{
+            overall.className='rounded-xl bg-amber-50 border border-amber-100 px-3 py-2 text-xs font-black text-amber-700 flex items-center gap-2';
+            overall.innerHTML='<i class="ph-bold ph-hand-tap"></i> Cần chạm màn hình để hoàn tất kích hoạt';
+        }
+    }
+    if(dot){
+        dot.className = 'text-[10px] font-black px-2 py-1 rounded-full ' + (s.overallReady ? 'bg-emerald-100 text-emerald-700' : (s.alarmReady ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'));
+        dot.textContent = s.overallReady ? 'ONLINE' : (s.alarmReady ? 'CHƯA ĐỦ' : 'OFFLINE');
+    }
+    const badge = el('voice-info-badge');
+    if(badge) badge.textContent = s.overallReady ? 'Alarm Ready' : (s.alarmReady ? 'Cần hoàn tất TTS/Audio' : 'Chưa kích hoạt nền');
+    return s;
+};
+
+window.ensureTTSReady=()=>{
+    window.synth = window.synth || window.speechSynthesis;
+    if(!window.synth) return false;
+    window.ttsActive = true;
+    const voices = window.synth.getVoices ? window.synth.getVoices() : [];
+    window.voice = window.voice || voices.find(x=>String(x.lang||'').includes('vi')) || voices[0] || null;
+    window.synth.onvoiceschanged = () => {
+        const v = window.synth.getVoices ? window.synth.getVoices() : [];
+        window.voice = v.find(x=>String(x.lang||'').includes('vi')) || v[0] || window.voice;
+        window.updateSentinelStatus?.();
+    };
+    el('bot-icon')?.classList.add('text-white','speaking-glow');
+    return !!window.synth;
+};
+
+if(typeof window.playSpeechTTS !== 'function'){
+    window.playSpeechTTS = (text) => {
+        if (!window.soundEnabled) return;
+        window.ensureTTSReady?.();
+        if(window.synth){
+            try{
+                window.synth.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                if(window.voice) u.voice = window.voice;
+                u.rate = 1.05; u.pitch = 1.05;
+                window.synth.speak(u);
+            }catch(e){}
+        }
+    };
+}
+
+window.unlockAudio=async()=>{
+    try{
+        if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(window.audioCtx && window.audioCtx.state === 'suspended') await window.audioCtx.resume();
+        const a = el('mstq-silence'), b = el('mstq-alarm');
+        const jobs = [];
+        if(a) { a.muted = true; jobs.push(a.play().catch(()=>{})); }
+        if(b) { b.muted = true; jobs.push(b.play().catch(()=>{})); }
+        await Promise.allSettled(jobs);
+        window.audioInitialized = true;
+        window.sentinelEngineState.alarmReady = true;
+        window.sentinelEngineState.mediaReady = true;
+        window.sentinelEngineState.lastPrimeAt = Date.now();
+        localStorage.setItem('lifeos_sentinel_alarm_ready','1');
+        localStorage.setItem('lifeos_sentinel_last_prime_at', String(window.sentinelEngineState.lastPrimeAt));
+        window.updateSentinelStatus?.();
+        return true;
+    }catch(e){
+        console.warn('[Sentinel unlockAudio fail]', e);
+        window.updateSentinelStatus?.();
+        return false;
+    }
+};
+
+window.initTTS=()=>{
+    window.ensureTTSReady?.();
+    window.unlockAudio?.();
+    window.showToast?.('Voice Guard Ready','ph-robot');
+    window.vibrate?.(20);
+    window.updateSentinelStatus?.();
+};
+
+window.primeSentinelEngine=async(options={})=>{
+    const before = window.getSentinelSnapshot?.() || {};
+    await window.unlockAudio?.();
+    window.ensureTTSReady?.();
+    const s = window.updateSentinelStatus?.() || window.getSentinelSnapshot?.() || {};
+    if(options.testAlarm){
+        try{ window.firePhysicalBeep?.(); }catch(e){}
+        const b = el('mstq-alarm');
+        if(b){ b.muted=false; b.currentTime=0; b.play().catch(()=>{}); setTimeout(()=>{ try{ b.pause(); b.muted=true; }catch(e){} }, 1200); }
+    }
+    if(options.testTTS) window.playSpeechTTS?.('Hệ thống hoạt động tốt. Xin chào bạn.');
+    if(options.manual || !window.sentinelEngineState.autoToastDone){
+        if(s.overallReady) window.showToast?.('Đã kích hoạt báo thức nền','ph-check-circle');
+        else if(!s.ttsReady) window.showToast?.('Giọng AI chưa sẵn sàng, hãy chạm thêm 1 lần','ph-speaker-slash');
+        else window.showToast?.('Chưa sẵn sàng hoàn toàn, hãy chạm thêm 1 lần','ph-hand-tap');
+        if(!options.manual) window.sentinelEngineState.autoToastDone = true;
+    }
+    return s;
+};
+
 window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el('timer-sound-btn');if(b){if(window.soundEnabled){setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-high text-lg"></i>');window.showToast('Âm thanh: BẬT','ph-speaker-high')}else{setHtml('timer-sound-btn','<i class="ph-bold ph-speaker-slash text-lg"></i>');window.showToast('Âm thanh: TẮT','ph-speaker-slash')} window.vibrate(10)}};
-window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
+window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.updateSentinelStatus?.();window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
+
+// ==============================================================================
+// PHA 9: VOICE EVERYWHERE - nói ngay trên mọi thao tác chính
+// ==============================================================================
+window.voiceEverywhereState = window.voiceEverywhereState || {
+    installed: false,
+    lastText: '',
+    lastAt: 0,
+    firstTouchSpoken: false
+};
+
+window.cleanVoiceText=(txt)=>{
+    return String(txt||'')
+        .replace(/\s+/g,' ')
+        .replace(/[🔑💰📝📞🧩🎧🎵🎶👑👵👨👩👦👧🌱✅❌⚠️🕒]/g,'')
+        .trim();
+};
+
+window.pickVietnameseVoice=()=>{
+    window.synth = window.synth || window.speechSynthesis;
+    if(!window.synth || !window.synth.getVoices) return null;
+    const voices = window.synth.getVoices() || [];
+    return window.voice
+        || voices.find(v=>/google/i.test(v.name||'') && /vi/i.test(v.lang||''))
+        || voices.find(v=>/vi/i.test(v.lang||''))
+        || voices.find(v=>/vietnam/i.test((v.name||'')+(v.lang||'')))
+        || voices[0]
+        || null;
+};
+
+window.lifeosSpeakNow=(text, opts={})=>{
+    const msg = window.cleanVoiceText(text);
+    if(!msg || msg.length < 1) return false;
+    try{
+        window.synth = window.synth || window.speechSynthesis;
+        if(!window.synth){
+            try{ window.firePhysicalBeep?.(); }catch(e){}
+            return false;
+        }
+        window.ensureTTSReady?.();
+        const now = Date.now();
+        if(!opts.force && window.voiceEverywhereState.lastText === msg && now - window.voiceEverywhereState.lastAt < 650) return true;
+        window.voiceEverywhereState.lastText = msg;
+        window.voiceEverywhereState.lastAt = now;
+
+        const voice = window.pickVietnameseVoice?.();
+        if(voice) window.voice = voice;
+
+        window.synth.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.lang = 'vi-VN';
+        if(voice) u.voice = voice;
+        u.rate = opts.rate || 1.08;
+        u.pitch = opts.pitch || 1.0;
+        u.volume = opts.volume || 1.0;
+        u.onstart = ()=>{ window.ttsActive = true; window.updateSentinelStatus?.(); };
+        u.onend = ()=>{ window.updateSentinelStatus?.(); };
+        window.synth.speak(u);
+
+        if(window.sentinelEngineState) window.sentinelEngineState.ttsReady = true;
+        window.updateSentinelStatus?.();
+        return true;
+    }catch(e){
+        console.warn('[VoiceEverywhere speak fail]', e);
+        try{ window.firePhysicalBeep?.(); }catch(_){}
+        return false;
+    }
+};
+
+window.getVoiceActionLabel=(node)=>{
+    if(!node) return '';
+    const elx = node.closest ? node.closest('button,a,[role="button"],select,input,textarea,summary,[data-voice-label]') : null;
+    if(!elx) return '';
+
+    const custom = elx.getAttribute('data-voice-label');
+    if(custom) return custom;
+
+    const title = elx.getAttribute('title');
+    const aria = elx.getAttribute('aria-label');
+    const placeholder = elx.getAttribute('placeholder');
+    const text = window.cleanVoiceText(elx.innerText || elx.textContent || '');
+
+    if(elx.matches('select')){
+        const selected = elx.options && elx.selectedIndex >= 0 ? elx.options[elx.selectedIndex].text : '';
+        return selected ? `Đã chọn ${selected}` : 'Đã mở danh sách chọn';
+    }
+
+    if(elx.matches('input,textarea')){
+        const type = (elx.getAttribute('type') || 'text').toLowerCase();
+        if(type === 'datetime-local' || type === 'date') return 'Chọn ngày giờ';
+        if(type === 'password') return 'Nhập mật khẩu';
+        if(type === 'checkbox' || type === 'radio') return text || title || aria || 'Đã chọn';
+        return placeholder ? `Đang nhập ${placeholder}` : 'Đang nhập dữ liệu';
+    }
+
+    const label = text || title || aria;
+    if(!label) return 'Đã chạm nút';
+    if(/thêm mới/i.test(label)) return 'Mở form thêm mới';
+    if(/xóa|xoá/i.test(label)) return `Chuẩn bị ${label}`;
+    if(/làm mới|tải lại/i.test(label)) return 'Đang làm mới dữ liệu';
+    if(/nghe nhạc/i.test(label)) return 'Mở tab nghe nhạc';
+    if(/kho lưu trữ/i.test(label)) return 'Mở kho lưu trữ';
+    if(/tập trung/i.test(label)) return 'Mở tab tập trung';
+    if(/nhiệm vụ/i.test(label)) return 'Mở tab nhiệm vụ';
+    if(/cài app/i.test(label)) return 'Mở hướng dẫn cài ứng dụng';
+    return `Đã bấm ${label}`;
+};
+
+window.installVoiceEverywhere=()=>{
+    if(window.voiceEverywhereState.installed) return;
+    window.voiceEverywhereState.installed = true;
+
+    if(window.synth && window.synth.onvoiceschanged !== undefined){
+        window.synth.onvoiceschanged = ()=>{
+            window.pickVietnameseVoice?.();
+            window.updateSentinelStatus?.();
+        };
+    }
+
+    const interactiveSelector = 'button,a,[role="button"],select,input,textarea,summary,[data-voice-label]';
+
+    document.addEventListener('pointerdown', (ev)=>{
+        window.primeSentinelEngine?.({auto:true});
+        const target = ev.target && ev.target.closest ? ev.target.closest(interactiveSelector) : null;
+        if(!target) return;
+        const label = window.getVoiceActionLabel(target);
+        if(label) window.lifeosSpeakNow(label, {source:'pointerdown'});
+    }, true);
+
+    document.addEventListener('keydown', (ev)=>{
+        if(ev.key !== 'Enter' && ev.key !== ' ') return;
+        const target = ev.target && ev.target.closest ? ev.target.closest(interactiveSelector) : null;
+        if(!target) return;
+        const label = window.getVoiceActionLabel(target);
+        if(label) window.lifeosSpeakNow(label, {source:'keyboard'});
+    }, true);
+
+    document.addEventListener('change', (ev)=>{
+        const target = ev.target && ev.target.closest ? ev.target.closest('select,input[type="checkbox"],input[type="radio"],input[type="datetime-local"],input[type="date"]') : null;
+        if(!target) return;
+        const label = window.getVoiceActionLabel(target);
+        if(label) window.lifeosSpeakNow(label, {source:'change'});
+    }, true);
+
+    document.addEventListener('submit', (ev)=>{
+        const form = ev.target;
+        if(form && form.id === 'form-mobile') window.lifeosSpeakNow('Đang thêm nhiệm vụ từ điện thoại', {source:'submit'});
+        else if(form && form.id === 'task-form') window.lifeosSpeakNow('Đang thêm nhiệm vụ', {source:'submit'});
+        else window.lifeosSpeakNow('Đang gửi thông tin', {source:'submit'});
+    }, true);
+
+    document.addEventListener('pointerdown', ()=>{
+        if(window.voiceEverywhereState.firstTouchSpoken) return;
+        window.voiceEverywhereState.firstTouchSpoken = true;
+        setTimeout(()=>{
+            const s = window.updateSentinelStatus?.();
+            if(s?.overallReady) window.lifeosSpeakNow('Hệ thống giọng nói và báo thức đã sẵn sàng', {force:true});
+            else window.lifeosSpeakNow('Đã kích hoạt giọng nói. Hãy chạm thêm một lần nếu chưa nghe rõ', {force:true});
+        }, 260);
+    }, {once:true, passive:true, capture:true});
+};
+
 
 // ==============================================================================
 // 3. TAB TẬP TRUNG (CLOCK, WEATHER, TIMERS)
@@ -1988,6 +2305,396 @@ window.initDraggableFab = function() {
     });
 };
 
+
+// ==============================================================================
+// PHA 10: REAL TASK ALARM LOOP — beep vật lý liên tục + Google TTS audio lặp
+// ==============================================================================
+window.lifeosRealAlarm = window.lifeosRealAlarm || {
+    running: false,
+    cycle: 0,
+    task: null,
+    worker: null,
+    beepTimer: null,
+    ttsPlaying: false,
+    audioCtx: null,
+    wakeLock: null,
+    schedulerWorker: null,
+    lastScanAt: 0,
+    nextPrimeId: '',
+    donePrefix: 'lifeos_real_alarm_done_',
+    snoozePrefix: 'lifeos_real_alarm_snooze_'
+};
+
+window.lifeosAlarmLog=(msg)=>{
+    try{ console.log('[REAL_ALARM]', new Date().toLocaleTimeString('vi-VN',{hour12:false}), msg); }catch(e){}
+};
+
+window.lifeosGetAlarmEls=()=>({
+    bg: document.getElementById('lifeos-bg-anchor'),
+    anchor: document.getElementById('lifeos-anchor-audio'),
+    tts: document.getElementById('lifeos-tts-audio'),
+    modal: document.getElementById('lifeos-real-alarm-modal'),
+    title: document.getElementById('lifeos-real-alarm-task-title'),
+    status: document.getElementById('lifeos-real-alarm-status')
+});
+
+window.lifeosMakeGoogleTTSUrl=(text)=>{
+    const clean = String(text||'Đến giờ rồi. Bạn có nhiệm vụ.').replace(/\s+/g,' ').trim().slice(0,190);
+    return 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=' + encodeURIComponent(clean) + '&ttsspeed=1';
+};
+
+window.lifeosBuildAlarmSpeech=(task)=>{
+    const title = String(task?.title || task?.name || task?.text || task?.content || task?.summary || 'nhiệm vụ').replace(/\s+/g,' ').trim();
+    return 'Đến giờ rồi. Bạn có nhiệm vụ: ' + title + '.';
+};
+
+window.ensureLifeOSAlarmEngine=async()=>{
+    const state = window.lifeosRealAlarm;
+    const {bg, anchor} = window.lifeosGetAlarmEls();
+    try{
+        if(!state.audioCtx) state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        if(state.audioCtx && state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+
+        const jobs = [];
+        [bg, anchor].forEach(a=>{
+            if(!a) return;
+            if(!a.src) a.src = './silence_30min.mp3';
+            a.loop = true;
+            a.preload = 'auto';
+            a.volume = 0.01;
+            a.muted = false;
+            jobs.push(a.play().catch(err=>window.lifeosAlarmLog('anchor play fail: '+err.message)));
+        });
+        await Promise.allSettled(jobs);
+
+        if('mediaSession' in navigator){
+            try{
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'LifeOS Alarm Anchor',
+                    artist: 'Quản Lý Cuộc Sống',
+                    album: 'Task Reminder'
+                });
+                navigator.mediaSession.playbackState = 'playing';
+            }catch(e){}
+        }
+
+        if('wakeLock' in navigator && !state.wakeLock){
+            try{ state.wakeLock = await navigator.wakeLock.request('screen'); }
+            catch(e){ window.lifeosAlarmLog('WakeLock rejected: '+e.message); }
+        }
+
+        if(window.sentinelEngineState){
+            window.sentinelEngineState.alarmReady = true;
+            window.sentinelEngineState.mediaReady = true;
+        }
+        localStorage.setItem('lifeos_sentinel_alarm_ready','1');
+        window.updateSentinelStatus?.();
+        return true;
+    }catch(e){
+        window.lifeosAlarmLog('ensure engine fail: '+e.message);
+        return false;
+    }
+};
+
+window.lifeosFireOneBeep=(soft=false)=>{
+    const ctx = window.lifeosRealAlarm.audioCtx || window.audioCtx;
+    if(!ctx) return;
+    try{
+        if(ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(soft ? 740 : 980, ctx.currentTime);
+        osc.frequency.setValueAtTime(soft ? 980 : 1480, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(soft ? 0.25 : 0.92, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (soft ? 0.22 : 0.36));
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + (soft ? 0.24 : 0.38));
+    }catch(e){ window.lifeosAlarmLog('beep fail: '+e.message); }
+};
+
+window.startPhysicalAlarmLoop=()=>{
+    const state = window.lifeosRealAlarm;
+    clearInterval(state.beepTimer);
+    window.lifeosFireOneBeep(false);
+    state.beepTimer = setInterval(()=>{
+        if(!state.running) return;
+        window.lifeosFireOneBeep(!!state.ttsPlaying);
+    }, state.ttsPlaying ? 1800 : 650);
+    window.lifeosAlarmLog('physical beep loop started');
+};
+
+window.stopPhysicalAlarmLoop=()=>{
+    clearInterval(window.lifeosRealAlarm.beepTimer);
+    window.lifeosRealAlarm.beepTimer = null;
+};
+
+window.loadLifeOSGoogleTTS=async(text)=>{
+    const {tts} = window.lifeosGetAlarmEls();
+    if(!tts) return false;
+    try{
+        const url = window.lifeosMakeGoogleTTSUrl(text);
+        tts.pause();
+        tts.removeAttribute('src');
+        tts.load();
+        await new Promise(r=>setTimeout(r,60));
+        tts.preload = 'auto';
+        tts.removeAttribute('crossorigin');
+        tts.src = url;
+        tts.volume = 1;
+        tts.muted = false;
+        tts.load();
+        window.lifeosAlarmLog('Google TTS loaded: '+url.slice(0,100)+'...');
+        return true;
+    }catch(e){
+        window.lifeosAlarmLog('load Google TTS fail: '+e.message);
+        return false;
+    }
+};
+
+window.primeNextLifeOSTaskTTS=async(task)=>{
+    if(!task) return;
+    const id = String(task.__alarmId||'');
+    if(!id || window.lifeosRealAlarm.nextPrimeId === id) return;
+    window.lifeosRealAlarm.nextPrimeId = id;
+    await window.loadLifeOSGoogleTTS(window.lifeosBuildAlarmSpeech(task));
+};
+
+window.playGoogleTTSLoop=async()=>{
+    const state = window.lifeosRealAlarm;
+    const {tts, status} = window.lifeosGetAlarmEls();
+    if(!state.running || !tts) return;
+
+    const speech = window.lifeosBuildAlarmSpeech(state.task);
+    await window.loadLifeOSGoogleTTS(speech);
+
+    const playNow = async()=>{
+        if(!state.running) return;
+        try{
+            if(state.audioCtx && state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+            tts.pause();
+            try{ tts.currentTime = 0; }catch(e){}
+            tts.muted = false;
+            tts.volume = 1;
+            state.ttsPlaying = true;
+            if(status) status.textContent = 'Google TTS đang đọc nhiệm vụ. Chuông vẫn giữ nhịp cảnh báo.';
+            window.lifeosAlarmLog('Google TTS play cycle='+state.cycle+' readyState='+tts.readyState);
+            const p = tts.play();
+            if(p && p.then) await p;
+        }catch(e){
+            state.ttsPlaying = false;
+            window.lifeosAlarmLog('Google TTS play fail: '+e.message);
+            if(status) status.textContent = 'TTS chưa phát được, chuông vật lý vẫn tiếp tục cảnh báo.';
+            setTimeout(()=>{ if(state.running) window.playGoogleTTSLoop(); }, 2500);
+        }
+    };
+
+    tts.onplaying = ()=>{ state.ttsPlaying = true; };
+    tts.onended = ()=>{
+        state.ttsPlaying = false;
+        if(!state.running) return;
+        state.cycle++;
+        if(status) status.textContent = 'Hết câu TTS. Chuông tiếp tục và sẽ đọc lại.';
+        setTimeout(()=>{
+            if(!state.running) return;
+            window.lifeosFireOneBeep(false);
+            setTimeout(()=>window.playGoogleTTSLoop(), 900);
+        }, 850);
+    };
+    tts.onerror = ()=>{
+        state.ttsPlaying = false;
+        window.lifeosAlarmLog('Google TTS error; retry soon');
+        setTimeout(()=>{ if(state.running) window.playGoogleTTSLoop(); }, 3000);
+    };
+
+    await playNow();
+};
+
+window.showAlarmModal=(task)=>{
+    const {modal, title, status} = window.lifeosGetAlarmEls();
+    const taskTitle = String(task?.title || task?.name || task?.text || task?.content || task?.summary || 'Nhiệm vụ cần làm').replace(/\s+/g,' ').trim();
+    if(title) title.textContent = taskTitle;
+    if(status) status.textContent = 'Chuông vật lý đang kêu liên tục. Google TTS sẽ đọc lặp lại cho đến khi bạn dừng.';
+    if(modal) showFlex ? showFlex('lifeos-real-alarm-modal') : modal.classList.remove('hidden');
+    try{ window.vibrate?.([220,120,220,120,360]); }catch(e){}
+};
+
+window.markLifeOSAlarmDone=(task)=>{
+    if(!task || !task.__alarmId) return;
+    localStorage.setItem(window.lifeosRealAlarm.donePrefix + task.__alarmId, String(Date.now()));
+};
+
+window.startLifeOSRealAlarm=async(task)=>{
+    if(!task) return;
+    const state = window.lifeosRealAlarm;
+    if(state.running) return;
+    await window.ensureLifeOSAlarmEngine();
+    state.running = true;
+    state.cycle = 1;
+    state.task = task;
+    window.showAlarmModal(task);
+    window.startPhysicalAlarmLoop();
+    setTimeout(()=>window.playGoogleTTSLoop(), 500);
+    window.showToast?.('Đến giờ làm việc. Báo thức đã kích hoạt.','ph-bell-ringing');
+};
+
+window.stopLifeOSRealAlarm=()=>{
+    const state = window.lifeosRealAlarm;
+    state.running = false;
+    window.stopPhysicalAlarmLoop();
+    const {tts, bg, anchor, modal} = window.lifeosGetAlarmEls();
+    try{ if(tts){ tts.pause(); tts.currentTime = 0; tts.onended = null; tts.onerror = null; } }catch(e){}
+    try{ if(bg){ bg.volume = 0.01; bg.play().catch(()=>{}); } if(anchor){ anchor.volume = 0.01; anchor.play().catch(()=>{}); } }catch(e){}
+    window.markLifeOSAlarmDone(state.task);
+    state.task = null;
+    state.ttsPlaying = false;
+    if(modal) modal.classList.add('hidden');
+    window.showToast?.('Đã dừng báo thức','ph-stop-circle');
+};
+
+window.snoozeLifeOSRealAlarm=(minutes=5)=>{
+    const state = window.lifeosRealAlarm;
+    const task = state.task;
+    state.running = false;
+    window.stopPhysicalAlarmLoop();
+    const {tts, modal} = window.lifeosGetAlarmEls();
+    try{ if(tts){ tts.pause(); tts.currentTime = 0; tts.onended = null; tts.onerror = null; } }catch(e){}
+    if(task && task.__alarmId){
+        localStorage.setItem(state.snoozePrefix + task.__alarmId, String(Date.now() + minutes*60000));
+    }
+    state.task = null;
+    state.ttsPlaying = false;
+    if(modal) modal.classList.add('hidden');
+    window.showToast?.('Đã nhắc lại sau '+minutes+' phút','ph-clock-countdown');
+};
+
+window.testLifeOSRealAlarm15s=async()=>{
+    await window.ensureLifeOSAlarmEngine();
+    window.showToast?.('Test báo thức sau 15 giây','ph-timer');
+    setTimeout(()=>{
+        window.startLifeOSRealAlarm({
+            id:'lifeos-test-alarm',
+            title:'Test báo thức 15 giây',
+            __alarmId:'test_alarm_' + Date.now(),
+            __dueMs:Date.now()
+        });
+    },15000);
+};
+
+window.lifeosParseDateLike=(v)=>{
+    if(v === null || v === undefined || v === '') return 0;
+    if(typeof v === 'number'){
+        if(v > 1000000000000) return v;
+        if(v > 1000000000) return v * 1000;
+        return 0;
+    }
+    if(typeof v === 'string'){
+        const s = v.trim();
+        if(!s) return 0;
+        if(/^\d{13}$/.test(s)) return Number(s);
+        if(/^\d{10}$/.test(s)) return Number(s)*1000;
+        const t = Date.parse(s);
+        return Number.isFinite(t) ? t : 0;
+    }
+    return 0;
+};
+
+window.lifeosExtractTasksFromAny=(data, out=[])=>{
+    if(!data) return out;
+    if(Array.isArray(data)){ data.forEach(x=>window.lifeosExtractTasksFromAny(x,out)); return out; }
+    if(typeof data !== 'object') return out;
+
+    const looksTask = ('title' in data) || ('text' in data) || ('content' in data) || ('name' in data);
+    if(looksTask) out.push(data);
+
+    ['tasks','items','todos','data','list'].forEach(k=>{
+        if(data[k]) window.lifeosExtractTasksFromAny(data[k], out);
+    });
+    return out;
+};
+
+window.lifeosTaskDone=(task)=>{
+    return !!(task.done || task.completed || task.checked || task.isDone || task.status === 'done' || task.status === 'completed');
+};
+
+window.lifeosTaskDueMs=(task)=>{
+    const keys = ['dueAt','datetime','timestamp','alarmAt','remindAt','scheduleAt','scheduledAt','timeAt','startAt','dateTime'];
+    for(const k of keys){
+        const t = window.lifeosParseDateLike(task?.[k]);
+        if(t) return t;
+    }
+    if(task?.date && task?.time){
+        const t = window.lifeosParseDateLike(String(task.date).slice(0,10)+'T'+String(task.time).slice(0,5));
+        if(t) return t;
+    }
+    return 0;
+};
+
+window.lifeosGetProfileTaskKeys=()=>{
+    const keys = [];
+    const u = window.viewingUser || window.currentUser || localStorage.getItem('lifeos_v8_session') || 'live';
+    ['lifeos_v8_data_'+u, 'lifeos_v8_tasks_'+u, 'tasks_'+u].forEach(k=>keys.push(k));
+    for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && /^lifeos_v8_data_|^lifeos_v8_tasks_/.test(k) && !keys.includes(k)) keys.push(k);
+    }
+    return keys;
+};
+
+window.lifeosFindDueTasks=()=>{
+    const now = Date.now();
+    const due = [];
+    for(const key of window.lifeosGetProfileTaskKeys()){
+        let raw = null, data = null;
+        try{ raw = localStorage.getItem(key); if(!raw) continue; data = JSON.parse(raw); }catch(e){ continue; }
+        const tasks = window.lifeosExtractTasksFromAny(data, []);
+        tasks.forEach((task, idx)=>{
+            if(window.lifeosTaskDone(task)) return;
+            let dueMs = window.lifeosTaskDueMs(task);
+            const rawId = String(task.id || task.uid || task.key || task.title || task.text || task.content || ('idx_'+idx));
+            const alarmIdBase = key + '_' + rawId + '_' + dueMs;
+            const alarmId = alarmIdBase.replace(/[^\w-]+/g,'_').slice(0,160);
+            const snooze = Number(localStorage.getItem(window.lifeosRealAlarm.snoozePrefix + alarmId) || 0);
+            if(snooze && snooze > now) dueMs = snooze;
+            if(!dueMs) return;
+            if(localStorage.getItem(window.lifeosRealAlarm.donePrefix + alarmId)) return;
+            if(dueMs <= now && dueMs > now - 86400000){
+                due.push({...task, __dueMs:dueMs, __alarmId:alarmId, __sourceKey:key});
+            }else if(dueMs > now && dueMs - now < 10*60000){
+                window.primeNextLifeOSTaskTTS?.({...task, __dueMs:dueMs, __alarmId:alarmId});
+            }
+        });
+    }
+    return due.sort((a,b)=>(a.__dueMs||0)-(b.__dueMs||0));
+};
+
+window.lifeosCheckDueTasks=()=>{
+    if(window.lifeosRealAlarm.running) return;
+    const due = window.lifeosFindDueTasks?.() || [];
+    if(due.length) window.startLifeOSRealAlarm(due[0]);
+};
+
+window.initLifeOSRealAlarmLoop=()=>{
+    if(window.lifeosRealAlarm.schedulerWorker) return;
+    window.ensureLifeOSAlarmEngine?.();
+    const code = "let stopped=false;function tick(){if(stopped)return;self.postMessage({type:'check',t:Date.now()});setTimeout(tick,10000)}self.onmessage=e=>{if(e.data&&e.data.cmd==='stop')stopped=true;if(e.data&&e.data.cmd==='start'){stopped=false;tick();}}";
+    try{
+        window.lifeosRealAlarm.schedulerWorker = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
+        window.lifeosRealAlarm.schedulerWorker.onmessage = (e)=>{ if(e.data?.type==='check') window.lifeosCheckDueTasks?.(); };
+        window.lifeosRealAlarm.schedulerWorker.postMessage({cmd:'start'});
+    }catch(e){
+        window.lifeosAlarmLog('Worker scheduler fallback interval: '+e.message);
+        setInterval(()=>window.lifeosCheckDueTasks?.(), 10000);
+    }
+    document.addEventListener('visibilitychange', ()=>{
+        if(document.visibilityState === 'visible') window.ensureLifeOSAlarmEngine?.();
+    });
+    setTimeout(()=>window.lifeosCheckDueTasks?.(), 2500);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ép cứng đường dẫn SW tuyệt đối để tránh lỗi 404 trên GitHub Pages
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/tool/sw_qlycuocsong.js').catch(()=>{});
@@ -2004,7 +2711,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.visibilityState === 'visible' && window.cloudSyncCompleted) { window.renderTasksOnly(); if (window.VaultUI) window.VaultUI.renderVaultCards(); }
     });
     
-    document.body.addEventListener('click', window.unlockAudio, {once:true});
+    document.body.addEventListener('pointerdown', () => window.primeSentinelEngine?.({auto:true}), {once:true, passive:true});
+    document.body.addEventListener('click', () => window.primeSentinelEngine?.({auto:true}), {once:true});
+    setTimeout(()=>{ window.updateSentinelStatus?.(); window.installVoiceEverywhere?.(); window.initLifeOSRealAlarmLoop?.(); }, 300);
 
     el('form-pc')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-pc'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-pc')); i.value=''; setVal('dt-pc',''); });
     el('form-mobile')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-mobile'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-mb')); i.value=''; setVal('dt-mb',''); });
@@ -2030,5 +2739,42 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadUserData();
 });
 </script>
+
+<!-- PHA 10 REAL ALARM LOOP AUDIO ANCHORS -->
+<audio id="lifeos-bg-anchor" playsinline preload="auto" loop src="./silence_30min.mp3" style="display:none"></audio>
+<audio id="lifeos-anchor-audio" playsinline preload="auto" loop src="./silence_30min.mp3" style="display:none"></audio>
+<audio id="lifeos-tts-audio" playsinline preload="auto" style="display:none"></audio>
+<!-- /PHA 10 REAL ALARM LOOP AUDIO ANCHORS -->
+
+
+<!-- PHA 10 REAL ALARM LOOP MODAL -->
+<div id="lifeos-real-alarm-modal" class="hidden fixed inset-0 z-[9999999] bg-slate-950/80 backdrop-blur-sm items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-[2rem] shadow-2xl border border-rose-100 overflow-hidden animate-fadeIn">
+        <div class="bg-rose-50 border-b border-rose-100 p-5 text-center">
+            <div class="mx-auto w-16 h-16 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg mb-3">
+                <i class="ph-fill ph-bell-ringing text-4xl animate-pulse"></i>
+            </div>
+            <h2 class="text-2xl font-black text-rose-600">Đến giờ làm việc</h2>
+            <p class="text-xs font-bold text-rose-400 mt-1">Báo thức sẽ lặp cho đến khi bạn dừng</p>
+        </div>
+        <div class="p-5">
+            <div class="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Nhiệm vụ</div>
+            <div id="lifeos-real-alarm-task-title" class="text-lg font-black text-slate-800 leading-snug bg-slate-50 border border-slate-200 rounded-2xl p-4 min-h-[72px]">Đến giờ rồi</div>
+            <div id="lifeos-real-alarm-status" class="mt-3 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                Chuông vật lý đang kêu, Google TTS sẽ đọc lặp lại.
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-5">
+                <button onclick="window.stopLifeOSRealAlarm?.()" class="min-h-[48px] rounded-2xl bg-rose-500 text-white font-black shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-stop-circle text-xl"></i> Dừng báo thức
+                </button>
+                <button onclick="window.snoozeLifeOSRealAlarm?.(5)" class="min-h-[48px] rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 font-black active:scale-95 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-clock-countdown text-xl"></i> Nhắc lại 5 phút
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /PHA 10 REAL ALARM LOOP MODAL -->
+
 </body>
 </html>
