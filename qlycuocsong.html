@@ -195,6 +195,674 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
     #music-list-container{padding-bottom:142px!important;}
 }
 </style>
+
+<style id="lifeos-pha11-mobile-scroll-fix">
+@media (max-width: 1023px) {
+  html, body {
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+  main, .view-section, .custom-scroll-area, #view-tasks, #view-focus, #view-vault, #view-music {
+    overscroll-behavior-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+  button, a, input, textarea, select, summary, [role="button"] { touch-action: manipulation; }
+  .install-fab, .install-fab * { touch-action: none !important; }
+  #lifeos-real-alarm-modal { touch-action: pan-y !important; }
+}
+</style>
+
+
+<style id="lifeos-pha14-pc-layout-css">
+/* PHA 14: PC-first layout — sticky tabbar + dashboard 3 cột. Mobile không bị ảnh hưởng. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-layout-ready {
+    overflow-y: auto !important;
+  }
+
+  #pc-smart-tabbar {
+    position: sticky;
+    top: var(--pc-header-offset, 86px);
+    z-index: 80;
+    width: min(1280px, calc(100vw - 40px));
+    margin: 14px auto 18px;
+    padding: 8px;
+    border-radius: 999px;
+    background: rgba(255, 247, 237, 0.92);
+    border: 1px solid rgba(251, 146, 60, 0.22);
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  #pc-smart-tabbar .pc-tabbar-inner {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    align-items: center;
+  }
+
+  #pc-smart-tabbar button {
+    min-height: 44px;
+    border-radius: 999px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 13px;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+
+  #pc-smart-tabbar button:hover {
+    background: rgba(255,255,255,.72);
+    color: #f97316;
+  }
+
+  #pc-smart-tabbar button.active {
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    color: white;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, .24);
+    border-color: rgba(255,255,255,.48);
+  }
+
+  #pc-smart-tabbar button.active i {
+    color: white;
+  }
+
+  #pc-smart-stage {
+    width: min(1320px, calc(100vw - 36px));
+    margin: 0 auto 90px;
+  }
+
+  #pc-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr) minmax(0, 0.92fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  #pc-overview-grid .pc-column {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  #pc-overview-grid .pc-column-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fb923c;
+    padding: 0 6px;
+    margin-bottom: -4px;
+  }
+
+  #pc-full-stage {
+    min-width: 0;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid [id^="view-"],
+  body.lifeos-pc-single-active #pc-full-stage [id^="view-"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-tasks,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-focus,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-vault,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-music {
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-single-active #pc-full-stage #view-tasks,
+  body.lifeos-pc-single-active #pc-full-stage #view-focus,
+  body.lifeos-pc-single-active #pc-full-stage #view-vault,
+  body.lifeos-pc-single-active #pc-full-stage #view-music {
+    margin: 0 auto !important;
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-single-active[data-pc-tab="focus"] #pc-full-stage #view-focus {
+    max-width: 980px !important;
+  }
+
+  body.lifeos-pc-single-active[data-pc-tab="music"] #pc-full-stage #view-music {
+    max-width: 1120px !important;
+  }
+
+  body.lifeos-pc-single-active[data-pc-tab="vault"] #pc-full-stage #view-vault {
+    max-width: 1200px !important;
+  }
+
+  body.lifeos-pc-single-active[data-pc-tab="tasks"] #pc-full-stage #view-tasks {
+    max-width: 1120px !important;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-vault,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-music {
+    max-height: 46vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-tasks {
+    max-height: calc(100vh - var(--pc-header-offset, 86px) - 132px);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-focus {
+    max-height: calc(100vh - var(--pc-header-offset, 86px) - 132px);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-vault::-webkit-scrollbar,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-music::-webkit-scrollbar,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-tasks::-webkit-scrollbar,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-focus::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid #view-vault::-webkit-scrollbar-thumb,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-music::-webkit-scrollbar-thumb,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-tasks::-webkit-scrollbar-thumb,
+  body.lifeos-pc-overview-active #pc-overview-grid #view-focus::-webkit-scrollbar-thumb {
+    background: rgba(251, 146, 60, .22);
+    border-radius: 999px;
+  }
+
+  body.lifeos-pc-layout-ready .bottom-nav,
+  body.lifeos-pc-layout-ready #mobile-nav,
+  body.lifeos-pc-layout-ready nav.lg\:hidden {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha14-1-pc-tab-isolation-css">
+/* PHA 14.1: Chống lẫn module khi bấm tab PC.
+   Lý do: #pc-overview-grid {display:grid} có specificity cao hơn .hidden,
+   nên phải có lớp cưỡng bức display none/block bằng !important. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-single-active #pc-overview-grid,
+  #pc-overview-grid.pc-force-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.lifeos-pc-overview-active #pc-full-stage,
+  #pc-full-stage.pc-force-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.lifeos-pc-single-active #pc-full-stage {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.lifeos-pc-overview-active #pc-overview-grid {
+    display: grid !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  #pc-parking-lot {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.lifeos-pc-single-active #pc-full-stage > [id^="view-"] {
+    display: block !important;
+    width: 100% !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha14-2-pc-hard-tabs-css">
+/* PHA 14.2: PC hard tab isolation.
+   Không dựa vào .hidden vì CSS cũ có display:grid !important.
+   Khi PC hard layout bật, chỉ một vùng được hiển thị thật. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-hard-layout #pc-smart-tabbar,
+  body.lifeos-pc-hard-layout #pc-smart-stage {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  #pc-hard-tabbar {
+    position: sticky;
+    top: var(--pc-header-offset, 86px);
+    z-index: 90;
+    width: min(1280px, calc(100vw - 40px));
+    margin: 14px auto 18px;
+    padding: 8px;
+    border-radius: 999px;
+    background: rgba(255, 247, 237, 0.94);
+    border: 1px solid rgba(251, 146, 60, 0.24);
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  #pc-hard-tabbar .pc-hard-tabbar-inner {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    align-items: center;
+  }
+
+  #pc-hard-tabbar button {
+    min-height: 44px;
+    border-radius: 999px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 13px;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+
+  #pc-hard-tabbar button:hover {
+    background: rgba(255,255,255,.74);
+    color: #f97316;
+  }
+
+  #pc-hard-tabbar button.active {
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    color: white;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, .24);
+    border-color: rgba(255,255,255,.5);
+  }
+
+  #pc-hard-stage {
+    width: min(1320px, calc(100vw - 36px));
+    margin: 0 auto 90px;
+  }
+
+  #pc-hard-overview {
+    display: grid;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.18fr) minmax(0, .92fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  #pc-hard-overview .pc-hard-column {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  #pc-hard-overview .pc-hard-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fb923c;
+    padding: 0 6px;
+    margin-bottom: -4px;
+  }
+
+  #pc-hard-full {
+    min-width: 0;
+  }
+
+  #pc-hard-parking {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full > [id^="view-"] {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    position: relative !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="focus"] #pc-hard-full > #view-focus {
+    max-width: 980px !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="music"] #pc-hard-full > #view-music {
+    max-width: 1120px !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="vault"] #pc-hard-full > #view-vault {
+    max-width: 1200px !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="tasks"] #pc-hard-full > #view-tasks {
+    max-width: 1120px !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview #view-tasks,
+  body.lifeos-pc-hard-layout #pc-hard-overview #view-focus {
+    max-height: calc(100vh - var(--pc-header-offset, 86px) - 132px);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview #view-vault,
+  body.lifeos-pc-hard-layout #pc-hard-overview #view-music {
+    max-height: 46vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.lifeos-pc-hard-layout .bottom-nav,
+  body.lifeos-pc-hard-layout #mobile-nav,
+  body.lifeos-pc-hard-layout nav.lg\:hidden {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #pc-hard-tabbar,
+  #pc-hard-stage {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha14-3-pc-full-width-fix">
+/* PHA 14.3: PC full-width stage.
+   Giữ thanh tab nổi gọn ở giữa, nhưng nội dung từng tab bung rộng gần full màn hình. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-hard-layout #pc-hard-stage {
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-tasks,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-focus,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-vault,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-music {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="tasks"] #pc-hard-full,
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="focus"] #pc-hard-full,
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="vault"] #pc-hard-full,
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="music"] #pc-hard-full {
+    display: block !important;
+    min-width: 0 !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="overview"] #pc-hard-stage {
+    width: calc(100vw - 24px) !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-tabbar {
+    width: min(1280px, calc(100vw - 40px)) !important;
+    max-width: 1280px !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha14-4-pc-stage-center-full-width">
+/* PHA 14.4: PC sân khấu full-width nhưng căn giữa viewport.
+   Giữ tabbar nổi gọn ở giữa. Chỉ bung rộng phần nội dung #pc-hard-stage.
+   Chỉ áp dụng PC, không ảnh hưởng mobile. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-hard-layout #pc-hard-stage {
+    position: relative !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 90px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview,
+  body.lifeos-pc-hard-layout #pc-hard-full {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview {
+    grid-template-columns: minmax(0, 30fr) minmax(0, 40fr) minmax(0, 30fr) !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview .pc-hard-column {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-tasks,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-focus,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-vault,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-music {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-tasks > :first-child,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-focus > :first-child,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-vault > :first-child,
+  body.lifeos-pc-hard-layout #pc-hard-full > #view-music > :first-child {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="tasks"] #pc-hard-full > #view-tasks [class*="max-w-"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="focus"] #pc-hard-full > #view-focus [class*="max-w-"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="vault"] #pc-hard-full > #view-vault [class*="max-w-"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="music"] #pc-hard-full > #view-music [class*="max-w-"] {
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="tasks"] #pc-hard-full > #view-tasks [class*="mx-auto"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="focus"] #pc-hard-full > #view-focus [class*="mx-auto"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="vault"] #pc-hard-full > #view-vault [class*="mx-auto"],
+  body.lifeos-pc-hard-layout[data-pc-hard-tab="music"] #pc-hard-full > #view-music [class*="mx-auto"] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-tabbar {
+    position: sticky !important;
+    left: auto !important;
+    transform: none !important;
+    width: min(1280px, calc(100vw - 40px)) !important;
+    max-width: 1280px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #lifeos-pha14-4-pc-stage-center-full-width {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha14-5-pc-fullbleed-stage-final">
+/* PHA 14.5: PC full-bleed stage final.
+   Nguyên nhân video: stage vẫn chịu constraint của parent/wrapper nên nhìn dạt trái / bó ngang.
+   Cách xử lý: hard stage bung theo viewport bằng full-bleed margin + JS promote stage ra body.
+   Chỉ áp dụng PC, tuyệt đối không ảnh hưởng mobile. */
+@media (min-width: 1024px) {
+  body.lifeos-pc-hard-layout #pc-hard-stage {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+
+    margin-left: calc(50% - 50vw + 12px) !important;
+    margin-right: calc(50% - 50vw + 12px) !important;
+    margin-top: 0 !important;
+    margin-bottom: 90px !important;
+
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout > #pc-hard-stage {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    grid-template-columns: minmax(0, 30fr) minmax(0, 40fr) minmax(0, 30fr) !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-overview .pc-hard-column {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-full {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > #view-tasks,
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > #view-focus,
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > #view-vault,
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > #view-music {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > [id^="view-"] > *,
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full > [id^="view-"] > * > * {
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full [class*="max-w-"] {
+    max-width: none !important;
+  }
+
+  body.lifeos-pc-hard-layout:not([data-pc-hard-tab="overview"]) #pc-hard-full [class*="mx-auto"] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.lifeos-pc-hard-layout #pc-hard-tabbar,
+  body.lifeos-pc-hard-layout > #pc-hard-tabbar {
+    position: sticky !important;
+    top: var(--pc-header-offset, 86px) !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    width: min(1280px, calc(100vw - 40px)) !important;
+    max-width: 1280px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    z-index: 90 !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #lifeos-pha14-5-pc-fullbleed-stage-final {
+    display: none !important;
+  }
+}
+</style>
+
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
@@ -2518,7 +3186,7 @@ window.showAlarmModal=(task)=>{
     const taskTitle = String(task?.title || task?.name || task?.text || task?.content || task?.summary || 'Nhiệm vụ cần làm').replace(/\s+/g,' ').trim();
     if(title) title.textContent = taskTitle;
     if(status) status.textContent = 'Chuông vật lý đang kêu liên tục. Google TTS sẽ đọc lặp lại cho đến khi bạn dừng.';
-    if(modal) showFlex ? showFlex('lifeos-real-alarm-modal') : modal.classList.remove('hidden');
+    if(modal){ modal.style.display='flex'; modal.classList.remove('hidden'); modal.classList.add('flex'); }
     try{ window.vibrate?.([220,120,220,120,360]); }catch(e){}
 };
 
@@ -2551,7 +3219,7 @@ window.stopLifeOSRealAlarm=()=>{
     window.markLifeOSAlarmDone(state.task);
     state.task = null;
     state.ttsPlaying = false;
-    if(modal) modal.classList.add('hidden');
+    if(modal){ modal.classList.add('hidden'); modal.classList.remove('flex'); modal.style.display='none'; }
     window.showToast?.('Đã dừng báo thức','ph-stop-circle');
 };
 
@@ -2567,7 +3235,7 @@ window.snoozeLifeOSRealAlarm=(minutes=5)=>{
     }
     state.task = null;
     state.ttsPlaying = false;
-    if(modal) modal.classList.add('hidden');
+    if(modal){ modal.classList.add('hidden'); modal.classList.remove('flex'); modal.style.display='none'; }
     window.showToast?.('Đã nhắc lại sau '+minutes+' phút','ph-clock-countdown');
 };
 
@@ -2695,6 +3363,1078 @@ window.initLifeOSRealAlarmLoop=()=>{
     setTimeout(()=>window.lifeosCheckDueTasks?.(), 2500);
 };
 
+
+// ==============================================================================
+// PHA 11: FIX Task Submit + Mic nhập giọng nói trực tiếp + modal alarm close
+// ==============================================================================
+window.lifeosDirectTaskSubmit=(v, dateVal)=>{
+    if(!v) return false;
+    try{ window.unlockAudio?.(); }catch(e){}
+    const parsed = (typeof window.parseTaskNLP === 'function')
+        ? window.parseTaskNLP(v)
+        : { text: String(v||'').trim(), priority:'normal', tags:[], alarmTime:null, timeStr:'', isDaily:false, dueDate:null };
+
+    if(dateVal){
+        const d = new Date(dateVal);
+        if(!Number.isNaN(d.getTime())){
+            parsed.dueDate = (typeof window.getIsoDate === 'function') ? window.getIsoDate(d) : d.toISOString().slice(0,10);
+            parsed.alarmTime = d.getTime();
+            parsed.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+    }
+
+    const cleanText = String(parsed.text || v || '').replace(/\s+/g,' ').trim();
+    if(!cleanText) return false;
+
+    const newId = String(Date.now()) + Math.floor(Math.random()*1000).toString();
+    const task = {
+        id: newId,
+        text: cleanText.charAt(0).toUpperCase() + cleanText.slice(1),
+        completed: false,
+        priority: parsed.priority || 'normal',
+        tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+        alarmTime: parsed.alarmTime || null,
+        timeStr: parsed.timeStr || '',
+        isDaily: !!parsed.isDaily,
+        dueDate: parsed.dueDate || null,
+        alerted: false,
+        createdAt: Date.now(),
+        alarmEnabled: true
+    };
+
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    window.todos.unshift(task);
+
+    try{ window.saveLocalTodos?.(); }catch(e){ console.error('[PHA12] saveLocalTodos failed', e); }
+    try{ window.renderTasksOnly?.(); }catch(e){ console.error('[PHA12] renderTasksOnly failed', e); }
+    try{
+        if(window.FirebaseSync?.pushAll) window.FirebaseSync.pushAll({reason:'task-add-pha12'});
+    }catch(e){
+        try{ window.FirebaseSync?.pushAll?.(); }catch(_e){}
+    }
+
+    try{ window.vibrate?.(15); }catch(e){}
+    try{
+        if(parsed.alarmTime && parsed.alarmTime <= Date.now()){
+            if(typeof window.startLifeOSRealAlarm === 'function') window.startLifeOSRealAlarm({...task, title:task.text, __alarmId:'manual_'+newId, __dueMs:parsed.alarmTime});
+            else window.triggerGlobalAlarm?.(newId, task.text);
+        }else if(parsed.timeStr){
+            window.showToast?.(`Đã hẹn lúc ${parsed.timeStr}`, 'ph-speaker-high');
+            window.lifeosSpeakNow?.(`Đã thêm nhiệm vụ và hẹn lúc ${parsed.timeStr}`, {force:true});
+        }else{
+            window.showToast?.('Đã thêm nhiệm vụ', 'ph-check-circle');
+            window.lifeosSpeakNow?.('Đã thêm nhiệm vụ', {force:true});
+        }
+    }catch(e){ console.warn('[PHA12] post-submit notify failed', e); }
+
+    setTimeout(()=>{ try{ window.lifeosCheckDueTasks?.(); }catch(e){} }, 120);
+    return true;
+};
+
+window.lifeosSubmitTaskFromInput=(inputId, dtId)=>{
+    const input = el(inputId);
+    if(!input) { window.showToast?.('Không tìm thấy ô nhập nhiệm vụ','ph-warning-circle'); return false; }
+    const text = String(input.value || '').trim();
+    if(!text){
+        input.focus();
+        window.showToast?.('Bạn chưa nhập nội dung nhiệm vụ','ph-pencil');
+        window.lifeosSpeakNow?.('Bạn chưa nhập nội dung nhiệm vụ', {force:true});
+        return false;
+    }
+    const dt = (typeof getVal === 'function') ? getVal(dtId) : (el(dtId)?.value || '');
+    const ok = window.lifeosDirectTaskSubmit(text, dt);
+    if(ok){
+        input.value = '';
+        if(typeof setVal === 'function') setVal(dtId, '');
+        else if(el(dtId)) el(dtId).value = '';
+        input.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    return ok;
+};
+
+window.installTaskSubmitRepair=()=>{
+    if(window.__lifeosTaskSubmitRepairInstalled) return;
+    window.__lifeosTaskSubmitRepairInstalled = true;
+
+    const bindForm = (formId, inputId, dtId)=>{
+        const form = el(formId);
+        if(!form) return;
+        form.dataset.pha11SubmitRepair = '1';
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            window.lifeosSubmitTaskFromInput(inputId, dtId);
+        }, true);
+
+        const btn = form.querySelector('button[type="submit"]');
+        if(btn){
+            btn.addEventListener('click', (e)=>{
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                window.lifeosSubmitTaskFromInput(inputId, dtId);
+            }, true);
+        }
+    };
+
+    bindForm('form-pc', 'input-pc', 'dt-pc');
+    bindForm('form-mobile', 'input-mobile', 'dt-mb');
+};
+
+window.lifeosGetInputForVoiceButton=(btn)=>{
+    const form = btn?.closest?.('form');
+    const input = form?.querySelector?.('input[type="text"]');
+    if(input) return input;
+    if(window.innerWidth < 1024 && el('input-mobile')) return el('input-mobile');
+    return el('input-pc') || el('input-mobile');
+};
+
+window.lifeosSetInputTextLive=(input, text)=>{
+    if(!input) return;
+    input.value = text;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+    input.focus();
+    try{ input.setSelectionRange(input.value.length, input.value.length); }catch(e){}
+};
+
+window.lifeosRequestMicrophonePermission=async()=>{
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        window.showToast?.('Trình duyệt này chưa hỗ trợ cấp quyền micro','ph-microphone-slash');
+        return false;
+    }
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+        window.lifeosMicPermissionOK = true;
+        return true;
+    }catch(e){
+        window.lifeosMicPermissionOK = false;
+        console.warn('[PHA12 mic permission fail]', e);
+        const ua = navigator.userAgent || '';
+        if(/Zalo|FBAN|FBAV|Instagram/i.test(ua) || location.protocol === 'content:'){
+            window.showToast?.('Zalo/app ngoài có thể chặn micro. Hãy mở bằng Chrome để dùng mic ổn định','ph-warning-circle');
+            window.lifeosSpeakNow?.('Zalo có thể chặn micro. Hãy mở bằng Chrome để dùng mic ổn định', {force:true});
+        }else{
+            window.showToast?.('Hãy bấm Cho phép micro rồi thử lại','ph-microphone');
+            window.lifeosSpeakNow?.('Hãy bấm cho phép micro rồi thử lại', {force:true});
+        }
+        return false;
+    }
+};
+
+window.startLifeOSDictation=async(input)=>{
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+        window.showToast?.('Trình duyệt chưa hỗ trợ nhập giọng nói','ph-microphone-slash');
+        window.lifeosSpeakNow?.('Trình duyệt chưa hỗ trợ nhập giọng nói', {force:true});
+        return;
+    }
+
+    if(window.lifeosDictationRec && window.lifeosDictationActive){
+        window.lifeosDictationManualStop = true;
+        try{ window.lifeosDictationRec.stop(); }catch(e){}
+        window.lifeosDictationRec = null;
+        window.lifeosDictationActive = false;
+        window.showToast?.('Đã dừng nghe','ph-microphone');
+        return;
+    }
+
+    const allowed = await window.lifeosRequestMicrophonePermission();
+    if(!allowed) return;
+
+    const rec = new SR();
+    window.lifeosDictationRec = rec;
+    window.lifeosDictationTarget = input;
+    window.lifeosDictationActive = true;
+    window.lifeosDictationManualStop = false;
+
+    const base = String(input?.value || '').trim();
+    let finalBuffer = '';
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+    rec.lang = 'vi-VN';
+    rec.continuous = !isMobile;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onstart = ()=>{
+        window.showToast?.('Đang nghe, nói xong chữ sẽ vào ô nhập','ph-microphone');
+        window.lifeosSpeakNow?.('Đang nghe, bạn cứ nói', {force:true});
+        input?.focus?.();
+    };
+
+    rec.onresult = (event)=>{
+        let interimText = '';
+        for(let i=event.resultIndex; i<event.results.length; i++){
+            const t = event.results[i][0]?.transcript || '';
+            if(event.results[i].isFinal) finalBuffer += t + ' ';
+            else interimText += t + ' ';
+        }
+        const spoken = (finalBuffer + interimText).replace(/\s+/g,' ').trim();
+        const merged = (base ? base + ' ' : '') + spoken;
+        window.lifeosSetInputTextLive(input, merged.trim());
+    };
+
+    rec.onerror = (event)=>{
+        console.warn('[PHA12 dictation error]', event.error);
+        if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+            window.showToast?.('Micro chưa được cấp quyền. Mở bằng Chrome và bấm Cho phép','ph-warning-circle');
+            window.lifeosSpeakNow?.('Micro chưa được cấp quyền. Mở bằng Chrome và bấm cho phép', {force:true});
+        }else if(event.error === 'no-speech'){
+            window.showToast?.('Chưa nghe thấy giọng nói, bấm mic rồi nói gần hơn','ph-microphone');
+        }else{
+            window.showToast?.('Mic chưa nghe được, thử bấm lại','ph-warning-circle');
+        }
+    };
+
+    rec.onend = ()=>{
+        window.lifeosDictationActive = false;
+        const val = String(input?.value || '').trim();
+        if(window.lifeosDictationManualStop) return;
+        if(val){
+            window.showToast?.('Đã nhận giọng nói vào ô nhập','ph-check-circle');
+            window.lifeosSpeakNow?.('Đã nhận giọng nói vào ô nhập', {force:true});
+        }else{
+            window.showToast?.('Chưa nghe thấy nội dung, hãy bấm mic và nói lại','ph-microphone');
+        }
+    };
+
+    try{ rec.start(); }
+    catch(e){
+        console.warn('[PHA12 dictation start fail]', e);
+        window.lifeosDictationActive = false;
+        window.showToast?.('Mic đang bận, thử bấm lại','ph-microphone-slash');
+    }
+};
+
+window.installVoiceMicRepair=()=>{
+    if(window.__lifeosVoiceMicRepairInstalled) return;
+    window.__lifeosVoiceMicRepairInstalled = true;
+    document.querySelectorAll('.btn-voice').forEach(btn=>{
+        btn.dataset.voiceLabel = 'Bắt đầu nhập bằng giọng nói';
+        btn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const input = window.lifeosGetInputForVoiceButton(btn);
+            window.primeSentinelEngine?.({auto:true});
+            window.startLifeOSDictation(input);
+        }, true);
+    });
+};
+
+window.installPha11Repairs=()=>{
+    window.installTaskSubmitRepair?.();
+    window.installVoiceMicRepair?.();
+};
+
+
+// ==============================================================================
+// PHA 13: RESTORE TASK RENDER LAYER — thêm là hiện ngay trong danh sách
+// ==============================================================================
+window.lifeosTaskEsc=(v)=>{
+    const s = String(v ?? '');
+    if(typeof window.escapeHTML === 'function') return window.escapeHTML(s);
+    return s.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+};
+
+window.lifeosTaskGetText=(t)=>String(t?.text || t?.title || t?.name || t?.content || t?.summary || 'Nhiệm vụ').replace(/\s+/g,' ').trim();
+
+window.lifeosTaskIsOverdue=(t)=>{
+    if(t?.completed) return false;
+    const now = Date.now();
+    let ms = 0;
+    if(t?.alarmTime) ms = Number(t.alarmTime);
+    else if(t?.dueAt) ms = window.lifeosParseDateLike ? window.lifeosParseDateLike(t.dueAt) : Date.parse(t.dueAt);
+    else if(t?.datetime) ms = window.lifeosParseDateLike ? window.lifeosParseDateLike(t.datetime) : Date.parse(t.datetime);
+    return Number.isFinite(ms) && ms > 0 && ms < now;
+};
+
+window.lifeosTaskMeta=(t)=>{
+    const parts = [];
+    if(t?.timeStr) parts.push(`<span class="inline-flex items-center gap-1 text-[11px] font-black text-primary bg-primary/10 px-2 py-1 rounded-full"><i class="ph-bold ph-clock"></i>${window.lifeosTaskEsc(t.timeStr)}</span>`);
+    if(t?.dueDate) parts.push(`<span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full"><i class="ph-bold ph-calendar"></i>${window.lifeosTaskEsc(t.dueDate)}</span>`);
+    if(t?.priority && t.priority !== 'normal') parts.push(`<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-full"><i class="ph-bold ph-warning-circle"></i>${window.lifeosTaskEsc(t.priority)}</span>`);
+    if(Array.isArray(t?.tags)) t.tags.slice(0,3).forEach(tag=>parts.push(`<span class="inline-flex items-center text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-full">#${window.lifeosTaskEsc(tag)}</span>`));
+    return parts.join('');
+};
+
+window.renderTasksOnly=()=>{
+    const list = el('todo-list');
+    const empty = el('empty-state');
+    if(!list) return;
+
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    const all = window.todos;
+    const mode = window.filterMode || 'all';
+    let visible = all;
+    if(mode === 'active') visible = all.filter(t=>!t.completed);
+    if(mode === 'overdue') visible = all.filter(t=>window.lifeosTaskIsOverdue(t));
+
+    if(!visible.length){
+        list.innerHTML = '';
+        if(empty){ empty.classList.remove('hidden'); empty.classList.add('flex'); }
+    }else{
+        if(empty){ empty.classList.add('hidden'); empty.classList.remove('flex'); }
+        list.innerHTML = visible.map((t)=>{
+            const id = window.lifeosTaskEsc(t.id);
+            const text = window.lifeosTaskEsc(window.lifeosTaskGetText(t));
+            const done = !!t.completed;
+            const overdue = window.lifeosTaskIsOverdue(t);
+            const meta = window.lifeosTaskMeta(t);
+            return `<li data-task-id="${id}" class="group bg-white border ${done?'border-emerald-100 opacity-70':'border-slate-200'} ${overdue?'ring-2 ring-rose-100':''} rounded-2xl p-3 sm:p-4 shadow-sm active:scale-[.99] transition-all">
+                <div class="flex items-start gap-3 min-w-0">
+                    <button type="button" data-task-action="toggle" class="shrink-0 w-10 h-10 rounded-xl ${done?'bg-emerald-500 text-white':'bg-slate-50 text-slate-400'} border border-slate-200 flex items-center justify-center active:scale-95" title="${done?'Đánh dấu chưa xong':'Đánh dấu hoàn thành'}">
+                        <i class="ph-bold ${done?'ph-check':'ph-circle'} text-lg"></i>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-slate-800 leading-snug break-words ${done?'line-through text-slate-400':''}">${text}</div>
+                        <div class="mt-2 flex flex-wrap gap-1.5">${meta || '<span class="text-[11px] font-bold text-slate-400">Chưa đặt giờ</span>'}</div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" data-task-action="focus" class="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/10 flex items-center justify-center active:scale-95" title="Tập trung"><i class="ph-bold ph-target"></i></button>
+                        <button type="button" data-task-action="delete" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-100 flex items-center justify-center active:scale-95" title="Xóa nhiệm vụ"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                </div>
+            </li>`;
+        }).join('');
+    }
+
+    const doneCount = all.filter(t=>t.completed).length;
+    const percent = all.length ? Math.round(doneCount / all.length * 100) : 0;
+    setTxt?.('progress-text', percent + '%');
+    const ring = el('progress-ring');
+    if(ring){
+        const total = 113;
+        ring.style.strokeDashoffset = String(total - total * percent / 100);
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn=>{
+        const active = btn.dataset.filter === mode;
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('text-slate-500', !active);
+        btn.classList.toggle('bg-white', !active);
+    });
+};
+
+window.lifeosPersistTasksAndRender=(reason='task-update')=>{
+    try{ window.saveLocalTodos?.(); }catch(e){ console.error('[PHA13 saveLocalTodos]', e); }
+    try{ window.renderTasksOnly?.(); }catch(e){ console.error('[PHA13 renderTasksOnly]', e); }
+    try{ window.FirebaseSync?.pushAll?.({reason}); }catch(e){ try{ window.FirebaseSync?.pushAll?.(); }catch(_e){} }
+};
+
+window.toggleTaskDone=(id)=>{
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    const t = window.todos.find(x=>String(x.id)===String(id));
+    if(!t) return;
+    t.completed = !t.completed;
+    t.completedAt = t.completed ? Date.now() : null;
+    window.lifeosPersistTasksAndRender('task-toggle');
+    window.showToast?.(t.completed ? 'Đã hoàn thành nhiệm vụ' : 'Đã mở lại nhiệm vụ', t.completed ? 'ph-check-circle' : 'ph-arrow-counter-clockwise');
+};
+
+window.deleteTask=(id)=>{
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    const before = window.todos.length;
+    window.todos = window.todos.filter(x=>String(x.id)!==String(id));
+    if(window.todos.length !== before){
+        window.lifeosPersistTasksAndRender('task-delete');
+        window.showToast?.('Đã xóa nhiệm vụ','ph-trash');
+    }
+};
+
+window.focusTask=(id)=>{
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    const t = window.todos.find(x=>String(x.id)===String(id));
+    if(!t) return;
+    window.currentFocusTaskId = String(id);
+    setTxt?.('focus-task-name', window.lifeosTaskGetText(t));
+    const card = el('focus-task-card');
+    if(card){ card.classList.remove('hidden'); card.classList.add('block'); }
+    window.showToast?.('Đã ghim nhiệm vụ tập trung','ph-target');
+};
+
+window.unpinTask=()=>{
+    window.currentFocusTaskId = null;
+    const card = el('focus-task-card');
+    if(card){ card.classList.add('hidden'); card.classList.remove('block'); }
+    window.showToast?.('Đã bỏ ghim tập trung','ph-x');
+};
+
+window.cleanupTasks=()=>{
+    window.todos = Array.isArray(window.todos) ? window.todos : [];
+    const before = window.todos.length;
+    window.todos = window.todos.filter(t=>!t.completed);
+    const removed = before - window.todos.length;
+    window.lifeosPersistTasksAndRender('task-cleanup');
+    window.showToast?.(removed ? `Đã dọn ${removed} nhiệm vụ đã xong` : 'Không có nhiệm vụ đã xong để dọn','ph-broom');
+};
+
+window.installPha13TaskRenderRestore=()=>{
+    if(window.__lifeosTaskRenderRestoreInstalled) return;
+    window.__lifeosTaskRenderRestoreInstalled = true;
+
+    const list = el('todo-list');
+    if(list){
+        list.addEventListener('click', (e)=>{
+            const btn = e.target.closest('[data-task-action]');
+            if(!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const li = btn.closest('[data-task-id]');
+            const id = li?.dataset?.taskId;
+            const action = btn.dataset.taskAction;
+            if(!id) return;
+            if(action === 'toggle') window.toggleTaskDone(id);
+            if(action === 'delete') window.deleteTask(id);
+            if(action === 'focus') window.focusTask(id);
+        }, true);
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            window.filterMode = btn.dataset.filter || 'all';
+            window.renderTasksOnly();
+        }, true);
+    });
+
+    window.renderTasksOnly();
+};
+
+
+// ==============================================================================
+// PHA 14: PC SMART LAYOUT — sticky tabbar + overview dashboard 3 cột
+// ==============================================================================
+window.PCLayoutSmart = window.PCLayoutSmart || {
+    enabled: false,
+    active: localStorage.getItem('lifeos_pc_active_tab') || 'overview',
+    nodes: {},
+    placeholders: {},
+    stage: null,
+    overview: null,
+    full: null,
+    mq: null,
+
+    isPC(){
+        return window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+    },
+
+    findHeader(){
+        return document.querySelector('header') || document.querySelector('.app-header') || document.body.firstElementChild;
+    },
+
+    setHeaderOffset(){
+        const h = this.findHeader();
+        const rect = h ? h.getBoundingClientRect() : {height:72};
+        const height = Math.max(64, Math.round(rect.height || 72));
+        document.documentElement.style.setProperty('--pc-header-offset', (height + 8) + 'px');
+    },
+
+    collectNodes(){
+        const ids = {tasks:'view-tasks', focus:'view-focus', vault:'view-vault', music:'view-music'};
+        Object.entries(ids).forEach(([key,id])=>{
+            const node = document.getElementById(id);
+            if(!node) return;
+            this.nodes[key] = node;
+            if(!this.placeholders[key]){
+                const ph = document.createComment('pc-layout-placeholder-' + key);
+                node.parentNode.insertBefore(ph, node);
+                this.placeholders[key] = ph;
+            }
+        });
+        return this.nodes.tasks && this.nodes.focus && this.nodes.vault && this.nodes.music;
+    },
+
+    createShell(){
+        if(document.getElementById('pc-smart-tabbar') && document.getElementById('pc-smart-stage')){
+            this.stage = document.getElementById('pc-smart-stage');
+            this.overview = document.getElementById('pc-overview-grid');
+            this.full = document.getElementById('pc-full-stage');
+            return;
+        }
+
+        const header = this.findHeader();
+        const tabbar = document.createElement('div');
+        tabbar.id = 'pc-smart-tabbar';
+        tabbar.innerHTML = `
+          <div class="pc-tabbar-inner" role="tablist" aria-label="Điều hướng PC">
+            <button type="button" data-pc-tab="overview"><i class="ph-bold ph-squares-four"></i><span>Tổng quan</span></button>
+            <button type="button" data-pc-tab="tasks"><i class="ph-bold ph-list-checks"></i><span>Nhiệm vụ</span></button>
+            <button type="button" data-pc-tab="focus"><i class="ph-bold ph-timer"></i><span>Tập trung</span></button>
+            <button type="button" data-pc-tab="vault"><i class="ph-bold ph-vault"></i><span>Kho lưu trữ</span></button>
+            <button type="button" data-pc-tab="music"><i class="ph-bold ph-music-notes"></i><span>Nghe nhạc</span></button>
+          </div>`;
+
+        const stage = document.createElement('div');
+        stage.id = 'pc-smart-stage';
+        stage.innerHTML = `
+          <div id="pc-overview-grid">
+            <section class="pc-column" id="pc-col-left"><div class="pc-column-label"><i class="ph-bold ph-list-checks"></i>Nhiệm vụ hôm nay</div></section>
+            <section class="pc-column" id="pc-col-center"><div class="pc-column-label"><i class="ph-bold ph-timer"></i>Tập trung · Ngày giờ</div></section>
+            <section class="pc-column" id="pc-col-right"><div class="pc-column-label"><i class="ph-bold ph-vault"></i>Kho lưu trữ · Nhạc</div></section>
+          </div>
+          <div id="pc-full-stage" class="hidden"></div>`;
+
+        if(header && header.parentNode){
+            header.parentNode.insertBefore(tabbar, header.nextSibling);
+            tabbar.parentNode.insertBefore(stage, tabbar.nextSibling);
+        }else{
+            document.body.insertBefore(tabbar, document.body.firstChild);
+            document.body.insertBefore(stage, tabbar.nextSibling);
+        }
+
+        tabbar.addEventListener('click', (e)=>{
+            const btn = e.target.closest('[data-pc-tab]');
+            if(!btn) return;
+            e.preventDefault();
+            this.switch(btn.dataset.pcTab || 'overview');
+        }, true);
+
+        this.stage = stage;
+        this.overview = document.getElementById('pc-overview-grid');
+        this.full = document.getElementById('pc-full-stage');
+    },
+
+    ensureParking(){
+        let parking = document.getElementById('pc-parking-lot');
+        if(!parking){
+            parking = document.createElement('div');
+            parking.id = 'pc-parking-lot';
+            parking.setAttribute('aria-hidden', 'true');
+            parking.style.display = 'none';
+            this.stage?.appendChild(parking);
+        }
+        return parking;
+    },
+
+    hardShow(node, displayValue='block'){
+        if(!node) return;
+        node.classList.remove('hidden');
+        node.style.display = displayValue;
+        node.style.visibility = 'visible';
+        node.style.pointerEvents = 'auto';
+    },
+
+    hardHide(node){
+        if(!node) return;
+        node.classList.add('hidden');
+        node.style.display = 'none';
+        node.style.visibility = 'hidden';
+        node.style.pointerEvents = 'none';
+    },
+
+    moveToOverview(){
+        const left = document.getElementById('pc-col-left');
+        const center = document.getElementById('pc-col-center');
+        const right = document.getElementById('pc-col-right');
+        if(!left || !center || !right) return;
+
+        [this.nodes.tasks, this.nodes.focus, this.nodes.vault, this.nodes.music].forEach(node=>{
+            if(node){
+                node.style.display = '';
+                node.style.visibility = '';
+                node.style.pointerEvents = '';
+                node.classList.remove('hidden');
+            }
+        });
+
+        if(this.nodes.tasks) left.appendChild(this.nodes.tasks);
+        if(this.nodes.focus) center.appendChild(this.nodes.focus);
+        if(this.nodes.vault) right.appendChild(this.nodes.vault);
+        if(this.nodes.music) right.appendChild(this.nodes.music);
+
+        if(this.overview){
+            this.overview.classList.remove('hidden','pc-force-hidden');
+            this.overview.style.display = 'grid';
+            this.overview.style.visibility = 'visible';
+            this.overview.style.pointerEvents = 'auto';
+        }
+        if(this.full){
+            this.full.classList.add('hidden','pc-force-hidden');
+            this.full.style.display = 'none';
+            this.full.style.visibility = 'hidden';
+            this.full.style.pointerEvents = 'none';
+        }
+    },
+
+    moveToSingle(tab){
+        if(!this.full) return;
+
+        const map = {tasks:this.nodes.tasks, focus:this.nodes.focus, vault:this.nodes.vault, music:this.nodes.music};
+        const selected = map[tab] || this.nodes.tasks;
+        const parking = this.ensureParking();
+
+        Object.entries(map).forEach(([key,node])=>{
+            if(!node) return;
+            if(node === selected){
+                this.full.appendChild(node);
+                node.classList.remove('hidden');
+                node.style.display = 'block';
+                node.style.visibility = 'visible';
+                node.style.pointerEvents = 'auto';
+            }else{
+                parking.appendChild(node);
+                node.classList.add('hidden');
+                node.style.display = 'none';
+                node.style.visibility = 'hidden';
+                node.style.pointerEvents = 'none';
+            }
+        });
+
+        if(this.overview){
+            this.overview.classList.add('hidden','pc-force-hidden');
+            this.overview.style.display = 'none';
+            this.overview.style.visibility = 'hidden';
+            this.overview.style.pointerEvents = 'none';
+        }
+        this.full.classList.remove('hidden','pc-force-hidden');
+        this.full.style.display = 'block';
+        this.full.style.visibility = 'visible';
+        this.full.style.pointerEvents = 'auto';
+    },
+
+    setActive(tab){
+        document.querySelectorAll('#pc-smart-tabbar [data-pc-tab]').forEach(btn=>{
+            btn.classList.toggle('active', btn.dataset.pcTab === tab);
+        });
+        document.body.dataset.pcTab = tab;
+        localStorage.setItem('lifeos_pc_active_tab', tab);
+    },
+
+    switch(tab='overview'){
+        if(!this.enabled || !this.isPC()) return;
+        this.active = tab;
+        this.setActive(tab);
+        document.body.classList.toggle('lifeos-pc-overview-active', tab === 'overview');
+        document.body.classList.toggle('lifeos-pc-single-active', tab !== 'overview');
+        if(tab === 'overview') this.moveToOverview();
+        else this.moveToSingle(tab);
+
+        try{ window.renderTasksOnly?.(); }catch(e){}
+        try{ window.renderVault?.(); }catch(e){}
+        try{ window.MusicApp?.render?.(); }catch(e){}
+        this.setHeaderOffset();
+    },
+
+    restoreMobile(){
+        Object.entries(this.nodes).forEach(([key,node])=>{
+            const ph = this.placeholders[key];
+            if(node && ph && ph.parentNode) ph.parentNode.insertBefore(node, ph.nextSibling);
+        });
+        document.body.classList.remove('lifeos-pc-layout-ready','lifeos-pc-overview-active','lifeos-pc-single-active');
+        delete document.body.dataset.pcTab;
+        this.enabled = false;
+    },
+
+    enable(){
+        if(!this.collectNodes()) {
+            console.warn('[PCLayoutSmart] thiếu view node, bỏ qua PC layout');
+            return;
+        }
+        this.createShell();
+        this.setHeaderOffset();
+        document.body.classList.add('lifeos-pc-layout-ready');
+        this.enabled = true;
+        this.switch(this.active || 'overview');
+    },
+
+    refresh(){
+        if(this.isPC()){
+            if(!this.enabled) this.enable();
+            else { this.setHeaderOffset(); this.switch(this.active || 'overview'); }
+        }else{
+            if(this.enabled) this.restoreMobile();
+        }
+    },
+
+    init(){
+        if(this._inited) return;
+        this._inited = true;
+        this.mq = window.matchMedia('(min-width: 1024px)');
+        this.refresh();
+        window.addEventListener('resize', ()=>this.refresh(), {passive:true});
+        window.addEventListener('orientationchange', ()=>setTimeout(()=>this.refresh(), 250), {passive:true});
+        setTimeout(()=>this.refresh(), 600);
+    }
+};
+
+
+// ==============================================================================
+// PHA 14.2: PC HARD TABS — tab nào hiện full tab đó, không lẫn module khác
+// ==============================================================================
+window.PCHardTabs = window.PCHardTabs || {
+    active: localStorage.getItem('lifeos_pc_hard_tab') || 'overview',
+    nodes: {},
+    placeholders: {},
+    inited: false,
+
+    isPC(){
+        return window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+    },
+
+    header(){
+        return document.querySelector('header') || document.querySelector('.app-header') || document.body.firstElementChild;
+    },
+
+    setHeaderOffset(){
+        const h = this.header();
+        const rect = h ? h.getBoundingClientRect() : {height:72};
+        const height = Math.max(64, Math.round(rect.height || 72));
+        document.documentElement.style.setProperty('--pc-header-offset', (height + 8) + 'px');
+    },
+
+    collect(){
+        const map = {tasks:'view-tasks', focus:'view-focus', vault:'view-vault', music:'view-music'};
+        Object.entries(map).forEach(([key,id])=>{
+            const node = document.getElementById(id);
+            if(!node) return;
+            this.nodes[key] = node;
+            if(!this.placeholders[key]){
+                const ph = document.createComment('pc-hard-placeholder-' + key);
+                node.parentNode.insertBefore(ph, node);
+                this.placeholders[key] = ph;
+            }
+        });
+        return this.nodes.tasks && this.nodes.focus && this.nodes.vault && this.nodes.music;
+    },
+
+    createShell(){
+        let tabbar = document.getElementById('pc-hard-tabbar');
+        let stage = document.getElementById('pc-hard-stage');
+        if(tabbar && stage) return;
+
+        tabbar = document.createElement('div');
+        tabbar.id = 'pc-hard-tabbar';
+        tabbar.innerHTML = `
+          <div class="pc-hard-tabbar-inner" role="tablist" aria-label="Điều hướng PC">
+            <button type="button" data-hard-tab="overview"><i class="ph-bold ph-squares-four"></i><span>Tổng quan</span></button>
+            <button type="button" data-hard-tab="tasks"><i class="ph-bold ph-list-checks"></i><span>Nhiệm vụ</span></button>
+            <button type="button" data-hard-tab="focus"><i class="ph-bold ph-timer"></i><span>Tập trung</span></button>
+            <button type="button" data-hard-tab="vault"><i class="ph-bold ph-vault"></i><span>Kho lưu trữ</span></button>
+            <button type="button" data-hard-tab="music"><i class="ph-bold ph-music-notes"></i><span>Nghe nhạc</span></button>
+          </div>`;
+
+        stage = document.createElement('div');
+        stage.id = 'pc-hard-stage';
+        stage.innerHTML = `
+          <div id="pc-hard-overview">
+            <section class="pc-hard-column" id="pc-hard-left"><div class="pc-hard-label"><i class="ph-bold ph-list-checks"></i>Nhiệm vụ hôm nay</div></section>
+            <section class="pc-hard-column" id="pc-hard-center"><div class="pc-hard-label"><i class="ph-bold ph-timer"></i>Tập trung · Ngày giờ</div></section>
+            <section class="pc-hard-column" id="pc-hard-right"><div class="pc-hard-label"><i class="ph-bold ph-vault"></i>Kho lưu trữ · Nhạc</div></section>
+          </div>
+          <div id="pc-hard-full"></div>
+          <div id="pc-hard-parking" aria-hidden="true"></div>`;
+
+        const h = this.header();
+        if(h && h.parentNode){
+            h.parentNode.insertBefore(tabbar, h.nextSibling);
+            tabbar.parentNode.insertBefore(stage, tabbar.nextSibling);
+        }else{
+            document.body.insertBefore(tabbar, document.body.firstChild);
+            document.body.insertBefore(stage, tabbar.nextSibling);
+        }
+
+        tabbar.addEventListener('click', (e)=>{
+            const btn = e.target.closest('[data-hard-tab]');
+            if(!btn) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this.switch(btn.dataset.hardTab || 'overview');
+        }, true);
+    },
+
+    setImportant(node, prop, value){
+        if(!node) return;
+        node.style.setProperty(prop, value, 'important');
+    },
+
+    show(node, display='block'){
+        if(!node) return;
+        node.classList.remove('hidden');
+        this.setImportant(node, 'display', display);
+        this.setImportant(node, 'visibility', 'visible');
+        this.setImportant(node, 'pointer-events', 'auto');
+        node.style.removeProperty('opacity');
+        node.style.removeProperty('transform');
+    },
+
+    hide(node){
+        if(!node) return;
+        node.classList.add('hidden');
+        this.setImportant(node, 'display', 'none');
+        this.setImportant(node, 'visibility', 'hidden');
+        this.setImportant(node, 'pointer-events', 'none');
+    },
+
+    resetViewNode(node){
+        if(!node) return;
+        node.classList.remove('hidden');
+        ['display','visibility','pointer-events','opacity','transform','position'].forEach(p=>node.style.removeProperty(p));
+    },
+
+    hideLegacyShell(){
+        const oldTab = document.getElementById('pc-smart-tabbar');
+        const oldStage = document.getElementById('pc-smart-stage');
+        this.hide(oldTab);
+        this.hide(oldStage);
+        try{
+            if(window.PCLayoutSmart){
+                window.PCLayoutSmart.switch = ()=>{};
+                window.PCLayoutSmart.refresh = ()=>{};
+                window.PCLayoutSmart.enable = ()=>{};
+                window.PCLayoutSmart.restoreMobile = ()=>{};
+                window.PCLayoutSmart.enabled = false;
+            }
+        }catch(e){}
+    },
+
+    overview(){
+        const left = document.getElementById('pc-hard-left');
+        const center = document.getElementById('pc-hard-center');
+        const right = document.getElementById('pc-hard-right');
+        const overview = document.getElementById('pc-hard-overview');
+        const full = document.getElementById('pc-hard-full');
+        const parking = document.getElementById('pc-hard-parking');
+        if(!left || !center || !right || !overview || !full) return;
+
+        Object.values(this.nodes).forEach(node=>this.resetViewNode(node));
+        if(this.nodes.tasks) left.appendChild(this.nodes.tasks);
+        if(this.nodes.focus) center.appendChild(this.nodes.focus);
+        if(this.nodes.vault) right.appendChild(this.nodes.vault);
+        if(this.nodes.music) right.appendChild(this.nodes.music);
+
+        this.show(overview, 'grid');
+        this.hide(full);
+        this.hide(parking);
+    },
+
+    single(tab){
+        const overview = document.getElementById('pc-hard-overview');
+        const full = document.getElementById('pc-hard-full');
+        const parking = document.getElementById('pc-hard-parking');
+        const selected = this.nodes[tab] || this.nodes.tasks;
+        if(!full || !parking || !selected) return;
+
+        Object.entries(this.nodes).forEach(([key,node])=>{
+            if(!node) return;
+            if(node === selected){
+                full.appendChild(node);
+                this.show(node, 'block');
+            }else{
+                parking.appendChild(node);
+                this.hide(node);
+            }
+        });
+
+        this.hide(overview);
+        this.show(full, 'block');
+        this.hide(parking);
+    },
+
+    setActive(tab){
+        document.querySelectorAll('#pc-hard-tabbar [data-hard-tab]').forEach(btn=>{
+            btn.classList.toggle('active', btn.dataset.hardTab === tab);
+        });
+        document.body.dataset.pcHardTab = tab;
+        document.body.dataset.pcTab = tab;
+        localStorage.setItem('lifeos_pc_hard_tab', tab);
+    },
+
+    switch(tab='overview'){
+        if(!this.isPC()) return;
+        this.active = tab;
+        this.hideLegacyShell();
+        document.body.classList.add('lifeos-pc-hard-layout');
+        document.body.classList.remove('lifeos-pc-overview-active','lifeos-pc-single-active');
+        this.setActive(tab);
+        if(tab === 'overview') this.overview();
+        else this.single(tab);
+        this.setHeaderOffset();
+
+        try{ window.renderTasksOnly?.(); }catch(e){}
+        try{ window.renderVault?.(); }catch(e){}
+        try{ window.MusicApp?.render?.(); }catch(e){}
+    },
+
+    restoreMobile(){
+        Object.entries(this.nodes).forEach(([key,node])=>{
+            const ph = this.placeholders[key];
+            if(node && ph && ph.parentNode){
+                ph.parentNode.insertBefore(node, ph.nextSibling);
+                this.resetViewNode(node);
+            }
+        });
+        document.body.classList.remove('lifeos-pc-hard-layout');
+        delete document.body.dataset.pcHardTab;
+        const tabbar = document.getElementById('pc-hard-tabbar');
+        const stage = document.getElementById('pc-hard-stage');
+        this.hide(tabbar);
+        this.hide(stage);
+    },
+
+    refresh(){
+        if(!this.collect()) return;
+        this.createShell();
+        if(this.isPC()){
+            const tabbar = document.getElementById('pc-hard-tabbar');
+            const stage = document.getElementById('pc-hard-stage');
+            this.show(tabbar, 'block');
+            this.show(stage, 'block');
+            this.switch(this.active || 'overview');
+        }else{
+            this.restoreMobile();
+        }
+    },
+
+    init(){
+        if(this.inited) return;
+        this.inited = true;
+        this.refresh();
+        window.addEventListener('resize', ()=>this.refresh(), {passive:true});
+        window.addEventListener('orientationchange', ()=>setTimeout(()=>this.refresh(), 220), {passive:true});
+        setTimeout(()=>this.refresh(), 500);
+        setTimeout(()=>this.refresh(), 1200);
+    }
+};
+
+
+// ==============================================================================
+// PHA 14.5: PC FULL-BLEED STAGE FIX — promote hard stage ra body + ép width viewport
+// ==============================================================================
+window.PCHardFullBleedFix = window.PCHardFullBleedFix || {
+    installed: false,
+
+    isPC(){
+        return window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+    },
+
+    topLevelAfterHeader(){
+        const header = document.querySelector('header') || document.querySelector('.app-header') || document.body.firstElementChild;
+        if(!header) return document.body.firstChild;
+        let top = header;
+        while(top && top.parentNode && top.parentNode !== document.body){
+            top = top.parentNode;
+        }
+        return top ? top.nextSibling : document.body.firstChild;
+    },
+
+    important(node, prop, value){
+        if(node) node.style.setProperty(prop, value, 'important');
+    },
+
+    promote(){
+        if(!this.isPC()) return;
+
+        const tabbar = document.getElementById('pc-hard-tabbar');
+        const stage = document.getElementById('pc-hard-stage');
+        if(!tabbar || !stage) return;
+
+        const body = document.body;
+        const ref = this.topLevelAfterHeader();
+
+        if(tabbar.parentNode !== body){
+            body.insertBefore(tabbar, ref);
+        }
+
+        if(stage.parentNode !== body || stage.previousSibling !== tabbar){
+            body.insertBefore(stage, tabbar.nextSibling);
+        }
+
+        document.body.classList.add('lifeos-pc-hard-layout');
+
+        this.important(stage, 'position', 'relative');
+        this.important(stage, 'left', 'auto');
+        this.important(stage, 'right', 'auto');
+        this.important(stage, 'transform', 'none');
+        this.important(stage, 'width', 'calc(100vw - 24px)');
+        this.important(stage, 'max-width', 'calc(100vw - 24px)');
+        this.important(stage, 'min-width', '0');
+        this.important(stage, 'margin-left', '12px');
+        this.important(stage, 'margin-right', '12px');
+        this.important(stage, 'padding-left', '0');
+        this.important(stage, 'padding-right', '0');
+        this.important(stage, 'box-sizing', 'border-box');
+
+        const overview = document.getElementById('pc-hard-overview');
+        const full = document.getElementById('pc-hard-full');
+
+        [overview, full].forEach(node=>{
+            if(!node) return;
+            this.important(node, 'width', '100%');
+            this.important(node, 'max-width', 'none');
+            this.important(node, 'min-width', '0');
+            this.important(node, 'margin-left', '0');
+            this.important(node, 'margin-right', '0');
+            this.important(node, 'box-sizing', 'border-box');
+        });
+
+        if(overview){
+            this.important(overview, 'grid-template-columns', 'minmax(0, 30fr) minmax(0, 40fr) minmax(0, 30fr)');
+        }
+
+        const active = document.body.dataset.pcHardTab || localStorage.getItem('lifeos_pc_hard_tab') || 'overview';
+        if(active !== 'overview' && full){
+            Array.from(full.children).forEach(node=>{
+                if(!/^view-/.test(node.id || '')) return;
+                this.important(node, 'display', 'block');
+                this.important(node, 'width', '100%');
+                this.important(node, 'max-width', 'none');
+                this.important(node, 'min-width', '0');
+                this.important(node, 'margin-left', '0');
+                this.important(node, 'margin-right', '0');
+                this.important(node, 'box-sizing', 'border-box');
+                node.querySelectorAll('[class*="max-w-"]').forEach(x=>this.important(x, 'max-width', 'none'));
+                node.querySelectorAll('[class*="mx-auto"]').forEach(x=>{
+                    this.important(x, 'margin-left', '0');
+                    this.important(x, 'margin-right', '0');
+                });
+            });
+        }
+
+        this.important(tabbar, 'width', 'min(1280px, calc(100vw - 40px))');
+        this.important(tabbar, 'max-width', '1280px');
+        this.important(tabbar, 'margin-left', 'auto');
+        this.important(tabbar, 'margin-right', 'auto');
+    },
+
+    hookSwitch(){
+        if(!window.PCHardTabs || window.PCHardTabs.__fullBleedHooked) return;
+        const oldSwitch = window.PCHardTabs.switch?.bind(window.PCHardTabs);
+        if(typeof oldSwitch === 'function'){
+            window.PCHardTabs.switch = (tab='overview') => {
+                oldSwitch(tab);
+                setTimeout(()=>this.promote(), 0);
+                setTimeout(()=>this.promote(), 80);
+            };
+            window.PCHardTabs.__fullBleedHooked = true;
+        }
+    },
+
+    init(){
+        if(this.installed) return;
+        this.installed = true;
+
+        const run = ()=>{
+            this.hookSwitch();
+            this.promote();
+        };
+
+        run();
+        setTimeout(run, 200);
+        setTimeout(run, 800);
+        setTimeout(run, 1500);
+
+        window.addEventListener('resize', ()=>setTimeout(run, 80), {passive:true});
+        window.addEventListener('orientationchange', ()=>setTimeout(run, 260), {passive:true});
+    }
+};
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    setTimeout(()=>window.PCHardFullBleedFix?.init?.(), 450);
+    setTimeout(()=>window.PCHardFullBleedFix?.init?.(), 1200);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ép cứng đường dẫn SW tuyệt đối để tránh lỗi 404 trên GitHub Pages
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/tool/sw_qlycuocsong.js').catch(()=>{});
@@ -2713,7 +4453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.body.addEventListener('pointerdown', () => window.primeSentinelEngine?.({auto:true}), {once:true, passive:true});
     document.body.addEventListener('click', () => window.primeSentinelEngine?.({auto:true}), {once:true});
-    setTimeout(()=>{ window.updateSentinelStatus?.(); window.installVoiceEverywhere?.(); window.initLifeOSRealAlarmLoop?.(); }, 300);
+    setTimeout(()=>{ window.updateSentinelStatus?.(); window.installVoiceEverywhere?.(); window.initLifeOSRealAlarmLoop?.(); window.installPha11Repairs?.(); window.installPha13TaskRenderRestore?.(); window.PCLayoutSmart?.init?.(); window.PCHardTabs?.init?.(); }, 300);
 
     el('form-pc')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-pc'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-pc')); i.value=''; setVal('dt-pc',''); });
     el('form-mobile')?.addEventListener('submit', (e) => { e.preventDefault(); const i=el('input-mobile'),v=i.value.trim(); if(!v)return; handleTaskSubmit(v, getVal('dt-mb')); i.value=''; setVal('dt-mb',''); });
