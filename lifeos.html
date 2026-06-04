@@ -3146,7 +3146,7 @@ body.music-player-active #mini-player {
 <div class="bg-white p-6 rounded-3xl w-full max-w-sm shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh] overflow-y-auto custom-scroll-area">
 <div class="w-16 h-16 rounded-full bg-slate-100 mx-auto flex items-center justify-center mb-4 text-3xl shadow-inner flex-shrink-0" id="pwd-icon">🔒</div>
 <h3 id="pwd-title" class="text-xl font-black text-center mb-6 text-slate-800 flex-shrink-0"></h3>
-<input type="password" id="pwd-input" class="w-full bg-slate-50 border border-slate-200 px-4 py-4 rounded-xl mb-6 text-center text-xl font-bold outline-none focus:border-primary transition-all shadow-inner flex-shrink-0" placeholder="Nhập mật khẩu">
+<input type="password" id="pwd-input" class="w-full bg-slate-50 border border-slate-200 px-4 py-4 rounded-xl mb-6 text-center text-xl font-bold outline-none focus:border-primary transition-all shadow-inner flex-shrink-0" placeholder="Nhập mật khẩu" autocomplete="current-password" enterkeyhint="go" autocapitalize="off" spellcheck="false">
 <div class="flex gap-3 flex-shrink-0">
 <button onclick="window.vibrate(10); window.closePasswordModal()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold text-slate-600 active:scale-95 transition border border-slate-200 hover:brightness-95">Hủy</button>
 <button onclick="window.submitPassword()" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg hover:brightness-110 flex justify-center items-center gap-2"><i class="ph-bold ph-sign-in"></i> Vào</button>
@@ -8089,5 +8089,114 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 </script>
 <!-- PHA12C_ALARM_LOOP_VOICE_ANCHOR_END -->
 
+<script id="lifeos-pha13-profile-enter-login-patch">
+/* PHA13_PROFILE_ENTER_LOGIN_PATCH — Enter/Done trong popup mật khẩu profile = bấm nút Vào. */
+(function(){
+  'use strict';
+  if (window.__lifeosPha13ProfileEnterLoginPatch) return;
+  window.__lifeosPha13ProfileEnterLoginPatch = true;
+
+  function safeVibrate(ms){
+    try { if (typeof window.vibrate === 'function') window.vibrate(ms || 8); }
+    catch(e) {}
+  }
+
+  function callSubmitPassword(){
+    if (typeof window.submitPassword === 'function') {
+      window.submitPassword();
+      return true;
+    }
+    var btn = document.querySelector('#password-modal button[onclick*="submitPassword"]');
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    return false;
+  }
+
+  function focusPasswordInput(){
+    var input = document.getElementById('pwd-input');
+    var modal = document.getElementById('password-modal');
+    if (!input || !modal) return;
+    if (modal.classList && modal.classList.contains('hidden')) return;
+    try {
+      input.focus({ preventScroll: true });
+      if (typeof input.select === 'function') input.select();
+    } catch(e) {
+      try { input.focus(); } catch(_e) {}
+    }
+  }
+
+  function enhancePasswordInput(){
+    var input = document.getElementById('pwd-input');
+    if (!input) return false;
+
+    input.setAttribute('autocomplete', 'current-password');
+    input.setAttribute('enterkeyhint', 'go');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+
+    if (input.dataset.lifeosPha13EnterBound === '1') return true;
+    input.dataset.lifeosPha13EnterBound = '1';
+
+    input.addEventListener('keydown', function(ev){
+      var isEnter = ev.key === 'Enter' || ev.code === 'Enter' || ev.keyCode === 13 || ev.which === 13;
+      if (!isEnter) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      safeVibrate(8);
+      callSubmitPassword();
+    }, true);
+
+    return true;
+  }
+
+  function hookOpenPasswordModal(){
+    if (typeof window.openPasswordModal !== 'function') return false;
+    if (window.openPasswordModal.__lifeosPha13Hooked) return true;
+
+    var originalOpenPasswordModal = window.openPasswordModal;
+    window.openPasswordModal = function(){
+      var ret = originalOpenPasswordModal.apply(this, arguments);
+      setTimeout(function(){
+        enhancePasswordInput();
+        focusPasswordInput();
+      }, 40);
+      setTimeout(focusPasswordInput, 180);
+      return ret;
+    };
+    window.openPasswordModal.__lifeosPha13Hooked = true;
+    return true;
+  }
+
+  function install(){
+    enhancePasswordInput();
+    hookOpenPasswordModal();
+
+    var modal = document.getElementById('password-modal');
+    if (modal && window.MutationObserver && !modal.__lifeosPha13Observer) {
+      modal.__lifeosPha13Observer = true;
+      new MutationObserver(function(){
+        enhancePasswordInput();
+        setTimeout(focusPasswordInput, 40);
+      }).observe(modal, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', install, { once: true });
+  } else {
+    install();
+  }
+
+  /* openPasswordModal có thể được định nghĩa muộn trong bundle cũ, thử lại nhẹ vài lần. */
+  var tries = 0;
+  var timer = setInterval(function(){
+    tries += 1;
+    install();
+    if (tries >= 20 || hookOpenPasswordModal()) clearInterval(timer);
+  }, 250);
+})();
+</script>
 </body>
 </html>
