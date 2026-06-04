@@ -4,39 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="referrer" content="no-referrer">
-  <title>LifeOS Pha 12A TEST — GitHub Silence Anchor V3</title>
+  <title>LifeOS Pha 12A TEST V4 — Loop Google TTS Anchor</title>
   <style>
     :root{--bg:#071225;--card:#0f1f38;--line:#2b4669;--ok:#22c55e;--warn:#facc15;--err:#fb7185;--blue:#3b82f6;--red:#ef4444;--mut:#94a3b8;--txt:#e5eefc}
     *{box-sizing:border-box} body{margin:0;padding:14px;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif;overscroll-behavior-y:contain}
-    h2{margin:8px 0 6px;text-align:center;font-size:20px} .sub{text-align:center;color:var(--mut);font-size:12px;margin-bottom:14px;line-height:1.4}
+    h2{margin:8px 0 6px;text-align:center;font-size:20px}.sub{text-align:center;color:var(--mut);font-size:12px;margin-bottom:14px;line-height:1.4}
     .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr;gap:10px}
-    button{width:100%;border:0;border-radius:12px;padding:15px 12px;font-weight:900;font-size:15px;cursor:pointer;letter-spacing:.01em} button:disabled{opacity:.48;cursor:not-allowed}.blue{background:#2563eb;color:#fff}.green{background:#10b981;color:#052e1a}.yellow{background:#f59e0b;color:#271400}.red{background:#ef4444;color:#fff}.gray{background:#475569;color:#fff}
-    textarea,input{width:100%;border:1px solid var(--line);border-radius:12px;background:#071225;color:#fff;padding:12px;font-size:15px;outline:none} textarea{min-height:74px;resize:vertical;line-height:1.35}.row{display:flex;gap:10px}.row input{width:92px;text-align:center;font-weight:900}.row button{flex:1;margin:0}
+    button{width:100%;border:0;border-radius:12px;padding:15px 12px;font-weight:900;font-size:15px;cursor:pointer;letter-spacing:.01em}button:disabled{opacity:.48;cursor:not-allowed}.blue{background:#2563eb;color:#fff}.green{background:#10b981;color:#052e1a}.yellow{background:#f59e0b;color:#271400}.red{background:#ef4444;color:#fff}.gray{background:#475569;color:#fff}
+    textarea,input{width:100%;border:1px solid var(--line);border-radius:12px;background:#071225;color:#fff;padding:12px;font-size:15px;outline:none}textarea{min-height:76px;resize:vertical;line-height:1.35}.row{display:flex;gap:10px}.row input{width:92px;text-align:center;font-weight:900}.row button{flex:1;margin:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     #status{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.pill{border:1px solid var(--line);border-radius:999px;padding:8px 10px;color:#cbd5e1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pill.ok{color:#86efac;border-color:#15803d}.pill.warn{color:#fde68a;border-color:#ca8a04}.pill.err{color:#fecdd3;border-color:#be123c}
     #log{height:48vh;overflow:auto;background:#000;border:1px solid #263241;border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;line-height:1.55;word-break:break-word}.time{color:#64748b}.info{color:#60a5fa}.ok{color:#34d399;font-weight:700}.warn{color:#facc15;font-weight:700}.err{color:#fb7185;font-weight:700}.evt{color:#c084fc}.hw{color:#f472b6;font-weight:800}
     .note{font-size:12px;color:#cbd5e1;line-height:1.45}.kbd{background:#13233b;border:1px solid #334155;border-radius:6px;padding:1px 5px;color:#fff}
+    .big{font-size:18px;text-align:center;font-weight:1000;color:#fff;background:#08162b;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.big span{color:#facc15}
   </style>
 </head>
 <body>
-  <h2>🧪 PHA 12A TEST — GITHUB SILENCE ANCHOR + GOOGLE TTS</h2>
-  <div class="sub">Test trên GitHub Pages. Đặt file này cùng thư mục với silence_30min.mp3 rồi bấm theo thứ tự, tắt màn hình sau khi hẹn giờ.</div>
+  <h2>🧪 PHA 12A TEST V4 — LOOP VÔ TẬN GOOGLE TTS</h2>
+  <div class="sub">Chạy trên GitHub Pages/HTTPS. Đặt file này cùng thư mục với <b>silence_30min.mp3</b>. Test lâu: tắt màn hình và để nó lặp cho đến khi bấm Stop.</div>
 
   <audio id="bg-music" playsinline preload="auto" loop></audio>
   <audio id="anchor-audio" playsinline preload="auto" loop></audio>
   <audio id="tts-player" playsinline preload="auto"></audio>
 
   <div class="grid">
-    <button class="blue" id="btn-engine">1. Kích hoạt Engine / silence_30min.mp3</button>
+    <button class="blue" id="btn-engine">1. Kích hoạt Engine / Mỏ neo / MediaSession</button>
     <div class="box">
-      <textarea id="tts-text">Đến giờ rồi. Đây là bài test Google TTS audio. Nếu bạn nghe được câu này khi màn hình tắt, hệ thống đã vượt qua kiểm tra.</textarea>
+      <textarea id="tts-text">Đến giờ rồi. Đây là bài test lặp vô tận Google TTS audio. Nếu bạn nghe được câu này nhiều lần khi màn hình tắt, hệ thống đã vượt qua kiểm tra chạy nền lâu.</textarea>
       <button class="yellow" id="btn-load" disabled style="margin-top:10px">2. Nạp Google TTS vào RAM</button>
     </div>
-    <div class="row">
-      <input id="sec" type="number" min="5" max="300" value="15">
-      <button class="red" id="btn-timer" disabled>3. Hẹn giờ — Tắt màn hình ngay</button>
+    <div class="two">
+      <div><div class="note">Đếm lần đầu / giây</div><input id="first-sec" type="number" min="5" max="600" value="15"></div>
+      <div><div class="note">Lặp lại mỗi / giây</div><input id="loop-sec" type="number" min="10" max="3600" value="60"></div>
     </div>
-    <button class="gray" id="btn-stop">4. Stop All / Reset âm thanh</button>
+    <button class="red" id="btn-loop" disabled>3. Bắt đầu LOOP VÔ TẬN — Tắt màn hình ngay</button>
+    <button class="gray" id="btn-stop">4. Stop All / Dừng vòng lặp</button>
   </div>
+
+  <div class="big">Vòng lặp: <span id="cycle-count">0</span> · Trạng thái: <span id="loop-state">chưa chạy</span></div>
 
   <div id="status">
     <div id="st-ctx" class="pill">AudioContext: chưa mở</div>
@@ -46,7 +50,7 @@
   </div>
 
   <div class="box note">
-    Bản V3 này phải chạy qua GitHub Pages/HTTPS, không ưu tiên mở bằng file://. File <span class="kbd">silence_30min.mp3</span> phải nằm cùng thư mục với HTML. <br>Chuẩn đạt: sau khi màn hình tắt vẫn nghe <span class="kbd">beep</span> và câu Google TTS. Khi mở lại log phải có <span class="kbd">TTS PLAYING</span> và <span class="kbd">TTS ENDED</span>.
+    Tiêu chí đạt: để màn hình tắt lâu, mỗi chu kỳ vẫn có <span class="kbd">beep</span> + <span class="kbd">Google TTS nói</span>. Khi mở lại log phải thấy nhiều vòng <span class="kbd">CYCLE #</span>, <span class="kbd">GOOGLE TTS AUDIO PLAYING</span>, <span class="kbd">GOOGLE TTS AUDIO ENDED</span>. Bấm Stop mới dừng.
   </div>
 
   <div id="log">Sẵn sàng...<br></div>
@@ -54,8 +58,6 @@
 <script>
 (() => {
   const SILENCE_URL = './silence_30min.mp3';
-  const MUSIC_URL = SILENCE_URL;
-  const ANCHOR_URL = SILENCE_URL;
   const $ = id => document.getElementById(id);
   const logEl = $('log');
   const bg = $('bg-music');
@@ -63,10 +65,10 @@
   const tts = $('tts-player');
   const btnEngine = $('btn-engine');
   const btnLoad = $('btn-load');
-  const btnTimer = $('btn-timer');
+  const btnLoop = $('btn-loop');
   const btnStop = $('btn-stop');
-  let audioCtx = null, wakeLock = null, worker = null, beepInt = null, ttsReady = false, engineReady = false;
-  let ttsPrimed = false;
+  let audioCtx = null, wakeLock = null, worker = null, beepInt = null;
+  let ttsReady = false, engineReady = false, ttsPrimed = false, loopRunning = false, cycle = 0;
 
   function log(msg, cls='info'){
     const time = new Date().toLocaleTimeString('vi-VN', {hour12:false});
@@ -76,49 +78,48 @@
   function setStatus(id, text, cls=''){
     const el=$(id); el.textContent=text; el.className='pill '+cls;
   }
+  function setLoopState(text){ $('loop-state').textContent = text; $('cycle-count').textContent = String(cycle); }
   function audioErrorText(el){
     const e = el.error; if(!e) return 'UNKNOWN';
-    return ({1:'MEDIA_ERR_ABORTED',2:'MEDIA_ERR_NETWORK',3:'MEDIA_ERR_DECODE',4:'MEDIA_ERR_SRC_NOT_SUPPORTED'})[e.code] || ('CODE_'+e.code);
+    return ({1:'ABORTED',2:'NETWORK',3:'DECODE',4:'SRC_NOT_SUPPORTED'})[e.code] || ('CODE_'+e.code);
   }
-  ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','playing','pause','ended','stalled','suspend','waiting','error'].forEach(evt=>{
-    tts.addEventListener(evt, () => {
-      if(evt === 'error') log('❌ [TTS EVENT] ERROR: '+audioErrorText(tts), 'err');
-      else log('📡 [TTS EVENT] '+evt.toUpperCase()+` readyState=${tts.readyState}`, 'evt');
-      if(evt === 'canplay' || evt === 'canplaythrough') {
-        ttsReady = true; setStatus('st-tts','Google TTS: đã nạp / readyState '+tts.readyState,'ok');
-        btnTimer.disabled = false;
+
+  ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','playing','pause','ended','waiting','stalled','suspend','error'].forEach(evt=>{
+    tts.addEventListener(evt, ()=>{
+      if(evt === 'error') log(`[TTS EVENT] ERROR ${audioErrorText(tts)} readyState=${tts.readyState}`, 'err');
+      else log(`[TTS EVENT] ${evt.toUpperCase()} readyState=${tts.readyState}`, 'evt');
+      if(evt === 'canplay' || evt === 'canplaythrough'){
+        ttsReady = true; btnLoop.disabled = false;
+        setStatus('st-tts','Google TTS: readyState '+tts.readyState,'ok');
       }
-      if(evt === 'playing') log('✅ GOOGLE TTS AUDIO PLAYING', 'ok');
-      if(evt === 'ended') log('✅ GOOGLE TTS AUDIO ENDED', 'ok');
+      if(evt === 'playing') log('✅ GOOGLE TTS AUDIO PLAYING','ok');
+      if(evt === 'ended') log('✅ GOOGLE TTS AUDIO ENDED','ok');
     });
   });
-  bg.addEventListener('playing',()=>{setStatus('st-bg','Nhạc nền: playing','ok'); log('✅ bg-music PLAYING — silence_30min.mp3 media anchor chính', 'ok');});
-  anchor.addEventListener('playing',()=>{setStatus('st-anchor','Mỏ neo: playing 1%','ok'); log('⚓ anchor-audio PLAYING — silence_30min.mp3 mỏ neo phụ', 'ok');});
-  bg.addEventListener('error',()=>log('❌ bg-music lỗi: '+audioErrorText(bg),'err'));
-  anchor.addEventListener('error',()=>log('❌ anchor-audio lỗi: '+audioErrorText(anchor),'err'));
-  document.addEventListener('visibilitychange',()=>log('👁 visibilityState = '+document.visibilityState, document.hidden?'warn':'info'));
+  document.addEventListener('visibilitychange', async ()=>{
+    log('👁 visibilityState = '+document.visibilityState, document.visibilityState === 'hidden' ? 'warn' : 'info');
+    if(document.visibilityState === 'visible' && engineReady && 'wakeLock' in navigator){
+      try{ if(!wakeLock) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){}
+    }
+  });
 
-  async function ensureCtx(){
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(!audioCtx) audioCtx = new AC();
-    if(audioCtx.state === 'suspended') await audioCtx.resume();
-    setStatus('st-ctx','AudioContext: '+audioCtx.state, audioCtx.state==='running'?'ok':'warn');
-    log('✅ AudioContext '+audioCtx.state, 'ok');
-  }
   async function initEngine(){
     try{
-      await ensureCtx();
-      log('📁 Base URL: '+location.href, 'info');
-      log('📁 Silence anchor URL: '+new URL(SILENCE_URL, location.href).href, 'info');
-      bg.src = MUSIC_URL; bg.loop = true; bg.volume = 0.02;
-      await bg.play();
-      anchor.src = ANCHOR_URL; anchor.loop = true; anchor.volume = 0.01;
-      await anchor.play();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
+      log('✅ AudioContext '+audioCtx.state,'ok'); setStatus('st-ctx','AudioContext: '+audioCtx.state,'ok');
+      log('📁 Base URL: '+location.href,'info');
+      log('📁 Silence anchor URL: '+new URL(SILENCE_URL, location.href).href,'info');
+      bg.removeAttribute('crossorigin'); anchor.removeAttribute('crossorigin');
+      bg.src = SILENCE_URL; anchor.src = SILENCE_URL;
+      bg.loop = true; anchor.loop = true; bg.volume = 0.01; anchor.volume = 0.01;
+      await bg.play(); log('✅ bg-music PLAYING — silence_30min.mp3 media anchor chính','ok'); setStatus('st-bg','Nhạc nền: playing','ok');
+      await anchor.play(); log('⚓ anchor-audio PLAYING — silence_30min.mp3 mỏ neo phụ','ok'); setStatus('st-anchor','Mỏ neo: playing','ok');
       if('mediaSession' in navigator){
-        navigator.mediaSession.metadata = new MediaMetadata({title:'LifeOS Alarm Anchor', artist:'Background guard', album:'Pha 12A Test'});
+        navigator.mediaSession.metadata = new MediaMetadata({title:'LifeOS Alarm Anchor V4', artist:'Google TTS loop test', album:'Pha 12A'});
         navigator.mediaSession.playbackState = 'playing';
         log('✅ MediaSession active / playbackState=playing','ok');
-      } else log('⚠️ Không có MediaSession','warn');
+      }
       if('wakeLock' in navigator){
         try{ wakeLock = await navigator.wakeLock.request('screen'); log('✅ WakeLock OK','ok'); }
         catch(e){ log('⚠️ WakeLock bị từ chối: '+e.message,'warn'); }
@@ -127,6 +128,7 @@
       log('✅ Engine sẵn sàng. Bước tiếp theo: nạp Google TTS.','ok');
     }catch(e){ log('❌ initEngine lỗi: '+e.message,'err'); }
   }
+
   function makeGoogleTTSUrl(text){
     const clean = (text || '').replace(/\s+/g,' ').trim().slice(0,190);
     return 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q='+encodeURIComponent(clean)+'&ttsspeed=1';
@@ -134,106 +136,102 @@
   async function primeTTSMuted(){
     if(ttsPrimed || tts.readyState < 2) return;
     try{
-      // Priming trong user gesture: play muted rất ngắn rồi pause để element được unlock.
       tts.muted = true; tts.volume = 0;
-      const p = tts.play();
-      if(p && p.then) await p;
-      await new Promise(r=>setTimeout(r,120));
-      tts.pause(); tts.currentTime = 0; tts.muted = false; tts.volume = 1;
-      ttsPrimed = true;
-      log('✅ TTS element đã prime muted, sẵn sàng play khi worker kích nổ','ok');
+      const p = tts.play(); if(p && p.then) await p;
+      await new Promise(r=>setTimeout(r,140));
+      tts.pause(); try{ tts.currentTime = 0; }catch(e){}
+      tts.muted = false; tts.volume = 1; ttsPrimed = true;
+      log('✅ TTS element đã prime muted, sẵn sàng lặp khi màn hình tắt','ok');
     }catch(e){
       tts.muted = false; tts.volume = 1;
-      log('⚠️ Prime muted không thành công: '+e.message+' — vẫn sẽ thử play lúc báo','warn');
+      log('⚠️ Prime muted không thành công: '+e.message+' — vẫn thử play lúc báo','warn');
     }
   }
   async function loadTTS(){
     try{
       if(!engineReady) return log('⚠️ Chưa kích hoạt Engine','warn');
-      ttsReady = false; ttsPrimed = false; btnTimer.disabled = true;
+      ttsReady = false; ttsPrimed = false; btnLoop.disabled = true;
       setStatus('st-tts','Google TTS: đang nạp','warn');
-      const text = $('tts-text').value;
-      const url = makeGoogleTTSUrl(text);
-      log('⚙️ Set Google TTS URL + load(): '+url.slice(0,110)+'...','info');
+      const url = makeGoogleTTSUrl($('tts-text').value);
+      log('⚙️ Set Google TTS URL + load(): '+url.slice(0,120)+'...','info');
       tts.pause(); tts.removeAttribute('src'); tts.load();
-      await new Promise(r=>setTimeout(r,60));
-      tts.preload = 'auto'; tts.removeAttribute('crossorigin'); tts.src = url; tts.volume = 1;
-      tts.load();
-      setTimeout(()=>{ if(tts.readyState >= 2) primeTTSMuted(); }, 600);
-      setTimeout(()=>{ if(tts.readyState >= 2){ ttsReady=true; btnTimer.disabled=false; setStatus('st-tts','Google TTS: readyState '+tts.readyState,'ok'); } }, 3500);
+      await new Promise(r=>setTimeout(r,80));
+      tts.preload = 'auto'; tts.removeAttribute('crossorigin'); tts.src = url; tts.volume = 1; tts.load();
+      setTimeout(()=>{ if(tts.readyState >= 2) primeTTSMuted(); }, 650);
+      setTimeout(()=>{ if(tts.readyState >= 2){ ttsReady=true; btnLoop.disabled=false; setStatus('st-tts','Google TTS: readyState '+tts.readyState,'ok'); } }, 3500);
     }catch(e){ log('❌ loadTTS lỗi: '+e.message,'err'); setStatus('st-tts','Google TTS: lỗi','err'); }
   }
+
   function fireBeepPattern(){
     if(!audioCtx) return;
-    let count = 0;
-    clearInterval(beepInt);
+    let count = 0; clearInterval(beepInt);
     const doBeep = () => {
       try{
-        if(audioCtx.state==='suspended') audioCtx.resume();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(1320, audioCtx.currentTime + .08);
-        gain.gain.setValueAtTime(0.95, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + .38);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + .4);
-        log('🔔 Beep fired #'+(count+1),'hw');
+        osc.type = 'square'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1320, audioCtx.currentTime + .08);
+        gain.gain.setValueAtTime(0.92, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + .34);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + .36);
+        log('🔔 Beep fired #'+(count+1)+' / cycle '+cycle,'hw');
       }catch(e){ log('❌ Beep lỗi: '+e.message,'err'); }
-      count++;
-      if(count >= 3) clearInterval(beepInt);
+      count++; if(count >= 2) clearInterval(beepInt);
     };
-    doBeep(); beepInt = setInterval(doBeep, 700);
+    doBeep(); beepInt = setInterval(doBeep, 650);
   }
   async function playTTSAlarm(){
     try{
-      if(audioCtx && audioCtx.state==='suspended') await audioCtx.resume();
+      if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
       tts.muted = false; tts.volume = 1;
-      if(tts.readyState < 2) {
-        log('❌ TTS chưa sẵn sàng, readyState='+tts.readyState+'. Không được tính đạt.','err');
+      if(tts.readyState < 2){
+        log('❌ TTS chưa sẵn sàng, readyState='+tts.readyState+'. Vòng này KHÔNG ĐẠT.','err');
         setStatus('st-tts','Google TTS: NOT READY','err');
         return;
       }
-      try { tts.currentTime = 0; } catch(e) {}
-      log('▶️ Google TTS play() called; readyState='+tts.readyState,'warn');
-      const p = tts.play();
-      if(p && p.then) await p;
+      try{ tts.pause(); tts.currentTime = 0; }catch(e){}
+      log('▶️ Google TTS play() called; cycle='+cycle+'; readyState='+tts.readyState,'warn');
+      const p = tts.play(); if(p && p.then) await p;
     }catch(e){ log('❌ Google TTS play() lỗi: '+e.name+' — '+e.message,'err'); }
   }
   function triggerAlarm(){
-    log('🚨 KÍCH NỔ BÁO THỨC','warn');
+    cycle++; setLoopState('đang báo vòng '+cycle);
+    log('🚨 CYCLE #'+cycle+' — KÍCH NỔ BÁO THỨC','warn');
     bg.volume = 0.01; anchor.volume = 0.01;
     log('⚙️ Giữ silence anchor ở 1%, ưu tiên beep + Google TTS','info');
-    fireBeepPattern();
-    setTimeout(playTTSAlarm, 450); // để beep đầu mở đường, không đè quá mạnh lên TTS
+    fireBeepPattern(); setTimeout(playTTSAlarm, 350);
   }
-  function startTimer(){
-    const sec = Math.max(5, Math.min(300, parseInt($('sec').value || '15')));
+  function startInfiniteLoop(){
+    const firstSec = Math.max(5, Math.min(600, parseInt($('first-sec').value || '15')));
+    const loopSec = Math.max(10, Math.min(3600, parseInt($('loop-sec').value || '60')));
     if(!engineReady) return log('⚠️ Chưa kích hoạt Engine','warn');
     if(!ttsReady && tts.readyState < 2) return log('⚠️ TTS chưa ready, hãy bấm nạp và chờ canplay','warn');
-    btnTimer.disabled = true;
-    log(`⏳ Hẹn ${sec}s. HÃY TẮT MÀN HÌNH NGAY.`, 'warn');
-    const code = `let t=0, id=null, target=15; self.onmessage=e=>{ if(e.data.cmd==='start'){ target=e.data.sec; id=setInterval(()=>{ t++; self.postMessage({type:'tick', t, target}); if(t>=target){ clearInterval(id); self.postMessage({type:'fire'}); } },1000); } if(e.data.cmd==='stop'){ clearInterval(id); } };`;
-    if(worker) worker.terminate();
+    if(worker) worker.terminate(); loopRunning = true; cycle = 0; btnLoop.disabled = true; btnLoad.disabled = true;
+    setLoopState('đang chờ vòng đầu');
+    log(`⏳ LOOP VÔ TẬN: vòng đầu sau ${firstSec}s, các vòng sau mỗi ${loopSec}s. TẮT MÀN HÌNH NGAY.`, 'warn');
+    const code = `let remain=15, loop=60, first=true, stopped=false;
+      function tick(){ if(stopped) return; remain--; self.postMessage({type:'tick', remain, target:first?'first':'loop'}); if(remain<=0){ self.postMessage({type:'fire'}); first=false; remain=loop; } setTimeout(tick,1000); }
+      self.onmessage=e=>{ if(e.data.cmd==='start'){ remain=e.data.first; loop=e.data.loop; stopped=false; setTimeout(tick,1000); } if(e.data.cmd==='stop'){ stopped=true; } };`;
     worker = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
     worker.onmessage = e => {
-      if(e.data.type==='tick'){
-        if(e.data.t >= e.data.target - 7) log('Worker đếm: '+e.data.t+'s / '+e.data.target+'s','info');
-      } else if(e.data.type==='fire') triggerAlarm();
+      if(e.data.type === 'tick'){
+        if(e.data.remain <= 7 || e.data.remain % 30 === 0) log('Worker còn: '+e.data.remain+'s ('+e.data.target+')','info');
+      } else if(e.data.type === 'fire') triggerAlarm();
     };
-    worker.postMessage({cmd:'start', sec});
+    worker.postMessage({cmd:'start', first:firstSec, loop:loopSec});
   }
   function stopAll(){
-    try{ if(worker) worker.postMessage({cmd:'stop'}); }catch(e){}
-    clearInterval(beepInt);
-    bg.pause(); anchor.pause(); tts.pause();
-    bg.volume=.45; anchor.volume=.01; tts.volume=1; tts.muted=false;
-    btnEngine.disabled=false; btnLoad.disabled=false; btnTimer.disabled=false;
-    log('🛑 Stop All xong. Có thể reload nếu muốn test lại sạch.','warn');
+    loopRunning = false;
+    try{ if(worker) worker.postMessage({cmd:'stop'}); if(worker) worker.terminate(); }catch(e){}
+    worker = null; clearInterval(beepInt); beepInt = null;
+    try{ tts.pause(); }catch(e){}
+    try{ bg.volume=.01; anchor.volume=.01; if(engineReady){ bg.play().catch(()=>{}); anchor.play().catch(()=>{}); } }catch(e){}
+    btnLoad.disabled = !engineReady; btnLoop.disabled = !(ttsReady || tts.readyState >= 2);
+    setLoopState('đã dừng bởi người dùng');
+    log('🛑 USER STOP — đã dừng vòng lặp. Anchor vẫn giữ nếu engine còn bật.','warn');
   }
+
   btnEngine.addEventListener('click', initEngine);
   btnLoad.addEventListener('click', loadTTS);
-  btnTimer.addEventListener('click', startTimer);
+  btnLoop.addEventListener('click', startInfiniteLoop);
   btnStop.addEventListener('click', stopAll);
 })();
 </script>
