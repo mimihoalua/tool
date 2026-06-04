@@ -2957,6 +2957,145 @@ body.music-player-active #mini-player {
 }
 /* PHA 11B: DESKTOP DOCK FIXED END */
 
+
+/* PHA 15.1: DATECLOCK MOBILE GRID FIX - START */
+@media (max-width: 1023px) {
+  /* Reset chắc chắn mọi override cũ làm 2 ô lịch bị hẹp/cao. */
+  #mode-dateclock-ui {
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  #mode-dateclock-ui > div,
+  #mode-dateclock-ui > div.bg-white {
+    width: 100% !important;
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 16px 14px 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  #dateclock-dual-cards {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    margin: 20px auto 0 !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    grid-auto-flow: row !important;
+    box-sizing: border-box !important;
+  }
+
+  #dateclock-dual-cards > div {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 12px 10px !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  #dateclock-dual-cards > div > .flex {
+    width: 100% !important;
+    margin: 0 0 8px 0 !important;
+    gap: 5px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    font-size: clamp(.68rem, 2.65vw, .82rem) !important;
+    line-height: 1.1 !important;
+    letter-spacing: .035em !important;
+    text-align: center !important;
+  }
+
+  #dateclock-dual-cards > div > .flex i {
+    font-size: clamp(.95rem, 3.6vw, 1.1rem) !important;
+    flex-shrink: 0 !important;
+  }
+
+  #dateclock-solar-short,
+  #dateclock-lunar-short {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    font-size: clamp(1.15rem, 4.8vw, 1.65rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.045em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    text-align: center !important;
+    word-break: keep-all !important;
+    font-variant-numeric: tabular-nums !important;
+  }
+
+  #dateclock-solar-long,
+  #dateclock-lunar-long {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px auto 0 !important;
+    font-size: clamp(.72rem, 2.75vw, .86rem) !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    overflow-wrap: break-word !important;
+    text-align: center !important;
+  }
+
+  #mode-dateclock-ui .mt-4.text-\[11px\] {
+    margin-top: 16px !important;
+  }
+}
+
+@media (min-width: 460px) and (max-width: 1023px) {
+  #dateclock-dual-cards {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 12px !important;
+    max-width: 640px !important;
+  }
+
+  #dateclock-dual-cards > div {
+    padding: 14px 12px !important;
+    border-radius: 20px !important;
+  }
+}
+
+@media (max-width: 359px) {
+  #mode-dateclock-ui > div,
+  #mode-dateclock-ui > div.bg-white {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  #dateclock-dual-cards {
+    gap: 10px !important;
+  }
+
+  #dateclock-solar-short,
+  #dateclock-lunar-short {
+    font-size: clamp(1.04rem, 4.55vw, 1.28rem) !important;
+    letter-spacing: -0.06em !important;
+  }
+}
+/* PHA 15.1: DATECLOCK MOBILE GRID FIX - END */
+
 </style>
 
 <style>
@@ -3225,13 +3364,13 @@ body.music-player-active #mini-player {
         <div class="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3"><i class="ph-bold ph-clock text-primary text-lg"></i> Theo giờ hệ thống thiết bị</div>
         <div id="dateclock-time" class="font-mono text-[clamp(2.35rem,12vw,4.25rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums whitespace-nowrap overflow-hidden text-center">--:--:--</div>
         <div id="dateclock-weekday" class="text-base sm:text-lg font-black text-primary mt-3">--</div>
-        <div id="dateclock-dual-cards">
-            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden">
+        <div id="dateclock-dual-cards" class="grid grid-cols-2 gap-3 mt-5 w-full min-w-0 lifeos-dateclock-two-cols-lock">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-solar">
                 <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-amber-600 mb-2"><i class="ph-fill ph-sun text-base sm:text-lg"></i> Dương lịch</div>
                 <div id="dateclock-solar-short" class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center">--/--/----</div>
                 <div id="dateclock-solar-long" class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center">--</div>
             </div>
-            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-lunar">
                 <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-indigo-600 mb-2"><i class="ph-fill ph-moon-stars text-base sm:text-lg"></i> Âm lịch</div>
                 <div id="dateclock-lunar-short" class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center">--/--/----</div>
                 <div id="dateclock-lunar-long" class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center">--</div>
@@ -3474,7 +3613,23 @@ window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
         <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
             <b>Cảnh báo iOS/Android:</b><br>Bật chuông điện thoại (Bỏ gạt rung). Chạm màn hình 1 lần để tải trước Audio. Background Audio sẽ đếm giờ bất chấp tắt màn hình!
         </div>
-        <div class="grid grid-cols-2 gap-3 flex-shrink-0">
+        
+<!-- PHA15_VOICE_GUARD_STATUS_BLOCK_START -->
+        <div id="lifeos-voiceguard-status-card" class="mb-5 p-4 flex-shrink-0">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 flex items-center gap-2"><i class="ph-bold ph-activity text-emerald-500 text-base"></i> Trạng thái hiện tại</div>
+                <button type="button" onclick="window.refreshLifeOSAlarmStatusUI && window.refreshLifeOSAlarmStatusUI(true)" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[10px] font-black text-slate-500 active:scale-95 hover:brightness-95 flex items-center gap-1"><i class="ph-bold ph-arrow-clockwise"></i> Cập nhật</button>
+            </div>
+            <div class="space-y-2">
+                <div class="lifeos-vg-status-row"><span class="lifeos-vg-status-label">Báo thức nền</span><span id="lifeos-vg-engine" class="lifeos-vg-status-chip is-bad">Chưa kích hoạt</span></div>
+                <div class="lifeos-vg-status-row"><span class="lifeos-vg-status-label">Media anchor / âm thanh nền</span><span id="lifeos-vg-anchor" class="lifeos-vg-status-chip is-warn">Chưa sẵn sàng</span></div>
+                <div class="lifeos-vg-status-row"><span class="lifeos-vg-status-label">Giọng AI / Google TTS</span><span id="lifeos-vg-tts" class="lifeos-vg-status-chip is-warn">Chưa sẵn sàng</span></div>
+                <div id="lifeos-vg-overall" class="is-warn">Cần chạm màn hình để hoàn tất kích hoạt.</div>
+            </div>
+        </div>
+<!-- PHA15_VOICE_GUARD_STATUS_BLOCK_END -->
+
+<div class="grid grid-cols-2 gap-3 flex-shrink-0">
             <button onclick="window.vibrate([50]); window.triggerGlobalAlarm(null, 'Hệ thống báo động thử nghiệm.'); window.showToast('Đang phát...','ph-warning')" class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
             <button onclick="window.testVoiceGuard()" class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
             <button id="lifeos-alarm-anchor-btn" type="button" onclick="window.activateLifeOSAlarmAnchor && window.activateLifeOSAlarmAnchor()" class="col-span-2 py-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm active:scale-95 border border-emerald-200 flex justify-center items-center gap-2 transition-all hover:bg-emerald-100"><i class="ph-bold ph-broadcast"></i> Kích hoạt báo thức nền</button>
@@ -7657,6 +7812,262 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   }
 }
 /* PHA 14: DATECLOCK MOBILE CARD WIDTH FIX - END */
+
+/* PHA 15: DATECLOCK + VOICE GUARD STATUS - START */
+@media (max-width: 1023px) {
+  /* DateClock: ép lại tinh thần hình 2 — hai card rộng, thấp, cân đối. */
+  #mode-dateclock-ui {
+    width: 100% !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  #mode-dateclock-ui > div,
+  #mode-dateclock-ui > div.bg-white {
+    width: calc(100% - 0px) !important;
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 18px 14px 20px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  #dateclock-time {
+    font-size: clamp(3.15rem, 15vw, 4.65rem) !important;
+    line-height: .92 !important;
+    letter-spacing: -0.08em !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    overflow: visible !important;
+  }
+
+  #dateclock-weekday {
+    margin-top: 12px !important;
+    font-size: clamp(1.05rem, 4.6vw, 1.35rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  #dateclock-dual-cards {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-auto-flow: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    min-width: 0 !important;
+    margin: 24px auto 0 !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  #dateclock-dual-cards > div {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 150px !important;
+    height: auto !important;
+    flex: none !important;
+    padding: 16px 10px 14px !important;
+    border-radius: 24px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    box-shadow: 0 10px 24px rgba(120, 83, 20, .10), inset 0 1px 0 rgba(255,255,255,.75) !important;
+  }
+
+  #dateclock-dual-cards > div > .flex {
+    width: 100% !important;
+    margin-bottom: 14px !important;
+    gap: 5px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    font-size: clamp(.68rem, 2.8vw, .82rem) !important;
+    line-height: 1.05 !important;
+    letter-spacing: .035em !important;
+    text-align: center !important;
+  }
+
+  #dateclock-dual-cards > div > .flex i {
+    font-size: clamp(.96rem, 3.7vw, 1.14rem) !important;
+    flex-shrink: 0 !important;
+  }
+
+  #dateclock-solar-short,
+  #dateclock-lunar-short {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+    margin: 0 auto !important;
+    font-size: clamp(1.18rem, 5.15vw, 1.58rem) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.055em !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: keep-all !important;
+    text-align: center !important;
+    font-variant-numeric: tabular-nums !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+
+  #dateclock-solar-long,
+  #dateclock-lunar-long {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    margin: 12px auto 0 !important;
+    font-size: clamp(.72rem, 2.9vw, .86rem) !important;
+    line-height: 1.28 !important;
+    letter-spacing: -0.012em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    text-align: center !important;
+  }
+
+  #mode-dateclock-ui .mt-4.text-\[11px\] {
+    margin-top: 20px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #mode-dateclock-ui > div,
+  #mode-dateclock-ui > div.bg-white {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  #dateclock-dual-cards {
+    gap: 9px !important;
+  }
+
+  #dateclock-dual-cards > div {
+    min-height: 142px !important;
+    padding: 14px 7px 13px !important;
+    border-radius: 21px !important;
+  }
+
+  #dateclock-dual-cards > div > .flex {
+    margin-bottom: 12px !important;
+    font-size: clamp(.60rem, 2.65vw, .74rem) !important;
+    gap: 4px !important;
+    letter-spacing: .025em !important;
+  }
+
+  #dateclock-solar-short,
+  #dateclock-lunar-short {
+    font-size: clamp(1.02rem, 4.85vw, 1.32rem) !important;
+    letter-spacing: -0.07em !important;
+  }
+
+  #dateclock-solar-long,
+  #dateclock-lunar-long {
+    margin-top: 10px !important;
+    font-size: clamp(.62rem, 2.65vw, .75rem) !important;
+    line-height: 1.22 !important;
+  }
+}
+
+#lifeos-voiceguard-status-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(226, 232, 240, .95);
+  background: rgba(248, 250, 252, .82);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.lifeos-vg-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .58rem .7rem;
+  border-radius: .95rem;
+  background: rgba(255,255,255,.74);
+  border: 1px solid rgba(226,232,240,.82);
+}
+
+.lifeos-vg-status-label {
+  color: var(--c-text);
+  font-size: .78rem;
+  font-weight: 850;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.lifeos-vg-status-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .28rem;
+  min-height: 1.75rem;
+  padding: .35rem .62rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 950;
+  border: 1px solid rgba(148,163,184,.35);
+  color: #64748b;
+  background: rgba(241,245,249,.92);
+  white-space: nowrap;
+}
+
+.lifeos-vg-status-chip.is-ok {
+  color: #047857;
+  border-color: rgba(16,185,129,.32);
+  background: rgba(209,250,229,.92);
+}
+
+.lifeos-vg-status-chip.is-warn {
+  color: #a16207;
+  border-color: rgba(234,179,8,.36);
+  background: rgba(254,249,195,.94);
+}
+
+.lifeos-vg-status-chip.is-bad {
+  color: #be123c;
+  border-color: rgba(244,63,94,.30);
+  background: rgba(255,228,230,.92);
+}
+
+#lifeos-vg-overall {
+  margin-top: .25rem;
+  padding: .72rem .8rem;
+  border-radius: 1rem;
+  font-size: .78rem;
+  font-weight: 950;
+  line-height: 1.25;
+  text-align: center;
+  border: 1px solid rgba(234,179,8,.32);
+  color: #a16207;
+  background: rgba(254,249,195,.86);
+}
+
+#lifeos-vg-overall.is-ok {
+  color: #047857;
+  border-color: rgba(16,185,129,.32);
+  background: rgba(209,250,229,.88);
+}
+
+#lifeos-vg-overall.is-bad {
+  color: #be123c;
+  border-color: rgba(244,63,94,.28);
+  background: rgba(255,228,230,.86);
+}
+/* PHA 15: DATECLOCK + VOICE GUARD STATUS - END */
+
 </style>
 
 <div id="lifeos-task-alarm-modal" class="hidden fixed inset-0 z-[9999999] bg-slate-950/90 backdrop-blur-xl items-center justify-center p-4">
@@ -8339,5 +8750,336 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   }, 250);
 })();
 </script>
+
+<!-- PHA15_VOICE_GUARD_STATUS_JS_START -->
+<script>
+(function(){
+  if (window.__lifeosPha15DateClockVoiceGuardStatus) return;
+  window.__lifeosPha15DateClockVoiceGuardStatus = true;
+
+  function $(id){ return document.getElementById(id); }
+  function toast(msg, icon){ try { if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-check-circle'); } catch(e){} }
+  function setChip(id, text, cls){
+    var el = $(id); if (!el) return;
+    el.textContent = text;
+    el.classList.remove('is-ok','is-warn','is-bad');
+    el.classList.add(cls || 'is-warn');
+  }
+  function readyAudio(a){
+    return !!(a && a.readyState >= 2 && a.networkState !== 3);
+  }
+  function anchorReady(){
+    var s = window.LifeOSAlarmLoop || {};
+    var bg = $('lifeos-bg-anchor');
+    var an = $('lifeos-anchor-audio');
+    var oldSilence = $('mstq-silence');
+    var hasAnchorTag = readyAudio(bg) || readyAudio(an) || readyAudio(oldSilence);
+    var isPlaying = (bg && !bg.paused) || (an && !an.paused) || (oldSilence && !oldSilence.paused);
+    return !!(s.activated && (hasAnchorTag || isPlaying));
+  }
+  function ttsReady(){
+    var s = window.LifeOSAlarmLoop || {};
+    var t = $('lifeos-tts-audio');
+    return !!(s.ttsReady || s.ttsPrimed || readyAudio(t));
+  }
+  function engineReady(){
+    var s = window.LifeOSAlarmLoop || {};
+    return !!s.activated;
+  }
+
+  window.refreshLifeOSAlarmStatusUI = function(showToast){
+    var eOk = engineReady();
+    var aOk = anchorReady();
+    var tOk = ttsReady();
+    setChip('lifeos-vg-engine', eOk ? 'Đã kích hoạt' : 'Chưa kích hoạt', eOk ? 'is-ok' : 'is-bad');
+    setChip('lifeos-vg-anchor', aOk ? 'Sẵn sàng' : 'Chưa sẵn sàng', aOk ? 'is-ok' : 'is-warn');
+    setChip('lifeos-vg-tts', tOk ? 'Sẵn sàng' : 'Chưa sẵn sàng', tOk ? 'is-ok' : 'is-warn');
+
+    var overall = $('lifeos-vg-overall');
+    if (overall) {
+      overall.classList.remove('is-ok','is-warn','is-bad');
+      if (eOk && aOk && tOk) {
+        overall.textContent = 'Hệ thống đã sẵn sàng báo thức có chuông và giọng AI.';
+        overall.classList.add('is-ok');
+      } else if (eOk || aOk || tOk) {
+        overall.textContent = 'Gần sẵn sàng. Hãy chạm/kích hoạt lại nếu cần giọng AI chạy nền.';
+        overall.classList.add('is-warn');
+      } else {
+        overall.textContent = 'Cần chạm màn hình để hoàn tất kích hoạt.';
+        overall.classList.add('is-bad');
+      }
+    }
+    if (showToast) {
+      if (eOk && aOk && tOk) toast('Báo thức nền đã sẵn sàng', 'ph-broadcast');
+      else if (eOk || aOk || tOk) toast('Chưa sẵn sàng hoàn toàn, hãy chạm thêm 1 lần', 'ph-warning-circle');
+      else toast('Chưa kích hoạt báo thức nền', 'ph-warning-circle');
+    }
+    return {engine:eOk, anchor:aOk, tts:tOk, ready:(eOk && aOk && tOk)};
+  };
+
+  var oldActivate = window.activateLifeOSAlarmAnchor;
+  if (typeof oldActivate === 'function' && !oldActivate.__pha15Wrapped) {
+    var wrappedActivate = async function(){
+      var ok = false;
+      try { ok = await oldActivate.apply(this, arguments); }
+      finally {
+        try { window.refreshLifeOSAlarmStatusUI(false); } catch(e) {}
+        setTimeout(function(){ try { window.refreshLifeOSAlarmStatusUI(false); } catch(e){} }, 700);
+        setTimeout(function(){ try { window.refreshLifeOSAlarmStatusUI(false); } catch(e){} }, 2500);
+      }
+      return ok;
+    };
+    wrappedActivate.__pha15Wrapped = true;
+    window.activateLifeOSAlarmAnchor = wrappedActivate;
+  }
+
+  var oldShow = window.showSentinelPanel;
+  window.showSentinelPanel = function(){
+    var result;
+    if (typeof oldShow === 'function') result = oldShow.apply(this, arguments);
+    else {
+      var p = $('sentinel-panel');
+      if (p) { p.classList.remove('hidden'); p.style.display = 'flex'; }
+    }
+    try { window.refreshLifeOSAlarmStatusUI(false); } catch(e) {}
+    setTimeout(function(){ try { window.refreshLifeOSAlarmStatusUI(false); } catch(e){} }, 500);
+    return result;
+  };
+
+  ['lifeos-tts-audio','lifeos-bg-anchor','lifeos-anchor-audio','mstq-silence'].forEach(function(id){
+    var a = $(id); if (!a || a.__pha15StatusEvents) return;
+    a.__pha15StatusEvents = true;
+    ['playing','canplay','canplaythrough','loadeddata','pause','ended','error','stalled'].forEach(function(evt){
+      a.addEventListener(evt, function(){ try { window.refreshLifeOSAlarmStatusUI(false); } catch(e){}; });
+    });
+  });
+
+  var autoTried = false;
+  var autoRunning = false;
+  async function autoPrimeAlarmEngine(){
+    if (autoTried || autoRunning) return;
+    var s = window.LifeOSAlarmLoop || {};
+    if (s.activated) { try { window.refreshLifeOSAlarmStatusUI(false); } catch(e){}; return; }
+    if (typeof window.activateLifeOSAlarmAnchor !== 'function') return;
+    autoTried = true;
+    autoRunning = true;
+    try {
+      var ok = await window.activateLifeOSAlarmAnchor();
+      var st = window.refreshLifeOSAlarmStatusUI(false);
+      if (ok && st.ready) toast('Đã kích hoạt báo thức nền', 'ph-broadcast');
+      else if (ok) toast('Chưa sẵn sàng hoàn toàn, hãy chạm thêm 1 lần', 'ph-warning-circle');
+      else toast('Giọng AI chưa sẵn sàng', 'ph-warning-circle');
+    } catch(e) {
+      try { window.refreshLifeOSAlarmStatusUI(false); } catch(err) {}
+      toast('Chưa sẵn sàng hoàn toàn, hãy chạm thêm 1 lần', 'ph-warning-circle');
+    } finally { autoRunning = false; }
+  }
+
+  ['pointerdown','touchend','click'].forEach(function(evt){
+    document.addEventListener(evt, function(){
+      setTimeout(autoPrimeAlarmEngine, 120);
+    }, {once:true, passive:true});
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ window.refreshLifeOSAlarmStatusUI(false); }, {once:true});
+  } else {
+    window.refreshLifeOSAlarmStatusUI(false);
+  }
+})();
+</script>
+<!-- PHA15_VOICE_GUARD_STATUS_JS_END -->
+
+
+
+
+<!-- PHA15_3_DATECLOCK_MOBILE_TWO_COLS_LEFT_RIGHT_FIX_START -->
+<style id="pha15-3-dateclock-mobile-two-cols-left-right-fix">
+/* PHA 15.3: khóa 2 ô lịch mobile thành 2 cột ngang trái/phải, không để card co thành thanh dọc. */
+@media (max-width: 1023px) {
+  html body #mode-dateclock-ui,
+  html body #mode-dateclock-ui > div,
+  html body #mode-dateclock-ui > div.bg-white {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  html body #mode-dateclock-ui > div,
+  html body #mode-dateclock-ui > div.bg-white {
+    padding-left: clamp(10px, 3vw, 16px) !important;
+    padding-right: clamp(10px, 3vw, 16px) !important;
+  }
+
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock,
+  html body #dateclock-dual-cards {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    grid-auto-flow: row !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 18px auto 0 !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock > .lifeos-dateclock-card,
+  html body #dateclock-dual-cards > div {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 170px !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 14px 8px !important;
+    border-radius: 22px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    flex: none !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+  }
+
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock > .lifeos-dateclock-card-solar,
+  html body #dateclock-dual-cards > div:nth-child(1) {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+  }
+
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock > .lifeos-dateclock-card-lunar,
+  html body #dateclock-dual-cards > div:nth-child(2) {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 / 2 !important;
+  }
+
+  html body #dateclock-dual-cards > div > .flex {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: 10px !important;
+    line-height: 1.08 !important;
+    letter-spacing: .03em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    text-align: center !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+  }
+
+  html body #dateclock-dual-cards > div > .flex i {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    flex: 0 0 auto !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+  }
+
+  html body #dateclock-solar-short,
+  html body #dateclock-lunar-short {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    font-size: clamp(1.05rem, 4vw, 1.45rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.04em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    text-align: center !important;
+    font-variant-numeric: tabular-nums !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+  }
+
+  html body #dateclock-solar-long,
+  html body #dateclock-lunar-long {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 10px auto 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    text-align: center !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock,
+  html body #dateclock-dual-cards {
+    gap: 8px !important;
+  }
+
+  html body #dateclock-dual-cards.lifeos-dateclock-two-cols-lock > .lifeos-dateclock-card,
+  html body #dateclock-dual-cards > div {
+    min-height: 158px !important;
+    padding: 12px 6px !important;
+    border-radius: 19px !important;
+  }
+
+  html body #dateclock-dual-cards > div > .flex {
+    font-size: 9px !important;
+    gap: 3px !important;
+    margin-bottom: 10px !important;
+    letter-spacing: .015em !important;
+  }
+
+  html body #dateclock-dual-cards > div > .flex i {
+    font-size: 13px !important;
+  }
+
+  html body #dateclock-solar-short,
+  html body #dateclock-lunar-short {
+    font-size: clamp(.94rem, 3.85vw, 1.16rem) !important;
+    letter-spacing: -0.055em !important;
+  }
+
+  html body #dateclock-solar-long,
+  html body #dateclock-lunar-long {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    margin-top: 8px !important;
+  }
+}
+</style>
+<!-- PHA15_3_DATECLOCK_MOBILE_TWO_COLS_LEFT_RIGHT_FIX_END -->
+
 </body>
 </html>
