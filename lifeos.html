@@ -27,6 +27,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
+/* Custom CSS Dự Báo Thời Tiết (Pha 02) */
+.weather-daily-card {
+    min-width: 90px; flex: 1 1 0; scroll-snap-align: start;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #ffffff; border: 1px solid #f1f5f9; border-radius: 1rem; padding: 12px 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;
+}
+.weather-daily-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
+
 :root, [data-theme="light"] { --lifeos-bottom-nav-h: 72px; --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -3096,6 +3105,67 @@ body.music-player-active #mini-player {
 }
 /* PHA 15.1: DATECLOCK MOBILE GRID FIX - END */
 
+
+/* LIFEOS FINAL CORE MOBILE HEADER — CHECKLIST PASS */
+@media (max-width: 1023px) {
+  html body header, html body header.lifeos-header-v17-2 {
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+    align-items: center !important; justify-content: space-between !important;
+    width: 100% !important; min-height: 60px !important; box-sizing: border-box !important;
+    padding: max(8px, env(safe-area-inset-top)) 10px 8px 10px !important; gap: 10px !important; overflow: visible !important;
+  }
+  html body header > div:first-child, html body header.lifeos-header-v17-2 .lifeos-header-brand {
+    display: flex !important; flex: 1 1 auto !important; min-width: 0 !important; gap: 8px !important;
+    align-items: center !important; justify-content: flex-start !important; overflow: hidden !important;
+  }
+  html body header > div:first-child .bg-primary {
+    flex: 0 0 38px !important; width: 38px !important; height: 38px !important; min-width: 38px !important; max-width: 38px !important;
+    padding: 0 !important; border-radius: 12px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+  }
+  html body header > div:first-child > div:nth-child(2), html body header > div:first-child > div:last-child {
+    min-width: 0 !important; display: flex !important; flex: 1 1 auto !important; flex-direction: column !important; justify-content: center !important; overflow: hidden !important;
+  }
+  html body header > div:first-child h1 {
+    font-size: clamp(14px, 4.5vw, 18px) !important; line-height: 1.1 !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 !important; display: block !important;
+    width: 100% !important; min-width: 0 !important; max-width: none !important; letter-spacing: -0.035em !important;
+  }
+  html body header > div:first-child #sentinel-badge { display: none !important; }
+  html body header > div:last-child, html body header.lifeos-header-v17-2 .lifeos-header-actions {
+    display: flex !important; flex: 0 0 auto !important; gap: 6px !important; min-width: 0 !important;
+    align-items: center !important; justify-content: flex-end !important; overflow: visible !important; margin-left: auto !important;
+  }
+  html body header > div:last-child > div:first-child {
+    display: flex !important; gap: 6px !important; align-items: center !important; justify-content: flex-end !important; flex: 0 0 auto !important; min-width: 0 !important; overflow: visible !important;
+  }
+  html body header > div:last-child a, html body #theme-toggle {
+    flex: 0 0 36px !important; width: 36px !important; height: 36px !important; min-width: 36px !important; max-width: 36px !important;
+    padding: 0 !important; margin: 0 !important; border-radius: 50% !important;
+    display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important;
+  }
+  html body header > div:last-child a span { display: none !important; }
+  html body header > div:last-child a i, html body #theme-toggle i { margin: 0 !important; font-size: 18px !important; line-height: 1 !important; }
+  html body #profile-selector { margin: 0 !important; flex: 0 0 auto !important; flex-shrink: 0 !important; min-width: 0 !important; overflow: visible !important; }
+  html body #profile-btn {
+    height: 36px !important; min-height: 36px !important; min-width: 62px !important; max-width: 82px !important; padding: 0 9px !important; border-radius: 999px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    gap: 4px !important; font-size: 12px !important; font-weight: 800 !important; white-space: nowrap !important; overflow: hidden !important; box-sizing: border-box !important;
+  }
+  html body #profile-name-badge { display: inline-block !important; max-width: 50px !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+  html body #pwaStatusDot { display: none !important; }
+}
+@media (max-width: 380px) {
+   html body header { padding-left: 6px !important; padding-right: 6px !important; gap: 4px !important; }
+   html body header > div:first-child { gap: 4px !important; }
+   html body header > div:first-child .bg-primary { flex: 0 0 34px !important; width: 34px !important; height: 34px !important; min-width: 34px !important; max-width: 34px !important; }
+   html body header > div:first-child h1 { font-size: 13px !important; }
+   html body header > div:last-child, html body header > div:last-child > div:first-child { gap: 4px !important; }
+   html body header > div:last-child a, html body #theme-toggle { flex: 0 0 34px !important; width: 34px !important; height: 34px !important; min-width: 34px !important; max-width: 34px !important; }
+   html body header > div:last-child a i, html body #theme-toggle i { font-size: 17px !important; }
+   html body #profile-btn { height: 34px !important; min-height: 34px !important; min-width: 56px !important; max-width: 68px !important; padding: 0 7px !important; font-size: 11px !important; }
+   html body #profile-name-badge { max-width: 40px !important; }
+}
 </style>
 
 <style>
@@ -3291,30 +3361,25 @@ body.music-player-active #mini-player {
 <button onclick="window.submitPassword()" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 transition shadow-lg hover:brightness-110 flex justify-center items-center gap-2"><i class="ph-bold ph-sign-in"></i> Vào</button>
 </div></div></div>
 
-<header class="flex justify-between items-center px-3 sm:px-6 lg:px-8 py-3 lg:py-4 bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 shadow-sm shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))] overflow-visible">
-<div class="flex items-center gap-2 sm:gap-3">
-<div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
-<div><h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
-<div class="flex items-center gap-2 mt-0.5">
-<span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div></div></div>
-
-<div class="flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
-    <div class="flex items-center gap-1.5 sm:gap-2">
-        <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i> <span class="hidden md:inline">Trang chủ</span></a>
-        <a href="https://mimihoalua.github.io/tool/readlifeos.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i> <span class="hidden md:inline">Hướng dẫn</span></a>
-    </div>
-
-    <span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"></span>
-    
-    <div id="profile-selector" class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible">
-        <button id="profile-btn" onclick="window.toggleProfileMenu()" class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95"><span id="profile-name-badge">N/A</span> <i class="ph-bold ph-caret-down text-[10px]"></i></button>
-        <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
-    </div>
-    
-    <button id="theme-toggle" onclick="window.cycleTheme()" class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center">
-        <i id="theme-icon" class="ph-bold ph-sun text-base sm:text-lg transition-transform"></i>
-    </button>
-</div>
+<header class="lifeos-header-final flex justify-between items-center px-3 sm:px-6 lg:px-8 py-3 lg:py-4 bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 shadow-sm shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))] overflow-visible">
+  <div class="lifeos-header-brand flex items-center gap-2 sm:gap-3">
+    <div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
+    <div class="lifeos-brand-text"><h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
+      <div class="flex items-center gap-2 mt-0.5"><span id="sentinel-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div>
+    </div>
+  </div>
+  <div class="lifeos-header-actions flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
+    <div class="lifeos-header-link-group flex items-center gap-1.5 sm:gap-2">
+      <a href="https://mimihoalua.github.io/mimihoalua/" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i><span class="hidden md:inline">Trang chủ</span></a>
+      <a href="https://mimihoalua.github.io/tool/readlifeos.html" target="_blank" class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i><span class="hidden md:inline">Hướng dẫn</span></a>
+    </div>
+    <span id="pwaStatusDot" class="status-dot mt-0.5 hidden md:inline-block shrink-0" title="Trạng thái Cloud"></span>
+    <div id="profile-selector" class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible">
+      <button id="profile-btn" onclick="window.toggleProfileMenu()" class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95"><span id="profile-name-badge">N/A</span><i class="ph-bold ph-caret-down text-[10px]"></i></button>
+      <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
+    </div>
+    <button id="theme-toggle" onclick="window.cycleTheme()" class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center"><i id="theme-icon" class="ph-bold ph-sun text-base sm:text-lg transition-transform"></i></button>
+  </div>
 </header>
 
 <div id="desktop-workspace-dock" class="hidden lg:flex" role="navigation" aria-label="Không gian làm việc LifeOS">
@@ -3330,7 +3395,7 @@ body.music-player-active #mini-player {
 <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
 <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
 <form id="form-pc" class="flex gap-3">
-    <button type="button" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl"></i></button>
+    <button type="button" onclick="window.lifeosStartMicToInput('input-pc', this)" class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200"><i class="ph-fill ph-microphone text-xl pointer-events-none"></i></button>
     <div class="relative flex-grow">
         <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
         <input type="text" id="input-pc" placeholder="Gõ NLP: hằng ngày lúc 14h30 đọc sách !gấp #hoc_tap..." class="w-full bg-slate-50 border border-slate-200 outline-none py-3.5 pl-12 pr-4 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner" autocomplete="off">
@@ -3380,45 +3445,78 @@ body.music-player-active #mini-player {
     </div>
 </div>
 <div id="mode-weather-ui" class="hidden w-full flex-col items-center z-10 animate-fadeIn">
-    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0">
-        <div class="flex items-center justify-between gap-3 mb-4">
-            <div class="min-w-0">
-                <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500"><i class="ph-bold ph-cloud-sun text-primary text-lg"></i> Thời tiết</div>
-                <div id="weather-updated" class="text-[11px] font-semibold text-slate-400 mt-1 truncate">Chưa cập nhật</div>
-            </div>
-            <button onclick="window.refreshWeather()" id="weather-refresh-btn" class="shrink-0 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-primary font-bold text-xs active:scale-95 hover:brightness-95 flex items-center gap-1">
-                <i class="ph-bold ph-arrow-clockwise"></i><span class="hidden min-[390px]:inline">Làm mới</span>
-            </button>
-        </div>
-        <div class="grid grid-cols-3 gap-1.5 mb-4" id="weather-location-tabs">
-            <button onclick="window.setWeatherLocation('hanoi')" id="weather-loc-hanoi" class="weather-loc-btn py-2 px-1 rounded-xl bg-primary text-white border border-primary text-[11px] font-black active:scale-95 truncate">Hà Nội</button>
-            <button onclick="window.setWeatherLocation('noibai')" id="weather-loc-noibai" class="weather-loc-btn py-2 px-1 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 text-[11px] font-black active:scale-95 truncate">Nội Bài</button>
-            <button onclick="window.setWeatherLocation('socson')" id="weather-loc-socson" class="weather-loc-btn py-2 px-1 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 text-[11px] font-black active:scale-95 truncate">Sóc Sơn</button>
-        </div>
-        <div id="weather-status" class="hidden mb-3 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2"></div>
-        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-4 sm:p-5 shadow-inner min-w-0 overflow-hidden">
-            <div class="flex items-start justify-between gap-4">
-                <div class="min-w-0">
-                    <div id="weather-location-name" class="text-sm font-black text-slate-700 truncate">Hà Nội</div>
-                    <div id="weather-desc" class="text-xs font-bold text-slate-500 mt-1">Đang tải...</div>
-                    <div id="weather-temp" class="font-mono text-[clamp(2.5rem,11vw,4rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums mt-3 whitespace-nowrap">--°C</div>
-                </div>
-                <div class="shrink-0 w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm">
-                    <i id="weather-icon" class="ph-bold ph-cloud-sun text-4xl"></i>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mt-4">
-                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Cảm giác</div><div id="weather-feels" class="text-sm font-black text-slate-800 mt-1">--°C</div></div>
-                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Độ ẩm</div><div id="weather-humidity" class="text-sm font-black text-slate-800 mt-1">--%</div></div>
-                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Gió</div><div id="weather-wind" class="text-sm font-black text-slate-800 mt-1">-- km/h</div></div>
-                <div class="bg-white/80 border border-slate-200 rounded-2xl p-3 min-w-0"><div class="text-[10px] font-black uppercase text-slate-400">Mưa</div><div id="weather-rain" class="text-sm font-black text-slate-800 mt-1">-- mm</div></div>
-            </div>
-        </div>
-        <div class="mt-4">
-            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 mb-2"><i class="ph-bold ph-calendar-dots text-primary"></i> Dự báo 5 ngày</div>
-            <div id="weather-daily-list" class="flex gap-2 overflow-x-auto custom-scroll-area pb-1"></div>
-        </div>
-    </div>
+    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-6 shadow-sm overflow-hidden min-w-0">
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-5 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 border border-sky-100 shrink-0">
+                    <i class="ph-fill ph-cloud-sun text-2xl"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm font-black uppercase tracking-widest text-slate-800">Thời tiết</h3>
+                        <span id="weather-updated" class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md truncate">--:--</span>
+                    </div>
+                    <div id="weather-status" class="hidden text-xs font-semibold text-amber-600 mt-0.5 truncate"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 w-full xl:w-auto overflow-x-auto hide-scrollbar custom-scroll-area pb-1">
+                 <button onclick="window.setWeatherLocation('hanoi')" id="weather-loc-hanoi" class="weather-loc-btn shrink-0 px-4 py-2 rounded-xl bg-primary text-white text-[12px] font-bold active:scale-95 transition-all shadow-sm">Hà Nội</button>
+                 <button onclick="window.setWeatherLocation('noibai')" id="weather-loc-noibai" class="weather-loc-btn shrink-0 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[12px] font-bold active:scale-95 transition-all hover:bg-slate-100">Nội Bài</button>
+                 <button onclick="window.setWeatherLocation('socson')" id="weather-loc-socson" class="weather-loc-btn shrink-0 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[12px] font-bold active:scale-95 transition-all hover:bg-slate-100">Sóc Sơn</button>
+                 <button onclick="window.refreshWeather()" id="weather-refresh-btn" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-primary active:scale-95 transition-all hover:brightness-95" title="Làm mới"><i class="ph-bold ph-arrows-clockwise text-base"></i></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+            <div class="lg:col-span-5 bg-gradient-to-br from-sky-50 to-indigo-50 rounded-[1.25rem] p-5 border border-sky-100 shadow-inner relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+                <i class="ph-fill ph-cloud-sun absolute -right-6 -top-6 text-[160px] text-sky-500/10 pointer-events-none transform -rotate-12"></i>
+
+                <div class="flex justify-between items-start relative z-10">
+                    <div class="min-w-0 pr-2">
+                        <div id="weather-location-name" class="text-xl font-black text-slate-800 tracking-tight truncate">Hà Nội</div>
+                        <div id="weather-desc" class="text-sm font-bold text-sky-600/90 mt-1 capitalize truncate">Đang tải...</div>
+                    </div>
+                    <div class="w-14 h-14 bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-white flex items-center justify-center text-sky-500 shrink-0">
+                        <i id="weather-icon" class="ph-fill ph-cloud-sun text-4xl"></i>
+                    </div>
+                </div>
+
+                <div class="mt-4 relative z-10 flex items-end justify-between">
+                    <div id="weather-temp" class="font-mono text-5xl sm:text-6xl font-black text-slate-900 tracking-tighter leading-none">--°</div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-slate-50 rounded-[1.25rem] p-4 border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02]">
+                    <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-rose-500 mb-2"><i class="ph-bold ph-thermometer text-lg"></i></div>
+                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Cảm giác</div>
+                    <div id="weather-feels" class="text-lg font-black text-slate-700 mt-0.5">--°C</div>
+                </div>
+                <div class="bg-slate-50 rounded-[1.25rem] p-4 border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02]">
+                    <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-blue-500 mb-2"><i class="ph-bold ph-drop text-lg"></i></div>
+                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Độ ẩm</div>
+                    <div id="weather-humidity" class="text-lg font-black text-slate-700 mt-0.5">--%</div>
+                </div>
+                <div class="bg-slate-50 rounded-[1.25rem] p-4 border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02]">
+                    <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-teal-500 mb-2"><i class="ph-bold ph-wind text-lg"></i></div>
+                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Gió</div>
+                    <div id="weather-wind" class="text-lg font-black text-slate-700 mt-0.5">-- km/h</div>
+                </div>
+                <div class="bg-slate-50 rounded-[1.25rem] p-4 border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02]">
+                    <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-indigo-500 mb-2"><i class="ph-bold ph-cloud-rain text-lg"></i></div>
+                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Lượng mưa</div>
+                    <div id="weather-rain" class="text-lg font-black text-slate-700 mt-0.5">-- mm</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t border-slate-100 pt-5">
+             <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 mb-3"><i class="ph-bold ph-calendar-dots text-primary text-sm"></i> Dự báo 5 ngày tới</div>
+             <div id="weather-daily-list" class="flex gap-3 overflow-x-auto hide-scrollbar custom-scroll-area pb-2 snap-x">
+                 </div>
+        </div>
+    </div>
 </div>
 <div id="mode-news-ui" class="hidden w-full flex-col z-10 animate-fadeIn">
     <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0">
@@ -3540,7 +3638,7 @@ body.music-player-active #mini-player {
 <div id="mobile-input" class="lg:hidden fixed inset-x-0 z-[60] px-3 transition-all duration-300" style="bottom: calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom));">
 <form id="form-mobile" class="w-full max-w-3xl mx-auto flex flex-col bg-white/80 backdrop-blur-2xl rounded-2xl p-1.5 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] border border-white/70">
     <div class="flex items-center w-full gap-1">
-        <button type="button" class="btn-voice p-3 text-slate-400 hover:text-primary transition rounded-xl active:scale-90"><i class="ph-fill ph-microphone text-xl"></i></button>
+        <button type="button" onclick="window.lifeosStartMicToInput('input-mobile', this)" class="btn-voice p-2.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl active:scale-90 border border-slate-200 shadow-sm shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"><i class="ph-fill ph-microphone text-[20px] pointer-events-none"></i></button>
         <input type="text" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" autocomplete="off">
         <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
             <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
@@ -3735,43 +3833,105 @@ window.firePhysicalBeep = () => {
     } catch(e) {}
 };
 
-window.initTTS=()=>{
-    if(!window.synth)return; window.ttsActive=true;
-    const l=()=>{const v=window.synth.getVoices();window.voice=v.find(x=>x.lang.includes('vi'))||v[0];setTxt('voice-info-badge',window.voice?window.voice.name:'Chưa có giọng VN')};
-    l();window.synth.onvoiceschanged=l;
-    el('bot-icon')?.classList.add('text-white','speaking-glow');
-    window.showToast('Voice Guard Ready','ph-robot'); window.vibrate(20); window.unlockAudio();
+// ==============================================================================
+// NATIVE TTS CORE & CẦM TAY CHỈ VIỆC (PHA 01)
+// ==============================================================================
+window.lifeosTTS = {
+    synth: window.speechSynthesis,
+    voice: null,
+    init: function() {
+        if (!this.synth) return;
+        this.loadVoice();
+        this.synth.onvoiceschanged = () => this.loadVoice();
+    },
+    loadVoice: function() {
+        let voices = this.synth.getVoices() || [];
+        if (!voices.length) return;
+        let viVoices = voices.filter(v => v.lang.toLowerCase().includes('vi'));
+        let msAn = viVoices.find(v => v.name.toLowerCase().includes('an'));
+        let ggVi = viVoices.find(v => v.name.toLowerCase().includes('google'));
+        this.voice = msAn || ggVi || viVoices[0] || voices[0];
+        const badge = document.getElementById('voice-info-badge');
+        if(badge) badge.textContent = this.voice ? 'Giọng máy: ' + this.voice.name : 'Chưa có giọng Việt';
+    },
+    speak: function(text) {
+        if (!window.soundEnabled || !text || !this.synth) return;
+        this.synth.cancel(); // Ngắt ngay giọng cũ để không bị vấp/lồng
+        let u = new SpeechSynthesisUtterance(text);
+        if (this.voice) u.voice = this.voice;
+        u.lang = this.voice ? this.voice.lang : 'vi-VN';
+        u.rate = 1.05;
+        u.pitch = 1.0;
+        u.volume = 1;
+        this.synth.speak(u); // Chấp nhận rủi ro mất tiếng chứ tuyệt đối không gọi Fallback Online
+    }
 };
 
-window.playSpeechTTS = (text) => {
-    if (!window.soundEnabled) return;
-    const speakNative = () => {
-        if(window.synth) {
-            window.synth.cancel(); 
-            const u = new SpeechSynthesisUtterance(text); 
-            if(window.voice) u.voice = window.voice; 
-            u.rate = 1.1; u.pitch = 1.1; window.synth.speak(u); 
-        }
-    };
-    try {
-        const c = document.getElementById('tts-audio');
-        if (c) {
-            c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(text)}`;
-            c.onerror = () => {
-                if (c.src.includes('google')) {
-                    const backupUrl = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(text)}&lang=vi&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=svhopqlX&gender=fallback`;
-                    c.src = backupUrl;
-                    c.load();
-                    c.play().catch(()=>{ speakNative(); });
-                } else { speakNative(); }
-            };
-            const playPromise = c.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => { speakNative(); });
-            }
-        } else { speakNative(); }
-    } catch (e) { speakNative(); }
+window.initTTS = () => {
+    window.ttsActive = true;
+    window.lifeosTTS.init();
+    const bot = document.getElementById('bot-icon');
+    if(bot) bot.classList.add('text-white','speaking-glow');
+    window.showToast('Hệ thống giọng nói sẵn sàng', 'ph-robot');
+    window.vibrate(20);
+    window.unlockAudio();
+    window.lifeosTTS.speak('Giọng máy đã sẵn sàng');
 };
+
+window.playSpeechTTS = window.speak = (text) => {
+    window._recentSpecificSpeak = Date.now();
+    window.lifeosTTS.speak(text);
+};
+
+window.testVoiceGuard = function() {
+    window.initTTS();
+    window.playSpeechTTS('Life OS đã bật bảo vệ giọng nói.');
+};
+
+// Lắng nghe sự kiện click toàn cục: Đọc mọi thao tác (Cầm tay chỉ việc)
+document.addEventListener('click', function(e) {
+    if(!window.soundEnabled) return;
+    let el = e.target.closest('button, a, .swipe-front, .song-row, .cat-filter-btn, .weather-loc-btn, [role="button"]');
+    if (!el) return;
+
+    let textToSpeak = '';
+    if (el.classList.contains('swipe-front')) {
+        let titleEl = el.querySelector('.font-bold.cursor-pointer');
+        if(titleEl) textToSpeak = 'Nhiệm vụ: ' + titleEl.innerText;
+    } else if (el.classList.contains('song-row')) {
+        let titleEl = el.querySelector('.song-title');
+        if(titleEl) textToSpeak = 'Phát nhạc: ' + titleEl.innerText;
+    } else if (el.classList.contains('cat-filter-btn')) {
+        textToSpeak = 'Lọc ' + el.innerText;
+    } else if (el.classList.contains('weather-loc-btn')) {
+        textToSpeak = 'Thời tiết ' + el.innerText;
+    } else if (el.id === 'btn-play-pause') {
+        textToSpeak = window.MusicApp && window.MusicApp.playing ? 'Tạm dừng nhạc' : 'Phát nhạc';
+    } else if (el.id === 'btn-next') {
+        textToSpeak = 'Bài tiếp theo';
+    } else if (el.id === 'btn-prev') {
+        textToSpeak = 'Bài trước đó';
+    } else if (el.id === 'btn-shuffle') {
+        textToSpeak = 'Trộn bài';
+    } else if (el.id === 'btn-repeat') {
+        textToSpeak = 'Lặp lại';
+    } else {
+        textToSpeak = el.getAttribute('aria-label') || el.getAttribute('title') || el.innerText;
+    }
+
+    if (!textToSpeak) return;
+    textToSpeak = textToSpeak.replace(/[\r\n]+/g, ' ').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, '').trim();
+
+    if (textToSpeak && textToSpeak.length > 0 && textToSpeak.length < 80) {
+        // Trễ 50ms để nhường quyền ưu tiên cho các hàm speak() gọi trực tiếp
+        setTimeout(() => {
+            if(!window._recentSpecificSpeak || (Date.now() - window._recentSpecificSpeak > 300)) {
+                window.lifeosTTS.speak(textToSpeak);
+            }
+        }, 50);
+    }
+}, true);
+
 
 window.audioInitialized = false;
 window.lastSentinelCheck = Date.now();
@@ -4129,478 +4289,14 @@ window.toggleTimerSound=()=>{window.soundEnabled=!window.soundEnabled;const b=el
 window.showSentinelPanel=()=>{showFlex('sentinel-panel');window.vibrate(10);};
 window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 
-/* PHA5_VOICE_GUARD_TTS_PATCH_START */
-(function(){
-  if (window.__lifeosPha5VoiceGuardTTSPatch) return;
-  window.__lifeosPha5VoiceGuardTTSPatch = true;
 
-  const TEST_TEXT = 'LifeOS đã bật bảo vệ giọng nói. Tôi sẽ nhắc bạn khi cần.';
-  const $ = (id) => document.getElementById(id);
 
-  function toast(msg, icon){
-    try {
-      if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-speaker-high');
-    } catch(e) {}
-  }
 
-  function normalize(s){ return String(s || '').toLowerCase(); }
 
-  function getVoiceList(){
-    try {
-      if (!window.speechSynthesis) return [];
-      return window.speechSynthesis.getVoices() || [];
-    } catch(e) { return []; }
-  }
 
-  window.selectVietnameseVoice = function(){
-    const voices = getVoiceList();
-    if (!voices.length) return null;
 
-    const isVi = (v) => /(^|[-_])vi([-_]vn)?$/i.test(String(v.lang || '').replace('_','-')) || /^vi/i.test(String(v.lang || ''));
-    const viVoices = voices.filter(isVi);
-    const googleVi = viVoices.find(v => normalize(v.name).includes('google'));
-    const vietnameseNamed = viVoices.find(v => /vietnam|tiếng việt|viet/i.test(v.name || ''));
-    const anyGoogle = voices.find(v => normalize(v.name).includes('google'));
 
-    return googleVi || vietnameseNamed || viVoices[0] || anyGoogle || voices[0] || null;
-  };
 
-  window.hasVietnameseTTSVoice = function(){
-    const v = window.selectVietnameseVoice();
-    return !!(v && /^vi/i.test(String(v.lang || '')));
-  };
-
-  window.refreshVoiceGuardInfo = function(showToastNow){
-    const synth = window.speechSynthesis;
-    const badge = $('voice-info-badge');
-
-    if (!synth) {
-      window.voice = null;
-      if (badge) badge.textContent = 'Trình duyệt chưa hỗ trợ giọng nói';
-      if (showToastNow) toast('Trình duyệt chưa có giọng Việt', 'ph-warning-circle');
-      return null;
-    }
-
-    const voices = getVoiceList();
-    const chosen = window.selectVietnameseVoice();
-    window.voice = chosen;
-
-    if (!voices.length) {
-      if (badge) badge.textContent = 'Đang tải giọng tiếng Việt...';
-      if (showToastNow) toast('Voice Guard đã sẵn sàng', 'ph-robot');
-      return chosen;
-    }
-
-    const hasVi = !!(chosen && /^vi/i.test(String(chosen.lang || '')));
-    if (badge) {
-      if (chosen) badge.textContent = (hasVi ? 'Giọng Việt: ' : 'Giọng dự phòng: ') + (chosen.name || chosen.lang || 'Mặc định');
-      else badge.textContent = 'Chưa tìm thấy giọng nói';
-    }
-
-    if (showToastNow) {
-      toast(hasVi ? 'Voice Guard đã sẵn sàng' : 'Trình duyệt chưa có giọng Việt', hasVi ? 'ph-robot' : 'ph-warning-circle');
-    }
-    return chosen;
-  };
-
-  window.unlockLifeOSTTSGesture = function(){
-    try { if (typeof window.unlockAudio === 'function') window.unlockAudio(); } catch(e) {}
-    try {
-      const c = $('tts-audio');
-      if (c) { c.muted = false; c.volume = 1; }
-    } catch(e) {}
-    try {
-      const synth = window.speechSynthesis;
-      if (synth) {
-        if (synth.paused) synth.resume();
-        const u = new SpeechSynthesisUtterance(' ');
-        u.lang = 'vi-VN';
-        u.volume = 0;
-        synth.speak(u);
-      }
-    } catch(e) {}
-  };
-
-  window.initTTS = function(options){
-    options = options || {};
-    window.soundEnabled = true;
-    window.ttsActive = true;
-    window.synth = window.speechSynthesis;
-    window.unlockLifeOSTTSGesture();
-
-    const refresh = () => window.refreshVoiceGuardInfo(!options.silentToast);
-    refresh();
-    setTimeout(() => window.refreshVoiceGuardInfo(false), 180);
-    setTimeout(() => window.refreshVoiceGuardInfo(false), 650);
-
-    try {
-      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = function(){ window.refreshVoiceGuardInfo(false); };
-    } catch(e) {}
-
-    try { $('bot-icon')?.classList.add('text-white','speaking-glow'); } catch(e) {}
-    try { if (typeof window.vibrate === 'function') window.vibrate(20); } catch(e) {}
-    return true;
-  };
-
-  function speakWithAudioFallback(text){
-    const c = $('tts-audio');
-    if (!c) return false;
-    try {
-      c.pause();
-      c.currentTime = 0;
-      c.muted = false;
-      c.volume = 1;
-      c.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=' + encodeURIComponent(text);
-      c.load();
-      const p = c.play();
-      if (p && typeof p.catch === 'function') p.catch(function(){
-        toast('Trình duyệt chưa có giọng Việt', 'ph-warning-circle');
-      });
-      return true;
-    } catch(e) { return false; }
-  }
-
-  window.playSpeechTTS = window.speak = function(text, options){
-    options = options || {};
-    if (!text) return false;
-    if (window.soundEnabled === false && !options.force) return false;
-
-    const msg = String(text);
-    const synth = window.speechSynthesis;
-    window.synth = synth;
-
-    try {
-      const c = $('tts-audio');
-      if (c) { c.muted = false; c.volume = 1; }
-    } catch(e) {}
-
-    if (synth) {
-      try {
-        window.refreshVoiceGuardInfo(false);
-        synth.cancel();
-        if (synth.paused) synth.resume();
-
-        const u = new SpeechSynthesisUtterance(msg);
-        const chosen = window.voice || window.selectVietnameseVoice();
-        if (chosen) u.voice = chosen;
-        u.lang = (chosen && chosen.lang) ? chosen.lang : 'vi-VN';
-        u.rate = 0.95;
-        u.pitch = 1.02;
-        u.volume = 1;
-        u.onerror = function(){ speakWithAudioFallback(msg); };
-        synth.speak(u);
-        return true;
-      } catch(e) {
-        return speakWithAudioFallback(msg);
-      }
-    }
-    return speakWithAudioFallback(msg);
-  };
-
-  window.testVoiceGuard = function(){
-    window.soundEnabled = true;
-    window.initTTS({silentToast:false});
-    setTimeout(function(){
-      window.playSpeechTTS(TEST_TEXT, {force:true});
-    }, 220);
-    return false;
-  };
-
-  window.showSentinelPanel = function(){
-    try { if (typeof showFlex === 'function') showFlex('sentinel-panel'); }
-    catch(e) { const p = $('sentinel-panel'); if (p) { p.classList.remove('hidden'); p.style.display = 'flex'; } }
-    try { if (typeof window.vibrate === 'function') window.vibrate(10); } catch(e) {}
-    window.testVoiceGuard();
-  };
-
-  ['pointerdown','touchstart','click','keydown'].forEach(function(evt){
-    try { document.addEventListener(evt, window.unlockLifeOSTTSGesture, {once:true, passive:true}); } catch(e) {}
-  });
-
-  try {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = function(){ window.refreshVoiceGuardInfo(false); };
-      window.refreshVoiceGuardInfo(false);
-    }
-  } catch(e) {}
-})();
-/* PHA5_VOICE_GUARD_TTS_PATCH_END */
-
-
-/* PHA5_TTS_FIX2_STABLE_VOICE_START */
-(function(){
-  if (window.__lifeosPha5TTSFix2StableVoice) return;
-  window.__lifeosPha5TTSFix2StableVoice = true;
-
-  const TEST_TEXT = 'LifeOS đã bật bảo vệ giọng nói. Tôi sẽ nhắc bạn khi cần.';
-  const STORAGE_KEY = 'lifeos_voice_guard_stable_voice_v2';
-  const $ = (id) => document.getElementById(id);
-
-  function toast(msg, icon){
-    try {
-      if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-speaker-high');
-    } catch(e) {}
-  }
-
-  function norm(s){
-    return String(s || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
-  }
-
-  function getVoices(){
-    try {
-      if (!window.speechSynthesis) return [];
-      return window.speechSynthesis.getVoices() || [];
-    } catch(e) { return []; }
-  }
-
-  function voiceKey(v){
-    if (!v) return '';
-    return [v.name || '', v.lang || '', v.voiceURI || ''].join('||');
-  }
-
-  function isVi(v){
-    const lang = String(v && v.lang || '').replace('_','-').toLowerCase();
-    const name = norm(v && v.name || '');
-    return lang === 'vi-vn' || lang === 'vi' || lang.indexOf('vi-') === 0 ||
-           name.includes('vietnam') || name.includes('viet') || name.includes('tieng viet');
-  }
-
-  function isMicrosoftAn(v){
-    const n = norm(v && v.name || '');
-    return isVi(v) && n.includes('microsoft') && (n.includes(' an ') || n.endsWith(' an') || n.includes(' an -') || n.includes(' an_'));
-  }
-
-  function isGoogleVi(v){
-    const n = norm(v && v.name || '');
-    return isVi(v) && n.includes('google');
-  }
-
-  function findSavedVoice(voices){
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return null;
-      return voices.find(function(v){ return voiceKey(v) === saved; }) || null;
-    } catch(e) { return null; }
-  }
-
-  function persistVoice(v){
-    if (!v) return;
-    try { localStorage.setItem(STORAGE_KEY, voiceKey(v)); } catch(e) {}
-  }
-
-  function pickFreshVoice(voices){
-    if (!voices || !voices.length) return null;
-    return voices.find(isMicrosoftAn) ||
-           voices.find(isGoogleVi) ||
-           voices.find(function(v){ return String(v.lang || '').replace('_','-').toLowerCase() === 'vi-vn'; }) ||
-           voices.find(isVi) ||
-           null;
-  }
-
-  window.lockStableVietnameseVoice = function(opts){
-    opts = opts || {};
-    const voices = getVoices();
-
-    if (window.__lifeosTTSVoiceLocked && window.voice) {
-      const stillExists = voices.find(function(v){ return voiceKey(v) === voiceKey(window.voice); });
-      if (stillExists) {
-        window.voice = stillExists;
-        return stillExists;
-      }
-      if (!voices.length) return window.voice;
-    }
-
-    if (!voices.length) {
-      window.__lifeosTTSVoiceLocked = false;
-      return null;
-    }
-
-    const saved = findSavedVoice(voices);
-    const chosen = saved || pickFreshVoice(voices);
-
-    if (chosen) {
-      window.voice = chosen;
-      window.__lifeosTTSVoiceLocked = true;
-      persistVoice(chosen);
-    }
-    return chosen;
-  };
-
-  window.selectVietnameseVoice = function(){
-    return window.lockStableVietnameseVoice({fromSelect:true});
-  };
-
-  window.hasVietnameseTTSVoice = function(){
-    const v = window.lockStableVietnameseVoice();
-    return !!(v && isVi(v));
-  };
-
-  window.refreshVoiceGuardInfo = function(showToastNow){
-    const badge = $('voice-info-badge');
-    if (!window.speechSynthesis) {
-      window.voice = null;
-      if (badge) badge.textContent = 'Trình duyệt chưa hỗ trợ giọng nói';
-      if (showToastNow) toast('Trình duyệt chưa có giọng Việt', 'ph-warning-circle');
-      return null;
-    }
-
-    const voices = getVoices();
-    const chosen = window.lockStableVietnameseVoice();
-    const hasVi = !!(chosen && isVi(chosen));
-
-    if (!voices.length) {
-      if (badge) badge.textContent = 'Đang tải danh sách giọng...';
-      if (showToastNow) toast('Đang tải giọng Việt...', 'ph-robot');
-      return chosen;
-    }
-
-    if (badge) {
-      badge.textContent = chosen
-        ? ('Đang dùng: ' + (chosen.name || chosen.lang || 'Giọng mặc định'))
-        : 'Trình duyệt chưa có giọng Việt';
-    }
-
-    if (showToastNow) {
-      toast(
-        chosen ? ('Voice Guard đã sẵn sàng: ' + (chosen.name || chosen.lang || 'Giọng mặc định')) : 'Trình duyệt chưa có giọng Việt',
-        chosen ? 'ph-robot' : 'ph-warning-circle'
-      );
-    }
-    return chosen;
-  };
-
-  window.unlockLifeOSTTSGesture = function(){
-    try { if (typeof window.unlockAudio === 'function') window.unlockAudio(); } catch(e) {}
-    try {
-      const c = $('tts-audio');
-      if (c) { c.muted = false; c.volume = 1; }
-    } catch(e) {}
-    try {
-      const synth = window.speechSynthesis;
-      if (synth && synth.paused) synth.resume();
-    } catch(e) {}
-  };
-
-  function stopOldSpeech(){
-    try {
-      const c = $('tts-audio');
-      if (c) { c.pause(); c.removeAttribute('src'); c.load(); }
-    } catch(e) {}
-    try {
-      const synth = window.speechSynthesis;
-      if (synth) {
-        synth.cancel();
-        if (synth.paused) synth.resume();
-      }
-    } catch(e) {}
-  }
-
-  function googleAudioFallback(text){
-    const c = $('tts-audio');
-    if (!c) return false;
-    try {
-      c.pause();
-      c.currentTime = 0;
-      c.muted = false;
-      c.volume = 1;
-      c.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=' + encodeURIComponent(text);
-      c.load();
-      const p = c.play();
-      if (p && typeof p.catch === 'function') p.catch(function(){
-        toast('Trình duyệt chưa có giọng Việt', 'ph-warning-circle');
-      });
-      return true;
-    } catch(e) { return false; }
-  }
-
-  window.initTTS = function(options){
-    options = options || {};
-    window.soundEnabled = true;
-    window.ttsActive = true;
-    window.synth = window.speechSynthesis;
-    window.unlockLifeOSTTSGesture();
-
-    const chosen = window.refreshVoiceGuardInfo(!options.silentToast);
-
-    try {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = function(){
-          if (!window.__lifeosTTSVoiceLocked) window.refreshVoiceGuardInfo(false);
-        };
-      }
-    } catch(e) {}
-
-    try { $('bot-icon')?.classList.add('text-white','speaking-glow'); } catch(e) {}
-    try { if (typeof window.vibrate === 'function') window.vibrate(20); } catch(e) {}
-    return chosen || true;
-  };
-
-  window.playSpeechTTS = window.speak = function(text, options){
-    options = options || {};
-    if (!text) return false;
-    if (window.soundEnabled === false && !options.force) return false;
-
-    const msg = String(text);
-    const synth = window.speechSynthesis;
-    window.synth = synth;
-    window.soundEnabled = true;
-
-    stopOldSpeech();
-
-    if (!synth) return googleAudioFallback(msg);
-
-    try {
-      const chosen = window.lockStableVietnameseVoice();
-      const u = new SpeechSynthesisUtterance(msg);
-      if (chosen) u.voice = chosen;
-      u.lang = (chosen && chosen.lang) ? chosen.lang : 'vi-VN';
-      u.rate = 1.04;
-      u.pitch = 1.0;
-      u.volume = 1;
-      u.onerror = function(){
-        googleAudioFallback(msg);
-      };
-      synth.speak(u);
-      if (chosen) {
-        const badge = $('voice-info-badge');
-        if (badge) badge.textContent = 'Đang dùng: ' + (chosen.name || chosen.lang || 'Giọng mặc định');
-      }
-      return true;
-    } catch(e) {
-      return googleAudioFallback(msg);
-    }
-  };
-
-  window.testVoiceGuard = function(){
-    window.initTTS({silentToast:false});
-    window.playSpeechTTS(TEST_TEXT, {force:true});
-    return false;
-  };
-
-  window.showSentinelPanel = function(){
-    try { if (typeof showFlex === 'function') showFlex('sentinel-panel'); }
-    catch(e) {
-      const p = $('sentinel-panel');
-      if (p) { p.classList.remove('hidden'); p.style.display = 'flex'; }
-    }
-    try { if (typeof window.vibrate === 'function') window.vibrate(10); } catch(e) {}
-    window.testVoiceGuard();
-  };
-
-  try {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = function(){
-        if (!window.__lifeosTTSVoiceLocked) window.refreshVoiceGuardInfo(false);
-      };
-      window.refreshVoiceGuardInfo(false);
-    }
-  } catch(e) {}
-})();
-/* PHA5_TTS_FIX2_STABLE_VOICE_END */
 
 
 
@@ -4608,47 +4304,52 @@ window.closeSentinelPanel=()=>{hideEl('sentinel-panel');window.vibrate(10);};
 // 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
 // ==============================================================================
 window.parseTaskNLP = (rawText) => {
-    let text = rawText; let isDaily = false; let priority = false; let tags = []; let timeStr = null; let alarmTime = null;
-    let dueDate = window.getIsoDate(); 
-    let forceToday = false;
+    let text = rawText; let isDaily = false; let priority = false; let tags = []; let timeStr = null; let alarmTime = null;
+    let dueDate = window.getIsoDate(); 
+    let forceToday = false;
 
-    if (text.match(/hằng ngày|mỗi ngày|hàng ngày/i)) { isDaily = true; text = text.replace(/hằng ngày|mỗi ngày|hàng ngày/gi, ''); }
-    if (text.match(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i)) { priority = true; text = text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/gi, ''); }
-    const tagMatch = text.match(/#[\w_]+/g);
-    if (tagMatch) { tags = tagMatch; tags.forEach(t => text = text.replace(t, '')); }
+    if (text.match(/hằng ngày|mỗi ngày|hàng ngày/i)) { isDaily = true; text = text.replace(/hằng ngày|mỗi ngày|hàng ngày/gi, ''); }
+    if (text.match(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i)) { priority = true; text = text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/gi, ''); }
+    const tagMatch = text.match(/#[\w_]+/g);
+    if (tagMatch) { tags = tagMatch; tags.forEach(t => text = text.replace(t, '')); }
 
-    let isTomorrow = false;
-    if (text.match(/ngày mai|sáng mai|chiều mai|tối mai|\bmai\b/i) && !isDaily) { isTomorrow = true; text = text.replace(/ngày mai|sáng mai|chiều mai|tối mai|\bmai\b/gi, ''); }
-    if (text.match(/\bnay\b|hôm nay/i)) { forceToday = true; text = text.replace(/\bnay\b|hôm nay/gi, ''); }
+    let isTomorrow = false;
+    if (text.match(/ngày mai|sáng mai|chiều mai|tối mai|\bmai\b/i) && !isDaily) { isTomorrow = true; text = text.replace(/ngày mai|sáng mai|chiều mai|tối mai|\bmai\b/gi, ''); }
+    if (text.match(/\bnay\b|hôm nay/i)) { forceToday = true; text = text.replace(/\bnay\b|hôm nay/gi, ''); }
 
-    const dateRegex = /\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?\b/;
-    const dMatch = text.match(dateRegex);
-    if(dMatch) {
-        let day = parseInt(dMatch[1]), month = parseInt(dMatch[2]), year = dMatch[3] ? parseInt(dMatch[3]) : new Date().getFullYear();
-        dueDate = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        text = text.replace(dMatch[0], ''); forceToday = true; 
-    }
+    const dateRegex = /\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?\b/;
+    const dMatch = text.match(dateRegex);
+    if(dMatch) {
+        let day = parseInt(dMatch[1]), month = parseInt(dMatch[2]), year = dMatch[3] ? parseInt(dMatch[3]) : new Date().getFullYear();
+        dueDate = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        text = text.replace(dMatch[0], ''); forceToday = true; 
+    }
 
-    const timeRegex = /(?:lúc|vào lúc|vào|@)?\s*([0-2]?[0-9])(?:h|:|\s*giờ)\s*([0-5][0-9])?\s*(sáng|chiều|tối)?/i;
-    const tMatch = text.match(timeRegex);
-    if (tMatch) {
-        let h = parseInt(tMatch[1]); let m = tMatch[2] ? parseInt(tMatch[2]) : 0; let ampm = tMatch[3] ? tMatch[3].toLowerCase() : '';
-        if ((ampm === 'chiều' || ampm === 'tối') && h < 12) { h += 12; } else if (ampm === 'sáng' && h === 12) { h = 0; }
-        timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        
-        let now = new Date(); let target;
-        if(dueDate !== window.getIsoDate()) {
-            let parts = dueDate.split('-'); target = new Date(parts[0], parseInt(parts[1])-1, parts[2], h, m, 0, 0);
-        } else { target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0); }
-        
-        if (isTomorrow) { target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); } 
-        else if (target.getTime() < now.getTime() && !forceToday && isDaily) { target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); }
-        
-        alarmTime = target.getTime(); text = text.replace(tMatch[0], '');
-    }
+    const timeRegex = /(?:lúc|vào lúc|vào|@)?\s*([0-2]?[0-9])(?:h|:|\s*giờ)\s*([0-5][0-9])?\s*(sáng|chiều|tối)?/i;
+    const tMatch = text.match(timeRegex);
+    if (tMatch) {
+        let h = parseInt(tMatch[1]); let m = tMatch[2] ? parseInt(tMatch[2]) : 0; let ampm = tMatch[3] ? tMatch[3].toLowerCase() : '';
+        if ((ampm === 'chiều' || ampm === 'tối') && h < 12) { h += 12; } else if (ampm === 'sáng' && h === 12) { h = 0; }
+        timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        
+        let now = new Date(); let target;
+        if(dueDate !== window.getIsoDate()) {
+            let parts = dueDate.split('-'); target = new Date(parts[0], parseInt(parts[1])-1, parts[2], h, m, 0, 0);
+        } else { target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0); }
+        
+        if (isTomorrow) { 
+            target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); 
+        } 
+        else if (target.getTime() <= now.getTime() && !forceToday) { 
+            // FIX LÕI: Nếu giờ đã qua và không ép "hôm nay", tự động đẩy sang ngày mai
+            target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); 
+        }
+        
+        alarmTime = target.getTime(); text = text.replace(tMatch[0], '');
+    }
 
-    if (isTomorrow && !timeStr && !dMatch) { let target = new Date(); target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); }
-    return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
+    if (isTomorrow && !timeStr && !dMatch) { let target = new Date(); target.setDate(target.getDate() + 1); dueDate = window.getIsoDate(target); }
+    return { text: text.replace(/\s+/g, ' ').replace(/^(lúc|vào lúc|vào)\s+/i, '').trim(), isDaily, priority, tags, timeStr, alarmTime, dueDate, alarmEnabled: true };
 };
 
 window.triggerGlobalAlarm = (taskIds, taskText) => {
@@ -4719,36 +4420,43 @@ window.stopGlobalAlarm = (actionType) => { 
 };
 
 window.checkAlarms = () => {
-    if(!window.todos || !window.todos.length) return;
-    const nowMs = Date.now(); const todayStr = window.getIsoDate();
-    let hasAlert = false; let alarmTexts = []; let needsSync = false; let triggeredIds = [];
-    
-    window.todos.forEach(t => {
-        if (t.isDaily && t.dueDate && t.dueDate < todayStr) {
-            t.completed = false; t.alerted = false; t.dueDate = todayStr;
-            if(t.alarmTime) {
-                const oldDate = new Date(t.alarmTime); const newAlarm = new Date();
-                newAlarm.setHours(oldDate.getHours(), oldDate.getMinutes(), 0, 0);
-                if (newAlarm.getTime() <= nowMs) newAlarm.setDate(newAlarm.getDate() + 1);
-                t.alarmTime = newAlarm.getTime();
-            }
-            needsSync = true;
-        }
-        
-        if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
-            const timeDiff = t.alarmTime - nowMs;
-            if (timeDiff > 0 && timeDiff <= 30000 && !window.preloadedTTS.has(t.id) && window.soundEnabled) {
-                window.preloadedTTS.add(t.id); const c = el('tts-audio');
-                if (c) { c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(t.text)}`; c.load(); }
-            }
-            if (timeDiff <= 0 && !window.notifiedTasks.has(String(t.id))) {
-                window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id));
-            }
-        }
-    });
-    
-    if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); } 
-    if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
+    if(!window.todos || !window.todos.length) return;
+    const nowMs = Date.now(); const todayStr = window.getIsoDate();
+    let hasAlert = false; let alarmTexts = []; let needsSync = false; let triggeredIds = [];
+    
+    window.todos.forEach(t => {
+        if (t.isDaily && t.dueDate && t.dueDate < todayStr) {
+            t.completed = false; t.alerted = false; t.dueDate = todayStr;
+            if(t.alarmTime) {
+                const oldDate = new Date(t.alarmTime); const newAlarm = new Date();
+                newAlarm.setHours(oldDate.getHours(), oldDate.getMinutes(), 0, 0);
+                if (newAlarm.getTime() <= nowMs) newAlarm.setDate(newAlarm.getDate() + 1);
+                t.alarmTime = newAlarm.getTime();
+            }
+            needsSync = true;
+        }
+        
+        if(!t.completed && t.alarmTime && t.alarmEnabled !== false && !t.alerted) {
+            const timeDiff = t.alarmTime - nowMs;
+            if (timeDiff > 0 && timeDiff <= 30000 && !window.preloadedTTS.has(t.id) && window.soundEnabled) {
+                window.preloadedTTS.add(t.id); const c = el('tts-audio');
+                if (c) { c.src = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=${encodeURIComponent(t.text)}`; c.load(); }
+            }
+            
+            // FIX LÕI: Chỉ kích hoạt chuông nếu quá hạn trong vòng 2 phút (chống nổ chuông loạt khi mở máy sau nhiều ngày)
+            if (timeDiff <= 0 && timeDiff > -120000 && !window.notifiedTasks.has(String(t.id))) {
+                window.notifiedTasks.add(String(t.id)); hasAlert = true; alarmTexts.push(t.text); triggeredIds.push(String(t.id));
+            } 
+            // Nếu quá hạn từ lâu (> 2 phút), âm thầm tắt báo thức đi
+            else if (timeDiff <= -120000) {
+                t.alerted = true;
+                needsSync = true;
+            }
+        }
+    });
+    
+    if(needsSync) { window.saveLocalTodos(); window.renderTasksOnly(); } 
+    if(hasAlert) { window.triggerGlobalAlarm(triggeredIds, alarmTexts.join(' + ')); }
 };
 
 window.toggleAlarm = (e, id) => {
@@ -5143,7 +4851,10 @@ window.renderTasksOnly=()=>{
             const badgeHTML = badges ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${badges}</div>` : '';
             const pC = (t.priority === 'high' || t.priority === true) ? 'bg-rose-500' : 'bg-transparent';
 
-            const actionsHTML = `<div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Tập trung"><i class="ph-bold ph-target text-base"></i></button><button onclick="window.openEditTask('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-blue-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-base"></i></button><button onclick="window.confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center shadow-sm border border-rose-200 transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-base"></i></button></div>`;
+            const taskIdForJS = String(t.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+
+            const actionsHTML = `<div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Tập trung"><i class="ph-bold ph-target text-base"></i></button><button type="button" data-task-action="copy" onclick="event.stopPropagation();window.lifeosDuplicateTask('${taskIdForJS}')" class="lifeos-task-card-btn w-8 h-8 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 flex items-center justify-center shadow-sm border border-sky-100 transition active:scale-90" title="Nhân bản nhiệm vụ" aria-label="Nhân bản nhiệm vụ"><i class="ph-bold ph-copy text-base pointer-events-none"></i></button><button onclick="window.openEditTask('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-blue-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-base"></i></button><button onclick="window.confirmDeleteTask('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center shadow-sm border border-rose-200 transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-base"></i></button></div>`;
 
             return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed?'opacity-60 bg-slate-50':''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${pC}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors mt-0.5 sm:mt-0 ${t.completed?'bg-primary border-primary shadow-md':'border-slate-300 hover:border-primary'}">${t.completed?'<i class="ph-bold ph-check text-white text-sm"></i>':''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold cursor-pointer py-0.5 leading-snug break-words text-[15px] ${t.completed?'line-through text-slate-400':(t.alarmTime < nowMs && !t.completed && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800')}">${window.escapeHTML(t.text)}</div>${badgeHTML}</div>${actionsHTML}</div></li>`;
         }).join(''))
@@ -5178,7 +4889,7 @@ window.execDeleteTask=id=>{ window.todos=(window.todos||[]).filter(x=>String(x.i
 window.openEditTask=id=>{
     const t=(window.todos||[]).find(x=>String(x.id)===String(id)); if(!t) return; window.vibrate(15);
     let rawText = t.text; if(t.isDaily) rawText += ' hằng ngày'; let dDate = t.dueDate || t.date; if(dDate && dDate !== window.getIsoDate() && !t.isDaily) { const pDate = dDate.split('-'); rawText += ` ngày ${pDate[2]}/${pDate[1]}`; } if(t.timeStr) rawText += ` lúc ${t.timeStr.replace(':','h')}`; if(t.priority) rawText += ` !gấp`; if(t.tags && t.tags.length) t.tags.forEach(tg => rawText += ` ${tg}`);
-    const editHTML = `<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex items-center justify-between mb-4 flex-shrink-0"><h2 class="text-xl font-black text-slate-800">Sửa Nhiệm Vụ</h2><button onclick="window.vibrate(10); document.getElementById('editTaskModal').remove()" class="p-2.5 text-slate-400 hover:bg-slate-50 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div><div class="flex-grow overflow-y-auto custom-scroll-area p-1 min-h-0"><div class="bg-primary/10 p-3 rounded-xl border border-primary/20 mb-4"><p class="text-[11px] text-primary font-medium italic"><b>Mẹo:</b> Sửa chữ hoặc chọn Lịch ở bên dưới.</p></div><div class="relative flex items-start gap-2"><textarea id="editTaskInput" rows="4" class="flex-grow bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner custom-scrollbar whitespace-pre-wrap"></textarea><div class="relative w-12 h-12 flex-shrink-0 bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:brightness-95 transition"><i class="ph-bold ph-calendar-plus text-2xl text-primary absolute pointer-events-none"></i><input type="datetime-local" id="editTaskDateManual" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" onchange="window.syncManualDateToInput(this, 'editTaskInput')"></div></div></div><div class="flex gap-3 flex-shrink-0 mt-4"><button onclick="window.vibrate(10); document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle"></i> Lưu Lại</button></div></div></div>`;
+    const editHTML = `<div id="editTaskModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex items-center justify-between mb-4 flex-shrink-0"><h2 class="text-xl font-black text-slate-800">Sửa Nhiệm Vụ</h2><button onclick="window.vibrate(10); document.getElementById('editTaskModal').remove()" class="p-2.5 text-slate-400 hover:bg-slate-50 rounded-xl active:scale-90 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div><div class="flex-grow overflow-y-auto custom-scroll-area p-1 min-h-0"><div class="bg-primary/10 p-3 rounded-xl border border-primary/20 mb-4"><p class="text-[11px] text-primary font-medium italic"><b>Mẹo:</b> Sửa chữ hoặc chọn Lịch ở bên dưới.</p></div><div class="relative flex items-start gap-2"><textarea id="editTaskInput" rows="4" class="flex-grow bg-slate-50 border border-slate-200 outline-none p-3.5 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner custom-scrollbar whitespace-pre-wrap"></textarea><div class="lifeos-edit-time-actions flex flex-col gap-2 flex-shrink-0"><button type="button" id="editTaskNowBtn" onclick="window.setEditTaskNow?.()" class="lifeos-edit-now-btn w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-primary shadow-sm flex items-center justify-center active:scale-95 transition hover:brightness-95" title="Lấy giờ hiện tại của thiết bị"><i class="ph-bold ph-clock-counter-clockwise text-xl"></i><span class="lifeos-edit-now-label">Bây giờ</span></button><div class="relative w-12 h-12 flex-shrink-0 bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:brightness-95 transition"><i class="ph-bold ph-calendar-plus text-2xl text-primary absolute pointer-events-none"></i><input type="datetime-local" id="editTaskDateManual" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" onchange="window.syncManualDateToInput(this, 'editTaskInput')"></div></div></div></div><div class="flex gap-3 flex-shrink-0 mt-4"><button onclick="window.vibrate(10); document.getElementById('editTaskModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-50 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Hủy</button><button onclick="window.saveEditTask('${id}')" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold active:scale-95 shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 hover:brightness-110"><i class="ph-bold ph-check-circle"></i> Lưu Lại</button></div></div></div>`;
     document.body.insertAdjacentHTML('beforeend', editHTML); const inp = el('editTaskInput'); if(inp){ inp.value = rawText; inp.focus(); }
 };
 
@@ -5190,10 +4901,23 @@ window.syncManualDateToInput = (inputEl, targetId) => {
 };
 
 window.saveEditTask=id=>{
-    const v=el('editTaskInput')?.value.trim(); if(!v){ window.showToast('Không được để trống!','ph-warning'); return; }
-    const t=(window.todos||[]).find(x=>String(x.id)===String(id));
-    if(t){ Object.assign(t, window.parseTaskNLP(v)); t.alerted = false; window.notifiedTasks.delete(String(t.id)); if(t.alarmTime && t.alarmTime <= Date.now()) { window.triggerGlobalAlarm(String(t.id), t.text); } window.vibrate([20,30]); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); window.showToast('Đã lưu chỉnh sửa','ph-check-circle'); }
-    el('editTaskModal')?.remove();
+    const v=el('editTaskInput')?.value.trim(); if(!v){ window.showToast('Không được để trống!','ph-warning'); return; }
+    const t=(window.todos||[]).find(x=>String(x.id)===String(id));
+    if(t){ 
+        Object.assign(t, window.parseTaskNLP(v)); 
+        
+        // FIX LÕI: Khóa còi nếu edit thành giờ trong quá khứ
+        let isPast = t.alarmTime && t.alarmTime <= Date.now();
+        t.alerted = isPast;
+        
+        if(t.alarmTime && t.alarmTime > Date.now()) {
+             window.notifiedTasks.delete(String(t.id)); // Chỉ reset thông báo nếu giờ là tương lai
+        }
+        
+        window.vibrate([20,30]); window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll(); 
+        window.showToast('Đã lưu chỉnh sửa','ph-check-circle'); 
+    }
+    el('editTaskModal')?.remove();
 };
 
 window.timerState={mode:'dateclock',cd:null,sw:null,cdTime:0,swTime:0,cdRun:false,swRun:false};
@@ -5292,10 +5016,62 @@ window.weatherFmtDate=function(s){try{const d=new Date(s+'T00:00:00');return `${
 window.getWeatherCache=function(locationKey){try{const raw=localStorage.getItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey));if(!raw)return null;const obj=JSON.parse(raw);return obj&&obj.data?obj:null}catch(e){console.warn('[WEATHER CACHE READ FAIL]',locationKey,e);return null}};
 window.setWeatherCache=function(locationKey,data){try{localStorage.setItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey),JSON.stringify({savedAt:Date.now(),data}))}catch(e){console.warn('[WEATHER CACHE WRITE FAIL]',locationKey,e)}};
 window.normalizeOpenMeteoWeather=function(raw,location){const c=raw?.current||{};const d=raw?.daily||{};const len=Array.isArray(d.time)?Math.min(d.time.length,5):0;const daily=[];for(let i=0;i<len;i++){daily.push({date:d.time?.[i],code:d.weather_code?.[i],tempMax:d.temperature_2m_max?.[i],tempMin:d.temperature_2m_min?.[i],precipSum:d.precipitation_sum?.[i],precipProb:d.precipitation_probability_max?.[i],text:window.weatherCodeToText(d.weather_code?.[i]),icon:window.weatherCodeToIcon(d.weather_code?.[i])})}return{source:'open-meteo',fetchedAt:Date.now(),location:{...location},current:{time:c.time,temperature:c.temperature_2m,apparent:c.apparent_temperature,humidity:c.relative_humidity_2m,wind:c.wind_speed_10m,precipitation:c.precipitation,rain:c.rain,code:c.weather_code,text:window.weatherCodeToText(c.weather_code),icon:window.weatherCodeToIcon(c.weather_code)},daily,raw}};
-window.setWeatherStatus=function(msg,type='info'){const box=el('weather-status');if(!box)return;if(!msg){box.classList.add('hidden');box.textContent='';return}box.classList.remove('hidden');box.textContent=msg;box.className=`mb-3 text-xs font-bold rounded-xl px-3 py-2 ${type==='error'?'text-rose-700 bg-rose-50 border border-rose-100':'text-amber-700 bg-amber-50 border border-amber-100'}`};
-window.renderWeatherLocationTabs=function(selected){Object.keys(window.WEATHER_LOCATIONS||{}).forEach(k=>{const b=el('weather-loc-'+k);if(!b)return;b.className=`weather-loc-btn py-2 px-1 rounded-xl border text-[11px] font-black active:scale-95 truncate ${k===selected?'bg-primary text-white border-primary':'bg-slate-50 text-slate-500 border-slate-200'}`})};
-window.renderWeather=function(data,opts={}){if(!data)return;window.weatherState.lastData=data;window.renderWeatherLocationTabs(data.location.key);setTxt('weather-location-name',data.location.name);setTxt('weather-desc',data.current.text||'Theo dữ liệu hiện tại');setTxt('weather-temp',`${window.weatherFmtNum(data.current.temperature)}°C`);setTxt('weather-feels',`${window.weatherFmtNum(data.current.apparent)}°C`);setTxt('weather-humidity',`${window.weatherFmtNum(data.current.humidity,0)}%`);setTxt('weather-wind',`${window.weatherFmtNum(data.current.wind)} km/h`);const rain=Number(data.current.rain||data.current.precipitation||0);setTxt('weather-rain',Number.isFinite(rain)?`${window.weatherFmtNum(rain)} mm`:'Theo dữ liệu');const ico=el('weather-icon');if(ico)ico.className=`ph-bold ${data.current.icon||'ph-cloud-sun'} text-4xl`;const tm=data.fetchedAt?new Date(data.fetchedAt):new Date();setTxt('weather-updated',`${opts.fromCache?'Dữ liệu gần nhất':'Cập nhật lúc'} ${window.formatDate2(tm.getHours())}:${window.formatDate2(tm.getMinutes())}`);const list=el('weather-daily-list');if(list){list.innerHTML=(data.daily||[]).slice(0,5).map(x=>`<div class="min-w-[112px] flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center shadow-inner"><div class="text-[11px] font-black text-slate-500 mb-1">${window.weatherFmtDate(x.date)}</div><i class="ph-bold ${x.icon||'ph-cloud-sun'} text-2xl text-primary"></i><div class="text-[10px] font-bold text-slate-500 leading-tight mt-1 min-h-[28px]">${x.text||'--'}</div><div class="text-xs font-black text-slate-800 mt-1">${window.weatherFmtNum(x.tempMax,0)}° / ${window.weatherFmtNum(x.tempMin,0)}°</div><div class="text-[10px] font-bold text-slate-400 mt-1">Mưa ${x.precipProb!=null?window.weatherFmtNum(x.precipProb,0)+'%':window.weatherFmtNum(x.precipSum)+' mm'}</div></div>`).join('')}window.setWeatherStatus(opts.fromCache?'Đang dùng dữ liệu gần nhất': '', opts.fromCache?'warn':'info')};
-window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');const res=await fetch(window.weatherApiUrl(loc),{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
+window.setWeatherStatus=function(msg,type='info'){
+    const box=el('weather-status');
+    if(!box)return;
+    if(!msg){
+        box.className='hidden text-xs font-semibold text-amber-600 mt-0.5 truncate';
+        box.textContent='';
+        return;
+    }
+    box.className=`text-xs font-semibold mt-0.5 truncate ${type==='error'?'text-rose-600':'text-amber-600'}`;
+    box.textContent=msg;
+};
+window.renderWeatherLocationTabs=function(selected){
+    Object.keys(window.WEATHER_LOCATIONS||{}).forEach(k=>{
+        const b=el('weather-loc-'+k);
+        if(!b)return;
+        const active=k===selected;
+        b.className=`weather-loc-btn shrink-0 px-4 py-2 rounded-xl text-[12px] font-bold active:scale-95 transition-all ${active?'bg-primary text-white shadow-sm':'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`;
+    });
+};
+window.renderWeather=function(data,opts={}){
+    if(!data)return;
+    window.weatherState.lastData=data;
+    window.renderWeatherLocationTabs(data.location.key);
+
+    setTxt('weather-location-name', data.location.name);
+    setTxt('weather-desc', data.current.text || 'Theo dữ liệu hiện tại');
+    setTxt('weather-temp', `${window.weatherFmtNum(data.current.temperature)}°C`);
+    setTxt('weather-feels', `${window.weatherFmtNum(data.current.apparent)}°C`);
+    setTxt('weather-humidity', `${window.weatherFmtNum(data.current.humidity,0)}%`);
+    setTxt('weather-wind', `${window.weatherFmtNum(data.current.wind)} km/h`);
+
+    const rain=Number(data.current.rain||data.current.precipitation||0);
+    setTxt('weather-rain', Number.isFinite(rain)?`${window.weatherFmtNum(rain)} mm`:'Theo dữ liệu');
+
+    const ico=el('weather-icon');
+    if(ico) ico.className=`ph-fill ${data.current.icon||'ph-cloud-sun'} text-4xl`;
+
+    const tm=data.fetchedAt?new Date(data.fetchedAt):new Date();
+    setTxt('weather-updated', `${opts.fromCache?'Dữ liệu cũ:':'Cập nhật:'} ${window.formatDate2(tm.getHours())}:${window.formatDate2(tm.getMinutes())}`);
+
+    window.setWeatherStatus(opts.fromCache?'Đang hiển thị dữ liệu lưu tạm. Cần mạng để làm mới.': '', opts.fromCache?'warn':'hidden');
+
+    const list=el('weather-daily-list');
+    if(list){
+        list.innerHTML=(data.daily||[]).slice(0,5).map(x=>`
+            <div class="weather-daily-card">
+                <div class="text-[11px] font-black text-slate-500 mb-1">${window.weatherFmtDate(x.date)}</div>
+                <i class="ph-fill ${x.icon||'ph-cloud-sun'} text-[32px] text-sky-500 my-2 drop-shadow-sm"></i>
+                <div class="text-[10px] font-bold text-slate-500 leading-tight min-h-[28px] flex items-center text-center">${x.text||'--'}</div>
+                <div class="text-sm font-black text-slate-800 mt-2">${window.weatherFmtNum(x.tempMax,0)}° <span class="text-xs font-bold text-slate-400">/ ${window.weatherFmtNum(x.tempMin,0)}°</span></div>
+                <div class="text-[10px] font-bold text-sky-500 mt-1.5 bg-sky-50 px-2 py-0.5 rounded-md w-full text-center"><i class="ph-bold ph-drop"></i> ${x.precipProb!=null?window.weatherFmtNum(x.precipProb,0)+'%':window.weatherFmtNum(x.precipSum)+' mm'}</div>
+            </div>
+        `).join('');
+    }
+};
+window.fetchWeather=window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');const res=await fetch(window.weatherApiUrl(loc),{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
 window.setWeatherLocation=function(locationKey){window.vibrate?.(10);return window.fetchWeather(locationKey,{force:false})};
 window.refreshWeather=function(){window.vibrate?.(10);return window.fetchWeather(window.weatherState?.selected||'hanoi',{force:true})};
 window.startWeatherPanel=function(){if(!window.weatherState)window.weatherState={selected:'hanoi'};window.fetchWeather(window.weatherState.selected||'hanoi',{force:false}).catch(e=>console.warn('[WEATHER PANEL START FAIL]',e))};
@@ -5736,15 +5512,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.filter-btn').forEach(btn => { btn.addEventListener('click', (e) => { window.filterTasks(e.target.getAttribute('data-filter') || 'all'); }); });
 
     const handleTaskSubmit = (v, dateVal) => {
-        if(!v) return; window.unlockAudio(); 
-        const parsed = window.parseTaskNLP(v);
-        if(dateVal) { const d = new Date(dateVal); parsed.dueDate = window.getIsoDate(d); parsed.alarmTime = d.getTime(); parsed.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-        const newId = String(Date.now())+Math.floor(Math.random()*1000).toString();
-        window.todos.unshift({ id: newId, text: parsed.text.charAt(0).toUpperCase() + parsed.text.slice(1), completed: false, priority: parsed.priority, tags: parsed.tags, alarmTime: parsed.alarmTime, timeStr: parsed.timeStr, isDaily: parsed.isDaily, dueDate: parsed.dueDate, alerted: false, createdAt: Date.now(), alarmEnabled: true });
-        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
-        window.vibrate(15);
-        if(parsed.alarmTime && parsed.alarmTime <= Date.now()) { window.triggerGlobalAlarm(newId, parsed.text); } else if(parsed.timeStr) { window.showToast(`Đã hẹn lúc ${parsed.timeStr}`, 'ph-speaker-high'); } else { window.showToast('Đã lưu!', 'ph-check-circle'); }
-    };
+        if(!v) return; window.unlockAudio(); 
+        const parsed = window.parseTaskNLP(v);
+        if(dateVal) { const d = new Date(dateVal); parsed.dueDate = window.getIsoDate(d); parsed.alarmTime = d.getTime(); parsed.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+        
+        const newId = String(Date.now())+Math.floor(Math.random()*1000).toString();
+        // FIX LÕI: Nếu alarmTime rơi vào quá khứ, đánh dấu alerted: true để KHÔNG nổ chuông
+        let isPast = parsed.alarmTime && parsed.alarmTime <= Date.now();
+        
+        window.todos.unshift({ id: newId, text: parsed.text.charAt(0).toUpperCase() + parsed.text.slice(1), completed: false, priority: parsed.priority, tags: parsed.tags, alarmTime: parsed.alarmTime, timeStr: parsed.timeStr, isDaily: parsed.isDaily, dueDate: parsed.dueDate, alerted: isPast, createdAt: Date.now(), alarmEnabled: true });
+        window.saveLocalTodos(); window.renderTasksOnly(); if(window.FirebaseSync) window.FirebaseSync.pushAll();
+        window.vibrate(15);
+        
+        if (parsed.timeStr) {
+            window.showToast(isPast ? `Đã lưu (Giờ đã trôi qua)` : `Đã hẹn lúc ${parsed.timeStr}`, 'ph-clock');
+        } else {
+            window.showToast('Đã lưu!', 'ph-check-circle');
+        }
+    };
 
     el('form-pc')?.addEventListener('submit', (e) => { e.preventDefault(); const i = el('input-pc'); const v = i.value.trim(); if(!v) { window.highlightError('input-pc'); return; } handleTaskSubmit(v, getVal('dt-pc')); i.value = ''; setVal('dt-pc', ''); });
     el('form-mobile')?.addEventListener('submit', (e) => { e.preventDefault(); const i = el('input-mobile'); const v = i.value.trim(); if(!v) { window.highlightError('input-mobile'); return; } handleTaskSubmit(v, getVal('dt-mb')); i.value = ''; setVal('dt-mb', ''); });
@@ -5814,16 +5599,6 @@ document.addEventListener('DOMContentLoaded', () => {
     hideEl('login-gate');
     window.loadUserData?.();
 }
-    
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(SR){
-        const rec = new SR(); rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false;
-        rec.onstart = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.add('text-rose-500','animate-pulse')); window.vibrate(30); window.unlockAudio(); };
-        rec.onresult = e => { const val = e.results[0][0].transcript; if(window.innerWidth >= 1024){ setVal('input-pc',val); el('form-pc')?.dispatchEvent(new Event('submit')); } else { setVal('input-mobile',val); el('form-mobile')?.dispatchEvent(new Event('submit')); } };
-        rec.onend = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); };
-        rec.onerror = () => { document.querySelectorAll('.btn-voice').forEach(b => b.classList.remove('text-rose-500','animate-pulse')); window.showToast('Không nghe rõ!','ph-warning-circle'); };
-        document.querySelectorAll('.btn-voice').forEach(b => { b.addEventListener('click', () => { window.initTTS(); try{rec.start();}catch(e){} }); });
-    } else { document.querySelectorAll('.btn-voice').forEach(b => b.style.display = 'none'); }
 });
 </script>
 
@@ -7044,313 +6819,9 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 <!-- PHA7_VAULT_BULK_DELETE_V2_END -->
 
 
-<!-- PHA9_VOICE_GUARD_ACTION_SPEAK_START -->
-<script id="pha9-voice-guard-action-speak">
-(function(){
-  if (window.__lifeosPha9VoiceGuardActionSpeak) return;
-  window.__lifeosPha9VoiceGuardActionSpeak = true;
 
-  var TEST_TEXT = 'LifeOS đã bật bảo vệ giọng nói. Tôi sẽ nhắc bạn khi cần.';
-  var STORAGE_KEY = 'lifeos_voice_guard_locked_voice_pha9';
-  var sessionVoice = null;
-  var sessionVoiceKey = '';
-  var patched = { switchTab:false, vault:false, bulk:false, music:false };
-  var lastMusicSpeakAt = 0;
 
-  function $(id){ return document.getElementById(id); }
-  function toast(msg, icon){
-    try { if (typeof window.showToast === 'function') window.showToast(msg, icon || 'ph-speaker-high'); } catch(e) {}
-  }
-  function vibrate(p){ try { if (typeof window.vibrate === 'function') window.vibrate(p); } catch(e) {} }
-  function norm(s){
-    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g,' ').trim();
-  }
-  function voices(){
-    try { return (window.speechSynthesis && window.speechSynthesis.getVoices) ? (window.speechSynthesis.getVoices() || []) : []; }
-    catch(e){ return []; }
-  }
-  function key(v){ return v ? [v.name || '', v.lang || '', v.voiceURI || ''].join('||') : ''; }
-  function isVi(v){
-    var lang = String(v && v.lang || '').replace('_','-').toLowerCase();
-    var name = norm(v && v.name || '');
-    return lang === 'vi-vn' || lang === 'vi' || lang.indexOf('vi-') === 0 ||
-           name.indexOf('vietnam') >= 0 || name.indexOf('viet') >= 0 || name.indexOf('tieng viet') >= 0;
-  }
-  function isMicrosoftAn(v){
-    var n = norm(v && v.name || '');
-    return isVi(v) && n.indexOf('microsoft') >= 0 &&
-      (n === 'microsoft an - vietnamese (vietnam)' ||
-       n.indexOf('microsoft an') >= 0 ||
-       n.indexOf(' an - vietnamese') >= 0 ||
-       n.indexOf(' an ') >= 0);
-  }
-  function isGoogleVi(v){ return isVi(v) && norm(v && v.name || '').indexOf('google') >= 0; }
-  function findBySaved(list){
-    try {
-      var saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return null;
-      return list.find(function(v){ return key(v) === saved; }) || null;
-    } catch(e){ return null; }
-  }
-  function saveVoice(v){
-    try { if (v) localStorage.setItem(STORAGE_KEY, key(v)); } catch(e) {}
-  }
-  function chooseVoice(list){
-    list = list || [];
-    if (!list.length) return null;
 
-    // Giọng nam ổn định đang dùng tốt: ưu tiên tuyệt đối khi có trong danh sách.
-    var an = list.find(isMicrosoftAn);
-    if (an) return an;
-
-    // Nếu không có Microsoft An thì dùng giọng đã khóa ở lần trước, miễn là còn tồn tại.
-    var saved = findBySaved(list);
-    if (saved) return saved;
-
-    return list.find(isGoogleVi) ||
-           list.find(function(v){ return String(v.lang || '').replace('_','-').toLowerCase() === 'vi-vn'; }) ||
-           list.find(isVi) ||
-           null;
-  }
-
-  window.lockLifeOSVoice = function(){
-    var list = voices();
-
-    if (sessionVoice && sessionVoiceKey) {
-      var still = list.find(function(v){ return key(v) === sessionVoiceKey; });
-      if (still) { sessionVoice = still; window.voice = still; return still; }
-      if (!list.length) { window.voice = sessionVoice; return sessionVoice; }
-    }
-
-    var chosen = chooseVoice(list);
-    if (chosen) {
-      sessionVoice = chosen;
-      sessionVoiceKey = key(chosen);
-      window.voice = chosen;
-      window.__lifeosTTSVoiceLocked = true;
-      saveVoice(chosen);
-      var badge = $('voice-info-badge');
-      if (badge) badge.textContent = 'Đang dùng: ' + (chosen.name || chosen.lang || 'Giọng Việt');
-    }
-    return chosen;
-  };
-
-  window.selectVietnameseVoice = window.lockLifeOSVoice;
-  window.lockStableVietnameseVoice = window.lockLifeOSVoice;
-
-  function stopSpeech(){
-    try {
-      var audio = $('tts-audio');
-      if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); }
-    } catch(e) {}
-    try {
-      var synth = window.speechSynthesis;
-      if (synth) { synth.cancel(); if (synth.paused) synth.resume(); }
-    } catch(e) {}
-  }
-  function unlockGesture(){
-    try { if (typeof window.unlockAudio === 'function') window.unlockAudio(); } catch(e) {}
-    try { var synth = window.speechSynthesis; if (synth && synth.paused) synth.resume(); } catch(e) {}
-    try { var a = $('tts-audio'); if (a) { a.muted = false; a.volume = 1; } } catch(e) {}
-  }
-  function fallbackAudio(text){
-    var a = $('tts-audio');
-    if (!a) return false;
-    try {
-      a.pause();
-      a.currentTime = 0;
-      a.muted = false;
-      a.volume = 1;
-      a.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q=' + encodeURIComponent(text);
-      a.load();
-      var p = a.play();
-      if (p && p.catch) p.catch(function(){ toast('Trình duyệt chưa có giọng Việt', 'ph-warning-circle'); });
-      return true;
-    } catch(e){ return false; }
-  }
-
-  window.lifeosSpeak = function(text, options){
-    options = options || {};
-    if (!text) return false;
-    if (!window.ttsActive && !options.force) return false;
-
-    unlockGesture();
-    stopSpeech();
-
-    var msg = String(text);
-    var synth = window.speechSynthesis;
-    window.synth = synth;
-    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return fallbackAudio(msg);
-
-    var chosen = window.lockLifeOSVoice();
-    if (!chosen) return fallbackAudio(msg);
-
-    try {
-      var u = new SpeechSynthesisUtterance(msg);
-      u.voice = chosen;
-      u.lang = chosen.lang || 'vi-VN';
-      u.rate = 1.05;
-      u.pitch = 1.0;
-      u.volume = 1;
-      u.onerror = function(){ fallbackAudio(msg); };
-      synth.speak(u);
-      var badge = $('voice-info-badge');
-      if (badge) badge.textContent = 'Đang dùng: ' + (chosen.name || chosen.lang || 'Giọng Việt');
-      return true;
-    } catch(e){
-      return fallbackAudio(msg);
-    }
-  };
-
-  // Một cổng nói duy nhất: các hàm cũ đều đi qua lifeosSpeak, không random giọng nữa.
-  window.playSpeechTTS = function(text, options){ return window.lifeosSpeak(text, options); };
-  window.speak = window.playSpeechTTS;
-
-  window.refreshVoiceGuardInfo = function(showToastNow){
-    var chosen = window.lockLifeOSVoice();
-    var badge = $('voice-info-badge');
-    if (badge) badge.textContent = chosen ? ('Đang dùng: ' + (chosen.name || chosen.lang || 'Giọng Việt')) : 'Trình duyệt chưa có giọng Việt';
-    if (showToastNow) toast(chosen ? ('Voice Guard đã sẵn sàng: ' + (chosen.name || chosen.lang || 'Giọng Việt')) : 'Trình duyệt chưa có giọng Việt', chosen ? 'ph-robot' : 'ph-warning-circle');
-    return chosen;
-  };
-
-  window.initTTS = function(options){
-    options = options || {};
-    window.ttsActive = true;
-    window.soundEnabled = true;
-    window.synth = window.speechSynthesis;
-    unlockGesture();
-    var chosen = window.lockLifeOSVoice();
-    try { $('bot-icon')?.classList.add('text-white','speaking-glow'); } catch(e) {}
-    if (!options.silentToast) toast(chosen ? ('Voice Guard đã sẵn sàng: ' + (chosen.name || chosen.lang || 'Giọng Việt')) : 'Trình duyệt chưa có giọng Việt', chosen ? 'ph-robot' : 'ph-warning-circle');
-    vibrate(20);
-    return chosen || true;
-  };
-
-  window.testVoiceGuard = function(){
-    window.initTTS({silentToast:false});
-    return window.lifeosSpeak(TEST_TEXT, {force:true});
-  };
-
-  window.showSentinelPanel = function(){
-    try { if (typeof showFlex === 'function') showFlex('sentinel-panel'); }
-    catch(e) { var p = $('sentinel-panel'); if (p) { p.classList.remove('hidden'); p.style.display = 'flex'; } }
-    window.initTTS({silentToast:false});
-    vibrate(10);
-  };
-
-  function speakTab(id){
-    var msg = '';
-    if (id === 'view-tasks') msg = 'Nhiệm vụ đã mở.';
-    else if (id === 'view-focus') msg = 'Bộ đếm thời gian đã mở.';
-    else if (id === 'view-vault') msg = 'Kho lưu trữ đã mở.';
-    else if (id === 'view-music') msg = 'Nghe nhạc đã mở.';
-    if (msg) window.lifeosSpeak(msg);
-  }
-
-  function patchSwitchTab(){
-    if (patched.switchTab || typeof window.switchTab !== 'function') return;
-    var old = window.switchTab;
-    window.switchTab = function(id, btn){
-      var result = old.apply(this, arguments);
-      speakTab(id);
-      return result;
-    };
-    patched.switchTab = true;
-  }
-
-  function patchVaultOpenModal(){
-    if (patched.vault || !window.VaultUI || typeof window.VaultUI.openModal !== 'function') return false;
-    var old = window.VaultUI.openModal;
-    window.VaultUI.openModal = function(id){
-      var isAdd = arguments.length === 0 || id === undefined || id === null || id === '';
-      var result = old.apply(this, arguments);
-      if (isAdd) window.lifeosSpeak('Đã mở form thêm dữ liệu.');
-      return result;
-    };
-    patched.vault = true;
-    return true;
-  }
-
-  function patchBulkDelete(){
-    if (patched.bulk || !window.VaultBulkDelete || typeof window.VaultBulkDelete.execDeleteSelected !== 'function') return false;
-    var old = window.VaultBulkDelete.execDeleteSelected;
-    window.VaultBulkDelete.execDeleteSelected = function(){
-      var count = 0;
-      try { count = this.selected ? this.selected.size : 0; } catch(e) {}
-      var result = old.apply(this, arguments);
-      if (count > 0) window.lifeosSpeak('Đã xóa các mục đã chọn.');
-      return result;
-    };
-    patched.bulk = true;
-    return true;
-  }
-
-  function speakMusicOnce(){
-    var now = Date.now();
-    if (now - lastMusicSpeakAt < 1200) return;
-    lastMusicSpeakAt = now;
-    window.lifeosSpeak('Đang phát nhạc.');
-  }
-  function patchMusic(){
-    var app = window.MusicApp;
-    if (patched.music || !app) return false;
-
-    if (typeof app.play === 'function' && !app.play.__pha9Speak) {
-      var oldPlay = app.play;
-      app.play = function(){
-        var result = oldPlay.apply(this, arguments);
-        speakMusicOnce();
-        return result;
-      };
-      app.play.__pha9Speak = true;
-    }
-    if (typeof app.togglePlay === 'function' && !app.togglePlay.__pha9Speak) {
-      var oldToggle = app.togglePlay;
-      app.togglePlay = function(){
-        var wasPlaying = !!this.playing;
-        var result = oldToggle.apply(this, arguments);
-        var audio = $('mstq-player');
-        var nowPlaying = !!this.playing || !!(audio && !audio.paused);
-        if (!wasPlaying && nowPlaying) speakMusicOnce();
-        return result;
-      };
-      app.togglePlay.__pha9Speak = true;
-    }
-    patched.music = true;
-    return true;
-  }
-
-  function patchAll(){
-    patchSwitchTab();
-    patchVaultOpenModal();
-    patchBulkDelete();
-    patchMusic();
-  }
-
-  try {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = function(){
-        // Không đổi voice trong phiên nếu đã khóa; chỉ khóa khi chưa có voice.
-        if (!sessionVoice) window.lockLifeOSVoice();
-        window.refreshVoiceGuardInfo(false);
-      };
-    }
-  } catch(e) {}
-
-  patchAll();
-  var tries = 0;
-  var t = setInterval(function(){
-    tries += 1;
-    patchAll();
-    if ((patched.switchTab && patched.vault && patched.bulk && patched.music) || tries > 80) clearInterval(t);
-  }, 150);
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', patchAll, {once:true});
-  else patchAll();
-})();
-</script>
-<!-- PHA9_VOICE_GUARD_ACTION_SPEAK_END -->
 
 <!-- PHA11_VAULT_UX_POLISH_START -->
 <style id="pha11-vault-ux-polish-style">
@@ -8338,31 +7809,106 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     }
   };
 
-  function firePhysicalBeep(){
-    var ctx = ensureAudioContext();
-    if (!ctx) return;
-    try {
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      var high = !state.ttsSpeaking;
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(high ? 880 : 740, ctx.currentTime);
-      osc.frequency.setValueAtTime(high ? 1320 : 880, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(high ? 0.95 : 0.16, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (high ? 0.34 : 0.18));
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + (high ? 0.36 : 0.20));
-    } catch(e) {}
-  }
-  function startPhysicalAlarmLoop(){
-    stopPhysicalAlarmLoop();
-    firePhysicalBeep();
-    state.beepInterval = setInterval(firePhysicalBeep, 850);
-  }
-  function stopPhysicalAlarmLoop(){
-    if (state.beepInterval) clearInterval(state.beepInterval);
-    state.beepInterval = null;
-  }
+  window.lifeosRealAlarm = state;
+  window.lifeosGetAlarmEls = function(){
+    return { tts: ttsAudio(), status: $('lifeos-alarm-anchor-status') };
+  };
+  window.lifeosBuildAlarmSpeech = function(task){
+    var text = safeText(task || state.task || state.ttsPhrase || 'một nhiệm vụ cần làm');
+    if (/^Đến giờ rồi/i.test(text)) return text;
+    return phraseForTask(text);
+  };
+  window.loadLifeOSGoogleTTS = async function(speech){
+    var phrase = safeText(speech);
+    if (!phrase) return false;
+    var tts = ttsAudio();
+    if (!tts) return false;
+    if (!loadTtsAudio(phrase, 'google', true)) return false;
+    var ok = await waitReady(tts, 8000);
+    if (!ok) {
+      loadTtsAudio(phrase, 'responsive', true);
+      ok = await waitReady(tts, 5000);
+    }
+    return ok;
+  };
+
+  window.firePhysicalBeep = () => {
+      const ctx = window.lifeosRealAlarm?.audioCtx || window.audioCtx;
+      if (!ctx) return;
+      try {
+          if (ctx.state === 'suspended') ctx.resume();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.setValueAtTime(1108.73, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+      } catch(e) {}
+  };
+
+  window.startPhysicalAlarmLoop = () => {
+      const state = window.lifeosRealAlarm || {};
+      clearInterval(state.beepTimer);
+      clearInterval(window.beepInterval);
+      window.firePhysicalBeep();
+      window.beepInterval = setInterval(window.firePhysicalBeep, 1000);
+      state.beepTimer = window.beepInterval;
+      const alarmAudio = document.getElementById('mstq-alarm');
+      if(alarmAudio) { alarmAudio.muted = false; alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }
+      window.lifeosRealAlarm = state;
+  };
+
+  window.stopPhysicalAlarmLoop = () => {
+      clearInterval(window.beepInterval);
+      if(window.lifeosRealAlarm) clearInterval(window.lifeosRealAlarm.beepTimer);
+      const alarmAudio = document.getElementById('mstq-alarm');
+      if(alarmAudio) { alarmAudio.pause(); alarmAudio.muted = true; }
+  };
+
+  window.__ttsLockedUntil = 0;
+  window.playGoogleTTSLoop = async () => {
+      const state = window.lifeosRealAlarm;
+      if(!state || !(state.running || state.active)) return;
+      const now = Date.now();
+      if(now < window.__ttsLockedUntil || state.ttsPlaying) return;
+
+      state.ttsPlaying = true;
+      window.__ttsLockedUntil = now + 9999999;
+      const {tts, status} = window.lifeosGetAlarmEls();
+
+      try {
+          const speech = window.lifeosBuildAlarmSpeech(state.task);
+          await window.loadLifeOSGoogleTTS(speech);
+          if(state.audioCtx && state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+          tts.pause(); tts.muted = false; tts.volume = 1;
+          if(status) status.textContent = 'Google TTS đang đọc nhiệm vụ. Chuông vẫn giữ nhịp cảnh báo.';
+
+          tts.onended = () => {
+              state.ttsPlaying = false;
+              state.ttsSpeaking = false;
+              window.__ttsLockedUntil = Date.now() + 8000;
+              if(status && (state.running || state.active)) status.textContent = 'Hết câu TTS. Chuông tiếp tục và sẽ đọc lại sau 8s.';
+              setTimeout(() => { if(window.lifeosRealAlarm?.running || window.lifeosRealAlarm?.active) window.playGoogleTTSLoop(); }, 8100);
+          };
+
+          tts.onerror = () => {
+              state.ttsPlaying = false; window.__ttsLockedUntil = Date.now() + 3000;
+              setTimeout(() => { if(window.lifeosRealAlarm?.running || window.lifeosRealAlarm?.active) window.playGoogleTTSLoop(); }, 3100);
+          };
+
+          const p = tts.play(); if(p && p.then) await p;
+      } catch(e) {
+          state.ttsPlaying = false; window.__ttsLockedUntil = Date.now() + 3000;
+          setTimeout(() => { if(window.lifeosRealAlarm?.running || window.lifeosRealAlarm?.active) window.playGoogleTTSLoop(); }, 3100);
+      }
+  };
+
+  function firePhysicalBeep(){ return window.firePhysicalBeep(); }
+  function startPhysicalAlarmLoop(){ return window.startPhysicalAlarmLoop(); }
+  function stopPhysicalAlarmLoop(){ return window.stopPhysicalAlarmLoop(); }
 
   function duckMusic(){
     try {
@@ -8405,51 +7951,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     }, delay == null ? LOOP_RESTART_DELAY_MS : delay);
   }
 
-  async function playGoogleTTSLoop(token){
-    if (!state.active || token !== state.loopToken) return;
-    var tts = ttsAudio();
-    if (!tts) return scheduleNextTtsLoop(5000);
-    state.cycle += 1;
-    setCycleLabel();
-    setStatus('Đang báo vòng ' + state.cycle + ': beep + Google TTS.', 'lifeos-anchor-ready');
-    try { await startAnchorAudio(); } catch(e) {}
-    try { if (ensureAudioContext() && window.audioCtx.state === 'suspended') await window.audioCtx.resume(); } catch(e) {}
-
-    if (!state.ttsPhrase) state.ttsPhrase = phraseForTask('một nhiệm vụ cần làm');
-    var expectedKey = state.ttsProvider + ':' + state.ttsPhrase;
-    if (!state.loadedKey || state.loadedKey !== expectedKey || !tts.src) {
-      loadTtsAudio(state.ttsPhrase, 'google', true);
-    }
-    var ready = await waitReady(tts, 5000);
-    if (!ready && state.ttsProvider !== 'responsive') {
-      loadTtsAudio(state.ttsPhrase, 'responsive', true);
-      ready = await waitReady(tts, 3500);
-    }
-    if (!state.active || token !== state.loopToken) return;
-    if (!ready) {
-      setStatus('TTS chưa sẵn sàng, tiếp tục beep và thử lại.', 'lifeos-anchor-warn');
-      return scheduleNextTtsLoop(5000);
-    }
-    try {
-      tts.muted = false;
-      tts.volume = 1;
-      tts.pause();
-      try { tts.currentTime = 0; } catch(e) {}
-      var p = tts.play();
-      if (p && p.then) await p;
-      clearTimeout(state.ttsWatchdog);
-      state.ttsWatchdog = setTimeout(function(){
-        if (state.active && token === state.loopToken && state.ttsSpeaking) {
-          state.ttsSpeaking = false;
-          scheduleNextTtsLoop(1200);
-        }
-      }, 35000);
-    } catch(e) {
-      state.ttsSpeaking = false;
-      setStatus('Google TTS play lỗi, sẽ thử lại vòng sau.', 'lifeos-anchor-warn');
-      scheduleNextTtsLoop(4500);
-    }
-  }
+  async function playGoogleTTSLoop(token){ return window.playGoogleTTSLoop(token); }
 
   function startAlarmLoop(taskIds, taskText){
     if (state.active || window.isAlarmRinging) return;
@@ -8460,6 +7962,9 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     window.alarmTextToSpeak = phrase;
     window.isAlarmRinging = true;
     state.active = true;
+    state.running = true;
+    state.task = raw;
+    window.lifeosRealAlarm = state;
     state.loopToken += 1;
     state.cycle = 0;
     state.ttsPhrase = phrase;
@@ -8488,6 +7993,8 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     clearTimeout(state.ttsWatchdog); state.ttsWatchdog = null;
     stopPhysicalAlarmLoop();
     state.active = false;
+    state.running = false;
+    state.ttsPlaying = false;
     state.ttsSpeaking = false;
     state.loopToken += 1;
     try { var tts = ttsAudio(); if (tts) { tts.pause(); try { tts.currentTime = 0; } catch(e) {} } } catch(e) {}
@@ -9078,8 +8585,349 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     margin-top: 8px !important;
   }
 }
+
+/* PHA 16: TASK EDIT NOW BUTTON + MOBILE HEADER COMPACT */
+.lifeos-edit-now-btn {
+  position: relative !important;
+  overflow: hidden !important;
+}
+.lifeos-edit-now-label {
+  display: none !important;
+}
+.lifeos-edit-time-actions {
+  align-items: center !important;
+}
+
+@media (min-width: 640px) {
+  .lifeos-edit-now-btn {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #editTaskModal > div {
+    width: min(94vw, 520px) !important;
+    padding: 18px !important;
+    border-radius: 24px !important;
+  }
+  #editTaskModal h2 {
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+  }
+  #editTaskInput {
+    min-height: 132px !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+  }
+  .lifeos-edit-time-actions {
+    width: 54px !important;
+    gap: 8px !important;
+  }
+  .lifeos-edit-now-btn,
+  .lifeos-edit-time-actions > .relative {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    min-height: 54px !important;
+    border-radius: 16px !important;
+  }
+  .lifeos-edit-now-btn {
+    background: var(--c-sub) !important;
+    border-color: var(--c-border) !important;
+  }
+}
+
 </style>
 <!-- PHA15_3_DATECLOCK_MOBILE_TWO_COLS_LEFT_RIGHT_FIX_END -->
 
+
+<script>
+// PHA 16: TASK EDIT NOW BUTTON HELPER
+(function(){
+  function pad2(n){ return String(n).padStart(2, '0'); }
+  window.lifeosFormatDateTimeLocalNow = function(d){
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  };
+  window.setEditTaskNow = function(){
+    try{
+      var dt = document.getElementById('editTaskDateManual');
+      var target = document.getElementById('editTaskInput');
+      if(!dt || !target){
+        if(window.showToast) window.showToast('Chưa mở ô sửa nhiệm vụ', 'ph-warning');
+        return;
+      }
+      dt.value = window.lifeosFormatDateTimeLocalNow(new Date());
+      if(typeof window.syncManualDateToInput === 'function'){
+        window.syncManualDateToInput(dt, 'editTaskInput');
+      }
+      if(window.vibrate) window.vibrate([12, 25]);
+      if(window.showToast) window.showToast('Đã cập nhật giờ hiện tại của thiết bị', 'ph-clock');
+      try{ target.focus(); target.setSelectionRange(target.value.length, target.value.length); }catch(e){}
+    }catch(err){
+      console.warn('[PHA16 setEditTaskNow]', err);
+      if(window.showToast) window.showToast('Chưa cập nhật được giờ hiện tại', 'ph-warning');
+    }
+  };
+})();
+</script>
+<script id="lifeos-task-duplicate-core">
+(function(){
+  if (window.LifeOSTaskDuplicateCore) return;
+
+  const Core = {
+    getProfileId(){
+      return window.currentProfileId
+        || window.activeProfileId
+        || window.viewingUser
+        || window.currentProfile?.id
+        || window.currentProfile?.name
+        || "tham";
+    },
+
+    normalizeProfileId(v){
+      return String(v || "tham")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase()
+        .replace(/[^\w-]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "tham";
+    },
+
+    getNextCopyTitle(sourceTitle, data){
+      const base = String(sourceTitle || "Nhiệm vụ").trim();
+      const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp("^" + escaped + "_copy(\\d+)$", "i");
+      let max = 0;
+      (data || []).forEach(t => {
+        const title = String(t.title || t.text || "").trim();
+        const m = title.match(re);
+        if (m) max = Math.max(max, Number(m[1] || 0));
+      });
+      return base + "_copy" + (max + 1);
+    },
+
+    buildTimeFieldsNow(){
+      const ms = Date.now();
+      const d = new Date(ms);
+      return {
+        alarmTime: ms,
+        timestamp: ms,
+        datetime: d.toISOString(),
+        dueAt: d.toISOString(),
+        dueDate: d.toISOString().slice(0, 10),
+        timeStr: String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0")
+      };
+    },
+
+    getFirestore(){
+      if (window.FirebaseSync && window.FirebaseSync._d) return window.FirebaseSync._d;
+      if (window.firebase && firebase.apps && firebase.apps.length && firebase.firestore) return firebase.firestore();
+      return null;
+    },
+
+    cleanForFirestore(obj){
+      const clean = JSON.parse(JSON.stringify(obj));
+      const dropUndefined = (v) => {
+        if (!v || typeof v !== "object") return v;
+        Object.keys(v).forEach(k => {
+          if (v[k] === undefined) delete v[k];
+          else dropUndefined(v[k]);
+        });
+        return v;
+      };
+      return dropUndefined(clean);
+    },
+
+    async duplicateTask(taskId){
+      try {
+        const profileId = this.normalizeProfileId(this.getProfileId());
+        const db = this.getFirestore();
+        let data = [];
+        let ref = null;
+
+        if (db) {
+          ref = db.collection("LifeOS_Profiles").doc(profileId);
+          const snap = await ref.get();
+          const docData = snap.exists ? snap.data() : {};
+          data = Array.isArray(docData.data) ? [...docData.data] : [];
+        } else {
+          data = Array.isArray(window.todos) ? [...window.todos] : [];
+          window.showToast?.("Firebase chưa sẵn sàng, tạm nhân bản cục bộ", "ph-warning-circle");
+        }
+
+        const original = data.find(t => String(t.id) === String(taskId))
+          || (Array.isArray(window.todos) ? window.todos.find(t => String(t.id) === String(taskId)) : null);
+        if (!original) {
+          window.showToast?.("Không tìm thấy nhiệm vụ để nhân bản", "ph-warning-circle");
+          return;
+        }
+
+        const newTitle = this.getNextCopyTitle(original.title || original.text, data);
+        const nowFields = this.buildTimeFieldsNow();
+        const newId = "task_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+        const clone = this.cleanForFirestore({
+          ...JSON.parse(JSON.stringify(original)),
+          id: newId,
+          title: newTitle,
+          text: newTitle,
+          name: newTitle,
+          completed: false,
+          alerted: false,
+          alarmStoppedAt: null,
+          alarmEnabled: true,
+          createdAt: Date.now(),
+          copiedFrom: original.id,
+          ...nowFields
+        });
+
+        data.push(clone);
+
+        if (ref) {
+          await ref.set({ data, updatedAt: Date.now() }, { merge: true });
+        }
+
+        window.todos = data;
+        try { window.notifiedTasks?.add?.(String(newId)); } catch(e) {}
+        try { window.saveLocalTodos?.(); } catch(e) {}
+        try { if (window.FirebaseSync && ref) window.FirebaseSync.pushAll?.({ reason: "duplicate-task" }); } catch(e) {}
+        try { window.renderTasksOnly?.(); } catch(e) {}
+        try { window.LifeOSTaskCoreRepair?.render?.(); } catch(e) {}
+        window.showToast?.("Đã nhân bản nhiệm vụ", "ph-copy");
+        if (window.lifeosSpeakNow) window.lifeosSpeakNow("Đã nhân bản nhiệm vụ", { force: true });
+        else window.playSpeechTTS?.("Đã nhân bản nhiệm vụ");
+      } catch(err) {
+        console.error("[LifeOSTaskDuplicateCore]", err);
+        window.showToast?.("Nhân bản nhiệm vụ thất bại", "ph-warning-circle");
+      }
+    }
+  };
+
+  window.LifeOSTaskDuplicateCore = Core;
+  window.lifeosDuplicateTask = function(taskId){ return Core.duplicateTask(taskId); };
+})();
+</script>
+
+<script id="lifeos-mic-dictation-core">
+(function(){
+  if (window.LifeOSMicDictationCore) return;
+
+  const MicCore = {
+    recognition: null,
+    activeInput: null,
+    baseText: "",
+    listening: false,
+
+    getRecognition(){
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        window.showToast?.("Trình duyệt này chưa hỗ trợ nhập giọng nói", "ph-warning-circle");
+        return null;
+      }
+
+      const rec = new SpeechRecognition();
+      rec.lang = "vi-VN";
+      rec.continuous = true;
+      rec.interimResults = true;
+      return rec;
+    },
+
+    start(inputId, buttonEl){
+      const input = document.getElementById(inputId);
+      if (!input) {
+        window.showToast?.("Không tìm thấy ô nhập", "ph-warning-circle");
+        return;
+      }
+
+      if (this.listening) {
+        this.stop(buttonEl);
+        return;
+      }
+
+      const rec = this.getRecognition();
+      if (!rec) return;
+
+      this.recognition = rec;
+      this.activeInput = input;
+      this.baseText = input.value || "";
+      this.listening = true;
+
+      if (buttonEl) {
+        buttonEl.dataset.micListening = "1";
+        buttonEl.classList.remove("text-slate-500", "border-slate-200");
+        buttonEl.classList.add("text-rose-500", "ring-2", "ring-rose-300", "border-rose-500", "animate-pulse");
+      }
+
+      window.showToast?.("Đang nghe, hãy nói nhiệm vụ...", "ph-microphone");
+      window.vibrate?.(20);
+
+      rec.onresult = (event) => {
+        let finalText = "";
+        let interimText = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const text = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalText += text;
+          else interimText += text;
+        }
+
+        const currentVoiceText = (finalText || interimText || "").trim();
+        const prefix = this.baseText.trim();
+
+        input.value = prefix
+          ? (prefix + " " + currentVoiceText).trim()
+          : currentVoiceText;
+
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      };
+
+      rec.onerror = (e) => {
+        console.warn("[MicDictation]", e);
+        window.showToast?.("Mic lỗi hoặc chưa được cấp quyền", "ph-warning-circle");
+        this.stop(buttonEl);
+      };
+
+      rec.onend = () => {
+        this.listening = false;
+        if (buttonEl) {
+          buttonEl.dataset.micListening = "0";
+          buttonEl.classList.add("text-slate-500", "border-slate-200");
+          buttonEl.classList.remove("text-rose-500", "ring-2", "ring-rose-300", "border-rose-500", "animate-pulse");
+        }
+      };
+
+      try {
+        rec.start();
+      } catch(e) {
+        console.warn("[MicDictation start failed]", e);
+        this.stop(buttonEl);
+      }
+    },
+
+    stop(buttonEl){
+      try { this.recognition?.stop(); } catch(e) {}
+      this.listening = false;
+
+      if (buttonEl) {
+        buttonEl.dataset.micListening = "0";
+        buttonEl.classList.add("text-slate-500", "border-slate-200");
+        buttonEl.classList.remove("text-rose-500", "ring-2", "ring-rose-300", "border-rose-500", "animate-pulse");
+      }
+
+      window.showToast?.("Đã dừng nghe mic", "ph-microphone-slash");
+    }
+  };
+
+  window.LifeOSMicDictationCore = MicCore;
+
+  window.lifeosStartMicToInput = function(inputId, buttonEl){
+    MicCore.start(inputId, buttonEl);
+  };
+})();
+</script>
 </body>
 </html>
