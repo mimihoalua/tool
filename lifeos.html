@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
-<title>LifeOS V45 - The Absolute Masterpiece</title>
+<title>LifeOS Master Pha07 - Family Chat Drag Drop</title>
 <link id="manifest-link" rel="manifest" href="/tool/manifest_lifeos.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -1782,7 +1782,7 @@ body.music-player-active #music-list-container {
   }
   #bottom-nav > div {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 4px !important;
@@ -2782,7 +2782,7 @@ body.music-player-active #mini-player {
 
   #bottom-nav > div {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     align-items: center !important;
     justify-items: center !important;
     justify-content: center !important;
@@ -3388,6 +3388,7 @@ body.music-player-active #mini-player {
   <button type="button" data-desktop-view="focus" onclick="window.setDesktopWorkspace?.('focus')"><i class="ph-bold ph-timer mr-1"></i> Tập trung</button>
   <button type="button" data-desktop-view="vault" onclick="window.setDesktopWorkspace?.('vault')"><i class="ph-bold ph-vault mr-1"></i> Kho lưu trữ</button>
   <button type="button" data-desktop-view="music" onclick="window.setDesktopWorkspace?.('music')"><i class="ph-bold ph-music-notes mr-1"></i> Nghe nhạc</button>
+  <button type="button" data-desktop-view="chat" onclick="window.setDesktopWorkspace?.('chat')"><i class="ph-bold ph-chats-teardrop mr-1"></i> Gia đình</button>
 </div>
 
 <main class="flex-grow w-full max-w-none mx-auto p-3 sm:p-4 md:p-6 lg:p-5 xl:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 xl:gap-6 pb-[140px] lg:pb-8 relative">
@@ -3614,6 +3615,60 @@ body.music-player-active #mini-player {
     </div>
 </div>
 </div>
+
+
+<div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-chat">
+  <div class="bg-white border border-slate-200 rounded-[2rem] shadow-sm flex flex-col h-full overflow-hidden min-h-[600px] relative">
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-sky-50 to-indigo-50 shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-11 h-11 rounded-2xl bg-white border border-sky-100 text-sky-600 shadow-sm flex items-center justify-center shrink-0">
+          <i class="ph-fill ph-chats-teardrop text-2xl"></i>
+        </div>
+        <div class="min-w-0">
+          <h2 class="text-base sm:text-lg font-black text-slate-800 uppercase tracking-wide truncate">Góc gia đình</h2>
+          <p id="chat-status" class="text-[11px] sm:text-xs font-bold text-slate-500 truncate">Chat riêng — text lưu Firebase, file lưu Telegram file_id</p>
+        </div>
+      </div>
+      <button type="button" onclick="window.ChatEngine?.render?.(); window.showToast?.('Đã làm mới khung chat','ph-arrows-clockwise');" class="w-10 h-10 rounded-xl bg-white/80 border border-slate-200 text-primary flex items-center justify-center active:scale-95 shadow-sm" title="Làm mới chat" aria-label="Làm mới chat">
+        <i class="ph-bold ph-arrows-clockwise text-lg pointer-events-none"></i>
+      </button>
+    </div>
+    <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto custom-scroll-area p-4 sm:p-6 bg-slate-50/50"></div>
+    <div id="chat-msg-menu" class="hidden fixed inset-0 z-[9999999] bg-slate-900/40 backdrop-blur-sm items-end justify-center sm:items-center">
+      <div class="bg-white w-full sm:w-96 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl animate-slide-up sm:animate-scaleIn flex flex-col gap-2">
+        <input type="hidden" id="chat-msg-active-id">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-2 sm:hidden"></div>
+
+        <div class="flex justify-around bg-slate-50 p-3 rounded-2xl mb-2">
+          <button type="button" onclick="window.ChatEngine.reactMsg('❤️')" class="text-3xl hover:scale-125 transition-transform active:scale-90">❤️</button>
+          <button type="button" onclick="window.ChatEngine.reactMsg('👍')" class="text-3xl hover:scale-125 transition-transform active:scale-90">👍</button>
+          <button type="button" onclick="window.ChatEngine.reactMsg('😂')" class="text-3xl hover:scale-125 transition-transform active:scale-90">😂</button>
+          <button type="button" onclick="window.ChatEngine.reactMsg('😢')" class="text-3xl hover:scale-125 transition-transform active:scale-90">😢</button>
+        </div>
+
+        <button type="button" onclick="window.ChatEngine.replyMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-arrow-u-up-left text-xl text-emerald-500 pointer-events-none"></i> Trả lời</button>
+        <button type="button" id="chat-menu-download" onclick="window.ChatEngine.downloadActiveFile()" class="hidden items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-download-simple text-xl text-purple-500 pointer-events-none"></i> Tải / Xem File</button>
+        <button type="button" onclick="window.ChatEngine.copyMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-copy text-xl text-blue-500 pointer-events-none"></i> Sao chép</button>
+        <button type="button" onclick="window.ChatEngine.deleteMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-rose-600 hover:bg-rose-50 active:bg-rose-100 transition"><i class="ph-bold ph-trash text-xl pointer-events-none"></i> Xóa tin nhắn</button>
+        <button type="button" onclick="window.ChatEngine.closeMsgMenu()" class="mt-2 w-full p-4 rounded-xl font-bold text-slate-500 bg-slate-100 active:bg-slate-200 transition">Đóng lại</button>
+      </div>
+    </div>
+    <div id="chat-reply-banner" class="hidden mx-4 mb-2 p-2 bg-slate-100 border border-slate-200 rounded-xl items-center justify-between">
+      <div class="flex flex-col overflow-hidden min-w-0">
+        <span class="text-[10px] font-bold text-primary">Đang trả lời:</span>
+        <span id="chat-reply-preview" class="text-xs text-slate-600 font-medium truncate">...</span>
+      </div>
+      <button type="button" onclick="window.ChatEngine.cancelReply()" class="p-2 text-slate-400 hover:text-rose-500 active:scale-90"><i class="ph-bold ph-x pointer-events-none"></i></button>
+    </div>
+    <form id="chat-form" class="shrink-0 p-3 sm:p-4 border-t border-slate-100 bg-white flex items-end gap-2" onsubmit="event.preventDefault(); window.ChatEngine?.handleSubmit?.();">
+      <input type="file" id="chat-file-input" class="hidden" multiple onchange="window.ChatEngine?.handleFiles?.(this.files); this.value='';">
+      <button type="button" onclick="document.getElementById('chat-file-input')?.click();" class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center active:scale-95 shrink-0" title="Đính kèm file" aria-label="Đính kèm file"><i class="ph-bold ph-paperclip text-xl pointer-events-none"></i></button>
+      <button type="button" id="chat-private-toggle" onclick="this.classList.toggle('text-slate-400'); this.classList.toggle('text-rose-500'); this.dataset.private = this.dataset.private === '1' ? '0' : '1';" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition shrink-0" title="Chế độ riêng tư (Chỉ mình tôi)" data-private="0" aria-label="Chế độ riêng tư"><i class="ph-bold ph-lock-key text-xl pointer-events-none"></i></button>
+      <textarea id="chat-input" rows="1" class="flex-1 min-h-[44px] max-h-32 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-primary shadow-inner" placeholder="Nhắn cho gia đình..."></textarea>
+      <button type="submit" class="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center active:scale-95 shadow-md shrink-0" title="Gửi tin nhắn" aria-label="Gửi tin nhắn"><i class="ph-bold ph-paper-plane-right text-xl pointer-events-none"></i></button>
+    </form>
+  </div>
+</div>
 </main>
 
 <div id="mini-player" class="lifeos-mini-player" style="display:none;" aria-hidden="true">
@@ -3670,6 +3725,11 @@ body.music-player-active #mini-player {
   <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
   <i class="ph-fill ph-music-notes text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
   <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nghe nhạc</span>
+</button>
+<button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="window.switchTab('view-chat',this)">
+  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
+  <i class="ph-fill ph-chats-teardrop text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
+  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Gia đình</span>
 </button>
 </div></nav>
 
@@ -3891,7 +3951,7 @@ window.testVoiceGuard = function() {
 // Lắng nghe sự kiện click toàn cục: Đọc mọi thao tác (Cầm tay chỉ việc)
 document.addEventListener('click', function(e) {
     if(!window.soundEnabled) return;
-    let el = e.target.closest('button, a, .swipe-front, .song-row, .cat-filter-btn, .weather-loc-btn, [role="button"]');
+    let el = e.target.closest('button, a, .swipe-front, .song-row, .cat-filter-btn, .weather-loc-btn, div[onclick*="window.ChatEngine"], [role="button"]');
     if (!el) return;
 
     let textToSpeak = '';
@@ -3915,6 +3975,12 @@ document.addEventListener('click', function(e) {
         textToSpeak = 'Trộn bài';
     } else if (el.id === 'btn-repeat') {
         textToSpeak = 'Lặp lại';
+    } else if (el.closest('form#chat-form') && el.type === 'submit') {
+        textToSpeak = 'Đang gửi tin nhắn';
+    } else if (el.querySelector('input[type="file"]') || ((el.getAttribute('onclick') || '').includes('chat-file-input')) || (el.closest('form#chat-form') && /gửi ảnh|chọn ảnh|đính kèm file|gửi file|chọn file/i.test((el.getAttribute('aria-label') || '') + ' ' + (el.getAttribute('title') || '')))) {
+        textToSpeak = 'Chọn file từ máy';
+    } else if (el.closest('div[onclick*="window.ChatEngine"]')) {
+        textToSpeak = 'Khung tin nhắn gia đình';
     } else {
         textToSpeak = el.getAttribute('aria-label') || el.getAttribute('title') || el.innerText;
     }
@@ -4108,7 +4174,7 @@ window.loadUserData=()=>{
 
 window.setDesktopWorkspace=function(mode){
     if(window.innerWidth < 1024) return;
-    const allowed=['overview','tasks','focus','vault','music'];
+    const allowed=['overview','tasks','focus','vault','music','chat'];
     if(!allowed.includes(mode)) mode='overview';
     document.body.dataset.desktopWorkspace=mode;
     try{localStorage.setItem('lifeos_desktop_workspace_v1',mode)}catch(e){}
@@ -4120,6 +4186,10 @@ window.setDesktopWorkspace=function(mode){
     }
     if(mode==='music' && window.MusicApp && !window.MusicApp.isInitialized){
         try{window.MusicApp.initAudioEngine()}catch(e){}
+    }
+    if(mode==='chat'){
+        try{window.ChatEngine?.init?.()}catch(e){}
+        try{window.ChatEngine?.render?.()}catch(e){}
     }
 };
 
@@ -4160,6 +4230,7 @@ window.lifeosPha8ScrollToTab = function(id){
     else if(id === 'view-focus') target = document.querySelector('#view-focus > div') || document.getElementById('view-focus');
     else if(id === 'view-vault') target = document.querySelector('#view-vault .vault-container-special') || document.getElementById('view-vault');
     else if(id === 'view-music') target = document.querySelector('#view-music > div') || document.getElementById('view-music');
+    else if(id === 'view-chat') target = document.querySelector('#view-chat > div') || document.getElementById('view-chat');
     if(!target) return;
 
     const extraTop = window.innerWidth < 1024 ? 10 : 12;
@@ -4218,6 +4289,7 @@ window.switchTab=(id,b)=>{
         else if(id==='view-focus') window.setDesktopWorkspace?.('focus');
         else if(id==='view-vault') window.setDesktopWorkspace?.('vault');
         else if(id==='view-music') window.setDesktopWorkspace?.('music');
+        else if(id==='view-chat') window.setDesktopWorkspace?.('chat');
 
         if(id==='view-focus') window.switchTimerMode?.('dateclock');
         if(id==='view-music' && window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine();
@@ -4235,6 +4307,7 @@ window.switchTab=(id,b)=>{
 
     if(id==='view-focus') window.switchTimerMode?.('dateclock');
     if(id==='view-music' && window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine();
+    if(id==='view-chat') { try{window.ChatEngine?.init?.()}catch(e){} try{window.ChatEngine?.render?.()}catch(e){} }
 
     requestAnimationFrame(()=>setTimeout(()=>window.lifeosPha8ScrollToTab?.(id), 60));
 
@@ -4243,6 +4316,7 @@ window.switchTab=(id,b)=>{
         else if(id==='view-focus') window.playSpeechTTS('Tập trung');
         else if(id==='view-vault') window.playSpeechTTS('Kho lưu trữ');
         else if(id==='view-music') window.playSpeechTTS('Nghe nhạc');
+        else if(id==='view-chat') window.playSpeechTTS('Gia đình');
     }
 };
 
@@ -4628,12 +4702,386 @@ window.applyVaultReconciliation = async function(cloudVault, context = {}) {
     return decision;
 };
 
+
+
+// ============================================================================
+// PHA 06: GÓC GIA ĐÌNH CHAT HYBRID - TELEGRAM FILE_ID + FIREBASE HISTORY
+// ============================================================================
+window.chatHistory = Array.isArray(window.chatHistory) ? window.chatHistory : [];
+window.ChatEngine = {
+    token: '8679345710:AAFYMFxc2HS6BGjwvu3ajkjtb-_8ndNAN9I',
+    chatId: '-1004299606539',
+    fileCache: {},
+    replyingTo: null,
+    dbRef: null,
+    unsubscribe: null,
+    _ready: false,
+    _lastKey: '',
+    getKey() { return window.viewingUser || window.currentUser || window.FirebaseSync?._k || 'tham'; },
+    init() {
+        const local = localStorage.getItem('lifeos_v8_chat_shared');
+        if (local) {
+            try {
+                const parsed = JSON.parse(local);
+                if (Array.isArray(parsed)) window.chatHistory = parsed;
+            } catch(e) { console.warn('[ChatEngine shared local parse]', e); }
+        } else {
+            // Fallback 1 lần để không làm mất tin nhắn cũ đang nằm ở local theo profile trước Pha 11.
+            try {
+                const oldLocal = localStorage.getItem('lifeos_v8_chat_' + this.getKey());
+                const parsed = oldLocal ? JSON.parse(oldLocal) : null;
+                if (Array.isArray(parsed) && parsed.length) {
+                    window.chatHistory = parsed;
+                    localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(window.chatHistory));
+                }
+            } catch(e) { console.warn('[ChatEngine old local fallback]', e); }
+        }
+        this._ready = true;
+        this._lastKey = this.getKey();
+        this.bindTextareaAutosize();
+        this.render();
+    },
+    initFirebase(db) {
+        if(!db) return;
+        this.dbRef = db.collection('LifeOS_Shared').doc('family_chat');
+        if(this.unsubscribe) {
+            try { this.unsubscribe(); } catch(e) { console.warn('[ChatEngine unsubscribe]', e); }
+            this.unsubscribe = null;
+        }
+        this.unsubscribe = this.dbRef.onSnapshot(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                if(data && Array.isArray(data.messages)) {
+                    window.chatHistory = data.messages.map(m => {
+                        const clean = {...m, id: String(m.id)};
+                        Object.keys(clean).forEach(k => clean[k] === undefined && delete clean[k]);
+                        return clean;
+                    });
+                    localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(window.chatHistory));
+                    this.render();
+                }
+            }
+        }, err => console.warn('[ChatEngine shared snapshot]', err));
+    },
+    bindTextareaAutosize() {
+        const input = document.getElementById('chat-input');
+        if (!input || input.__lifeosChatBound) return;
+        input.__lifeosChatBound = true;
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 128) + 'px';
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.handleSubmit();
+            }
+        });
+    },
+    handleSubmit() {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        const text = input.value || '';
+        if (!text.trim()) return;
+        input.value = '';
+        input.style.height = 'auto';
+        this.sendText(text);
+    },
+    handleFile(file) {
+        if (!file) return;
+        return this.sendFile(file, 1, 1);
+    },
+    handleFiles(files) {
+        const arr = Array.from(files || []).filter(Boolean);
+        return this.sendMultipleFiles(arr);
+    },
+    async sendText(text) {
+        if(!String(text || '').trim()) return;
+        const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+        const msg = {
+            id: Date.now().toString(),
+            type: 'text',
+            text: String(text).trim(),
+            sender: this.getKey(),
+            timestamp: Date.now(),
+            reply_to: this.replyingTo,
+            isPrivate: isPriv
+        };
+        window.chatHistory.push(msg);
+        this.cancelReply();
+        this.saveAndSync();
+        this.render();
+    },
+    async sendMultipleFiles(files) {
+        const arr = Array.from(files || []).filter(Boolean);
+        if (!arr.length) return;
+        window.showToast?.(`Đang tải lên ${arr.length} file...`, 'ph-spinner animate-spin');
+        window.playSpeechTTS?.(`Đang tải lên ${arr.length} file. Vui lòng không đóng ứng dụng.`);
+        for (let i = 0; i < arr.length; i++) {
+            await this.sendFile(arr[i], i + 1, arr.length);
+        }
+        window.showToast?.('Đã tải xong toàn bộ file!', 'ph-check-circle');
+        window.playSpeechTTS?.('Đã hoàn tất tải lên toàn bộ file.');
+    },
+    async sendFile(file, index = 1, total = 1) {
+        if(!file) return;
+        const batchLabel = total > 1 ? ` ${index}/${total}` : '';
+        window.showToast?.(`Đang tải file${batchLabel} lên Telegram...`, 'ph-spinner animate-spin');
+        if (total <= 1) window.playSpeechTTS?.('Đang xử lý và tải file lên. Vui lòng chờ.');
+
+        const formData = new FormData();
+        formData.append('chat_id', this.chatId);
+
+        let endpoint = 'sendDocument';
+        let fileField = 'document';
+        let msgType = 'file';
+
+        const mime = String(file.type || '').toLowerCase();
+        if(mime.startsWith('image/')) { endpoint = 'sendPhoto'; fileField = 'photo'; msgType = 'image'; }
+        else if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
+        else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
+
+        formData.append(fileField, file);
+
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${this.token}/${endpoint}`, {
+                method: 'POST', body: formData
+            });
+            const data = await res.json();
+            if(data.ok) {
+                let fileId = '';
+                if(msgType === 'image') {
+                    const photoArr = data.result.photo || [];
+                    const best = photoArr[photoArr.length - 1];
+                    fileId = best && best.file_id;
+                } else {
+                    fileId = data.result[fileField] && data.result[fileField].file_id;
+                }
+                if (!fileId) throw new Error('Missing Telegram file_id');
+
+                const fileName = file.name || 'Tập tin';
+                const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+                const msg = {
+                    id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+                    type: msgType,
+                    file_id: fileId,
+                    file_name: fileName,
+                    sender: this.getKey(),
+                    timestamp: Date.now(),
+                    reply_to: this.replyingTo,
+                    isPrivate: isPriv
+                };
+                window.chatHistory.push(msg);
+                this.cancelReply();
+                this.saveAndSync();
+                this.render();
+                window.showToast?.(total > 1 ? `Đã gửi file ${index}/${total}` : 'Gửi file thành công!', 'ph-check-circle');
+                if (total <= 1) window.playSpeechTTS?.('Gửi file thành công!');
+            } else { throw new Error(data.description || 'Telegram API Error'); }
+        } catch(e) {
+            console.warn('[ChatEngine sendFile]', e);
+            window.showToast?.(total > 1 ? `Lỗi gửi file ${index}/${total}` : 'Lỗi gửi file lên Telegram!', 'ph-warning-circle');
+            window.playSpeechTTS?.('Đã xảy ra lỗi khi gửi file. Vui lòng kiểm tra mạng.');
+        }
+    },
+    saveAndSync() {
+        const safeHistory = (window.chatHistory || []).map(m => {
+            const clean = {...m, id: String(m.id)};
+            Object.keys(clean).forEach(k => clean[k] === undefined && delete clean[k]);
+            return clean;
+        });
+        window.chatHistory = safeHistory;
+        localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(safeHistory));
+        if(this.dbRef) {
+            this.dbRef.set({ messages: safeHistory, updatedAt: Date.now() }, { merge: true })
+                .catch(e => console.warn('[ChatEngine shared push]', e));
+        }
+    },
+    async getImageUrl(fileId) {
+        if(this.fileCache[fileId]) return this.fileCache[fileId];
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${this.token}/getFile?file_id=${encodeURIComponent(fileId)}`);
+            const data = await res.json();
+            if(data.ok) {
+                const url = `https://api.telegram.org/file/bot${this.token}/${data.result.file_path}`;
+                this.fileCache[fileId] = url;
+                return url;
+            }
+        } catch(e) { console.warn('[ChatEngine getImageUrl]', e); }
+        return '';
+    },
+    openMsgMenu(id) {
+        window.vibrate?.(15);
+        const active = document.getElementById('chat-msg-active-id');
+        if (active) active.value = String(id || '');
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        const btnDl = document.getElementById('chat-menu-download');
+        if(btnDl) {
+            if(m && m.type !== 'text') { btnDl.classList.remove('hidden'); btnDl.classList.add('flex'); }
+            else { btnDl.classList.remove('flex'); btnDl.classList.add('hidden'); }
+        }
+        const menu = document.getElementById('chat-msg-menu');
+        if(menu) { menu.classList.remove('hidden'); menu.style.display = 'flex'; }
+    },
+    closeMsgMenu() {
+        window.vibrate?.(10);
+        const menu = document.getElementById('chat-msg-menu');
+        if(menu) { menu.classList.add('hidden'); menu.style.display = 'none'; }
+    },
+    async downloadActiveFile() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(m && m.file_id) {
+            window.showToast?.('Đang mở file...', 'ph-spinner animate-spin');
+            const url = await this.getImageUrl(m.file_id);
+            if(url) window.open(url, '_blank');
+        }
+        this.closeMsgMenu();
+    },
+    replyMsg() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(m) {
+            this.replyingTo = String(m.id);
+            const rPreview = document.getElementById('chat-reply-preview');
+            const rBanner = document.getElementById('chat-reply-banner');
+            if(rPreview) rPreview.textContent = m.type === 'text' ? String(m.text || '') : `[${String(m.type || 'FILE').toUpperCase()}] đính kèm`;
+            if(rBanner) { rBanner.classList.remove('hidden'); rBanner.classList.add('flex'); }
+            this.closeMsgMenu();
+            const input = document.getElementById('chat-input-text') || document.getElementById('chat-input') || document.querySelector('#view-chat input[type="text"], #view-chat textarea');
+            if(input) input.focus();
+        }
+    },
+    cancelReply() {
+        this.replyingTo = null;
+        const rBanner = document.getElementById('chat-reply-banner');
+        if(rBanner) { rBanner.classList.remove('flex'); rBanner.classList.add('hidden'); }
+    },
+    reactMsg(emoji) {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(m) {
+            if(!m.reactions) m.reactions = {};
+            const key = this.getKey();
+            if(m.reactions[key] === emoji) delete m.reactions[key];
+            else m.reactions[key] = emoji;
+            this.saveAndSync();
+            this.render();
+            window.vibrate?.(10);
+        }
+        this.closeMsgMenu();
+    },
+    copyMsg() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const msg = (window.chatHistory || []).find(m => String(m.id) === String(id));
+        if(msg) {
+            const textToCopy = msg.type === 'text' ? String(msg.text || '') : `[${String(msg.type || 'FILE').toUpperCase()}] đính kèm.`;
+            if(navigator.clipboard) navigator.clipboard.writeText(textToCopy).catch(()=>{});
+            window.showToast?.('Đã sao chép!', 'ph-check-circle');
+            window.playSpeechTTS?.('Đã sao chép tin nhắn');
+        }
+        this.closeMsgMenu();
+    },
+    deleteMsg() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        window.chatHistory = (window.chatHistory || []).filter(m => String(m.id) !== String(id));
+        (window.chatHistory || []).forEach(m => { if (String(m.reply_to || '') === String(id)) m.reply_to = null; });
+        this.saveAndSync();
+        this.render();
+        window.showToast?.('Đã xóa tin nhắn!', 'ph-trash');
+        window.playSpeechTTS?.('Đã xóa tin nhắn');
+        this.closeMsgMenu();
+    },
+    render() {
+        const container = document.getElementById('chat-messages');
+        if(!container) return;
+        const profileKey = this.getKey();
+        const messages = Array.isArray(window.chatHistory) ? window.chatHistory : [];
+        const emptyHtml = `<div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-8"><div class="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-3"><i class="ph-duotone ph-chats-teardrop text-4xl text-primary"></i></div><div class="text-sm font-black text-slate-600">Chưa có tin nhắn</div><div class="text-xs font-semibold mt-1">Gửi lời nhắn hoặc file đầu tiên cho gia đình.</div></div>`;
+        const visibleMessages = messages.filter(m => !(m.isPrivate && String(m.sender || '') !== String(profileKey)));
+        if (!visibleMessages.length) { container.innerHTML = emptyHtml; return; }
+        container.innerHTML = visibleMessages.map(m => {
+            const isMe = String(m.sender || '') === String(profileKey);
+            const alignCls = isMe ? 'justify-end' : 'justify-start';
+            const bubbleCls = isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm border border-slate-200';
+            const timeStr = new Date(m.timestamp || Date.now()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            const lockIcon = m.isPrivate ? '<i class="ph-bold ph-lock-key text-xs ml-1 text-rose-300" title="Chỉ mình tôi"></i>' : '';
+            const senderProf = window.PROFILES?.[m.sender] || { name: m.sender || 'Gia đình', icon: '👤' };
+            const avatarHtml = `<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-lg shadow-sm shrink-0">${window.escapeHTML(String(senderProf.icon || '👤'))}</div>`;
+            let contentHtml = '';
+            if(m.type === 'text') {
+                contentHtml = `<p class="text-sm font-medium whitespace-pre-wrap break-words">${window.escapeHTML(String(m.text || ''))}</p>`;
+            } else {
+                const elId = 'file-' + String(m.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+                if(m.type === 'image') {
+                    contentHtml = `<img src="" id="${elId}" class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover pointer-events-none" alt="Photo">`;
+                } else if(m.type === 'video') {
+                    contentHtml = `<video src="" id="${elId}" controls class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover"></video>`;
+                } else if(m.type === 'audio') {
+                    contentHtml = `<audio src="" id="${elId}" controls class="w-[200px] sm:w-[250px] animate-pulse bg-slate-200 rounded-full h-[40px]"></audio>`;
+                } else {
+                    contentHtml = `<div id="${elId}" class="flex items-center gap-2 text-primary font-bold bg-white/50 p-2 rounded-lg pointer-events-none"><i class="ph-bold ph-file-text text-2xl"></i> <span class="text-xs truncate max-w-[150px]">${window.escapeHTML(m.file_name||'Tập tin')}</span></div>`;
+                }
+
+                this.getImageUrl(m.file_id).then(url => {
+                    const el = document.getElementById(elId);
+                    if(el && url) {
+                        if (m.type === 'image' || m.type === 'video') {
+                            el.src = url;
+                            el.classList.remove('animate-pulse', 'h-[150px]');
+                        } else if (m.type === 'audio') {
+                            el.src = url;
+                            el.classList.remove('animate-pulse');
+                        } else {
+                            el.classList.remove('bg-white/50');
+                            el.classList.add('bg-white');
+                        }
+                    }
+                });
+            }
+            let replyHtml = '';
+            if (m.reply_to) {
+                const rMsg = messages.find(x => String(x.id) === String(m.reply_to) && !(x.isPrivate && String(x.sender || '') !== String(profileKey)));
+                if (rMsg) {
+                    const rText = rMsg.type === 'text' ? String(rMsg.text || '') : `[${String(rMsg.type || 'FILE').toUpperCase()}]`;
+                    const rName = window.PROFILES?.[rMsg.sender]?.name || rMsg.sender || 'Gia đình';
+                    replyHtml = `<div class="bg-black/10 border-l-[3px] border-primary/50 px-2 py-1 mb-1.5 rounded-r text-[10px] opacity-80 line-clamp-2"><b class="mr-1">${window.escapeHTML(String(rName))}:</b>${window.escapeHTML(rText)}</div>`;
+                }
+            }
+            let reactHtml = '';
+            if (m.reactions && Object.keys(m.reactions).length > 0) {
+                const counts = {};
+                Object.values(m.reactions).forEach(emoji => counts[emoji] = (counts[emoji] || 0) + 1);
+                const badges = Object.entries(counts).map(([e,c]) => `<span>${window.escapeHTML(String(e))}${c > 1 ? ' ' + c : ''}</span>`).join(' ');
+                reactHtml = `<div class="absolute -bottom-2 ${isMe ? '-left-2' : '-right-2'} flex gap-1 bg-white border border-slate-200 rounded-full px-1.5 py-0.5 shadow-sm text-[10px] pointer-events-none z-10">${badges}</div>`;
+            }
+            const msgIdAttr = window.escapeHTML(String(m.id || ''));
+            return `
+            <div class="flex w-full mb-4 ${alignCls}">
+                ${!isMe ? avatarHtml + '<div class="w-2 shrink-0"></div>' : ''}
+                <div class="flex flex-col max-w-[75%]">
+                    ${!isMe ? `<span class="text-[10px] font-bold text-slate-500 mb-1 ml-1">${window.escapeHTML(String(senderProf.name || m.sender || 'Gia đình'))}</span>` : ''}
+                    <div class="relative">
+                        <div data-chat-msg-id="${msgIdAttr}" class="p-3 rounded-[1.25rem] shadow-sm cursor-pointer active:scale-95 transition-transform ${bubbleCls}" onclick="window.ChatEngine.openMsgMenu(this.dataset.chatMsgId)">
+                            ${replyHtml}
+                            ${contentHtml}
+                        </div>
+                        ${reactHtml}
+                    </div>
+                    <span class="text-[9px] font-semibold text-slate-400 mt-1 flex items-center ${isMe ? 'justify-end mr-1' : 'justify-start ml-1'}">${timeStr} ${lockIcon}</span>
+                </div>
+            </div>`;
+        }).join('');
+        setTimeout(() => { container.scrollTop = container.scrollHeight; }, 80);
+    }
+};
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
     init(k){
         console.log('[FB:init] profile=', k);
         this._k=k;
-        window.cloudSyncCompleted = false;
+        try{ window.ChatEngine?.init?.(); }catch(e){ console.warn('[ChatEngine init before Firebase]', e); }
+        window.cloudSyncCompleted = false;
         try{
             if(this._u){ try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe old listener failed]', e); } this._u=null; }
             if(!firebase.apps.length) firebase.initializeApp({
@@ -4647,6 +5095,7 @@ window.FirebaseSync={
             const startFS = () => {
                 this._d=firebase.firestore();
                 this._i=true;
+                if(window.ChatEngine) window.ChatEngine.initFirebase(this._d);
                 const dt=el('pwaStatusDot');if(dt)dt.className='status-dot dot-yellow mt-0.5 hidden md:inline-block';
                 this._listen();
                 setTimeout(() => {
@@ -4702,8 +5151,7 @@ window.FirebaseSync={
                     }
                 }
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
-
-                if(Array.isArray(c.vaultData)){
+                if(Array.isArray(c.vaultData)){
                     await window.applyVaultReconciliation(c.vaultData, { cloudReadOk: true, allowLocalPushAfterCloudRead: false, profile: this._k, source: 'onSnapshot' });
                 } else {
                     console.warn('[VAULT RECONCILE SKIP] snapshot vaultData is not array', c.vaultData);
@@ -4721,7 +5169,7 @@ window.FirebaseSync={
         localStorage.setItem('lifeos_v8_time_'+this._k, currentTs.toString());
         const safeTodos = (window.todos||[]).map(t => { const cleanT = {...t, id: String(t.id)}; Object.keys(cleanT).forEach(key => cleanT[key] === undefined && delete cleanT[key]); return cleanT; });
         const vaultLocal = window.VaultStorageLayer?.getData?.() || [];
-        let includeVaultData = true;
+        let includeVaultData = true;
         let safeVault = vaultLocal.map(v => { const cleanV = {...v, id: String(v.id)}; Object.keys(cleanV).forEach(key => cleanV[key] === undefined && delete cleanV[key]); return cleanV; });
         const allowEmptyVaultPush = options.allowEmptyVaultPush === true || options.reason === 'user-delete-vault';
         if(vaultLocal.length === 0 && !allowEmptyVaultPush){
@@ -5599,6 +6047,40 @@ document.addEventListener('DOMContentLoaded', () => {
     hideEl('login-gate');
     window.loadUserData?.();
 }
+
+
+    // PHA 08: LOGIC KÉO THẢ MỌI LOẠI FILE VÀO KHUNG CHAT
+    const chatView = document.getElementById('view-chat');
+    if(chatView && !chatView.__lifeosPha08DragDropBound) {
+        chatView.__lifeosPha08DragDropBound = true;
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            chatView.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        chatView.addEventListener('dragover', () => {
+            chatView.classList.add('ring-4', 'ring-primary', 'bg-primary/5', 'transition-all');
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            chatView.addEventListener(eventName, () => {
+                chatView.classList.remove('ring-4', 'ring-primary', 'bg-primary/5');
+            });
+        });
+
+        chatView.addEventListener('drop', e => {
+            const dt = e.dataTransfer;
+            const files = dt && dt.files;
+            if(files && files.length > 0) {
+                window.playSpeechTTS?.(`Đã nhận ${files.length} file kéo thả. Đang gửi lên hệ thống.`);
+                if(window.ChatEngine && window.ChatEngine.sendMultipleFiles) {
+                    window.ChatEngine.sendMultipleFiles(Array.from(files));
+                }
+            }
+        });
+    }
 });
 </script>
 
@@ -8638,6 +9120,40 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   }
 }
 
+
+
+/* PHA 06: GÓC GIA ĐÌNH CHAT HYBRID - START */
+#bottom-nav > div {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: center !important;
+  justify-items: center !important;
+}
+#view-chat { min-width: 0 !important; }
+#chat-messages { scroll-behavior: smooth; }
+.lifeos-chat-bubble-img { max-width: min(250px, 72vw); border-radius: .85rem; object-fit: cover; }
+@media (max-width: 1023px) {
+  #bottom-nav .nav-btn span { font-size: 9px !important; letter-spacing: 0 !important; }
+  #bottom-nav .nav-btn i { font-size: 20px !important; }
+  #view-chat { width: 100% !important; margin-top: .5rem !important; min-height: calc(100dvh - var(--lifeos-header-h, 72px) - var(--lifeos-bottom-nav-h, 66px) - 28px) !important; }
+  #view-chat > div { min-height: calc(100dvh - var(--lifeos-header-h, 72px) - var(--lifeos-bottom-nav-h, 66px) - 34px) !important; max-height: calc(100dvh - var(--lifeos-header-h, 72px) - var(--lifeos-bottom-nav-h, 66px) - 34px) !important; border-radius: 24px !important; }
+  #chat-messages { min-height: 0 !important; }
+}
+@media (min-width: 1024px) {
+  body[data-desktop-workspace="chat"] > main { grid-template-columns: minmax(0, 1fr) !important; max-width: min(1680px, calc(100vw - 32px)) !important; width: calc(100% - 32px) !important; justify-items: stretch !important; }
+  body[data-desktop-workspace="overview"] #view-chat,
+  body[data-desktop-workspace="tasks"] #view-chat,
+  body[data-desktop-workspace="focus"] #view-chat,
+  body[data-desktop-workspace="vault"] #view-chat,
+  body[data-desktop-workspace="music"] #view-chat { display: none !important; }
+  body[data-desktop-workspace="chat"] #view-chat { display: flex !important; grid-column: 1 !important; width: min(1180px, calc(100vw - 48px)) !important; max-width: none !important; margin: 0 auto !important; animation: none !important; }
+  body[data-desktop-workspace="chat"] #view-tasks,
+  body[data-desktop-workspace="chat"] #view-focus,
+  body[data-desktop-workspace="chat"] #view-vault,
+  body[data-desktop-workspace="chat"] #view-music { display: none !important; }
+  body[data-desktop-workspace="chat"] #view-chat > div { min-height: calc(100vh - 190px) !important; max-height: calc(100vh - 190px) !important; }
+}
+/* PHA 06: GÓC GIA ĐÌNH CHAT HYBRID - END */
 </style>
 <!-- PHA15_3_DATECLOCK_MOBILE_TWO_COLS_LEFT_RIGHT_FIX_END -->
 
@@ -8689,7 +9205,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     normalizeProfileId(v){
       return String(v || "tham")
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[̀-ͯ]/g, "")
         .replace(/đ/g, "d")
         .replace(/Đ/g, "D")
         .toLowerCase()
@@ -8699,8 +9215,8 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 
     getNextCopyTitle(sourceTitle, data){
       const base = String(sourceTitle || "Nhiệm vụ").trim();
-      const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp("^" + escaped + "_copy(\\d+)$", "i");
+      const escaped = base.replace(/[.*+?^${}()|[\]\]/g, "\$&");
+      const re = new RegExp("^" + escaped + "_copy(\d+)$", "i");
       let max = 0;
       (data || []).forEach(t => {
         const title = String(t.title || t.text || "").trim();
