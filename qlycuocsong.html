@@ -863,6 +863,24 @@ select.timer-dropdown { appearance: none; background-color: var(--c-sub); color:
 }
 </style>
 
+
+<style id="lifeos-pha15-task-core-repair-css">
+#lifeos-task-edit-modal{z-index:9999998}.lifeos-task-card-btn{min-width:38px;min-height:38px}
+#lifeos-task-edit-modal input{font-family:inherit}
+@media (min-width:1024px){body.lifeos-pc-hard-layout #todo-list{width:100%!important;max-width:none!important}}
+</style>
+
+
+<style id="lifeos-pha18-2-edit-now-button-css">
+#lifeos-task-edit-now-btn {
+  touch-action: manipulation;
+}
+#lifeos-task-edit-now-btn i,
+#lifeos-task-edit-now-btn span {
+  pointer-events: none;
+}
+</style>
+
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
@@ -4515,6 +4533,3049 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 <!-- /PHA 10 REAL ALARM LOOP MODAL -->
+
+
+<!-- PHA 15 TASK EDIT MODAL -->
+<div id="lifeos-task-edit-modal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+  <div class="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-orange-100 overflow-hidden">
+    <div class="p-5 bg-orange-50 border-b border-orange-100 flex items-center justify-between gap-3">
+      <div><h3 class="text-xl font-black text-orange-600 flex items-center gap-2"><i class="ph-bold ph-pencil-simple-line"></i>Sửa nhiệm vụ</h3><p class="text-xs font-bold text-slate-500 mt-1">Sửa nội dung và giờ nhắc việc</p></div>
+      <button type="button" onclick="window.LifeOSTaskCoreRepair?.closeEdit()" class="w-10 h-10 rounded-xl bg-white text-slate-500 border border-slate-200 flex items-center justify-center active:scale-95"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <input id="lifeos-task-edit-id" type="hidden">
+      <div><label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nội dung nhiệm vụ</label><input id="lifeos-task-edit-text" type="text" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl font-bold text-slate-800 outline-none focus:border-orange-400" placeholder="Nhập nội dung nhiệm vụ"></div>
+      <div><label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Giờ nhắc</label><input id="lifeos-task-edit-datetime" type="datetime-local" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl font-bold text-slate-800 outline-none focus:border-orange-400"></div>
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button type="button" onclick="window.LifeOSTaskCoreRepair?.saveEdit()" class="min-h-[48px] rounded-2xl bg-orange-500 text-white font-black shadow-lg active:scale-95 flex items-center justify-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Lưu sửa</button>
+        <button type="button" onclick="window.LifeOSTaskCoreRepair?.closeEdit()" class="min-h-[48px] rounded-2xl bg-slate-50 text-slate-600 border border-slate-200 font-black active:scale-95 flex items-center justify-center gap-2"><i class="ph-bold ph-x-circle"></i> Hủy</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /PHA 15 TASK EDIT MODAL -->
+
+
+<script id="lifeos-pha15-task-core-repair-js">
+(function(){
+if(window.LifeOSTaskCoreRepair&&window.LifeOSTaskCoreRepair.installed)return;
+const $=id=>document.getElementById(id);
+const clean=v=>String(v??'').replace(/\s+/g,' ').trim();
+const esc=v=>{const s=String(v??'');return (typeof window.escapeHTML==='function')?window.escapeHTML(s):s.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));};
+const A=window.LifeOSTaskCoreRepair={installed:true,filter:window.filterMode||'all',alarmTimer:null,alarmWorker:null,oldFindDueTasks:typeof window.lifeosFindDueTasks==='function'?window.lifeosFindDueTasks:null,
+ profileKey(){try{return clean(window.viewingUser||window.currentUser?.id||window.currentUser?.name||window.currentProfile?.id||window.currentProfile?.name||localStorage.getItem('lifeos_v8_session')||'default')||'default'}catch(e){return'default'}},
+ backupKey(){return 'lifeos_task_core_repair_tasks_'+this.profileKey()},
+ parseDateLike(v){if(v==null||v==='')return 0;if(typeof v==='number')return v>1000000000000?v:(v>1000000000?v*1000:0);const s=String(v).trim();if(/^\d{13}$/.test(s))return Number(s);if(/^\d{10}$/.test(s))return Number(s)*1000;const t=Date.parse(s);return Number.isFinite(t)?t:0},
+ normalize(t){if(!t||typeof t!=='object')return null;const text=clean(t.text||t.title||t.name||t.content||t.summary||'');if(!text)return null;const id=String(t.id||t.uid||t.key||('task_'+Date.now()+'_'+Math.floor(Math.random()*1e5)));let alarmTime=Number(t.alarmTime||t.timestamp||0)||0;if(!alarmTime&&t.dueAt)alarmTime=this.parseDateLike(t.dueAt);if(!alarmTime&&t.datetime)alarmTime=this.parseDateLike(t.datetime);let dueDate=t.dueDate||'',timeStr=t.timeStr||'';if(alarmTime){const d=new Date(alarmTime);if(!Number.isNaN(d.getTime())){dueDate=dueDate||d.toISOString().slice(0,10);timeStr=timeStr||`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}}return {...t,id,text,title:text,completed:!!(t.completed||t.done||t.checked||t.isDone),priority:t.priority||'normal',tags:Array.isArray(t.tags)?t.tags:[],alarmTime:alarmTime||null,dueAt:alarmTime?new Date(alarmTime).toISOString():(t.dueAt||null),datetime:alarmTime?new Date(alarmTime).toISOString():(t.datetime||null),dueDate:dueDate||null,timeStr:timeStr||'',alarmEnabled:alarmTime?true:!!t.alarmEnabled,alerted:false,createdAt:Number(t.createdAt||Date.now())}},
+ ensure(){if(!Array.isArray(window.todos))window.todos=[];if(!window.todos.length){try{const raw=localStorage.getItem(this.backupKey());if(raw){const arr=JSON.parse(raw);if(Array.isArray(arr))window.todos=arr}}catch(e){}}window.todos=window.todos.map(t=>this.normalize(t)).filter(Boolean);return window.todos},
+ parseTime(text,explicitDt){if(explicitDt){const d=new Date(explicitDt);if(!Number.isNaN(d.getTime()))return d.getTime()}const s=clean(text).toLowerCase();const m=s.match(/(?:lúc|luc|vào lúc|vao luc)?\s*(\d{1,2})\s*[:h]\s*(\d{1,2})/i)||s.match(/(?:lúc|luc|vào lúc|vao luc)?\s*(\d{1,2})\s*giờ\s*(\d{1,2})?/i);if(!m)return 0;const hh=Math.max(0,Math.min(23,Number(m[1]))),mm=Math.max(0,Math.min(59,Number(m[2]||0)));const d=new Date();d.setHours(hh,mm,0,0);if(/ngày mai|mai/i.test(s))d.setDate(d.getDate()+1);return d.getTime()},
+ stripTime(text){return clean(text).replace(/(?:lúc|luc|vào lúc|vao luc)?\s*\d{1,2}\s*[:h]\s*\d{1,2}/ig,'').replace(/(?:lúc|luc|vào lúc|vao luc)?\s*\d{1,2}\s*giờ\s*\d{0,2}/ig,'').replace(/\b(hôm nay|ngày mai|mai)\b/ig,'').replace(/\s+/g,' ').trim()},
+ save(reason='task-save'){this.ensure();try{localStorage.setItem(this.backupKey(),JSON.stringify(window.todos))}catch(e){}try{window.saveLocalTodos?.()}catch(e){console.warn('[PHA15 saveLocalTodos]',e)}try{window.FirebaseSync?.pushAll?.({reason})}catch(e){try{window.FirebaseSync?.pushAll?.()}catch(_e){}}},
+ addTask(rawText,explicitDt=''){const raw=clean(rawText);if(!raw){window.showToast?.('Bạn chưa nhập nội dung nhiệm vụ','ph-pencil');window.lifeosSpeakNow?.('Bạn chưa nhập nội dung nhiệm vụ',{force:true});return false}const alarmTime=this.parseTime(raw,explicitDt);const text=this.stripTime(raw)||raw;const id='task_'+Date.now()+'_'+Math.floor(Math.random()*1e5);const task=this.normalize({id,text:text.charAt(0).toUpperCase()+text.slice(1),completed:false,priority:'normal',tags:[],alarmTime:alarmTime||null,alarmEnabled:!!alarmTime,createdAt:Date.now()});this.ensure();window.todos.unshift(task);this.save('task-add-pha15');this.render();this.afterAdd(task,alarmTime);return true},
+ afterAdd(task,alarmTime){try{window.vibrate?.(15)}catch(e){}if(alarmTime){const d=new Date(alarmTime),ts=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;if(alarmTime<=Date.now()){window.showToast?.('Đã thêm nhiệm vụ. Giờ nhắc đã đến, kích hoạt báo thức.','ph-bell-ringing');setTimeout(()=>this.fireAlarm(task),300)}else{window.showToast?.(`Đã thêm nhiệm vụ, hẹn lúc ${ts}`,'ph-clock');window.lifeosSpeakNow?.(`Đã thêm nhiệm vụ, hẹn lúc ${ts}`,{force:true});try{window.primeNextLifeOSTaskTTS?.({...task,__alarmId:this.alarmId(task),__dueMs:alarmTime})}catch(e){}}}else{window.showToast?.('Đã thêm nhiệm vụ','ph-check-circle');window.lifeosSpeakNow?.('Đã thêm nhiệm vụ',{force:true})}},
+ submitFrom(inputId,dtId){const input=$(inputId);if(!input){window.showToast?.('Không tìm thấy ô nhập nhiệm vụ','ph-warning-circle');return false}const ok=this.addTask(input.value,$(dtId)?.value||'');if(ok){input.value='';const dt=$(dtId);if(dt)dt.value='';input.dispatchEvent(new Event('input',{bubbles:true}))}return ok},
+ overdue(t){return !t.completed&&Number(t.alarmTime||0)&&Number(t.alarmTime)<Date.now()},
+ meta(t){const out=[];if(t.timeStr)out.push(`<span class="inline-flex items-center gap-1 text-[11px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded-full"><i class="ph-bold ph-clock"></i>${esc(t.timeStr)}</span>`);if(t.dueDate)out.push(`<span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full"><i class="ph-bold ph-calendar"></i>${esc(t.dueDate)}</span>`);if(!out.length)out.push('<span class="text-[11px] font-bold text-slate-400">Chưa đặt giờ</span>');return out.join('')},
+ filtered(){const all=this.ensure(),mode=window.filterMode||this.filter||'all';if(mode==='active')return all.filter(t=>!t.completed);if(mode==='overdue')return all.filter(t=>this.overdue(t));return all},
+ render(){const list=$('todo-list'),empty=$('empty-state');if(!list)return;const items=this.filtered();if(!items.length){list.innerHTML='';if(empty){empty.classList.remove('hidden');empty.classList.add('flex')}}else{if(empty){empty.classList.add('hidden');empty.classList.remove('flex')}list.innerHTML=items.map(t=>{const done=!!t.completed,over=this.overdue(t);return `<li data-task-id="${esc(t.id)}" class="group bg-white border ${done?'border-emerald-100 opacity-70':'border-slate-200'} ${over?'ring-2 ring-rose-100':''} rounded-2xl p-3 sm:p-4 shadow-sm active:scale-[.99] transition-all"><div class="flex items-start gap-3 min-w-0"><button type="button" data-task-action="toggle" class="lifeos-task-card-btn shrink-0 rounded-xl ${done?'bg-emerald-500 text-white':'bg-slate-50 text-slate-400'} border border-slate-200 flex items-center justify-center active:scale-95" title="${done?'Đánh dấu chưa xong':'Đánh dấu hoàn thành'}"><i class="ph-bold ${done?'ph-check':'ph-circle'} text-lg"></i></button><div class="flex-1 min-w-0"><div class="font-black text-slate-800 leading-snug break-words ${done?'line-through text-slate-400':''}">${esc(t.text)}</div><div class="mt-2 flex flex-wrap gap-1.5">${this.meta(t)}</div></div><div class="flex items-center gap-1 shrink-0"><button type="button" data-task-action="edit" class="lifeos-task-card-btn rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center active:scale-95" title="Sửa nhiệm vụ"><i class="ph-bold ph-pencil-simple-line"></i></button><button type="button" data-task-action="focus" class="lifeos-task-card-btn rounded-xl bg-primary/10 text-primary border border-primary/10 flex items-center justify-center active:scale-95" title="Tập trung"><i class="ph-bold ph-target"></i></button><button type="button" data-task-action="delete" class="lifeos-task-card-btn rounded-xl bg-rose-50 text-rose-500 border border-rose-100 flex items-center justify-center active:scale-95" title="Xóa nhiệm vụ"><i class="ph-bold ph-trash"></i></button></div></div></li>`}).join('')}const all=this.ensure(),done=all.filter(t=>t.completed).length,p=all.length?Math.round(done/all.length*100):0;try{if($('progress-text'))$('progress-text').textContent=p+'%'}catch(e){}try{const ring=$('progress-ring');if(ring){const total=113;ring.style.strokeDashoffset=String(total-total*p/100)}}catch(e){}},
+ find(id){this.ensure();return window.todos.find(t=>String(t.id)===String(id))},
+ toggle(id){const t=this.find(id);if(!t)return;t.completed=!t.completed;t.completedAt=t.completed?Date.now():null;this.save('task-toggle-pha15');this.render();window.showToast?.(t.completed?'Đã hoàn thành nhiệm vụ':'Đã mở lại nhiệm vụ',t.completed?'ph-check-circle':'ph-arrow-counter-clockwise')},
+ delete(id){this.ensure();const n=window.todos.length;window.todos=window.todos.filter(t=>String(t.id)!==String(id));if(window.todos.length!==n){this.save('task-delete-pha15');this.render();window.showToast?.('Đã xóa nhiệm vụ','ph-trash')}},
+ focus(id){const t=this.find(id);if(!t)return;window.currentFocusTaskId=String(id);try{if($('focus-task-name'))$('focus-task-name').textContent=t.text}catch(e){}const card=$('focus-task-card');if(card){card.classList.remove('hidden');card.classList.add('block')}window.showToast?.('Đã ghim nhiệm vụ tập trung','ph-target')},
+ openEdit(id){const t=this.find(id);if(!t)return;$('lifeos-task-edit-id').value=t.id;$('lifeos-task-edit-text').value=t.text||'';const dt=$('lifeos-task-edit-datetime');if(dt){if(t.alarmTime){const d=new Date(Number(t.alarmTime));dt.value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}else dt.value=''}const modal=$('lifeos-task-edit-modal');if(modal){modal.classList.remove('hidden');modal.classList.add('flex');modal.style.display='flex'}setTimeout(()=>$('lifeos-task-edit-text')?.focus(),60)},
+ closeEdit(){const m=$('lifeos-task-edit-modal');if(m){m.classList.add('hidden');m.classList.remove('flex');m.style.display='none'}},
+ saveEdit(){const id=$('lifeos-task-edit-id')?.value||'',t=this.find(id);if(!t)return;const text=clean($('lifeos-task-edit-text')?.value||'');if(!text){window.showToast?.('Nội dung nhiệm vụ không được để trống','ph-warning-circle');return}const alarmTime=this.parseTime(text,$('lifeos-task-edit-datetime')?.value||'');t.text=text;t.title=text;t.alarmTime=alarmTime||null;t.alarmEnabled=!!alarmTime;t.alerted=false;if(alarmTime){const d=new Date(alarmTime);t.dueAt=d.toISOString();t.datetime=d.toISOString();t.dueDate=d.toISOString().slice(0,10);t.timeStr=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}else{t.dueAt=null;t.datetime=null;t.dueDate=null;t.timeStr=''}this.save('task-edit-pha15');this.closeEdit();this.render();window.showToast?.('Đã sửa nhiệm vụ','ph-pencil-simple-line');if(alarmTime&&alarmTime<=Date.now())setTimeout(()=>this.fireAlarm(t),300)},
+ cleanup(){this.ensure();const n=window.todos.length;window.todos=window.todos.filter(t=>!t.completed);const removed=n-window.todos.length;this.save('task-cleanup-pha15');this.render();window.showToast?.(removed?`Đã dọn ${removed} nhiệm vụ đã xong`:'Không có nhiệm vụ đã xong để dọn','ph-broom')},
+ alarmId(t){return String('task_'+(t.id||'')+'_'+(t.alarmTime||'')).replace(/[^\w-]+/g,'_').slice(0,160)},
+ dueTasks(){const now=Date.now(),donePrefix=window.lifeosRealAlarm?.donePrefix||'lifeos_real_alarm_done_',snoozePrefix=window.lifeosRealAlarm?.snoozePrefix||'lifeos_real_alarm_snooze_',due=[];this.ensure().forEach(t=>{if(t.completed||!t.alarmTime)return;const alarmId=this.alarmId(t);let dueMs=Number(t.alarmTime);const snooze=Number(localStorage.getItem(snoozePrefix+alarmId)||0);if(snooze&&snooze>now)dueMs=snooze;if(localStorage.getItem(donePrefix+alarmId))return;if(dueMs<=now&&dueMs>now-86400000)due.push({...t,title:t.text,__alarmId:alarmId,__dueMs:dueMs});else if(dueMs>now&&dueMs-now<600000){try{window.primeNextLifeOSTaskTTS?.({...t,title:t.text,__alarmId:alarmId,__dueMs:dueMs})}catch(e){}}});return due.sort((a,b)=>(a.__dueMs||0)-(b.__dueMs||0))},
+ fireAlarm(t){if(!t||window.lifeosRealAlarm?.running)return;const task={...t,title:t.text||t.title||'Nhiệm vụ',__alarmId:this.alarmId(t),__dueMs:Number(t.alarmTime||Date.now())};if(typeof window.startLifeOSRealAlarm==='function')window.startLifeOSRealAlarm(task);else if(typeof window.triggerGlobalAlarm==='function')window.triggerGlobalAlarm(task.id,task.title);else{window.showToast?.('Đến giờ làm việc: '+task.title,'ph-bell-ringing');window.lifeosSpeakNow?.('Đến giờ rồi. Bạn có nhiệm vụ: '+task.title,{force:true})}},
+ scanAlarms(){const due=this.dueTasks();if(due.length)this.fireAlarm(due[0])},
+ installAlarms(){if(this.alarmTimer)clearInterval(this.alarmTimer);this.alarmTimer=setInterval(()=>this.scanAlarms(),5000);try{if(!this.alarmWorker){const code="let stopped=false;function tick(){if(stopped)return;self.postMessage({type:'scan',t:Date.now()});setTimeout(tick,5000)}self.onmessage=e=>{if(e.data&&e.data.cmd==='stop')stopped=true;if(e.data&&e.data.cmd==='start'){stopped=false;tick();}}";this.alarmWorker=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));this.alarmWorker.onmessage=ev=>{if(ev.data?.type==='scan')this.scanAlarms()};this.alarmWorker.postMessage({cmd:'start'})}}catch(e){console.warn('[PHA15 alarm worker fallback]',e)}const old=this.oldFindDueTasks;window.lifeosFindDueTasks=()=>{const o=typeof old==='function'?(old.call(window)||[]):[],m=this.dueTasks(),ids=new Set();return[...o,...m].filter(t=>{const k=t.__alarmId||t.id||JSON.stringify(t);if(ids.has(k))return false;ids.add(k);return true})};setTimeout(()=>this.scanAlarms(),1200);setTimeout(()=>this.scanAlarms(),6000)},
+ installListeners(){document.addEventListener('submit',e=>{const f=e.target;if(!f||!['form-pc','form-mobile'].includes(f.id))return;e.preventDefault();e.stopImmediatePropagation();f.id==='form-pc'?this.submitFrom('input-pc','dt-pc'):this.submitFrom('input-mobile','dt-mb')},true);document.addEventListener('click',e=>{const ab=e.target.closest?.('[data-task-action]');if(ab){const li=ab.closest('[data-task-id]'),id=li?.dataset?.taskId,act=ab.dataset.taskAction;if(id){e.preventDefault();e.stopImmediatePropagation();if(act==='toggle')this.toggle(id);if(act==='delete')this.delete(id);if(act==='focus')this.focus(id);if(act==='edit')this.openEdit(id);return}}const btn=e.target.closest?.('button');if(btn){const f=btn.closest?.('#form-pc,#form-mobile'),txt=clean(btn.innerText||btn.textContent||''),isSubmit=btn.type==='submit'||/thêm/i.test(txt);if(f&&isSubmit){e.preventDefault();e.stopImmediatePropagation();f.id==='form-pc'?this.submitFrom('input-pc','dt-pc'):this.submitFrom('input-mobile','dt-mb');return}}const filter=e.target.closest?.('.filter-btn');if(filter&&filter.dataset?.filter){e.preventDefault();this.filter=filter.dataset.filter;window.filterMode=this.filter;this.render()}},true);document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const input=e.target;if(!input||!['input-pc','input-mobile'].includes(input.id))return;e.preventDefault();e.stopImmediatePropagation();input.id==='input-pc'?this.submitFrom('input-pc','dt-pc'):this.submitFrom('input-mobile','dt-mb')},true)},
+ globals(){window.renderTasksOnly=()=>this.render();window.toggleTaskDone=id=>this.toggle(id);window.deleteTask=id=>this.delete(id);window.focusTask=id=>this.focus(id);window.cleanupTasks=()=>this.cleanup();window.lifeosSubmitTaskFromInput=(i,d)=>this.submitFrom(i,d);window.lifeosDirectTaskSubmit=(t,d)=>this.addTask(t,d);window.openLifeOSTaskEdit=id=>this.openEdit(id)},
+ init(){this.ensure();this.globals();this.installListeners();this.installAlarms();this.render();setTimeout(()=>this.render(),500);setTimeout(()=>this.render(),1500);window.showToast?.('Task Core đã sẵn sàng','ph-check-circle')}
+};
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>A.init(),450));if(document.readyState!=='loading')setTimeout(()=>A.init(),450);
+})();
+</script>
+
+
+<script id="lifeos-pha16-alarm-stop-dedupe-loud-beep-js">
+(function(){
+  if (window.LifeOSAlarmStopDedupeFix && window.LifeOSAlarmStopDedupeFix.installed) return;
+
+  const api = window.LifeOSAlarmStopDedupeFix = {
+    installed: true,
+    oldStop: null,
+    oldSnooze: null,
+    oldStart: null,
+    oldFindDue: null,
+    oldCheckDue: null,
+
+    clean(v){
+      return String(v ?? '').replace(/\s+/g, ' ').trim();
+    },
+
+    norm(v){
+      return this.clean(v).replace(/[^\w\u00C0-\u1EF9-]+/g, '_').slice(0, 180) || 'unknown';
+    },
+
+    titleOf(task){
+      return this.clean(task?.title || task?.text || task?.name || task?.content || task?.summary || 'nhiệm vụ');
+    },
+
+    dueOf(task){
+      return Number(task?.__dueMs || task?.alarmTime || task?.timestamp || 0) || 0;
+    },
+
+    donePrefix(){
+      return window.lifeosRealAlarm?.donePrefix || 'lifeos_real_alarm_done_';
+    },
+
+    snoozePrefix(){
+      return window.lifeosRealAlarm?.snoozePrefix || 'lifeos_real_alarm_snooze_';
+    },
+
+    alarmIdLike(task){
+      if(!task) return '';
+      if(task.__alarmId) return String(task.__alarmId);
+      if(window.LifeOSTaskCoreRepair?.alarmId){
+        try { return String(window.LifeOSTaskCoreRepair.alarmId(task)); } catch(e) {}
+      }
+      const id = String(task.id || task.uid || task.key || this.titleOf(task));
+      const due = this.dueOf(task);
+      return this.norm('task_' + id + '_' + due);
+    },
+
+    sig(task){
+      const title = this.titleOf(task).toLowerCase();
+      const due = this.dueOf(task);
+      const minuteBucket = due ? Math.floor(due / 60000) : 0;
+      return this.norm(title + '_' + minuteBucket);
+    },
+
+    idKey(task){
+      const id = task?.id || task?.uid || task?.key || '';
+      return id ? this.norm(String(id)) : '';
+    },
+
+    allKeys(task){
+      const keys = new Set();
+      if(!task) return [];
+      const alarmId = this.alarmIdLike(task);
+      const id = this.idKey(task);
+      const sig = this.sig(task);
+      const due = this.dueOf(task);
+
+      [task.__alarmId, alarmId, id, sig].forEach(k => { if(k) keys.add(String(k)); });
+      if(id && due) {
+        keys.add(this.norm('task_' + id + '_' + due));
+        keys.add(this.norm('manual_' + id));
+      }
+      if(task.__sourceKey && id && due) keys.add(this.norm(task.__sourceKey + '_' + id + '_' + due));
+      return Array.from(keys).filter(Boolean);
+    },
+
+    setDoneKeys(task){
+      const now = String(Date.now());
+      this.allKeys(task).forEach(k => {
+        try { localStorage.setItem(this.donePrefix() + k, now); } catch(e) {}
+        try { localStorage.setItem('lifeos_alarm_stopped_' + k, now); } catch(e) {}
+      });
+      try { localStorage.setItem('lifeos_alarm_stopped_sig_' + this.sig(task), now); } catch(e) {}
+      const id = this.idKey(task);
+      if(id) {
+        try { localStorage.setItem('lifeos_alarm_stopped_id_' + id, now); } catch(e) {}
+      }
+    },
+
+    setSnoozeKeys(task, minutes){
+      const until = String(Date.now() + (Number(minutes || 5) * 60000));
+      this.allKeys(task).forEach(k => {
+        try { localStorage.setItem(this.snoozePrefix() + k, until); } catch(e) {}
+        try { localStorage.setItem('lifeos_alarm_snoozed_' + k, until); } catch(e) {}
+      });
+      try { localStorage.setItem('lifeos_alarm_snoozed_sig_' + this.sig(task), until); } catch(e) {}
+      const id = this.idKey(task);
+      if(id) {
+        try { localStorage.setItem('lifeos_alarm_snoozed_id_' + id, until); } catch(e) {}
+      }
+    },
+
+    isDone(task){
+      if(!task) return true;
+      const keys = this.allKeys(task);
+      const id = this.idKey(task);
+      const sig = this.sig(task);
+      if(id && localStorage.getItem('lifeos_alarm_stopped_id_' + id)) return true;
+      if(sig && localStorage.getItem('lifeos_alarm_stopped_sig_' + sig)) return true;
+      return keys.some(k => localStorage.getItem(this.donePrefix() + k) || localStorage.getItem('lifeos_alarm_stopped_' + k));
+    },
+
+    isSnoozed(task){
+      if(!task) return false;
+      const now = Date.now();
+      const keys = this.allKeys(task);
+      const id = this.idKey(task);
+      const sig = this.sig(task);
+      const vals = [];
+      if(id) vals.push(localStorage.getItem('lifeos_alarm_snoozed_id_' + id));
+      if(sig) vals.push(localStorage.getItem('lifeos_alarm_snoozed_sig_' + sig));
+      keys.forEach(k => {
+        vals.push(localStorage.getItem(this.snoozePrefix() + k));
+        vals.push(localStorage.getItem('lifeos_alarm_snoozed_' + k));
+      });
+      return vals.some(v => Number(v || 0) > now);
+    },
+
+    updateTaskAfterStop(task){
+      if(!task) return;
+      const id = this.idKey(task);
+      const due = this.dueOf(task);
+      const title = this.titleOf(task).toLowerCase();
+      if(Array.isArray(window.todos)){
+        let changed = false;
+        window.todos.forEach(t => {
+          const sameId = id && this.idKey(t) === id;
+          const sameSig = this.titleOf(t).toLowerCase() === title && Math.abs((Number(t.alarmTime || 0) || 0) - due) < 70000;
+          if(sameId || sameSig){
+            t.alerted = true;
+            t.alarmEnabled = false;
+            t.alarmStoppedAt = Date.now();
+            changed = true;
+          }
+        });
+        if(changed){
+          try { window.saveLocalTodos?.(); } catch(e) {}
+          try { window.LifeOSTaskCoreRepair?.save?.('alarm-stop-dedupe-pha16'); } catch(e) {}
+          try { window.renderTasksOnly?.(); } catch(e) {}
+        }
+      }
+    },
+
+    filterDueList(list){
+      return (Array.isArray(list) ? list : []).filter(task => {
+        if(!task) return false;
+        if(task.completed || task.done || task.checked || task.isDone) return false;
+        if(task.alerted === true || task.alarmEnabled === false) return false;
+        if(this.isDone(task)) return false;
+        if(this.isSnoozed(task)) return false;
+        return true;
+      });
+    },
+
+    installDedupe(){
+      if(this.oldStop) return;
+
+      this.oldStop = typeof window.stopLifeOSRealAlarm === 'function' ? window.stopLifeOSRealAlarm.bind(window) : null;
+      this.oldSnooze = typeof window.snoozeLifeOSRealAlarm === 'function' ? window.snoozeLifeOSRealAlarm.bind(window) : null;
+      this.oldStart = typeof window.startLifeOSRealAlarm === 'function' ? window.startLifeOSRealAlarm.bind(window) : null;
+      this.oldFindDue = typeof window.lifeosFindDueTasks === 'function' ? window.lifeosFindDueTasks.bind(window) : null;
+      this.oldCheckDue = typeof window.lifeosCheckDueTasks === 'function' ? window.lifeosCheckDueTasks.bind(window) : null;
+
+      const self = this;
+
+      if(window.LifeOSTaskCoreRepair && typeof window.LifeOSTaskCoreRepair.dueTasks === 'function' && !window.LifeOSTaskCoreRepair.__pha16DueWrapped){
+        const oldDueTasks = window.LifeOSTaskCoreRepair.dueTasks.bind(window.LifeOSTaskCoreRepair);
+        window.LifeOSTaskCoreRepair.dueTasks = function(){
+          return self.filterDueList(oldDueTasks());
+        };
+        window.LifeOSTaskCoreRepair.__pha16DueWrapped = true;
+      }
+
+      window.lifeosFindDueTasks = function(){
+        if(window.LifeOSTaskCoreRepair?.dueTasks) return self.filterDueList(window.LifeOSTaskCoreRepair.dueTasks());
+        if(self.oldFindDue) return self.filterDueList(self.oldFindDue());
+        return [];
+      };
+
+      window.lifeosCheckDueTasks = function(){
+        if(window.lifeosRealAlarm?.running) return;
+        const due = self.filterDueList(window.lifeosFindDueTasks());
+        if(due.length) window.startLifeOSRealAlarm?.(due[0]);
+      };
+
+      if(this.oldStart){
+        window.startLifeOSRealAlarm = async function(task){
+          if(self.isDone(task) || self.isSnoozed(task)) {
+            console.log('[PHA16] blocked duplicate alarm', task);
+            return;
+          }
+          return self.oldStart(task);
+        };
+      }
+
+      window.stopLifeOSRealAlarm = function(){
+        const task = window.lifeosRealAlarm?.task;
+        if(task){
+          self.setDoneKeys(task);
+          self.updateTaskAfterStop(task);
+        }
+        const result = self.oldStop ? self.oldStop() : undefined;
+        setTimeout(()=>{
+          if(task){
+            self.setDoneKeys(task);
+            self.updateTaskAfterStop(task);
+          }
+          if(window.lifeosRealAlarm) {
+            window.lifeosRealAlarm.running = false;
+            window.lifeosRealAlarm.task = null;
+            window.lifeosRealAlarm.ttsPlaying = false;
+          }
+          window.lifeosCheckDueTasks = window.lifeosCheckDueTasks;
+        }, 60);
+        return result;
+      };
+
+      window.snoozeLifeOSRealAlarm = function(minutes=5){
+        const task = window.lifeosRealAlarm?.task;
+        if(task) self.setSnoozeKeys(task, minutes);
+        const result = self.oldSnooze ? self.oldSnooze(minutes) : undefined;
+        setTimeout(()=>{
+          if(task) self.setSnoozeKeys(task, minutes);
+          if(window.lifeosRealAlarm) {
+            window.lifeosRealAlarm.running = false;
+            window.lifeosRealAlarm.task = null;
+            window.lifeosRealAlarm.ttsPlaying = false;
+          }
+        }, 60);
+        return result;
+      };
+    },
+
+    installLoudBeep(){
+      if(window.__lifeosPha16LoudBeepInstalled) return;
+      window.__lifeosPha16LoudBeepInstalled = true;
+
+      window.lifeosFireOneBeep = (soft=false)=>{
+        const state = window.lifeosRealAlarm || {};
+        const ctx = state.audioCtx || window.audioCtx;
+        if(!ctx) return;
+        try{
+          if(ctx.state === 'suspended') ctx.resume();
+          const now = ctx.currentTime;
+          const master = ctx.createGain();
+          master.gain.setValueAtTime(soft ? 0.20 : 0.78, now);
+          master.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.34 : 0.52));
+          master.connect(ctx.destination);
+
+          const freqs = soft ? [880, 1320] : [740, 1180, 1760, 2360];
+          freqs.forEach((f, idx)=>{
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = idx % 2 ? 'square' : 'sawtooth';
+            osc.frequency.setValueAtTime(f, now);
+            osc.frequency.linearRampToValueAtTime(f * 1.35, now + 0.10);
+            osc.frequency.linearRampToValueAtTime(f * 0.92, now + 0.22);
+            g.gain.setValueAtTime((soft ? 0.12 : 0.25) / (idx + 1), now);
+            g.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.30 : 0.48));
+            osc.connect(g);
+            g.connect(master);
+            osc.start(now + idx * 0.012);
+            osc.stop(now + (soft ? 0.32 : 0.50));
+          });
+        }catch(e){
+          console.warn('[PHA16 loud beep fail]', e);
+        }
+      };
+
+      window.startPhysicalAlarmLoop = ()=>{
+        const state = window.lifeosRealAlarm || {};
+        clearInterval(state.beepTimer);
+        state.loudTick = 0;
+
+        const pulse = ()=>{
+          if(!window.lifeosRealAlarm?.running) return;
+          const tts = !!window.lifeosRealAlarm.ttsPlaying;
+          state.loudTick = (state.loudTick || 0) + 1;
+
+          if(tts){
+            if(state.loudTick % 3 === 0) window.lifeosFireOneBeep(true);
+          }else{
+            window.lifeosFireOneBeep(false);
+            setTimeout(()=>{ if(window.lifeosRealAlarm?.running && !window.lifeosRealAlarm?.ttsPlaying) window.lifeosFireOneBeep(false); }, 230);
+          }
+        };
+
+        pulse();
+        state.beepTimer = setInterval(pulse, 520);
+        window.lifeosRealAlarm = state;
+        console.log('[PHA16] loud physical alarm loop started');
+      };
+
+      window.stopPhysicalAlarmLoop = ()=>{
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+          window.lifeosRealAlarm.loudTick = 0;
+        }
+      };
+    },
+
+    init(){
+      this.installDedupe();
+      this.installLoudBeep();
+      console.log('[PHA16] Alarm stop dedupe + loud beep ready');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', ()=>setTimeout(()=>api.init(), 500));
+  if(document.readyState !== 'loading') setTimeout(()=>api.init(), 500);
+})();
+</script>
+
+
+<script id="lifeos-pha17-task-copy-loud-siren-js">
+(function(){
+  if (window.LifeOSPha17TaskCopyLoudSiren && window.LifeOSPha17TaskCopyLoudSiren.installed) return;
+
+  const api = window.LifeOSPha17TaskCopyLoudSiren = {
+    installed: true,
+    renderHooked: false,
+    oldPlayTTSLoop: null,
+
+    $(id){ return document.getElementById(id); },
+
+    textOf(task){
+      return String(task?.text || task?.title || task?.name || task?.content || task?.summary || 'Nhiệm vụ').replace(/\s+/g, ' ').trim();
+    },
+
+    findTask(id){
+      if(window.LifeOSTaskCoreRepair?.findTask){
+        try { return window.LifeOSTaskCoreRepair.findTask(id); } catch(e) {}
+      }
+      if(Array.isArray(window.todos)){
+        return window.todos.find(t => String(t.id) === String(id));
+      }
+      return null;
+    },
+
+    async copyText(text){
+      const value = String(text || '').trim();
+      if(!value) return false;
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+      }catch(e){}
+
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = value;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, value.length);
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return !!ok;
+      }catch(e){
+        console.warn('[PHA17 copy fallback fail]', e);
+        return false;
+      }
+    },
+
+    async copyTask(id){
+      const task = this.findTask(id);
+      const text = this.textOf(task);
+      if(!text){
+        window.showToast?.('Không tìm thấy nội dung nhiệm vụ để copy','ph-warning-circle');
+        return;
+      }
+      const ok = await this.copyText(text);
+      if(ok){
+        try{ window.vibrate?.(12); }catch(e){}
+        window.showToast?.('Đã copy nhiệm vụ','ph-copy');
+        window.lifeosSpeakNow?.('Đã copy nhiệm vụ', {force:true});
+      }else{
+        window.showToast?.('Chưa copy được, hãy thử lại','ph-warning-circle');
+      }
+    },
+
+    addCopyButtons(){
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(li => {
+        if(li.querySelector('[data-task-action="copy"]')) return;
+        const editBtn = li.querySelector('[data-task-action="edit"]');
+        const focusBtn = li.querySelector('[data-task-action="focus"]');
+        const anchor = editBtn || focusBtn;
+        if(!anchor) return;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.taskAction = 'copy';
+        btn.className = 'lifeos-task-card-btn rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center active:scale-95';
+        btn.title = 'Copy nhiệm vụ';
+        btn.innerHTML = '<i class="ph-bold ph-copy"></i>';
+        anchor.parentNode.insertBefore(btn, anchor);
+      });
+    },
+
+    installCopyListener(){
+      if(this.copyListenerInstalled) return;
+      this.copyListenerInstalled = true;
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest?.('[data-task-action="copy"]');
+        if(!btn) return;
+        const li = btn.closest('[data-task-id]');
+        const id = li?.dataset?.taskId;
+        if(!id) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        this.copyTask(id);
+      }, true);
+    },
+
+    hookRender(){
+      if(this.renderHooked) return;
+
+      const core = window.LifeOSTaskCoreRepair;
+      if(core && typeof core.render === 'function' && !core.__pha17CopyHooked){
+        const oldRender = core.render.bind(core);
+        core.render = (...args) => {
+          const result = oldRender(...args);
+          setTimeout(() => this.addCopyButtons(), 0);
+          setTimeout(() => this.addCopyButtons(), 120);
+          return result;
+        };
+        core.__pha17CopyHooked = true;
+      }
+
+      const oldGlobalRender = typeof window.renderTasksOnly === 'function' ? window.renderTasksOnly.bind(window) : null;
+      if(oldGlobalRender && !window.__pha17GlobalRenderHooked){
+        window.renderTasksOnly = (...args) => {
+          const result = oldGlobalRender(...args);
+          setTimeout(() => this.addCopyButtons(), 0);
+          setTimeout(() => this.addCopyButtons(), 120);
+          return result;
+        };
+        window.__pha17GlobalRenderHooked = true;
+      }
+
+      this.renderHooked = true;
+      this.addCopyButtons();
+
+      const list = this.$('todo-list');
+      if(list && !this.copyObserver){
+        this.copyObserver = new MutationObserver(() => this.addCopyButtons());
+        this.copyObserver.observe(list, {childList:true, subtree:true});
+      }
+    },
+
+    ensureAudioCtx(){
+      try{
+        const state = window.lifeosRealAlarm || {};
+        if(!state.audioCtx) state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        window.lifeosRealAlarm = state;
+        if(state.audioCtx?.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      }catch(e){
+        console.warn('[PHA17 audio ctx fail]', e);
+        return null;
+      }
+    },
+
+    playTingTingBurst(strong=true){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        const comp = ctx.createDynamicsCompressor();
+
+        comp.threshold.setValueAtTime(-22, now);
+        comp.knee.setValueAtTime(18, now);
+        comp.ratio.setValueAtTime(9, now);
+        comp.attack.setValueAtTime(0.002, now);
+        comp.release.setValueAtTime(0.12, now);
+
+        master.gain.setValueAtTime(strong ? 0.98 : 0.36, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (strong ? 0.62 : 0.30));
+
+        master.connect(comp);
+        comp.connect(ctx.destination);
+
+        const hits = strong ? [0, 0.115, 0.23] : [0];
+        const freqs = strong ? [1568, 2093, 2637, 3136] : [980, 1460];
+
+        hits.forEach((offset, hitIdx) => {
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = idx % 2 ? 'square' : 'triangle';
+            const start = now + offset + idx * 0.004;
+            const end = start + (strong ? 0.105 : 0.14);
+
+            osc.frequency.setValueAtTime(f, start);
+            osc.frequency.exponentialRampToValueAtTime(f * 1.45, start + 0.035);
+            osc.frequency.exponentialRampToValueAtTime(f * 0.82, end);
+
+            gain.gain.setValueAtTime((strong ? 0.16 : 0.10) / (idx + 1), start);
+            gain.gain.exponentialRampToValueAtTime(0.001, end);
+
+            osc.connect(gain);
+            gain.connect(master);
+            osc.start(start);
+            osc.stop(end);
+          });
+
+          // Thêm một tiếng click cao ở đầu mỗi nhịp để nghe kiểu "ting ting" rõ hơn.
+          const click = ctx.createOscillator();
+          const cg = ctx.createGain();
+          click.type = 'square';
+          click.frequency.setValueAtTime(strong ? 3520 : 2200, now + offset);
+          cg.gain.setValueAtTime(strong ? 0.16 : 0.06, now + offset);
+          cg.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.045);
+          click.connect(cg);
+          cg.connect(master);
+          click.start(now + offset);
+          click.stop(now + offset + 0.05);
+        });
+      }catch(e){
+        console.warn('[PHA17 ting ting fail]', e);
+      }
+    },
+
+    playCurrentStyleBeep(soft=false){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(soft ? 0.22 : 0.62, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.34 : 0.48));
+        master.connect(ctx.destination);
+
+        const freqs = soft ? [880, 1320] : [740, 1180, 1760, 2360];
+        freqs.forEach((f, idx)=>{
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = idx % 2 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.linearRampToValueAtTime(f * 1.28, now + 0.10);
+          osc.frequency.linearRampToValueAtTime(f * 0.92, now + 0.22);
+          g.gain.setValueAtTime((soft ? 0.10 : 0.20) / (idx + 1), now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.30 : 0.45));
+          osc.connect(g);
+          g.connect(master);
+          osc.start(now + idx * 0.010);
+          osc.stop(now + (soft ? 0.32 : 0.48));
+        });
+      }catch(e){
+        console.warn('[PHA17 current beep fail]', e);
+      }
+    },
+
+    installSiren(){
+      if(window.__lifeosPha17SirenInstalled) return;
+      window.__lifeosPha17SirenInstalled = true;
+
+      window.lifeosFireOneBeep = (soft=false) => {
+        const state = window.lifeosRealAlarm || {};
+        const start = state.pha17AlarmStartedAt || 0;
+        const elapsed = Date.now() - start;
+        if(!soft && start && elapsed >= 0 && elapsed < 3600){
+          this.playTingTingBurst(true);
+        }else{
+          this.playCurrentStyleBeep(soft);
+        }
+      };
+
+      window.startPhysicalAlarmLoop = () => {
+        const state = window.lifeosRealAlarm || {};
+        clearInterval(state.beepTimer);
+        state.pha17AlarmStartedAt = Date.now();
+        state.pha17Tick = 0;
+        state.pha17FirstSirenUntil = Date.now() + 3600;
+
+        const pulse = () => {
+          if(!window.lifeosRealAlarm?.running) return;
+          const currentState = window.lifeosRealAlarm || state;
+          const elapsed = Date.now() - (currentState.pha17AlarmStartedAt || Date.now());
+          currentState.pha17Tick = (currentState.pha17Tick || 0) + 1;
+
+          if(elapsed < 3600){
+            this.playTingTingBurst(true);
+          }else if(currentState.ttsPlaying){
+            if(currentState.pha17Tick % 4 === 0) this.playCurrentStyleBeep(true);
+          }else{
+            this.playCurrentStyleBeep(false);
+            setTimeout(() => {
+              if(window.lifeosRealAlarm?.running && !window.lifeosRealAlarm?.ttsPlaying) this.playCurrentStyleBeep(false);
+            }, 260);
+          }
+
+          window.lifeosRealAlarm = currentState;
+        };
+
+        pulse();
+        state.beepTimer = setInterval(pulse, 390);
+        window.lifeosRealAlarm = state;
+        console.log('[PHA17] first ting-ting siren + normal alarm loop started');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+          window.lifeosRealAlarm.pha17Tick = 0;
+          window.lifeosRealAlarm.pha17FirstSirenUntil = 0;
+        }
+      };
+
+      if(!this.oldPlayTTSLoop && typeof window.playGoogleTTSLoop === 'function'){
+        this.oldPlayTTSLoop = window.playGoogleTTSLoop.bind(window);
+        window.playGoogleTTSLoop = (...args) => {
+          const until = Number(window.lifeosRealAlarm?.pha17FirstSirenUntil || 0);
+          const wait = until - Date.now();
+          if(wait > 80){
+            setTimeout(() => this.oldPlayTTSLoop(...args), wait + 80);
+            return;
+          }
+          return this.oldPlayTTSLoop(...args);
+        };
+      }
+    },
+
+    init(){
+      this.installCopyListener();
+      this.hookRender();
+      this.installSiren();
+      setTimeout(() => this.addCopyButtons(), 600);
+      setTimeout(() => this.addCopyButtons(), 1500);
+      console.log('[PHA17] Task copy + first ting-ting siren ready');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 650));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 650);
+})();
+</script>
+
+
+<script id="lifeos-pha18-task-duplicate-piercing-siren-js">
+(function(){
+  if (window.LifeOSPha18TaskDuplicateAlarmSiren && window.LifeOSPha18TaskDuplicateAlarmSiren.installed) return;
+
+  const api = window.LifeOSPha18TaskDuplicateAlarmSiren = {
+    installed: true,
+
+    clean(v){
+      return String(v ?? '').replace(/\s+/g, ' ').trim();
+    },
+
+    findTask(id){
+      if(window.LifeOSTaskCoreRepair?.findTask){
+        try { return window.LifeOSTaskCoreRepair.findTask(id); } catch(e) {}
+      }
+      if(Array.isArray(window.todos)){
+        return window.todos.find(t => String(t.id) === String(id));
+      }
+      return null;
+    },
+
+    cloneTaskForDuplicate(task){
+      const now = Date.now();
+      const text = this.clean(task?.text || task?.title || task?.name || task?.content || task?.summary || 'Nhiệm vụ');
+      const copy = {
+        ...task,
+        id: 'task_copy_' + now + '_' + Math.floor(Math.random() * 100000),
+        uid: undefined,
+        key: undefined,
+        text,
+        title: text,
+        completed: false,
+        done: false,
+        checked: false,
+        isDone: false,
+        alerted: false,
+        alarmStoppedAt: null,
+        createdAt: now,
+        copiedFrom: task?.id || task?.uid || task?.key || null
+      };
+
+      // Giữ nguyên giờ cũ để người dùng thấy task giống hệt, rồi bấm sửa đổi giờ.
+      // Đồng thời mở lại alarmEnabled nếu bản gốc có alarmTime.
+      if(copy.alarmTime){
+        copy.alarmEnabled = true;
+        copy.dueAt = new Date(Number(copy.alarmTime)).toISOString();
+        copy.datetime = copy.dueAt;
+      }
+
+      return copy;
+    },
+
+    async duplicateTask(id){
+      window.todos = Array.isArray(window.todos) ? window.todos : [];
+      const original = this.findTask(id);
+      if(!original){
+        window.showToast?.('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle');
+        return false;
+      }
+
+      const copy = this.cloneTaskForDuplicate(original);
+      const idx = window.todos.findIndex(t => String(t.id) === String(id));
+      if(idx >= 0) window.todos.splice(idx + 1, 0, copy);
+      else window.todos.unshift(copy);
+
+      try { window.LifeOSTaskCoreRepair?.save?.('task-duplicate-pha18'); } catch(e) {
+        try { window.saveLocalTodos?.(); } catch(_e) {}
+      }
+
+      try { window.LifeOSTaskCoreRepair?.render?.(); } catch(e) {
+        try { window.renderTasksOnly?.(); } catch(_e) {}
+      }
+
+      setTimeout(() => {
+        try {
+          const el = document.querySelector(`#todo-list [data-task-id="${CSS.escape(copy.id)}"]`);
+          if(el){
+            el.scrollIntoView({block:'center', behavior:'smooth'});
+            el.classList.add('ring-2','ring-sky-200');
+            setTimeout(()=>el.classList.remove('ring-2','ring-sky-200'), 1400);
+          }
+        } catch(e) {}
+      }, 120);
+
+      try { window.vibrate?.(18); } catch(e) {}
+      window.showToast?.('Đã nhân bản nhiệm vụ. Bấm sửa để đổi giờ.','ph-copy');
+      window.lifeosSpeakNow?.('Đã nhân bản nhiệm vụ. Bấm sửa để đổi giờ.', {force:true});
+      return true;
+    },
+
+    patchCopyButtonBehavior(){
+      const p17 = window.LifeOSPha17TaskCopyLoudSiren;
+      if(p17){
+        p17.copyTask = async (id) => this.duplicateTask(id);
+        p17.copyText = async () => false;
+      }
+
+      // Bắt thêm ở mức document capture để bảo đảm copy là nhân bản, không copy clipboard.
+      if(!this.copyListenerInstalled){
+        this.copyListenerInstalled = true;
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest?.('[data-task-action="copy"]');
+          if(!btn) return;
+          const li = btn.closest('[data-task-id]');
+          const id = li?.dataset?.taskId;
+          if(!id) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.duplicateTask(id);
+        }, true);
+      }
+
+      // Đổi tooltip để đúng nghĩa nhân bản.
+      document.querySelectorAll('[data-task-action="copy"]').forEach(btn => {
+        btn.title = 'Nhân bản nhiệm vụ';
+        btn.setAttribute('aria-label', 'Nhân bản nhiệm vụ');
+      });
+    },
+
+    ensureAudioCtx(){
+      try{
+        const state = window.lifeosRealAlarm || {};
+        if(!state.audioCtx) state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        window.lifeosRealAlarm = state;
+        if(state.audioCtx?.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      }catch(e){
+        console.warn('[PHA18 audio ctx fail]', e);
+        return null;
+      }
+    },
+
+    // Tiếng "tít tít tít" cao/chói kiểu chuông đồng hồ điện tử.
+    playPiercingTitTit(strong=true){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+
+      try{
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        const comp = ctx.createDynamicsCompressor();
+
+        comp.threshold.setValueAtTime(-28, now);
+        comp.knee.setValueAtTime(10, now);
+        comp.ratio.setValueAtTime(14, now);
+        comp.attack.setValueAtTime(0.001, now);
+        comp.release.setValueAtTime(0.075, now);
+
+        master.gain.setValueAtTime(strong ? 0.98 : 0.38, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (strong ? 0.30 : 0.22));
+
+        master.connect(comp);
+        comp.connect(ctx.destination);
+
+        const offsets = strong ? [0, 0.070, 0.140] : [0];
+        const freqs = strong ? [2450, 3150, 3920, 4700] : [1900, 2550];
+
+        offsets.forEach((off, hit) => {
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = now + off + idx * 0.0025;
+            const end = start + (strong ? 0.055 : 0.090);
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(f, start);
+            osc.frequency.exponentialRampToValueAtTime(f * 1.18, start + 0.020);
+            osc.frequency.exponentialRampToValueAtTime(f * 0.92, end);
+
+            gain.gain.setValueAtTime((strong ? 0.20 : 0.09) / Math.sqrt(idx + 1), start);
+            gain.gain.exponentialRampToValueAtTime(0.001, end);
+
+            osc.connect(gain);
+            gain.connect(master);
+            osc.start(start);
+            osc.stop(end);
+          });
+
+          // Click cực cao ở đầu nhịp để tạo cảm giác báo thức "tít" xuyên tai.
+          const click = ctx.createOscillator();
+          const cg = ctx.createGain();
+          const st = now + off;
+          click.type = 'square';
+          click.frequency.setValueAtTime(strong ? 5200 : 3600, st);
+          cg.gain.setValueAtTime(strong ? 0.20 : 0.07, st);
+          cg.gain.exponentialRampToValueAtTime(0.001, st + 0.032);
+          click.connect(cg);
+          cg.connect(master);
+          click.start(st);
+          click.stop(st + 0.035);
+        });
+      }catch(e){
+        console.warn('[PHA18 piercing tit tit fail]', e);
+      }
+    },
+
+    playNormalAlarmBeep(soft=false){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(soft ? 0.20 : 0.70, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.32 : 0.48));
+        master.connect(ctx.destination);
+
+        const freqs = soft ? [920, 1300] : [760, 1220, 1780, 2440];
+        freqs.forEach((f, idx)=>{
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = idx % 2 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.linearRampToValueAtTime(f * 1.32, now + 0.10);
+          osc.frequency.linearRampToValueAtTime(f * 0.9, now + 0.24);
+          g.gain.setValueAtTime((soft ? 0.10 : 0.22) / (idx + 1), now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.30 : 0.46));
+          osc.connect(g);
+          g.connect(master);
+          osc.start(now + idx * 0.008);
+          osc.stop(now + (soft ? 0.32 : 0.48));
+        });
+      }catch(e){
+        console.warn('[PHA18 normal alarm beep fail]', e);
+      }
+    },
+
+    installPiercingSiren(){
+      if(window.__lifeosPha18PiercingSirenInstalled) return;
+      window.__lifeosPha18PiercingSirenInstalled = true;
+
+      window.lifeosFireOneBeep = (soft=false) => {
+        const state = window.lifeosRealAlarm || {};
+        const start = state.pha18AlarmStartedAt || state.pha17AlarmStartedAt || 0;
+        const elapsed = Date.now() - start;
+
+        if(!soft && start && elapsed >= 0 && elapsed < 6200){
+          this.playPiercingTitTit(true);
+        }else{
+          this.playNormalAlarmBeep(soft);
+        }
+      };
+
+      window.startPhysicalAlarmLoop = () => {
+        const state = window.lifeosRealAlarm || {};
+        clearInterval(state.beepTimer);
+
+        state.pha18AlarmStartedAt = Date.now();
+        state.pha18Tick = 0;
+        state.pha18FirstSirenUntil = Date.now() + 6200;
+
+        const pulse = () => {
+          if(!window.lifeosRealAlarm?.running) return;
+          const s = window.lifeosRealAlarm || state;
+          const elapsed = Date.now() - (s.pha18AlarmStartedAt || Date.now());
+          s.pha18Tick = (s.pha18Tick || 0) + 1;
+
+          if(elapsed < 6200){
+            this.playPiercingTitTit(true);
+          }else if(s.ttsPlaying){
+            if(s.pha18Tick % 5 === 0) this.playNormalAlarmBeep(true);
+          }else{
+            this.playNormalAlarmBeep(false);
+            setTimeout(() => {
+              if(window.lifeosRealAlarm?.running && !window.lifeosRealAlarm?.ttsPlaying) this.playNormalAlarmBeep(false);
+            }, 230);
+          }
+
+          window.lifeosRealAlarm = s;
+        };
+
+        pulse();
+        state.beepTimer = setInterval(pulse, 185);
+        window.lifeosRealAlarm = state;
+        console.log('[PHA18] piercing tit-tit-tit first siren started');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+          window.lifeosRealAlarm.pha18Tick = 0;
+          window.lifeosRealAlarm.pha18FirstSirenUntil = 0;
+        }
+      };
+
+      if(!this.oldTTSLoop && typeof window.playGoogleTTSLoop === 'function'){
+        this.oldTTSLoop = window.playGoogleTTSLoop.bind(window);
+        window.playGoogleTTSLoop = (...args) => {
+          const until = Number(window.lifeosRealAlarm?.pha18FirstSirenUntil || 0);
+          const wait = until - Date.now();
+          if(wait > 80){
+            setTimeout(() => this.oldTTSLoop(...args), wait + 90);
+            return;
+          }
+          return this.oldTTSLoop(...args);
+        };
+      }
+    },
+
+    init(){
+      this.patchCopyButtonBehavior();
+      this.installPiercingSiren();
+
+      // Sau render sau này vẫn giữ tooltip đúng.
+      setInterval(() => this.patchCopyButtonBehavior(), 2000);
+      console.log('[PHA18] Task duplicate copy + piercing tit-tit siren ready');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 780));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 780);
+})();
+</script>
+
+
+<script id="lifeos-pha18-1-duplicate-firebase-alarm-siren-js">
+(function(){
+  if (window.LifeOSPha18_1DuplicateFirebaseAlarmSiren && window.LifeOSPha18_1DuplicateFirebaseAlarmSiren.installed) return;
+
+  const api = window.LifeOSPha18_1DuplicateFirebaseAlarmSiren = {
+    installed: true,
+    scanTimer: null,
+    scanWorker: null,
+    oldTTSLoop: null,
+
+    clean(v){
+      return String(v ?? '').replace(/\s+/g, ' ').trim();
+    },
+
+    titleOf(task){
+      return this.clean(task?.text || task?.title || task?.name || task?.content || task?.summary || 'Nhiệm vụ');
+    },
+
+    ensureTodos(){
+      if(!Array.isArray(window.todos)) window.todos = [];
+      return window.todos;
+    },
+
+    findTask(id){
+      this.ensureTodos();
+      let t = window.todos.find(x => String(x.id) === String(id));
+      if(t) return t;
+      if(window.LifeOSTaskCoreRepair?.findTask){
+        try { return window.LifeOSTaskCoreRepair.findTask(id); } catch(e) {}
+      }
+      return null;
+    },
+
+    baseTitleForCopy(title){
+      const s = this.clean(title);
+      if(!s) return 'Nhiệm vụ';
+      // Nếu nhiệm vụ hiện tại đang đánh số 0/1/2 ở cuối tiêu đề thì lấy gốc trước số đó.
+      return s.replace(/\s+(?:số\s*)?\d+$/i, '').trim() || s;
+    },
+
+    nextCopyTitle(originalTitle){
+      const base = this.baseTitleForCopy(originalTitle);
+      let max = -1;
+      this.ensureTodos().forEach(t => {
+        const title = this.titleOf(t);
+        if(title === base) max = Math.max(max, 0);
+        const m = title.match(new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\\\s+(?:số\\\\s*)?(\\\\d+)$', 'i'));
+        if(m) max = Math.max(max, Number(m[1] || 0));
+      });
+      return base + ' ' + String(Math.max(1, max + 1));
+    },
+
+    parseDueMs(task){
+      const candidates = [task?.alarmTime, task?.__dueMs, task?.dueAt, task?.datetime, task?.timestamp, task?.remindAt, task?.scheduleAt];
+      for(const v of candidates){
+        const n = this.parseDateLike(v);
+        if(n) return n;
+      }
+      return 0;
+    },
+
+    parseDateLike(v){
+      if(v === null || v === undefined || v === '') return 0;
+      if(typeof v === 'number') return v > 1000000000000 ? v : (v > 1000000000 ? v * 1000 : 0);
+      const s = String(v).trim();
+      if(!s) return 0;
+      if(/^\d{13}$/.test(s)) return Number(s);
+      if(/^\d{10}$/.test(s)) return Number(s) * 1000;
+      const t = Date.parse(s);
+      return Number.isFinite(t) ? t : 0;
+    },
+
+    normalizeClone(original){
+      const now = Date.now();
+      const originalTitle = this.titleOf(original);
+      const title = this.nextCopyTitle(originalTitle);
+      const dueMs = this.parseDueMs(original);
+
+      const clone = JSON.parse(JSON.stringify(original || {}));
+      clone.id = 'task_dup_' + now + '_' + Math.floor(Math.random()*1000000);
+      delete clone.uid;
+      delete clone.key;
+      clone.text = title;
+      clone.title = title;
+      clone.name = title;
+      clone.completed = false;
+      clone.done = false;
+      clone.checked = false;
+      clone.isDone = false;
+      clone.alerted = false;
+      clone.alarmStoppedAt = null;
+      clone.completedAt = null;
+      clone.copiedFrom = original?.id || original?.uid || original?.key || null;
+      clone.createdAt = now;
+
+      if(dueMs){
+        clone.alarmTime = dueMs;
+        clone.dueAt = new Date(dueMs).toISOString();
+        clone.datetime = clone.dueAt;
+        clone.timestamp = dueMs;
+        clone.alarmEnabled = true;
+        const d = new Date(dueMs);
+        clone.dueDate = d.toISOString().slice(0,10);
+        clone.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      }else{
+        clone.alarmTime = null;
+        clone.alarmEnabled = false;
+      }
+      return clone;
+    },
+
+    backupKey(){
+      try{
+        const p = window.LifeOSTaskCoreRepair?.profileKey?.() || window.viewingUser || window.currentUser?.id || window.currentUser?.name || localStorage.getItem('lifeos_v8_session') || 'default';
+        return 'lifeos_task_core_repair_tasks_' + String(p || 'default');
+      }catch(e){
+        return 'lifeos_task_core_repair_tasks_default';
+      }
+    },
+
+    saveEverywhere(reason='task-duplicate-18-1'){
+      try { localStorage.setItem(this.backupKey(), JSON.stringify(window.todos || [])); } catch(e) {}
+      try { window.saveLocalTodos?.(); } catch(e) { console.warn('[18.1 saveLocalTodos]', e); }
+      try { window.LifeOSTaskCoreRepair?.save?.(reason); } catch(e) {}
+      try { window.FirebaseSync?.pushAll?.({reason}); } catch(e) {
+        try { window.FirebaseSync?.pushAll?.(); } catch(_e) {}
+      }
+      try { window.FirebaseSync?.schedulePush?.(reason); } catch(e) {}
+      try { window.FirebaseSync?.save?.(); } catch(e) {}
+    },
+
+    clearDedupeForClone(clone){
+      const id = String(clone.id || '');
+      const title = this.titleOf(clone).toLowerCase();
+      const due = this.parseDueMs(clone);
+      const bucket = due ? Math.floor(due/60000) : 0;
+      const keys = [
+        id,
+        'task_' + id + '_' + due,
+        (title + '_' + bucket).replace(/[^\w\u00C0-\u1EF9-]+/g,'_')
+      ];
+      keys.forEach(k => {
+        try { localStorage.removeItem('lifeos_real_alarm_done_' + k); } catch(e) {}
+        try { localStorage.removeItem('lifeos_alarm_stopped_' + k); } catch(e) {}
+        try { localStorage.removeItem('lifeos_alarm_stopped_id_' + k); } catch(e) {}
+        try { localStorage.removeItem('lifeos_alarm_stopped_sig_' + k); } catch(e) {}
+      });
+    },
+
+    duplicateTask(id){
+      this.ensureTodos();
+      const original = this.findTask(id);
+      if(!original){
+        window.showToast?.('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle');
+        return false;
+      }
+
+      const clone = this.normalizeClone(original);
+      const idx = window.todos.findIndex(t => String(t.id) === String(id));
+      if(idx >= 0) window.todos.splice(idx + 1, 0, clone);
+      else window.todos.unshift(clone);
+
+      this.clearDedupeForClone(clone);
+      this.saveEverywhere('task-duplicate-firebase-18-1');
+
+      try { window.LifeOSTaskCoreRepair?.render?.(); } catch(e) {}
+      try { window.renderTasksOnly?.(); } catch(e) {}
+
+      setTimeout(() => {
+        this.installDuplicateButtons();
+        try{
+          const el = document.querySelector(`#todo-list [data-task-id="${CSS.escape(clone.id)}"]`);
+          if(el){
+            el.scrollIntoView({block:'center', behavior:'smooth'});
+            el.classList.add('ring-2','ring-sky-300');
+            setTimeout(()=>el.classList.remove('ring-2','ring-sky-300'), 1800);
+          }
+        }catch(e){}
+      }, 120);
+
+      try { window.vibrate?.(20); } catch(e) {}
+      window.showToast?.('Đã nhân bản nhiệm vụ và đồng bộ Firebase','ph-copy');
+      window.lifeosSpeakNow?.('Đã nhân bản nhiệm vụ. Bạn có thể bấm sửa để đổi giờ.', {force:true});
+      return true;
+    },
+
+    installDuplicateButtons(){
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(li => {
+        let btn = li.querySelector('[data-task-action="copy"]');
+        const editBtn = li.querySelector('[data-task-action="edit"]');
+        const focusBtn = li.querySelector('[data-task-action="focus"]');
+        const anchor = editBtn || focusBtn;
+
+        if(!btn && anchor && anchor.parentNode){
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.taskAction = 'copy';
+          btn.className = 'lifeos-task-card-btn rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center active:scale-95';
+          btn.innerHTML = '<i class="ph-bold ph-copy"></i>';
+          anchor.parentNode.insertBefore(btn, anchor);
+        }
+
+        if(btn){
+          btn.title = 'Nhân bản nhiệm vụ';
+          btn.setAttribute('aria-label', 'Nhân bản nhiệm vụ');
+        }
+      });
+    },
+
+    patchCopyRuntime(){
+      const p17 = window.LifeOSPha17TaskCopyLoudSiren;
+      if(p17){
+        p17.copyTask = async (id) => this.duplicateTask(id);
+        p17.copyText = async () => false;
+      }
+      const p18 = window.LifeOSPha18TaskDuplicateAlarmSiren;
+      if(p18){
+        p18.duplicateTask = (id) => this.duplicateTask(id);
+      }
+
+      if(!this.copyListenerInstalled){
+        this.copyListenerInstalled = true;
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest?.('[data-task-action="copy"]');
+          if(!btn) return;
+          const li = btn.closest('[data-task-id]');
+          const id = li?.dataset?.taskId;
+          if(!id) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.duplicateTask(id);
+        }, true);
+      }
+
+      if(!this.copyObserver){
+        const list = document.getElementById('todo-list');
+        if(list){
+          this.copyObserver = new MutationObserver(() => this.installDuplicateButtons());
+          this.copyObserver.observe(list, {childList:true, subtree:true});
+        }
+      }
+      this.installDuplicateButtons();
+    },
+
+    isStopped(task){
+      const id = String(task?.id || '');
+      if(!id) return false;
+      if(task.alerted === true || task.alarmEnabled === false) return true;
+      if(localStorage.getItem('lifeos_alarm_stopped_id_' + id)) return true;
+      return false;
+    },
+
+    alarmId(task){
+      if(window.LifeOSTaskCoreRepair?.alarmId){
+        try { return window.LifeOSTaskCoreRepair.alarmId(task); } catch(e) {}
+      }
+      return String('task_' + (task.id || '') + '_' + (this.parseDueMs(task) || '')).replace(/[^\w-]+/g,'_').slice(0,160);
+    },
+
+    dueTasks(){
+      const now = Date.now();
+      this.ensureTodos();
+      const donePrefix = window.lifeosRealAlarm?.donePrefix || 'lifeos_real_alarm_done_';
+      const snoozePrefix = window.lifeosRealAlarm?.snoozePrefix || 'lifeos_real_alarm_snooze_';
+
+      return window.todos.filter(t => {
+        if(!t || t.completed || t.done || t.checked || t.isDone) return false;
+        if(this.isStopped(t)) return false;
+        const due = this.parseDueMs(t);
+        if(!due) return false;
+        const alarmId = this.alarmId(t);
+        const snooze = Number(localStorage.getItem(snoozePrefix + alarmId) || 0);
+        if(snooze && snooze > now) return false;
+        if(localStorage.getItem(donePrefix + alarmId)) return false;
+        return due <= now && due > now - 86400000;
+      }).map(t => ({...t, title:this.titleOf(t), __alarmId:this.alarmId(t), __dueMs:this.parseDueMs(t)})).sort((a,b)=>a.__dueMs-b.__dueMs);
+    },
+
+    scanAlarms(){
+      if(window.lifeosRealAlarm?.running) return;
+      const due = this.dueTasks();
+      if(due.length){
+        console.log('[PHA18.1] due alarm firing', due[0]);
+        if(typeof window.startLifeOSRealAlarm === 'function') window.startLifeOSRealAlarm(due[0]);
+        else if(typeof window.triggerGlobalAlarm === 'function') window.triggerGlobalAlarm(due[0].id, due[0].title);
+      }
+    },
+
+    installAlarmScanner(){
+      window.lifeosFindDueTasks = () => this.dueTasks();
+      window.lifeosCheckDueTasks = () => this.scanAlarms();
+
+      if(window.LifeOSTaskCoreRepair && typeof window.LifeOSTaskCoreRepair.dueTasks === 'function'){
+        window.LifeOSTaskCoreRepair.dueTasks = () => this.dueTasks();
+      }
+
+      if(this.scanTimer) clearInterval(this.scanTimer);
+      this.scanTimer = setInterval(() => this.scanAlarms(), 2500);
+
+      if(!this.scanWorker){
+        try{
+          const code = "let stopped=false;function tick(){if(stopped)return;self.postMessage({type:'scan',t:Date.now()});setTimeout(tick,2500)}self.onmessage=e=>{if(e.data&&e.data.cmd==='stop')stopped=true;if(e.data&&e.data.cmd==='start'){stopped=false;tick();}}";
+          this.scanWorker = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
+          this.scanWorker.onmessage = (ev) => { if(ev.data?.type === 'scan') this.scanAlarms(); };
+          this.scanWorker.postMessage({cmd:'start'});
+        }catch(e){
+          console.warn('[PHA18.1 alarm worker fallback]', e);
+        }
+      }
+
+      setTimeout(()=>this.scanAlarms(), 1200);
+      setTimeout(()=>this.scanAlarms(), 4200);
+      setTimeout(()=>this.scanAlarms(), 9000);
+    },
+
+    ensureAudioCtx(){
+      try{
+        const state = window.lifeosRealAlarm || {};
+        if(!state.audioCtx) state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        window.lifeosRealAlarm = state;
+        if(state.audioCtx?.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      }catch(e){
+        console.warn('[PHA18.1 audio ctx fail]', e);
+        return null;
+      }
+    },
+
+    ringRengTitBip(strong=true){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+        const comp = ctx.createDynamicsCompressor();
+        const master = ctx.createGain();
+
+        comp.threshold.setValueAtTime(-30, now);
+        comp.knee.setValueAtTime(8, now);
+        comp.ratio.setValueAtTime(16, now);
+        comp.attack.setValueAtTime(0.001, now);
+        comp.release.setValueAtTime(0.06, now);
+
+        master.gain.setValueAtTime(strong ? 0.99 : 0.42, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (strong ? 0.50 : 0.28));
+        master.connect(comp);
+        comp.connect(ctx.destination);
+
+        // RENG RENG: sweep cao, gắt, giống chuông đồng hồ.
+        const rengOffsets = [0, 0.12];
+        rengOffsets.forEach(off => {
+          [1650, 2100, 2850].forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const st = now + off + idx * 0.004;
+            const en = st + 0.105;
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, st);
+            osc.frequency.exponentialRampToValueAtTime(f * 1.75, st + 0.045);
+            osc.frequency.exponentialRampToValueAtTime(f * 0.72, en);
+            gain.gain.setValueAtTime((strong ? 0.18 : 0.08) / Math.sqrt(idx + 1), st);
+            gain.gain.exponentialRampToValueAtTime(0.001, en);
+            osc.connect(gain); gain.connect(master); osc.start(st); osc.stop(en);
+          });
+        });
+
+        // TÍT TÍT TÍT: xung vuông rất cao, xuyên tai.
+        [0.25, 0.33, 0.41].forEach(off => {
+          [3200, 4300, 5400].forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const st = now + off + idx * 0.002;
+            const en = st + 0.045;
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(f, st);
+            gain.gain.setValueAtTime((strong ? 0.16 : 0.06) / Math.sqrt(idx + 1), st);
+            gain.gain.exponentialRampToValueAtTime(0.001, en);
+            osc.connect(gain); gain.connect(master); osc.start(st); osc.stop(en);
+          });
+        });
+
+        // BÍP BÍP BÍP: nhịp kết thúc thấp hơn một chút để não dễ nhận báo động.
+        [0.48, 0.58, 0.68].forEach(off => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const st = now + off;
+          const en = st + 0.065;
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(strong ? 2550 : 1500, st);
+          gain.gain.setValueAtTime(strong ? 0.20 : 0.07, st);
+          gain.gain.exponentialRampToValueAtTime(0.001, en);
+          osc.connect(gain); gain.connect(master); osc.start(st); osc.stop(en);
+        });
+      }catch(e){
+        console.warn('[PHA18.1 siren fail]', e);
+      }
+    },
+
+    normalAlarmBeep(soft=false){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(soft ? 0.18 : 0.72, now);
+        master.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.30 : 0.46));
+        master.connect(ctx.destination);
+
+        const freqs = soft ? [900, 1280] : [760, 1240, 1860, 2480];
+        freqs.forEach((f, idx)=>{
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx % 2 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.linearRampToValueAtTime(f * 1.35, now + 0.08);
+          osc.frequency.linearRampToValueAtTime(f * 0.86, now + 0.22);
+          gain.gain.setValueAtTime((soft ? 0.09 : 0.20) / (idx + 1), now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + (soft ? 0.28 : 0.42));
+          osc.connect(gain); gain.connect(master); osc.start(now + idx*0.006); osc.stop(now + (soft ? 0.30 : 0.44));
+        });
+      }catch(e){}
+    },
+
+    installRengTitBipSiren(){
+      window.lifeosFireOneBeep = (soft=false) => {
+        const state = window.lifeosRealAlarm || {};
+        const start = state.pha18_1StartedAt || 0;
+        const elapsed = Date.now() - start;
+        if(!soft && start && elapsed >= 0 && elapsed < 9000) this.ringRengTitBip(true);
+        else this.normalAlarmBeep(soft);
+      };
+
+      window.startPhysicalAlarmLoop = () => {
+        const state = window.lifeosRealAlarm || {};
+        clearInterval(state.beepTimer);
+        state.pha18_1StartedAt = Date.now();
+        state.pha18_1T = 0;
+        state.pha18_1SirenUntil = Date.now() + 9000;
+
+        const pulse = () => {
+          if(!window.lifeosRealAlarm?.running) return;
+          const s = window.lifeosRealAlarm || state;
+          const elapsed = Date.now() - (s.pha18_1StartedAt || Date.now());
+          s.pha18_1T = (s.pha18_1T || 0) + 1;
+
+          if(elapsed < 9000){
+            this.ringRengTitBip(true);
+          }else if(s.ttsPlaying){
+            if(s.pha18_1T % 5 === 0) this.normalAlarmBeep(true);
+          }else{
+            this.normalAlarmBeep(false);
+            setTimeout(() => {
+              if(window.lifeosRealAlarm?.running && !window.lifeosRealAlarm?.ttsPlaying) this.normalAlarmBeep(false);
+            }, 250);
+          }
+          window.lifeosRealAlarm = s;
+        };
+
+        pulse();
+        state.beepTimer = setInterval(pulse, 720);
+        window.lifeosRealAlarm = state;
+        console.log('[PHA18.1] reng reng reng tit tit tit bip bip bip siren started');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+          window.lifeosRealAlarm.pha18_1T = 0;
+          window.lifeosRealAlarm.pha18_1SirenUntil = 0;
+        }
+      };
+
+      if(!this.oldTTSLoop && typeof window.playGoogleTTSLoop === 'function'){
+        this.oldTTSLoop = window.playGoogleTTSLoop.bind(window);
+        window.playGoogleTTSLoop = (...args) => {
+          const until = Number(window.lifeosRealAlarm?.pha18_1SirenUntil || 0);
+          const wait = until - Date.now();
+          if(wait > 80){
+            setTimeout(() => this.oldTTSLoop(...args), wait + 120);
+            return;
+          }
+          return this.oldTTSLoop(...args);
+        };
+      }
+    },
+
+    init(){
+      this.patchCopyRuntime();
+      this.installAlarmScanner();
+      this.installRengTitBipSiren();
+
+      setInterval(() => this.patchCopyRuntime(), 1800);
+      console.log('[PHA18.1] duplicate to Firebase + alarm scanner + reng/tit/bip siren ready');
+      window.showToast?.('Pha 18.1: Nhân bản nhiệm vụ và báo thức đã sẵn sàng','ph-check-circle');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 900));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 900);
+})();
+</script>
+
+
+<script id="lifeos-pha18-1-fix2-duplicate-firestore-alarm-siren-js">
+(function(){
+  if (window.LifeOSPha18_1Fix2DuplicateFirestoreAlarmSiren && window.LifeOSPha18_1Fix2DuplicateFirestoreAlarmSiren.installed) return;
+
+  const api = window.LifeOSPha18_1Fix2DuplicateFirestoreAlarmSiren = {
+    installed: true,
+    scanTimer: null,
+    scanWorker: null,
+    oldTTSLoop: null,
+
+    clean(v){
+      return String(v ?? '').replace(/\s+/g, ' ').trim();
+    },
+
+    vnKey(s){
+      return this.clean(s)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/đ/g,'d').replace(/Đ/g,'D')
+        .toLowerCase()
+        .replace(/[^\w-]+/g,'_')
+        .replace(/^_+|_+$/g,'');
+    },
+
+    titleOf(task){
+      return this.clean(task?.text || task?.title || task?.name || task?.content || task?.summary || 'Nhiệm vụ');
+    },
+
+    parseDateLike(v){
+      if(v === null || v === undefined || v === '') return 0;
+      if(typeof v === 'number') return v > 1000000000000 ? v : (v > 1000000000 ? v * 1000 : 0);
+      const s = String(v).trim();
+      if(!s) return 0;
+      if(/^\d{13}$/.test(s)) return Number(s);
+      if(/^\d{10}$/.test(s)) return Number(s) * 1000;
+      const t = Date.parse(s);
+      return Number.isFinite(t) ? t : 0;
+    },
+
+    dueMs(task){
+      return this.parseDateLike(task?.alarmTime) || this.parseDateLike(task?.__dueMs) || this.parseDateLike(task?.dueAt) || this.parseDateLike(task?.datetime) || this.parseDateLike(task?.timestamp) || 0;
+    },
+
+    ensureTodos(){
+      if(!Array.isArray(window.todos)) window.todos = [];
+      return window.todos;
+    },
+
+    findAllTaskArrays(){
+      const found = [];
+      const seen = new Set();
+
+      const add = (arr, label) => {
+        if(!Array.isArray(arr) || seen.has(arr)) return;
+        const ok = arr.some(x => x && typeof x === 'object' && (x.id || x.text || x.title) && (x.alarmTime || x.dueAt || x.datetime || x.timeStr || x.completed !== undefined));
+        if(ok){
+          seen.add(arr);
+          found.push({arr, label});
+        }
+      };
+
+      add(window.todos, 'window.todos');
+      add(window.tasks, 'window.tasks');
+      add(window.currentTasks, 'window.currentTasks');
+
+      const candidates = [
+        window.currentProfile, window.activeProfile, window.profileData, window.currentUser,
+        window.viewingProfile, window.selectedProfile, window.LifeOSProfile, window.appState,
+        window.state, window.store
+      ];
+
+      candidates.forEach((obj, idx) => {
+        if(!obj || typeof obj !== 'object') return;
+        ['data','tasks','todos','taskData'].forEach(k => add(obj[k], `obj${idx}.${k}`));
+      });
+
+      // Tìm nông trên window các object có data/tasks, nhưng tránh quét sâu gây nặng.
+      ['LifeOS_AppState','LifeOSState','LifeOSData','ProfileStore','DataStore'].forEach(k => {
+        const obj = window[k];
+        if(obj && typeof obj === 'object'){
+          ['data','tasks','todos','taskData'].forEach(p => add(obj[p], `${k}.${p}`));
+        }
+      });
+
+      if(!found.length) add(this.ensureTodos(), 'fallback.todos');
+      return found;
+    },
+
+    findTask(id){
+      const sid = String(id || '');
+      for(const bucket of this.findAllTaskArrays()){
+        const t = bucket.arr.find(x => String(x?.id || x?.uid || x?.key || '') === sid);
+        if(t) return {task:t, arr:bucket.arr, label:bucket.label};
+      }
+      if(window.LifeOSTaskCoreRepair?.findTask){
+        try{
+          const t = window.LifeOSTaskCoreRepair.findTask(id);
+          if(t) return {task:t, arr:this.ensureTodos(), label:'LifeOSTaskCoreRepair.findTask'};
+        }catch(e){}
+      }
+      return {task:null, arr:this.ensureTodos(), label:'fallback'};
+    },
+
+    baseTitleForCopy(title){
+      const s = this.clean(title);
+      if(!s) return 'Nhiệm vụ';
+      // Nếu đã có số cuối: "Nhiệm vụ 0", "Nhiệm vụ số 0" thì gốc là "Nhiệm vụ".
+      return s.replace(/\s+(?:số\s*)?\d+$/i, '').trim() || s;
+    },
+
+    nextCopyTitle(originalTitle){
+      const base = this.baseTitleForCopy(originalTitle);
+      let max = -1;
+      const baseEsc = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp('^' + baseEsc + '\\s+(?:số\\s*)?(\\d+)$', 'i');
+
+      this.findAllTaskArrays().forEach(bucket => {
+        bucket.arr.forEach(t => {
+          const title = this.titleOf(t);
+          if(title === base) max = Math.max(max, 0);
+          const m = title.match(re);
+          if(m) max = Math.max(max, Number(m[1] || 0));
+        });
+      });
+
+      return base + ' ' + String(Math.max(1, max + 1));
+    },
+
+    buildClone(original){
+      const now = Date.now();
+      const due = this.dueMs(original);
+      const newTitle = this.nextCopyTitle(this.titleOf(original));
+
+      const clone = JSON.parse(JSON.stringify(original || {}));
+      clone.id = 'task_' + now + '_' + Math.floor(Math.random() * 100000);
+      delete clone.uid;
+      delete clone.key;
+
+      // Firestore của app đang dùng text/title trong field data[], nên bắt buộc set cả hai.
+      clone.text = newTitle;
+      clone.title = newTitle;
+      clone.name = newTitle;
+
+      clone.completed = false;
+      clone.done = false;
+      clone.checked = false;
+      clone.isDone = false;
+      clone.alerted = false;
+      clone.alarmEnabled = !!due;
+      clone.alarmStoppedAt = null;
+      clone.completedAt = null;
+      clone.copiedFrom = original?.id || original?.uid || original?.key || null;
+      clone.createdAt = now;
+
+      if(due){
+        const d = new Date(due);
+        clone.alarmTime = due;
+        clone.timestamp = due;
+        clone.dueAt = d.toISOString();
+        clone.datetime = d.toISOString();
+        clone.dueDate = d.toISOString().slice(0,10);
+        clone.timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      }else{
+        clone.alarmTime = null;
+        clone.timestamp = null;
+        clone.dueAt = null;
+        clone.datetime = null;
+        clone.dueDate = null;
+        clone.timeStr = '';
+      }
+
+      if(!Array.isArray(clone.tags)) clone.tags = [];
+      if(!clone.priority) clone.priority = 'normal';
+      return clone;
+    },
+
+    insertCloneEverywhere(originalId, clone){
+      let inserted = false;
+      const sid = String(originalId || '');
+
+      this.findAllTaskArrays().forEach(bucket => {
+        const exists = bucket.arr.some(t => String(t?.id || '') === String(clone.id));
+        if(exists) return;
+
+        const idx = bucket.arr.findIndex(t => String(t?.id || t?.uid || t?.key || '') === sid);
+        if(idx >= 0) bucket.arr.splice(idx + 1, 0, JSON.parse(JSON.stringify(clone)));
+        else bucket.arr.unshift(JSON.parse(JSON.stringify(clone)));
+        inserted = true;
+      });
+
+      if(!Array.isArray(window.todos)) window.todos = [];
+      if(!window.todos.some(t => String(t?.id || '') === String(clone.id))){
+        const idx = window.todos.findIndex(t => String(t?.id || t?.uid || t?.key || '') === sid);
+        if(idx >= 0) window.todos.splice(idx + 1, 0, clone);
+        else window.todos.unshift(clone);
+        inserted = true;
+      }
+
+      return inserted;
+    },
+
+    profileId(){
+      const direct = [
+        window.currentProfileId, window.activeProfileId, window.viewingUser,
+        window.currentUser?.id, window.currentUser?.key, window.currentUser?.name,
+        window.currentProfile?.id, window.currentProfile?.key, window.currentProfile?.name,
+        window.activeProfile?.id, window.activeProfile?.key, window.activeProfile?.name
+      ].map(x => this.clean(x)).find(Boolean);
+
+      if(direct) return this.vnKey(direct);
+
+      try{
+        for(let i=0; i<localStorage.length; i++){
+          const k = localStorage.key(i);
+          const v = localStorage.getItem(k) || '';
+          if(/profile|user|session/i.test(k) && v){
+            if(/thắm|tham/i.test(v)) return 'tham';
+            if(/admin/i.test(v)) return 'admin';
+            const parsed = JSON.parse(v);
+            const p = parsed?.id || parsed?.key || parsed?.name || parsed?.profile || parsed?.user;
+            if(p) return this.vnKey(p);
+          }
+        }
+      }catch(e){}
+
+      // Theo ảnh Firebase hiện tại user đang dùng doc "tham".
+      return 'tham';
+    },
+
+    backupKey(){
+      return 'lifeos_task_core_repair_tasks_' + this.profileId();
+    },
+
+    async saveFirestoreDataArray(){
+      const profileId = this.profileId();
+      const data = Array.isArray(window.todos) ? window.todos : [];
+      let ok = false;
+
+      // Firebase v8 compat.
+      try{
+        if(window.firebase?.firestore){
+          await window.firebase.firestore().collection('LifeOS_Profiles').doc(profileId).set({
+            data,
+            updatedAt: Date.now()
+          }, {merge:true});
+          ok = true;
+        }
+      }catch(e){
+        console.warn('[18.1 FIX2 firebase v8 write fail]', e);
+      }
+
+      // Firebase v9 globals, nếu coder expose ra window.
+      try{
+        if(!ok && window.db && window.setDoc && window.doc){
+          await window.setDoc(window.doc(window.db, 'LifeOS_Profiles', profileId), {
+            data,
+            updatedAt: Date.now()
+          }, {merge:true});
+          ok = true;
+        }
+      }catch(e){
+        console.warn('[18.1 FIX2 firebase v9 write fail]', e);
+      }
+
+      // Nếu app có FirebaseSync riêng, gọi pushAll sau khi đã ép window.todos đúng data[].
+      try { window.FirebaseSync?.pushAll?.({reason:'task-duplicate-firestore-fix2'}); ok = true; } catch(e) {
+        try { window.FirebaseSync?.pushAll?.(); ok = true; } catch(_e) {}
+      }
+      try { window.FirebaseSync?.schedulePush?.('task-duplicate-firestore-fix2'); ok = true; } catch(e) {}
+
+      return ok;
+    },
+
+    async persistClone(){
+      try { localStorage.setItem(this.backupKey(), JSON.stringify(window.todos || [])); } catch(e) {}
+      try { window.saveLocalTodos?.(); } catch(e) {}
+      try { window.LifeOSTaskCoreRepair?.save?.('task-duplicate-firestore-fix2'); } catch(e) {}
+      return await this.saveFirestoreDataArray();
+    },
+
+    clearAlarmBlocksForTask(task){
+      const id = String(task?.id || '');
+      const due = this.dueMs(task);
+      const keys = [
+        id,
+        'task_' + id + '_' + due,
+        String(task?.__alarmId || ''),
+      ].filter(Boolean);
+
+      keys.forEach(k => {
+        ['lifeos_real_alarm_done_', 'lifeos_alarm_stopped_', 'lifeos_alarm_stopped_id_', 'lifeos_alarm_stopped_sig_', 'lifeos_alarm_snoozed_', 'lifeos_alarm_snoozed_id_'].forEach(prefix => {
+          try { localStorage.removeItem(prefix + k); } catch(e) {}
+        });
+      });
+    },
+
+    async duplicateTask(id){
+      const found = this.findTask(id);
+      const original = found.task;
+      if(!original){
+        window.showToast?.('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle');
+        return false;
+      }
+
+      const clone = this.buildClone(original);
+      this.clearAlarmBlocksForTask(clone);
+      this.insertCloneEverywhere(id, clone);
+
+      const okFirebase = await this.persistClone();
+
+      try { window.LifeOSTaskCoreRepair?.render?.(); } catch(e) {}
+      try { window.renderTasksOnly?.(); } catch(e) {}
+      this.installDuplicateButtons();
+
+      setTimeout(() => {
+        try{
+          const el = document.querySelector(`#todo-list [data-task-id="${CSS.escape(clone.id)}"]`);
+          if(el){
+            el.scrollIntoView({block:'center', behavior:'smooth'});
+            el.classList.add('ring-2','ring-sky-400');
+            setTimeout(()=>el.classList.remove('ring-2','ring-sky-400'), 1800);
+          }
+        }catch(e){}
+      }, 160);
+
+      try { window.vibrate?.(25); } catch(e) {}
+      window.showToast?.(okFirebase ? 'Đã nhân bản nhiệm vụ và ghi Firebase' : 'Đã nhân bản nhiệm vụ, Firebase chờ đồng bộ', 'ph-copy');
+      window.lifeosSpeakNow?.('Đã nhân bản nhiệm vụ. Bấm sửa để đổi giờ.', {force:true});
+      return true;
+    },
+
+    installDuplicateButtons(){
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(li => {
+        let btn = li.querySelector('[data-task-action="copy"]');
+        const editBtn = li.querySelector('[data-task-action="edit"]');
+        const focusBtn = li.querySelector('[data-task-action="focus"]');
+        const anchor = editBtn || focusBtn;
+
+        if(!btn && anchor && anchor.parentNode){
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.taskAction = 'copy';
+          btn.className = 'lifeos-task-card-btn rounded-xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center active:scale-95';
+          btn.innerHTML = '<i class="ph-bold ph-copy"></i>';
+          anchor.parentNode.insertBefore(btn, anchor);
+        }
+        if(btn){
+          btn.title = 'Nhân bản nhiệm vụ';
+          btn.setAttribute('aria-label', 'Nhân bản nhiệm vụ');
+        }
+      });
+    },
+
+    patchCopyRuntime(){
+      // Đè tất cả các pha cũ: copy clipboard / duplicate lỗi đều chuyển về duplicateTask chuẩn.
+      if(window.LifeOSPha17TaskCopyLoudSiren){
+        window.LifeOSPha17TaskCopyLoudSiren.copyTask = async (id) => this.duplicateTask(id);
+        window.LifeOSPha17TaskCopyLoudSiren.copyText = async () => false;
+      }
+      if(window.LifeOSPha18TaskDuplicateAlarmSiren){
+        window.LifeOSPha18TaskDuplicateAlarmSiren.duplicateTask = (id) => this.duplicateTask(id);
+      }
+      if(window.LifeOSPha18_1DuplicateFirebaseAlarmSiren){
+        window.LifeOSPha18_1DuplicateFirebaseAlarmSiren.duplicateTask = (id) => this.duplicateTask(id);
+      }
+
+      if(!this.copyListenerInstalled){
+        this.copyListenerInstalled = true;
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest?.('[data-task-action="copy"]');
+          if(!btn) return;
+          const li = btn.closest('[data-task-id]');
+          const id = li?.dataset?.taskId;
+          if(!id) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.duplicateTask(id);
+        }, true);
+      }
+
+      if(!this.copyObserver){
+        const list = document.getElementById('todo-list');
+        if(list){
+          this.copyObserver = new MutationObserver(() => this.installDuplicateButtons());
+          this.copyObserver.observe(list, {childList:true, subtree:true});
+        }
+      }
+
+      this.installDuplicateButtons();
+    },
+
+    alarmId(task){
+      if(window.LifeOSTaskCoreRepair?.alarmId){
+        try { return window.LifeOSTaskCoreRepair.alarmId(task); } catch(e) {}
+      }
+      return String('task_' + (task?.id || '') + '_' + (this.dueMs(task) || '')).replace(/[^\w-]+/g,'_').slice(0,160);
+    },
+
+    isStopped(task){
+      // Chỉ chặn khi task đã hoàn thành/disable rõ ràng. Không chặn vì text giống task cũ.
+      if(task?.completed || task?.done || task?.checked || task?.isDone) return true;
+      if(task?.alarmEnabled === false) return true;
+      const id = String(task?.id || '');
+      const alarmId = this.alarmId(task);
+      return !!(
+        localStorage.getItem('lifeos_alarm_stopped_id_' + id) ||
+        localStorage.getItem('lifeos_real_alarm_done_' + alarmId)
+      );
+    },
+
+    dueTasks(){
+      const now = Date.now();
+      const snoozePrefix = window.lifeosRealAlarm?.snoozePrefix || 'lifeos_real_alarm_snooze_';
+      const out = [];
+
+      this.findAllTaskArrays().forEach(bucket => {
+        bucket.arr.forEach(t => {
+          if(!t || this.isStopped(t)) return;
+          const due = this.dueMs(t);
+          if(!due) return;
+          const alarmId = this.alarmId(t);
+          const snooze = Number(localStorage.getItem(snoozePrefix + alarmId) || 0);
+          if(snooze && snooze > now) return;
+          if(due <= now && due > now - 86400000){
+            out.push({...t, title:this.titleOf(t), text:this.titleOf(t), __alarmId:alarmId, __dueMs:due});
+          }
+        });
+      });
+
+      const seen = new Set();
+      return out.filter(t => {
+        const k = String(t.id || '') + '_' + String(t.__dueMs || '');
+        if(seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      }).sort((a,b)=>a.__dueMs-b.__dueMs);
+    },
+
+    scanAlarms(){
+      if(window.lifeosRealAlarm?.running) return;
+      const due = this.dueTasks();
+      if(due.length){
+        console.log('[18.1 FIX2] due alarm firing', due[0]);
+        if(typeof window.startLifeOSRealAlarm === 'function') window.startLifeOSRealAlarm(due[0]);
+        else if(typeof window.triggerGlobalAlarm === 'function') window.triggerGlobalAlarm(due[0].id, due[0].title);
+      }
+    },
+
+    installAlarmScanner(){
+      window.lifeosFindDueTasks = () => this.dueTasks();
+      window.lifeosCheckDueTasks = () => this.scanAlarms();
+      if(window.LifeOSTaskCoreRepair) window.LifeOSTaskCoreRepair.dueTasks = () => this.dueTasks();
+
+      if(this.scanTimer) clearInterval(this.scanTimer);
+      this.scanTimer = setInterval(() => this.scanAlarms(), 1800);
+
+      if(!this.scanWorker){
+        try{
+          const code = "let stopped=false;function tick(){if(stopped)return;self.postMessage({type:'scan',t:Date.now()});setTimeout(tick,1800)}self.onmessage=e=>{if(e.data&&e.data.cmd==='stop')stopped=true;if(e.data&&e.data.cmd==='start'){stopped=false;tick();}}";
+          this.scanWorker = new Worker(URL.createObjectURL(new Blob([code], {type:'application/javascript'})));
+          this.scanWorker.onmessage = ev => { if(ev.data?.type === 'scan') this.scanAlarms(); };
+          this.scanWorker.postMessage({cmd:'start'});
+        }catch(e){}
+      }
+
+      setTimeout(()=>this.scanAlarms(), 1000);
+      setTimeout(()=>this.scanAlarms(), 3500);
+      setTimeout(()=>this.scanAlarms(), 7000);
+    },
+
+    ensureAudioCtx(){
+      try{
+        const state = window.lifeosRealAlarm || {};
+        if(!state.audioCtx) state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        window.lifeosRealAlarm = state;
+        if(state.audioCtx?.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      }catch(e){ return null; }
+    },
+
+    // RENG RENG + TÍT TÍT + BÍP BÍP cực gắt. Không phụ thuộc file mp3 ngoài.
+    hardAlarmSound(strong=true){
+      const ctx = this.ensureAudioCtx();
+      if(!ctx) return;
+      const now = ctx.currentTime;
+      const comp = ctx.createDynamicsCompressor();
+      const master = ctx.createGain();
+
+      comp.threshold.setValueAtTime(-34, now);
+      comp.knee.setValueAtTime(6, now);
+      comp.ratio.setValueAtTime(18, now);
+      comp.attack.setValueAtTime(0.001, now);
+      comp.release.setValueAtTime(0.045, now);
+
+      master.gain.setValueAtTime(strong ? 1.0 : 0.35, now);
+      master.gain.exponentialRampToValueAtTime(0.001, now + 0.62);
+      master.connect(comp);
+      comp.connect(ctx.destination);
+
+      const make = (type, freq, st, dur, gainValue, sweep=1.0) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now + st);
+        if(sweep !== 1.0) osc.frequency.exponentialRampToValueAtTime(freq * sweep, now + st + dur * 0.55);
+        g.gain.setValueAtTime(gainValue, now + st);
+        g.gain.exponentialRampToValueAtTime(0.001, now + st + dur);
+        osc.connect(g); g.connect(master);
+        osc.start(now + st); osc.stop(now + st + dur);
+      };
+
+      // reng reng
+      [0, .11, .22].forEach(off => {
+        make('sawtooth', 1650, off, .10, strong ? .23 : .08, 1.85);
+        make('square',   2400, off+.004, .08, strong ? .15 : .05, 1.45);
+        make('triangle', 3100, off+.008, .07, strong ? .12 : .04, 1.25);
+      });
+
+      // tít tít tít
+      [.36, .43, .50].forEach(off => {
+        make('square', 3600, off, .045, strong ? .22 : .06, 1.12);
+        make('square', 5200, off+.003, .034, strong ? .17 : .04, 1.02);
+      });
+
+      // bíp bíp bíp
+      [.58, .69, .80].forEach(off => {
+        make('square', 2500, off, .07, strong ? .24 : .07, 1.0);
+        make('sawtooth', 1250, off, .08, strong ? .10 : .03, 1.0);
+      });
+    },
+
+    installSiren(){
+      window.lifeosFireOneBeep = (soft=false) => {
+        const s = window.lifeosRealAlarm || {};
+        const start = s.pha18_1_fix2_startedAt || 0;
+        const elapsed = Date.now() - start;
+        if(!soft && start && elapsed >= 0 && elapsed < 12000) this.hardAlarmSound(true);
+        else this.hardAlarmSound(!soft);
+      };
+
+      window.startPhysicalAlarmLoop = () => {
+        const s = window.lifeosRealAlarm || {};
+        clearInterval(s.beepTimer);
+        s.pha18_1_fix2_startedAt = Date.now();
+        s.pha18_1_fix2_sirenUntil = Date.now() + 12000;
+        s.pha18_1_fix2_tick = 0;
+
+        const pulse = () => {
+          if(!window.lifeosRealAlarm?.running) return;
+          const state = window.lifeosRealAlarm || s;
+          const elapsed = Date.now() - (state.pha18_1_fix2_startedAt || Date.now());
+          state.pha18_1_fix2_tick = (state.pha18_1_fix2_tick || 0) + 1;
+          if(elapsed < 12000){
+            this.hardAlarmSound(true);
+          }else if(state.ttsPlaying){
+            if(state.pha18_1_fix2_tick % 5 === 0) this.hardAlarmSound(false);
+          }else{
+            this.hardAlarmSound(true);
+          }
+          window.lifeosRealAlarm = state;
+        };
+
+        pulse();
+        s.beepTimer = setInterval(pulse, 560);
+        window.lifeosRealAlarm = s;
+        console.log('[18.1 FIX2] hard reng/tit/bip alarm loop started');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+          window.lifeosRealAlarm.pha18_1_fix2_sirenUntil = 0;
+        }
+      };
+
+      if(!this.oldTTSLoop && typeof window.playGoogleTTSLoop === 'function'){
+        this.oldTTSLoop = window.playGoogleTTSLoop.bind(window);
+        window.playGoogleTTSLoop = (...args) => {
+          const until = Number(window.lifeosRealAlarm?.pha18_1_fix2_sirenUntil || 0);
+          const wait = until - Date.now();
+          if(wait > 80){
+            setTimeout(() => this.oldTTSLoop(...args), wait + 140);
+            return;
+          }
+          return this.oldTTSLoop(...args);
+        };
+      }
+    },
+
+    init(){
+      this.patchCopyRuntime();
+      this.installAlarmScanner();
+      this.installSiren();
+
+      setInterval(() => this.patchCopyRuntime(), 1500);
+      console.log('[18.1 FIX2] duplicate Firestore data[] + alarm + hard siren ready');
+      window.showToast?.('18_1 FIX2: Nhân bản/Firebase/Báo thức sẵn sàng','ph-check-circle');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 1000));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 1000);
+})();
+</script>
+
+
+<script id="lifeos-pha18-1-fix6-copy-mobiletab-squarebeep-js">
+(function(){
+  if (window.LifeOSPha18_1Fix6CopyMobileTabSquareBeep && window.LifeOSPha18_1Fix6CopyMobileTabSquareBeep.installed) return;
+
+  const api = window.LifeOSPha18_1Fix6CopyMobileTabSquareBeep = {
+    installed: true,
+
+    clean(v){ return String(v ?? '').replace(/\s+/g, ' ').trim(); },
+
+    normalizeProfile(v){
+      const raw = this.clean(v);
+      const s = raw
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/đ/g,'d').replace(/Đ/g,'D')
+        .toLowerCase();
+      if(/tham|thm|thắm/i.test(raw) || /tham/.test(s)) return 'tham';
+      if(/thanh/.test(s)) return 'thanh';
+      if(/xiem/.test(s)) return 'xiem';
+      if(/admin/.test(s)) return 'admin';
+      return s.replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham';
+    },
+
+    profileId(){
+      const direct = [
+        window.currentProfileId,
+        window.activeProfileId,
+        window.selectedProfileId,
+        window.viewingUser,
+        window.currentProfile?.id,
+        window.currentProfile?.key,
+        window.currentProfile?.name,
+        window.activeProfile?.id,
+        window.activeProfile?.key,
+        window.activeProfile?.name,
+        window.currentUser?.id,
+        window.currentUser?.key,
+        window.currentUser?.name
+      ].map(x => this.clean(x)).find(Boolean);
+      if(direct) return this.normalizeProfile(direct);
+
+      try{
+        const txt = document.body?.innerText || '';
+        if(/thắm|tham/i.test(txt)) return 'tham';
+      }catch(e){}
+
+      try{
+        for(let i=0; i<localStorage.length; i++){
+          const k = localStorage.key(i);
+          const v = localStorage.getItem(k) || '';
+          if(/thắm|tham/i.test(v)) return 'tham';
+          if(/admin/i.test(v)) return 'admin';
+        }
+      }catch(e){}
+
+      return 'tham';
+    },
+
+    titleOf(task){
+      return this.clean(task?.title || task?.text || task?.name || task?.content || task?.summary || 'Nhiệm vụ');
+    },
+
+    runtimeArrays(){
+      const out = [];
+      const seen = new Set();
+      const add = (arr, label) => {
+        if(!Array.isArray(arr) || seen.has(arr)) return;
+        const ok = arr.some(x => x && typeof x === 'object' && (x.id || x.title || x.text) && ('completed' in x || 'alarmTime' in x || 'dueAt' in x || 'timeStr' in x));
+        if(ok){ seen.add(arr); out.push({arr,label}); }
+      };
+
+      add(window.todos, 'window.todos');
+      add(window.tasks, 'window.tasks');
+      add(window.currentTasks, 'window.currentTasks');
+
+      [
+        window.currentProfile, window.activeProfile, window.profileData, window.currentUser,
+        window.selectedProfile, window.viewingProfile, window.appState, window.state, window.store
+      ].forEach((obj, idx) => {
+        if(!obj || typeof obj !== 'object') return;
+        ['data','tasks','todos'].forEach(k => add(obj[k], 'obj' + idx + '.' + k));
+      });
+
+      if(!out.length){
+        if(!Array.isArray(window.todos)) window.todos = [];
+        add(window.todos, 'fallback.window.todos');
+      }
+      return out;
+    },
+
+    async readProfileDataArray(){
+      const profileId = this.profileId();
+
+      try{
+        if(window.firebase?.firestore){
+          const ref = window.firebase.firestore().collection('LifeOS_Profiles').doc(profileId);
+          const snap = await ref.get();
+          const data = snap.exists ? (snap.data() || {}) : {};
+          return {mode:'v8', profileId, ref, arr:Array.isArray(data.data) ? data.data : []};
+        }
+      }catch(e){
+        console.warn('[18_1_FIX6] Firestore compat read failed', e);
+      }
+
+      try{
+        if(window.db && window.doc && window.getDoc && window.setDoc){
+          const ref = window.doc(window.db, 'LifeOS_Profiles', profileId);
+          const snap = await window.getDoc(ref);
+          const data = snap.exists?.() ? (snap.data() || {}) : {};
+          return {mode:'v9', profileId, ref, arr:Array.isArray(data.data) ? data.data : []};
+        }
+      }catch(e){
+        console.warn('[18_1_FIX6] Firestore v9 read failed', e);
+      }
+
+      const rt = this.runtimeArrays()[0]?.arr || [];
+      return {mode:'runtime', profileId, ref:null, arr:Array.isArray(rt) ? rt : []};
+    },
+
+    async writeProfileDataArray(doc, arr){
+      const payload = {data: arr, updatedAt: Date.now()};
+
+      try{
+        if(doc?.mode === 'v8' && doc.ref){
+          await doc.ref.set(payload, {merge:true});
+          return true;
+        }
+      }catch(e){
+        console.warn('[18_1_FIX6] Firestore compat write failed', e);
+      }
+
+      try{
+        if(doc?.mode === 'v9' && doc.ref && window.setDoc){
+          await window.setDoc(doc.ref, payload, {merge:true});
+          return true;
+        }
+      }catch(e){
+        console.warn('[18_1_FIX6] Firestore v9 write failed', e);
+      }
+
+      return false;
+    },
+
+    nextCopyTitle(sourceTitle, arr){
+      const source = this.titleOf({title:sourceTitle});
+      const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp('^' + escaped + '_copy(\\d+)$', 'i');
+      let max = 0;
+
+      (arr || []).forEach(t => {
+        const title = this.titleOf(t);
+        const m = title.match(re);
+        if(m) max = Math.max(max, Number(m[1] || 0));
+      });
+
+      return source + '_copy' + String(max + 1);
+    },
+
+    newTimeFields(){
+      // Copy giống tạo mới: lấy thời điểm copy, làm tròn lên phút kế tiếp để có giờ hợp lệ và không báo ngay lập tức.
+      const ms = Math.ceil((Date.now() + 5000) / 60000) * 60000;
+      const d = new Date(ms);
+      return {
+        alarmTime: ms,
+        timestamp: ms,
+        dueAt: d.toISOString(),
+        datetime: d.toISOString(),
+        dueDate: d.toISOString().slice(0,10),
+        timeStr: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+      };
+    },
+
+    buildClone(original, arr){
+      const now = Date.now();
+      const title = this.nextCopyTitle(this.titleOf(original), arr);
+      const clone = JSON.parse(JSON.stringify(original || {}));
+
+      clone.id = 'task_' + now + '_' + Math.floor(Math.random() * 100000);
+      delete clone.uid;
+      delete clone.key;
+
+      clone.title = title;
+      clone.text = title;
+      clone.name = title;
+
+      clone.completed = false;
+      clone.done = false;
+      clone.checked = false;
+      clone.isDone = false;
+      clone.alerted = false;
+      clone.alarmEnabled = true;
+      clone.alarmStoppedAt = null;
+      clone.completedAt = null;
+      clone.createdAt = now;
+      clone.copiedFrom = original?.id || original?.uid || original?.key || null;
+
+      Object.assign(clone, this.newTimeFields());
+
+      if(!Array.isArray(clone.tags)) clone.tags = [];
+      if(!clone.priority) clone.priority = 'normal';
+
+      return clone;
+    },
+
+    updateRuntimeArrays(arr){
+      const fresh = JSON.parse(JSON.stringify(arr || []));
+      window.todos = fresh;
+
+      [
+        window.currentProfile, window.activeProfile, window.profileData, window.currentUser,
+        window.selectedProfile, window.viewingProfile, window.appState, window.state, window.store
+      ].forEach(obj => {
+        if(obj && typeof obj === 'object' && Array.isArray(obj.data)){
+          obj.data = JSON.parse(JSON.stringify(fresh));
+        }
+      });
+
+      try { localStorage.setItem('lifeos_task_core_repair_tasks_' + this.profileId(), JSON.stringify(fresh)); } catch(e) {}
+    },
+
+    async duplicateLikeCreate(taskId){
+      const sid = String(taskId || '');
+      const doc = await this.readProfileDataArray();
+      const arr = Array.isArray(doc.arr) ? JSON.parse(JSON.stringify(doc.arr)) : [];
+
+      let original = arr.find(t => String(t?.id || t?.uid || t?.key || '') === sid);
+
+      if(!original){
+        for(const box of this.runtimeArrays()){
+          original = box.arr.find(t => String(t?.id || t?.uid || t?.key || '') === sid);
+          if(original) break;
+        }
+      }
+
+      if(!original){
+        window.showToast?.('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle');
+        console.warn('[18_1_FIX6] task not found', {taskId:sid, profileId:doc.profileId, arr});
+        return false;
+      }
+
+      const clone = this.buildClone(original, arr);
+
+      // Firebase data[] đang là mảng index 0,1; nhân bản append thành 2,3...
+      arr.push(clone);
+
+      this.updateRuntimeArrays(arr);
+
+      let wrote = await this.writeProfileDataArray(doc, arr);
+
+      // Gọi lại đúng luồng tạo mới/sync sẵn có.
+      try { window.saveLocalTodos?.(); } catch(e) {}
+      try { window.LifeOSTaskCoreRepair?.save?.('task-copy-like-create-fix6'); } catch(e) {}
+      try { window.FirebaseSync?.pushAll?.({reason:'task-copy-like-create-fix6'}); wrote = true; } catch(e) {
+        try { window.FirebaseSync?.pushAll?.(); wrote = true; } catch(_e) {}
+      }
+      try { window.FirebaseSync?.schedulePush?.('task-copy-like-create-fix6'); wrote = true; } catch(e) {}
+
+      try { window.LifeOSTaskCoreRepair?.render?.(); } catch(e) {}
+      try { window.renderTasksOnly?.(); } catch(e) {}
+      setTimeout(() => this.ensureCopyButtons(), 120);
+
+      window.showToast?.(wrote ? 'Đã nhân bản nhiệm vụ lên Firebase' : 'Đã nhân bản, chờ đồng bộ Firebase', 'ph-copy');
+      window.lifeosSpeakNow?.('Đã nhân bản nhiệm vụ.', {force:true});
+      try { window.vibrate?.(18); } catch(e) {}
+
+      return true;
+    },
+
+    ensureCopyButtons(){
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(li => {
+        let btn = li.querySelector('[data-task-action="copy"]');
+        const editBtn = li.querySelector('[data-task-action="edit"]');
+        const focusBtn = li.querySelector('[data-task-action="focus"]');
+        const anchor = editBtn || focusBtn;
+        if(!btn && anchor && anchor.parentNode){
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.taskAction = 'copy';
+          btn.className = 'lifeos-task-card-btn rounded-xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center active:scale-95';
+          btn.innerHTML = '<i class="ph-bold ph-copy"></i>';
+          anchor.parentNode.insertBefore(btn, anchor);
+        }
+        if(btn){
+          btn.title = 'Nhân bản nhiệm vụ';
+          btn.setAttribute('aria-label', 'Nhân bản nhiệm vụ');
+        }
+      });
+    },
+
+    patchCopy(){
+      const fn = async (id) => this.duplicateLikeCreate(id);
+
+      if(window.LifeOSPha17TaskCopyLoudSiren){
+        window.LifeOSPha17TaskCopyLoudSiren.copyTask = fn;
+        window.LifeOSPha17TaskCopyLoudSiren.copyText = async () => false;
+      }
+      if(window.LifeOSPha18TaskDuplicateAlarmSiren){
+        window.LifeOSPha18TaskDuplicateAlarmSiren.duplicateTask = fn;
+      }
+      if(window.LifeOSPha18_1DuplicateFirebaseAlarmSiren){
+        window.LifeOSPha18_1DuplicateFirebaseAlarmSiren.duplicateTask = fn;
+      }
+      if(window.LifeOSPha18_1Fix2DuplicateFirestoreAlarmSiren){
+        window.LifeOSPha18_1Fix2DuplicateFirestoreAlarmSiren.duplicateTask = fn;
+      }
+
+      if(!this.captureInstalled){
+        this.captureInstalled = true;
+        window.addEventListener('click', (e) => {
+          const btn = e.target.closest?.('[data-task-action="copy"]');
+          if(!btn) return;
+          const li = btn.closest('[data-task-id]');
+          const id = li?.dataset?.taskId;
+          if(!id) return;
+
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.duplicateLikeCreate(id);
+        }, true);
+      }
+
+      if(!this.observer){
+        const list = document.getElementById('todo-list');
+        if(list){
+          this.observer = new MutationObserver(() => this.ensureCopyButtons());
+          this.observer.observe(list, {childList:true, subtree:true});
+        }
+      }
+
+      this.ensureCopyButtons();
+    },
+
+    isMobile(){
+      return !window.matchMedia || window.matchMedia('(max-width: 1023px)').matches;
+    },
+
+    restoreMobileTabs(){
+      if(!this.isMobile()) return;
+
+      try { window.PCHardTabs?.restoreMobile?.(); } catch(e) {}
+
+      document.body.classList.remove('lifeos-pc-hard-layout');
+      delete document.body.dataset.pcHardTab;
+
+      ['pc-hard-tabbar','pc-hard-stage','pc-smart-tabbar','pc-smart-stage'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('pointer-events', 'none', 'important');
+        }
+      });
+
+      // Không tự ép display các view ở đây để tránh phá cơ chế tab gốc.
+      // Chỉ gọi lại hàm tab gốc nếu có.
+      const current = localStorage.getItem('lifeos_mobile_current_tab') || localStorage.getItem('lifeos_current_tab') || '';
+      if(current){
+        try { window.switchView?.(current); } catch(e) {}
+        try { window.switchTab?.(current); } catch(e) {}
+      }
+    },
+
+    detectMobileTabTarget(el){
+      const t = (el?.dataset?.tab || el?.dataset?.view || el?.dataset?.target || el?.getAttribute?.('aria-label') || el?.textContent || '').toLowerCase();
+      if(/nhiệm|task/.test(t)) return 'tasks';
+      if(/tập|focus|timer/.test(t)) return 'focus';
+      if(/kho|vault|lưu/.test(t)) return 'vault';
+      if(/nhạc|music/.test(t)) return 'music';
+      return '';
+    },
+
+    patchMobileTabClick(){
+      if(this.mobileTabCaptureInstalled) return;
+      this.mobileTabCaptureInstalled = true;
+
+      // Bubble phase only: không chặn handler gốc. Nếu handler gốc chạy lỗi vì PC hard layout,
+      // ta chỉ restore sau đó.
+      document.addEventListener('click', (e) => {
+        if(!this.isMobile()) return;
+
+        const btn = e.target.closest?.('button,a,[role="button"]');
+        if(!btn) return;
+
+        const inMobileNav = btn.closest('.bottom-nav,#mobile-nav,nav.lg\\:hidden,[data-mobile-nav]');
+        if(!inMobileNav) return;
+
+        const target = this.detectMobileTabTarget(btn);
+        if(!target) return;
+
+        localStorage.setItem('lifeos_mobile_current_tab', target);
+
+        setTimeout(() => {
+          this.restoreMobileTabs();
+          try { window.switchView?.(target); } catch(err) {}
+          try { window.switchTab?.(target); } catch(err) {}
+          try { window.showView?.(target); } catch(err) {}
+          try { window.changeView?.(target); } catch(err) {}
+        }, 30);
+      }, false);
+    },
+
+    audioCtx(){
+      try{
+        const state = window.lifeosRealAlarm || {};
+        if(!state.audioCtx){
+          state.audioCtx = window.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+          window.audioCtx = state.audioCtx;
+          window.lifeosRealAlarm = state;
+        }
+        if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      }catch(e){
+        console.warn('[18_1_FIX6] AudioContext fail', e);
+        return null;
+      }
+    },
+
+    sharpSquareBeep(){
+      const ctx = this.audioCtx();
+      if(!ctx) return;
+      try{
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'square';
+
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1108.73, now + 0.1);
+
+        gain.gain.setValueAtTime(1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }catch(e){}
+    },
+
+    installPhysicalBeepAlarm(){
+      window.firePhysicalBeep = () => this.sharpSquareBeep();
+      window.lifeosFireOneBeep = () => this.sharpSquareBeep();
+
+      window.startPhysicalAlarmLoop = () => {
+        const state = window.lifeosRealAlarm || {};
+        clearInterval(state.beepTimer);
+        clearInterval(window.beepInterval);
+
+        window.firePhysicalBeep();
+
+        // Bíp 0.5s, nghỉ 0.5s, lặp đúng 1 giây/lần.
+        window.beepInterval = setInterval(window.firePhysicalBeep, 1000);
+        state.beepTimer = window.beepInterval;
+
+        window.lifeosRealAlarm = state;
+        console.log('[18_1_FIX6] sharp square physical beep loop started');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        clearInterval(window.beepInterval);
+        window.beepInterval = null;
+        if(window.lifeosRealAlarm){
+          clearInterval(window.lifeosRealAlarm.beepTimer);
+          window.lifeosRealAlarm.beepTimer = null;
+        }
+      };
+    },
+
+    init(){
+      this.restoreMobileTabs();
+      this.patchMobileTabClick();
+      this.patchCopy();
+      this.installPhysicalBeepAlarm();
+
+      setTimeout(() => this.restoreMobileTabs(), 350);
+      setTimeout(() => this.restoreMobileTabs(), 1200);
+      setInterval(() => this.patchCopy(), 1800);
+
+      console.log('[18_1_FIX6] from FIX2 only: copy-like-create + mobile tab restore + square beep ready');
+      window.showToast?.('18_1 FIX6: Copy + tab mobile + bíp vuông sẵn sàng','ph-check-circle');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 900));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 900);
+})();
+</script>
+
+
+<script id="lifeos-pha18-2-edit-now-button-js">
+(function(){
+  if (window.LifeOSPha18_2EditNowButton && window.LifeOSPha18_2EditNowButton.installed) return;
+
+  const api = window.LifeOSPha18_2EditNowButton = {
+    installed: true,
+
+    pad(n){ return String(n).padStart(2, '0'); },
+
+    nowLocalValue(){
+      const d = new Date();
+      return [
+        d.getFullYear(),
+        this.pad(d.getMonth() + 1),
+        this.pad(d.getDate())
+      ].join('-') + 'T' + [
+        this.pad(d.getHours()),
+        this.pad(d.getMinutes())
+      ].join(':');
+    },
+
+    setEditTimeNow(){
+      const input = document.getElementById('lifeos-task-edit-datetime');
+      if(!input){
+        window.showToast?.('Không tìm thấy ô giờ nhắc','ph-warning-circle');
+        return false;
+      }
+
+      const value = this.nowLocalValue();
+      input.value = value;
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+      input.dispatchEvent(new Event('change', {bubbles:true}));
+
+      try { window.vibrate?.(12); } catch(e) {}
+
+      const d = new Date();
+      const text = 'Đã lấy giờ hiện tại: ' +
+        this.pad(d.getDate()) + '/' + this.pad(d.getMonth() + 1) + '/' + d.getFullYear() +
+        ' ' + this.pad(d.getHours()) + ':' + this.pad(d.getMinutes());
+
+      window.showToast?.(text, 'ph-clock');
+      window.lifeosSpeakNow?.('Đã lấy giờ hiện tại', {force:true});
+      return true;
+    },
+
+    injectButton(){
+      const input = document.getElementById('lifeos-task-edit-datetime');
+      if(!input || document.getElementById('lifeos-task-edit-now-btn')) return;
+
+      const btn = document.createElement('button');
+      btn.id = 'lifeos-task-edit-now-btn';
+      btn.type = 'button';
+      btn.className = 'mt-2 w-full min-h-[44px] rounded-2xl bg-orange-50 text-orange-600 border border-orange-200 font-black active:scale-95 flex items-center justify-center gap-2 hover:bg-orange-100 transition-all';
+      btn.innerHTML = '<i class="ph-bold ph-clock-countdown text-lg"></i><span>Lấy giờ hiện tại</span>';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setEditTimeNow();
+      }, true);
+
+      input.insertAdjacentElement('afterend', btn);
+    },
+
+    hookOpenEdit(){
+      if(this.hookedOpenEdit) return;
+      this.hookedOpenEdit = true;
+
+      const tryHook = () => {
+        const core = window.LifeOSTaskCoreRepair;
+        if(core && typeof core.openEdit === 'function' && !core.__pha18_2_now_hooked){
+          const oldOpenEdit = core.openEdit.bind(core);
+          core.openEdit = (...args) => {
+            const result = oldOpenEdit(...args);
+            setTimeout(() => this.injectButton(), 40);
+            setTimeout(() => this.injectButton(), 180);
+            return result;
+          };
+          core.__pha18_2_now_hooked = true;
+        }
+
+        const oldGlobalOpen = typeof window.openLifeOSTaskEdit === 'function' ? window.openLifeOSTaskEdit.bind(window) : null;
+        if(oldGlobalOpen && !window.__pha18_2_global_open_edit_hooked){
+          window.openLifeOSTaskEdit = (...args) => {
+            const result = oldGlobalOpen(...args);
+            setTimeout(() => this.injectButton(), 40);
+            setTimeout(() => this.injectButton(), 180);
+            return result;
+          };
+          window.__pha18_2_global_open_edit_hooked = true;
+        }
+      };
+
+      tryHook();
+      setTimeout(tryHook, 700);
+      setTimeout(tryHook, 1800);
+    },
+
+    observeModal(){
+      if(this.observer) return;
+      const modal = document.getElementById('lifeos-task-edit-modal');
+      if(!modal) return;
+
+      this.observer = new MutationObserver(() => {
+        const visible = !modal.classList.contains('hidden') && modal.style.display !== 'none';
+        if(visible) this.injectButton();
+      });
+      this.observer.observe(modal, {attributes:true, childList:true, subtree:true});
+    },
+
+    init(){
+      this.injectButton();
+      this.hookOpenEdit();
+      this.observeModal();
+      setTimeout(() => this.injectButton(), 600);
+      setTimeout(() => this.observeModal(), 1200);
+      console.log('[PHA18.2] edit task now-button ready');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => api.init(), 650));
+  if(document.readyState !== 'loading') setTimeout(() => api.init(), 650);
+})();
+</script>
+
+
+<!-- PHA 20: ABSOLUTE OVERRIDE ALARM SQUARE BEEP & TTS DEBOUNCE -->
+<script id="lifeos-pha20-absolute-override">
+(function(){
+  if (window.__LIFEOS_PHA20_ABSOLUTE_OVERRIDE_INSTALLED__) return;
+  window.__LIFEOS_PHA20_ABSOLUTE_OVERRIDE_INSTALLED__ = true;
+
+  const AbsoluteFix = {
+    init() {
+      // 1. DỌN SẠCH VÒNG LẶP CHUÔNG RÁC TỪ CÁC PHA TRƯỚC
+      this.clearAllRogueIntervals();
+
+      // 2. ĐẢM BẢO AUDIOCONTEXT + OGG NỀN TỒN TẠI
+      this.ensureAudioCtx();
+      this.ensureMstqAlarm();
+
+      // 3. KHÔI PHỤC TIẾNG CHUÔNG VẬT LÝ CHÓI TAI GỐC
+      this.installPhysicalBeep();
+
+      // 4. ÉP VÒNG LẶP CHUÔNG GỐC KẾT HỢP OGG
+      this.installPhysicalAlarmLoop();
+
+      // 5. KHÓA CHẾT TTS CHỒNG CHÉO
+      this.installGoogleTTSLock();
+
+      // 6. GẮN VÀO LUỒNG BÁO THỨC THẬT
+      this.installAlarmStartHooks();
+
+      console.log('[PHA20] Absolute alarm override ready: square beep + OGG + hard TTS debounce');
+    },
+
+    ensureAudioCtx() {
+      try {
+        const state = window.lifeosRealAlarm || {};
+        if (!state.audioCtx && window.audioCtx) state.audioCtx = window.audioCtx;
+        if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        window.audioCtx = state.audioCtx;
+        window.lifeosRealAlarm = state;
+        if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+        return state.audioCtx;
+      } catch(e) {
+        console.warn('[PHA20] Không tạo được AudioContext', e);
+        return null;
+      }
+    },
+
+    ensureMstqAlarm() {
+      let alarmAudio = document.getElementById('mstq-alarm');
+      if (!alarmAudio) {
+        alarmAudio = document.createElement('audio');
+        alarmAudio.id = 'mstq-alarm';
+        document.body.appendChild(alarmAudio);
+      }
+
+      alarmAudio.setAttribute('loop', '');
+      alarmAudio.setAttribute('playsinline', '');
+      alarmAudio.setAttribute('webkit-playsinline', '');
+      alarmAudio.setAttribute('preload', 'auto');
+      alarmAudio.src = 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg';
+      alarmAudio.loop = true;
+      alarmAudio.preload = 'auto';
+      alarmAudio.volume = 1.0;
+      return alarmAudio;
+    },
+
+    installPhysicalBeep() {
+      window.firePhysicalBeep = window.lifeosFireOneBeep = () => {
+        const ctx = window.lifeosRealAlarm?.audioCtx || window.audioCtx || AbsoluteFix.ensureAudioCtx();
+        if (!ctx) return;
+
+        try {
+          if (ctx.state === 'suspended') ctx.resume();
+
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'square'; // Ép tuyệt đối sóng vuông
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.setValueAtTime(1108.73, ctx.currentTime + 0.1); // Bước nhảy chói tai
+
+          gain.gain.setValueAtTime(1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.5);
+        } catch(e) {}
+      };
+    },
+
+    installPhysicalAlarmLoop() {
+      window.startPhysicalAlarmLoop = () => {
+        const state = window.lifeosRealAlarm || {};
+        window.lifeosRealAlarm = state;
+
+        AbsoluteFix.clearAllRogueIntervals();
+        AbsoluteFix.ensureAudioCtx();
+        AbsoluteFix.ensureMstqAlarm();
+
+        window.firePhysicalBeep();
+
+        // Lặp tiếng bíp mỗi 1 giây
+        window.beepInterval = setInterval(window.firePhysicalBeep, 1000);
+        state.beepTimer = window.beepInterval;
+
+        // Kích hoạt file OGG nền
+        const alarmAudio = document.getElementById('mstq-alarm');
+        if(alarmAudio) {
+            alarmAudio.muted = false;
+            alarmAudio.volume = 1.0;
+            try { alarmAudio.currentTime = 0; } catch(e) {}
+            alarmAudio.play().catch(()=>{});
+        }
+
+        window.lifeosRealAlarm = state;
+        console.log('[PHA20] Đã kích hoạt chuông Square + OGG');
+      };
+
+      window.stopPhysicalAlarmLoop = () => {
+        AbsoluteFix.clearAllRogueIntervals();
+
+        if(window.lifeosRealAlarm) {
+          window.lifeosRealAlarm.ttsPlaying = false;
+        }
+
+        const alarmAudio = document.getElementById('mstq-alarm');
+        if(alarmAudio) {
+            try {
+              alarmAudio.pause();
+              alarmAudio.currentTime = 0;
+              alarmAudio.muted = true;
+            } catch(e) {}
+        }
+      };
+    },
+
+    installGoogleTTSLock() {
+      window.__ttsLockedUntil = 0;
+
+      window.playGoogleTTSLoop = async () => {
+        const state = window.lifeosRealAlarm;
+        if(!state || !state.running) return;
+
+        const now = Date.now();
+
+        // CHỐT CHẶN 1: nếu chưa hết giờ khóa hoặc TTS đang chạy -> rút lui ngay
+        if(now < Number(window.__ttsLockedUntil || 0) || state.ttsPlaying) return;
+
+        // KHÓA CỬA: không cho luồng khác nhảy vào
+        state.ttsPlaying = true;
+        window.__ttsLockedUntil = now + 9999999;
+
+        const els = (typeof window.lifeosGetAlarmEls === 'function') ? window.lifeosGetAlarmEls() : {};
+        const tts = els.tts || document.getElementById('lifeos-tts-audio') || document.getElementById('tts-audio');
+        const status = els.status || document.getElementById('lifeos-real-alarm-status');
+
+        if(!tts) {
+          state.ttsPlaying = false;
+          window.__ttsLockedUntil = Date.now() + 3000;
+          console.warn('[PHA20] Không tìm thấy audio Google TTS');
+          return;
+        }
+
+        try {
+            const speech = (typeof window.lifeosBuildAlarmSpeech === 'function')
+              ? window.lifeosBuildAlarmSpeech(state.task)
+              : 'Đến giờ rồi. Bạn có nhiệm vụ.';
+
+            if (typeof window.loadLifeOSGoogleTTS === 'function') {
+              await window.loadLifeOSGoogleTTS(speech);
+            }
+
+            if(state.audioCtx && state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+
+            tts.pause();
+            try { tts.currentTime = 0; } catch(e) {}
+            tts.muted = false;
+            tts.volume = 1;
+
+            if(status) status.textContent = 'Google TTS đang đọc nhiệm vụ. Chuông vẫn giữ nhịp cảnh báo.';
+
+            tts.onended = () => {
+                state.ttsPlaying = false;
+                window.__ttsLockedUntil = Date.now() + 8000;
+
+                if(status && state.running) status.textContent = 'Hết câu TTS. Chuông tiếp tục và sẽ đọc lại sau 8s.';
+
+                setTimeout(() => {
+                    if(window.lifeosRealAlarm?.running) window.playGoogleTTSLoop();
+                }, 8100);
+            };
+
+            tts.onerror = () => {
+                state.ttsPlaying = false;
+                window.__ttsLockedUntil = Date.now() + 3000;
+                setTimeout(() => {
+                  if(window.lifeosRealAlarm?.running) window.playGoogleTTSLoop();
+                }, 3100);
+            };
+
+            const p = tts.play();
+            if(p && p.then) await p;
+
+        } catch(e) {
+            console.warn('[PHA20] Google TTS loop lỗi', e);
+            state.ttsPlaying = false;
+            window.__ttsLockedUntil = Date.now() + 3000;
+            setTimeout(() => {
+              if(window.lifeosRealAlarm?.running) window.playGoogleTTSLoop();
+            }, 3100);
+        }
+      };
+    },
+
+    installAlarmStartHooks() {
+      if (typeof window.startLifeOSRealAlarm === 'function' && !window.startLifeOSRealAlarm.__pha20_absolute_wrapped) {
+        const oldStart = window.startLifeOSRealAlarm.bind(window);
+
+        const wrapped = function(task) {
+          const result = oldStart(task);
+
+          setTimeout(() => {
+            if (window.lifeosRealAlarm) {
+              window.lifeosRealAlarm.ttsPlaying = false;
+            }
+            window.startPhysicalAlarmLoop?.();
+            window.playGoogleTTSLoop?.();
+          }, 0);
+
+          return result;
+        };
+
+        wrapped.__pha20_absolute_wrapped = true;
+        window.startLifeOSRealAlarm = wrapped;
+      }
+
+      if (typeof window.triggerGlobalAlarm === 'function' && !window.triggerGlobalAlarm.__pha20_absolute_wrapped) {
+        const oldTrigger = window.triggerGlobalAlarm.bind(window);
+
+        const wrapped = function() {
+          const result = oldTrigger.apply(window, arguments);
+
+          setTimeout(() => {
+            if (window.isAlarmRinging || window.lifeosRealAlarm?.running) {
+              window.startPhysicalAlarmLoop?.();
+              window.playGoogleTTSLoop?.();
+            }
+          }, 0);
+
+          return result;
+        };
+
+        wrapped.__pha20_absolute_wrapped = true;
+        window.triggerGlobalAlarm = wrapped;
+      }
+    },
+
+    clearAllRogueIntervals() {
+      if (window.beepInterval) {
+        clearInterval(window.beepInterval);
+        window.beepInterval = null;
+      }
+
+      if (window.lifeosRealAlarm?.beepTimer) {
+        clearInterval(window.lifeosRealAlarm.beepTimer);
+        window.lifeosRealAlarm.beepTimer = null;
+      }
+    }
+  };
+
+  // Ép chạy muộn để đè các script cũ. Sửa lỗi bản nháp: dùng AbsoluteFix, không gọi api.init().
+  setTimeout(() => AbsoluteFix.init(), 2000);
+  setTimeout(() => AbsoluteFix.init(), 5000);
+})();
+</script>
 
 </body>
 </html>
