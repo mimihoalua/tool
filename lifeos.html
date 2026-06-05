@@ -3633,6 +3633,11 @@ body.music-player-active #mini-player {
         <i class="ph-bold ph-arrows-clockwise text-lg pointer-events-none"></i>
       </button>
     </div>
+    <div class="w-full bg-white/80 backdrop-blur border-b border-slate-200 px-3 py-2 flex gap-2 overflow-x-auto custom-scroll-area shrink-0 z-20" id="chat-folder-tabs">
+        <button onclick="window.ChatEngine.switchFolder('all')" id="chat-folder-all" class="chat-folder-btn active shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-slate-800 text-white shadow-md">Tất cả</button>
+        <div id="chat-dynamic-folders" class="flex gap-2"></div>
+        <button onclick="window.ChatEngine.openFolderManager()" class="shrink-0 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-primary hover:bg-slate-200 flex items-center justify-center transition shadow-sm" title="Tạo thư mục" aria-label="Tạo thư mục"><i class="ph-bold ph-plus pointer-events-none"></i></button>
+    </div>
     <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto custom-scroll-area p-4 sm:p-6 bg-slate-50/50"></div>
     <div id="chat-msg-menu" class="hidden fixed inset-0 z-[9999999] bg-slate-900/40 backdrop-blur-sm items-end justify-center sm:items-center">
       <div class="bg-white w-full sm:w-96 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl animate-slide-up sm:animate-scaleIn flex flex-col gap-2">
@@ -3647,11 +3652,30 @@ body.music-player-active #mini-player {
         </div>
 
         <button type="button" onclick="window.ChatEngine.replyMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-arrow-u-up-left text-xl text-emerald-500 pointer-events-none"></i> Trả lời</button>
+        <button type="button" id="chat-menu-edit" onclick="window.ChatEngine.editMsgInit()" class="hidden items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-pencil-simple text-xl text-amber-500 pointer-events-none"></i> Chỉnh sửa</button>
         <button type="button" id="chat-menu-download" onclick="window.ChatEngine.downloadActiveFile()" class="hidden items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-download-simple text-xl text-purple-500 pointer-events-none"></i> Tải / Xem File</button>
         <button type="button" onclick="window.ChatEngine.copyMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition"><i class="ph-bold ph-copy text-xl text-blue-500 pointer-events-none"></i> Sao chép</button>
         <button type="button" onclick="window.ChatEngine.deleteMsg()" class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-rose-600 hover:bg-rose-50 active:bg-rose-100 transition"><i class="ph-bold ph-trash text-xl pointer-events-none"></i> Xóa tin nhắn</button>
         <button type="button" onclick="window.ChatEngine.closeMsgMenu()" class="mt-2 w-full p-4 rounded-xl font-bold text-slate-500 bg-slate-100 active:bg-slate-200 transition">Đóng lại</button>
       </div>
+    </div>
+    <div id="chat-lightbox" class="hidden fixed inset-0 z-[9999999] bg-black/95 flex-col items-center justify-center backdrop-blur-md">
+      <div class="absolute top-4 right-4 z-50">
+        <button type="button" onclick="window.ChatEngine.closeLightbox()" class="text-white hover:text-rose-500 p-2 bg-black/50 rounded-full" aria-label="Đóng ảnh"><i class="ph-bold ph-x text-2xl pointer-events-none"></i></button>
+      </div>
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-bold bg-black/50 px-4 py-2 rounded-full z-50 text-sm" id="lightbox-counter">1 / 1</div>
+      <button type="button" onclick="window.ChatEngine.prevLightbox()" class="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:text-primary p-3 bg-black/30 rounded-full z-50" aria-label="Ảnh trước"><i class="ph-bold ph-caret-left text-3xl pointer-events-none"></i></button>
+      <button type="button" onclick="window.ChatEngine.nextLightbox()" class="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-primary p-3 bg-black/30 rounded-full z-50" aria-label="Ảnh sau"><i class="ph-bold ph-caret-right text-3xl pointer-events-none"></i></button>
+      <div class="w-full h-full flex items-center justify-center p-4">
+        <img id="lightbox-img" src="" class="max-h-[85vh] max-w-[95vw] object-contain transition-opacity duration-300" alt="Ảnh xem lớn">
+      </div>
+    </div>
+    <div id="chat-edit-banner" class="hidden mx-4 mb-2 p-2 bg-amber-50 border border-amber-200 rounded-xl items-center justify-between">
+      <div class="flex flex-col overflow-hidden min-w-0">
+        <span class="text-[10px] font-bold text-amber-600"><i class="ph-bold ph-pencil-simple pointer-events-none"></i> Đang chỉnh sửa:</span>
+        <span id="chat-edit-preview" class="text-xs text-slate-600 font-medium truncate">...</span>
+      </div>
+      <button type="button" onclick="window.ChatEngine.cancelEdit()" class="p-2 text-slate-400 hover:text-rose-500 active:scale-90"><i class="ph-bold ph-x text-base pointer-events-none"></i></button>
     </div>
     <div id="chat-reply-banner" class="hidden mx-4 mb-2 p-2 bg-slate-100 border border-slate-200 rounded-xl items-center justify-between">
       <div class="flex flex-col overflow-hidden min-w-0">
@@ -3660,12 +3684,22 @@ body.music-player-active #mini-player {
       </div>
       <button type="button" onclick="window.ChatEngine.cancelReply()" class="p-2 text-slate-400 hover:text-rose-500 active:scale-90"><i class="ph-bold ph-x pointer-events-none"></i></button>
     </div>
+    <div id="chat-emoji-container" class="hidden absolute bottom-[80px] sm:bottom-[90px] left-4 bg-white border border-slate-200 shadow-2xl rounded-2xl p-3 w-[280px] z-50 animate-scaleIn flex-col gap-2">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cảm xúc</span>
+        <button type="button" onclick="window.ChatEngine.toggleEmojiPicker()" class="text-slate-400 hover:text-rose-500 active:scale-90" aria-label="Đóng emoji"><i class="ph-bold ph-x pointer-events-none"></i></button>
+      </div>
+      <div id="chat-emoji-list" class="grid grid-cols-6 gap-2 h-48 overflow-y-auto custom-scroll-area p-1 text-center"></div>
+    </div>
     <form id="chat-form" class="shrink-0 p-3 sm:p-4 border-t border-slate-100 bg-white flex items-end gap-2" onsubmit="event.preventDefault(); window.ChatEngine?.handleSubmit?.();">
-      <input type="file" id="chat-file-input" class="hidden" multiple onchange="window.ChatEngine?.handleFiles?.(this.files); this.value='';">
-      <button type="button" onclick="document.getElementById('chat-file-input')?.click();" class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center active:scale-95 shrink-0" title="Đính kèm file" aria-label="Đính kèm file"><i class="ph-bold ph-paperclip text-xl pointer-events-none"></i></button>
-      <button type="button" id="chat-private-toggle" onclick="this.classList.toggle('text-slate-400'); this.classList.toggle('text-rose-500'); this.dataset.private = this.dataset.private === '1' ? '0' : '1';" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition shrink-0" title="Chế độ riêng tư (Chỉ mình tôi)" data-private="0" aria-label="Chế độ riêng tư"><i class="ph-bold ph-lock-key text-xl pointer-events-none"></i></button>
+      <input type="file" id="chat-file-input" multiple class="hidden" accept="*/*" onchange="window.ChatEngine?.sendMultipleFiles?.(this.files); this.value='';">
+      <button type="button" onclick="document.getElementById('chat-file-input')?.click();" class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 border border-sky-100 flex items-center justify-center active:scale-95 shrink-0" title="Đính kèm" aria-label="Đính kèm"><i class="ph-bold ph-paperclip text-xl pointer-events-none"></i></button>
+      <button type="button" onclick="window.ChatEngine.toggleEmojiPicker()" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center active:scale-95 shrink-0" title="Emoji" aria-label="Emoji"><i class="ph-bold ph-smiley text-xl pointer-events-none"></i></button>
       <textarea id="chat-input" rows="1" class="flex-1 min-h-[44px] max-h-32 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-primary shadow-inner" placeholder="Nhắn cho gia đình..."></textarea>
-      <button type="submit" class="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center active:scale-95 shadow-md shrink-0" title="Gửi tin nhắn" aria-label="Gửi tin nhắn"><i class="ph-bold ph-paper-plane-right text-xl pointer-events-none"></i></button>
+      <button type="button" id="chat-private-toggle" onclick="this.classList.toggle('text-slate-400'); this.classList.toggle('text-rose-500'); this.dataset.private = this.dataset.private === '1' ? '0' : '1';" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition shrink-0" title="Chế độ riêng tư (Chỉ mình tôi)" data-private="0" aria-label="Chế độ riêng tư">
+          <i class="ph-bold ph-lock-key text-xl pointer-events-none"></i>
+      </button>
+      <button type="submit" id="chat-send-btn" class="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center active:scale-95 shadow-md shrink-0" title="Gửi/Lưu" aria-label="Gửi hoặc lưu"><i class="ph-bold ph-paper-plane-right text-xl pointer-events-none"></i></button>
     </form>
   </div>
 </div>
@@ -3735,11 +3769,29 @@ body.music-player-active #mini-player {
 
 <div id="toast-container" class="fixed top-[env(safe-area-inset-top,20px)] mt-4 left-1/2 -translate-x-1/2 z-[9999999] flex flex-col gap-2 pointer-events-none w-max max-w-[90vw]"></div>
 <script>
-window.showToast=(m,i='ph-info')=>{
-    const c=document.getElementById('toast-container');if(!c)return;const t=document.createElement('div');
-    t.className='bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999]';
-    t.innerHTML=`<i class="ph-fill ${i} text-xl text-primary"></i> <span>${m}</span>`;
-    c.appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-20px) scale(0.9)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300)},3000);
+window.showToast = (m, i = 'ph-info') => {
+    const c = document.getElementById('toast-container');
+    if(!c) return;
+
+    // Giới hạn số lượng Toast tối đa là 3 để chống rối mắt
+    while(c.children.length >= 3) {
+        c.firstChild.remove();
+    }
+
+    const msg = String(m == null ? '' : m);
+    const t = document.createElement('div');
+    t.className = 'bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast text-sm font-bold pointer-events-auto z-[9999999] transition-all duration-300 transform translate-y-0 opacity-100';
+    t.innerHTML = `<i class="ph-fill ${i} text-xl text-primary"></i> <span>${msg}</span>`;
+    c.appendChild(t);
+
+    // Tự động tính toán thời gian hiển thị (Tối thiểu 6 giây)
+    const duration = Math.max(6000, msg.length * 80);
+
+    setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(-20px) scale(0.9)';
+        setTimeout(() => t.remove(), 300);
+    }, duration);
 };
 
 window.PROFILES={"live":{pin:"",name:"Live",icon:'🟢',noPin:true},"admin":{pin:"admin",name:"Admin",icon:'👑'},"xiem":{pin:"a",name:"Xiêm",icon:'👵'},"thanh":{pin:"a",name:"Thành",icon:'👨'},"tham":{pin:"a",name:"Thắm",icon:'👩'},"phuc":{pin:"a",name:"Phúc",icon:'👦'},"my":{pin:"a",name:"My",icon:'👧'}};
@@ -4713,6 +4765,12 @@ window.ChatEngine = {
     chatId: '-1004299606539',
     fileCache: {},
     replyingTo: null,
+    editingId: null,
+    emojiList: ['😀','😂','🥰','😍','😎','😊','😉','🥲','😜','🤪','🥺','😢','😭','😤','😡','🤬','🤯','😳','🥵','🥶','😱','🤗','🤔','🤫','🙄','🥱','😴','🤤','🤮','🤧','😷','🤒','😈','🤡','💩','👻','👽','👾','🤖','🎃','❤️','💔','🔥','🎉','✨','🌟','🎁','🎂','👏','🙌','🙏','💪','👀','🐶','🐱','🐭','🐰','🐻','🐼','🦊','🐯','🦁','🐮','🐷'],
+    lightboxImages: [],
+    lightboxIndex: 0,
+    chatFolders: [],
+    currentTopic: 'all',
     dbRef: null,
     unsubscribe: null,
     _ready: false,
@@ -4723,7 +4781,13 @@ window.ChatEngine = {
         if (local) {
             try {
                 const parsed = JSON.parse(local);
-                if (Array.isArray(parsed)) window.chatHistory = parsed;
+                if (Array.isArray(parsed)) {
+                    window.chatHistory = parsed;
+                    this.chatFolders = [];
+                } else if (parsed && typeof parsed === 'object') {
+                    window.chatHistory = Array.isArray(parsed.m) ? parsed.m : (Array.isArray(parsed.messages) ? parsed.messages : []);
+                    this.chatFolders = Array.isArray(parsed.f) ? parsed.f : (Array.isArray(parsed.folders) ? parsed.folders : []);
+                }
             } catch(e) { console.warn('[ChatEngine shared local parse]', e); }
         } else {
             // Fallback 1 lần để không làm mất tin nhắn cũ đang nằm ở local theo profile trước Pha 11.
@@ -4732,13 +4796,16 @@ window.ChatEngine = {
                 const parsed = oldLocal ? JSON.parse(oldLocal) : null;
                 if (Array.isArray(parsed) && parsed.length) {
                     window.chatHistory = parsed;
-                    localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(window.chatHistory));
+                    this.chatFolders = [];
+                    localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m: window.chatHistory, f: this.chatFolders}));
                 }
             } catch(e) { console.warn('[ChatEngine old local fallback]', e); }
         }
         this._ready = true;
         this._lastKey = this.getKey();
         this.bindTextareaAutosize();
+        this.renderEmojiPicker();
+        this.renderFolders();
         this.render();
     },
     initFirebase(db) {
@@ -4750,16 +4817,22 @@ window.ChatEngine = {
         }
         this.unsubscribe = this.dbRef.onSnapshot(doc => {
             if(doc.exists) {
-                const data = doc.data();
-                if(data && Array.isArray(data.messages)) {
-                    window.chatHistory = data.messages.map(m => {
-                        const clean = {...m, id: String(m.id)};
-                        Object.keys(clean).forEach(k => clean[k] === undefined && delete clean[k]);
-                        return clean;
-                    });
-                    localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(window.chatHistory));
-                    this.render();
-                }
+                const data = doc.data() || {};
+                window.chatHistory = Array.isArray(data.messages) ? data.messages.map(m => {
+                    const clean = {...m, id: String(m.id)};
+                    Object.keys(clean).forEach(k => clean[k] === undefined && delete clean[k]);
+                    return clean;
+                }) : [];
+                this.chatFolders = Array.isArray(data.folders) ? data.folders.map(f => ({
+                    id: String(f.id || ('folder_' + Date.now())),
+                    name: String(f.name || 'Thư mục'),
+                    icon: String(f.icon || '📁'),
+                    color: String(f.color || 'bg-blue-500'),
+                    createdAt: f.createdAt || Date.now()
+                })) : [];
+                localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m: window.chatHistory, f: this.chatFolders}));
+                this.renderFolders();
+                this.render();
             }
         }, err => console.warn('[ChatEngine shared snapshot]', err));
     },
@@ -4778,14 +4851,85 @@ window.ChatEngine = {
             }
         });
     },
+    renderEmojiPicker() {
+        const list = document.getElementById('chat-emoji-list');
+        if(!list) return;
+        list.innerHTML = this.emojiList.map(e => `<button type="button" onclick="window.ChatEngine.insertEmoji('${e}')" class="text-2xl hover:scale-125 transition-transform active:scale-90">${e}</button>`).join('');
+    },
+    toggleEmojiPicker() {
+        window.vibrate?.(10);
+        const picker = document.getElementById('chat-emoji-container');
+        if(picker) {
+            picker.classList.toggle('hidden');
+            picker.classList.toggle('flex');
+            if(!picker.classList.contains('hidden')) {
+                this.renderEmojiPicker();
+            }
+        }
+    },
+    insertEmoji(emoji) {
+        window.vibrate?.(10);
+        const input = document.getElementById('chat-input');
+        if(input) {
+            input.value += emoji;
+            input.focus();
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 128) + 'px';
+        }
+    },
+    editMsgInit() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(m && m.type === 'text' && m.sender === window.viewingUser) {
+            this.editingId = m.id;
+            const ePreview = document.getElementById('chat-edit-preview');
+            const eBanner = document.getElementById('chat-edit-banner');
+            const input = document.getElementById('chat-input');
+            const sendBtnIcon = document.querySelector('#chat-send-btn i');
+
+            if(ePreview) ePreview.textContent = m.text;
+            if(eBanner) { eBanner.classList.remove('hidden'); eBanner.classList.add('flex'); }
+            this.cancelReply?.();
+            if(input) { input.value = m.text; input.focus(); input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 128) + 'px'; }
+            if(sendBtnIcon) { sendBtnIcon.className = 'ph-bold ph-check text-xl pointer-events-none'; }
+
+            this.closeMsgMenu();
+        }
+    },
+
+    cancelEdit() {
+        this.editingId = null;
+        const eBanner = document.getElementById('chat-edit-banner');
+        const input = document.getElementById('chat-input');
+        const sendBtnIcon = document.querySelector('#chat-send-btn i');
+
+        if(eBanner) { eBanner.classList.remove('flex'); eBanner.classList.add('hidden'); }
+        if(input) { input.value = ''; input.style.height = 'auto'; }
+        if(sendBtnIcon) { sendBtnIcon.className = 'ph-bold ph-paper-plane-right text-xl pointer-events-none'; }
+    },
+
     handleSubmit() {
         const input = document.getElementById('chat-input');
         if (!input) return;
         const text = input.value || '';
         if (!text.trim()) return;
+
+        if (this.editingId) {
+            const m = (window.chatHistory || []).find(x => String(x.id) === String(this.editingId));
+            if(m) {
+                m.text = text.trim();
+                m.isEdited = true;
+                this.saveAndSync();
+                this.render();
+                window.showToast?.('Đã cập nhật tin nhắn!', 'ph-check-circle');
+                window.vibrate?.(15);
+            }
+            this.cancelEdit();
+        } else {
+            this.sendText(text);
+        }
         input.value = '';
         input.style.height = 'auto';
-        this.sendText(text);
     },
     handleFile(file) {
         if (!file) return;
@@ -4805,7 +4949,8 @@ window.ChatEngine = {
             sender: this.getKey(),
             timestamp: Date.now(),
             reply_to: this.replyingTo,
-            isPrivate: isPriv
+            isPrivate: isPriv,
+            topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
         };
         window.chatHistory.push(msg);
         this.cancelReply();
@@ -4815,74 +4960,103 @@ window.ChatEngine = {
     async sendMultipleFiles(files) {
         const arr = Array.from(files || []).filter(Boolean);
         if (!arr.length) return;
-        window.showToast?.(`Đang tải lên ${arr.length} file...`, 'ph-spinner animate-spin');
-        window.playSpeechTTS?.(`Đang tải lên ${arr.length} file. Vui lòng không đóng ứng dụng.`);
+        window.playSpeechTTS?.(`Bắt đầu tải lên ${arr.length} file. Vui lòng giữ ứng dụng mở.`);
         for (let i = 0; i < arr.length; i++) {
             await this.sendFile(arr[i], i + 1, arr.length);
         }
         window.showToast?.('Đã tải xong toàn bộ file!', 'ph-check-circle');
         window.playSpeechTTS?.('Đã hoàn tất tải lên toàn bộ file.');
     },
-    async sendFile(file, index = 1, total = 1) {
+    async sendFile(file, currentIndex = 1, totalFiles = 1) {
         if(!file) return;
-        const batchLabel = total > 1 ? ` ${index}/${total}` : '';
-        window.showToast?.(`Đang tải file${batchLabel} lên Telegram...`, 'ph-spinner animate-spin');
-        if (total <= 1) window.playSpeechTTS?.('Đang xử lý và tải file lên. Vui lòng chờ.');
 
-        const formData = new FormData();
-        formData.append('chat_id', this.chatId);
+        // PHA 12: Chặn 50MB theo giới hạn Telegram Bot API, resolve để queue tiếp tục.
+        const MAX_SIZE = 50 * 1024 * 1024;
+        if (file.size > MAX_SIZE) {
+            window.showToast?.(`File ${file.name || 'không tên'} vượt quá 50MB. Đã bỏ qua!`, 'ph-warning-circle');
+            window.playSpeechTTS?.('Một file quá lớn đã bị bỏ qua do vượt giới hạn tải lên.');
+            return Promise.resolve();
+        }
 
         let endpoint = 'sendDocument';
         let fileField = 'document';
         let msgType = 'file';
-
         const mime = String(file.type || '').toLowerCase();
         if(mime.startsWith('image/')) { endpoint = 'sendPhoto'; fileField = 'photo'; msgType = 'image'; }
         else if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
         else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
 
+        const formData = new FormData();
+        formData.append('chat_id', this.chatId);
         formData.append(fileField, file);
 
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${this.token}/${endpoint}`, {
-                method: 'POST', body: formData
-            });
-            const data = await res.json();
-            if(data.ok) {
-                let fileId = '';
-                if(msgType === 'image') {
-                    const photoArr = data.result.photo || [];
-                    const best = photoArr[photoArr.length - 1];
-                    fileId = best && best.file_id;
-                } else {
-                    fileId = data.result[fileField] && data.result[fileField].file_id;
-                }
-                if (!fileId) throw new Error('Missing Telegram file_id');
+        return new Promise((resolve) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://api.telegram.org/bot${this.token}/${endpoint}`, true);
 
-                const fileName = file.name || 'Tập tin';
-                const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
-                const msg = {
-                    id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
-                    type: msgType,
-                    file_id: fileId,
-                    file_name: fileName,
-                    sender: this.getKey(),
-                    timestamp: Date.now(),
-                    reply_to: this.replyingTo,
-                    isPrivate: isPriv
-                };
-                window.chatHistory.push(msg);
-                this.cancelReply();
-                this.saveAndSync();
-                this.render();
-                window.showToast?.(total > 1 ? `Đã gửi file ${index}/${total}` : 'Gửi file thành công!', 'ph-check-circle');
-                if (total <= 1) window.playSpeechTTS?.('Gửi file thành công!');
-            } else { throw new Error(data.description || 'Telegram API Error'); }
-        } catch(e) {
-            console.warn('[ChatEngine sendFile]', e);
-            window.showToast?.(total > 1 ? `Lỗi gửi file ${index}/${total}` : 'Lỗi gửi file lên Telegram!', 'ph-warning-circle');
-            window.playSpeechTTS?.('Đã xảy ra lỗi khi gửi file. Vui lòng kiểm tra mạng.');
-        }
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    window.showToast?.(`Đang tải file ${currentIndex}/${totalFiles}: ${percent}%`, 'ph-spinner animate-spin');
+                }
+            };
+
+            xhr.onload = () => {
+                try {
+                    const data = JSON.parse(xhr.responseText || '{}');
+                    if(data.ok) {
+                        let fileId = '';
+                        if(msgType === 'image') {
+                            const photoArr = data.result.photo || [];
+                            const best = photoArr[photoArr.length - 1];
+                            fileId = best && best.file_id;
+                        } else {
+                            fileId = data.result[fileField] && data.result[fileField].file_id;
+                        }
+                        if (!fileId) throw new Error('Missing Telegram file_id');
+
+                        const telegramMsgId = data.result.message_id;
+                        const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+                        const fileName = file.name || 'Tập tin';
+                        const msg = {
+                            id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+                            type: msgType,
+                            file_id: fileId,
+                            file_name: fileName,
+                            sender: this.getKey(),
+                            timestamp: Date.now(),
+                            reply_to: this.replyingTo,
+                            isPrivate: isPriv,
+                            telegram_msg_id: telegramMsgId,
+                            topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
+                        };
+                        window.chatHistory.push(msg);
+                        this.cancelReply();
+                        this.saveAndSync();
+                        this.render();
+                    } else {
+                        console.warn('[ChatEngine Telegram API]', data);
+                        window.showToast?.(`Lỗi API Telegram ở file thứ ${currentIndex}`, 'ph-warning-circle');
+                    }
+                } catch(err) {
+                    console.warn('[ChatEngine XHR parse]', err);
+                    window.showToast?.('Lỗi phân tích phản hồi', 'ph-warning-circle');
+                }
+                resolve();
+            };
+
+            xhr.onerror = () => {
+                window.showToast?.(`Lỗi mạng tải file ${currentIndex}`, 'ph-warning-circle');
+                resolve();
+            };
+
+            try { xhr.send(formData); }
+            catch(e) {
+                console.warn('[ChatEngine XHR send]', e);
+                window.showToast?.(`Lỗi gửi file ${currentIndex}`, 'ph-warning-circle');
+                resolve();
+            }
+        });
     },
     saveAndSync() {
         const safeHistory = (window.chatHistory || []).map(m => {
@@ -4890,10 +5064,18 @@ window.ChatEngine = {
             Object.keys(clean).forEach(k => clean[k] === undefined && delete clean[k]);
             return clean;
         });
+        const safeFolders = (this.chatFolders || []).map(f => ({
+            id: String(f.id || ('folder_' + Date.now())),
+            name: String(f.name || 'Thư mục'),
+            icon: String(f.icon || '📁'),
+            color: String(f.color || 'bg-blue-500'),
+            createdAt: f.createdAt || Date.now()
+        }));
         window.chatHistory = safeHistory;
-        localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify(safeHistory));
+        this.chatFolders = safeFolders;
+        localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m: safeHistory, f: safeFolders}));
         if(this.dbRef) {
-            this.dbRef.set({ messages: safeHistory, updatedAt: Date.now() }, { merge: true })
+            this.dbRef.set({ messages: safeHistory, folders: safeFolders, updatedAt: Date.now() }, { merge: true })
                 .catch(e => console.warn('[ChatEngine shared push]', e));
         }
     },
@@ -4919,6 +5101,12 @@ window.ChatEngine = {
         if(btnDl) {
             if(m && m.type !== 'text') { btnDl.classList.remove('hidden'); btnDl.classList.add('flex'); }
             else { btnDl.classList.remove('flex'); btnDl.classList.add('hidden'); }
+        }
+        const btnEdit = document.getElementById('chat-menu-edit');
+        if(btnEdit) {
+            // Chỉ cho sửa tin nhắn dạng TEXT và phải là TIN DO CHÍNH MÌNH GỬI
+            if(m && m.type === 'text' && m.sender === window.viewingUser) { btnEdit.classList.remove('hidden'); btnEdit.classList.add('flex'); }
+            else { btnEdit.classList.remove('flex'); btnEdit.classList.add('hidden'); }
         }
         const menu = document.getElementById('chat-msg-menu');
         if(menu) { menu.classList.remove('hidden'); menu.style.display = 'flex'; }
@@ -4982,15 +5170,192 @@ window.ChatEngine = {
         }
         this.closeMsgMenu();
     },
-    deleteMsg() {
-        const id = document.getElementById('chat-msg-active-id')?.value;
-        window.chatHistory = (window.chatHistory || []).filter(m => String(m.id) !== String(id));
-        (window.chatHistory || []).forEach(m => { if (String(m.reply_to || '') === String(id)) m.reply_to = null; });
+    async deleteMsg() {
+        const id = document.getElementById('chat-msg-active-id').value;
+        const msg = window.chatHistory.find(m => m.id === id);
+        if(!msg) return;
+
+        // BƯỚC 1: NẾU CÓ TELEGRAM ID, PHẢI XÓA BÊN TELEGRAM TRƯỚC
+        if (msg.telegram_msg_id) {
+            window.showToast("Đang đồng bộ xóa trên Telegram...", "ph-spinner animate-spin");
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${this.token}/deleteMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: this.chatId,
+                        message_id: msg.telegram_msg_id
+                    })
+                });
+                const data = await res.json();
+                
+                // NẾU TELEGRAM TỪ CHỐI -> DỪNG LẠI NGAY LẬP TỨC
+                if (!data.ok) {
+                    console.error('Telegram từ chối xóa:', data);
+                    window.showToast(`Lỗi Telegram: ${data.description}`, "ph-warning-circle");
+                    window.playSpeechTTS('Không thể xóa file. Lệnh bị hệ thống lưu trữ từ chối.');
+                    this.closeMsgMenu();
+                    return; // KHÔNG ĐƯỢC XÓA TRÊN WEB
+                }
+            } catch(e) {
+                console.error('Lỗi mạng API Telegram:', e);
+                window.showToast("Lỗi kết nối đến Telegram", "ph-warning-circle");
+                window.playSpeechTTS('Mất kết nối mạng. Không thể xóa.');
+                this.closeMsgMenu();
+                return; // KHÔNG ĐƯỢC XÓA TRÊN WEB
+            }
+        }
+
+        // BƯỚC 2: TELEGRAM ĐÃ XÓA THÀNH CÔNG (HOẶC TIN CŨ KHÔNG CÓ TELEGRAM ID) -> TIẾN HÀNH XÓA TRÊN WEB
+        window.chatHistory = window.chatHistory.filter(m => m.id !== id);
         this.saveAndSync();
         this.render();
-        window.showToast?.('Đã xóa tin nhắn!', 'ph-trash');
-        window.playSpeechTTS?.('Đã xóa tin nhắn');
+        
+        window.showToast("Đã xóa vĩnh viễn tin nhắn!", "ph-trash");
+        window.playSpeechTTS('Đã xóa thành công khỏi hệ thống');
         this.closeMsgMenu();
+    },
+    openLightbox(msgId) {
+        const profileKey = this.getKey();
+        this.lightboxImages = (window.chatHistory || []).filter(m => m.type === 'image' && (!m.isPrivate || String(m.sender || '') === String(profileKey)));
+        if(!this.lightboxImages.length) return;
+        this.lightboxIndex = this.lightboxImages.findIndex(m => String(m.id) === String(msgId));
+        if(this.lightboxIndex === -1) this.lightboxIndex = 0;
+        this.updateLightboxView();
+        const lb = document.getElementById('chat-lightbox');
+        if(lb) { lb.classList.remove('hidden'); lb.style.display = 'flex'; }
+    },
+    closeLightbox() {
+        const lb = document.getElementById('chat-lightbox');
+        if(lb) { lb.classList.add('hidden'); lb.style.display = 'none'; }
+    },
+    nextLightbox() {
+        if(!this.lightboxImages.length) return;
+        this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length;
+        this.updateLightboxView();
+    },
+    prevLightbox() {
+        if(!this.lightboxImages.length) return;
+        this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
+        this.updateLightboxView();
+    },
+    async updateLightboxView() {
+        const imgEl = document.getElementById('lightbox-img');
+        const counterEl = document.getElementById('lightbox-counter');
+        const msg = this.lightboxImages[this.lightboxIndex];
+        if(!msg || !imgEl) return;
+        if(counterEl) counterEl.textContent = `${this.lightboxIndex + 1} / ${this.lightboxImages.length}`;
+        imgEl.style.opacity = '0.3';
+        const url = await this.getImageUrl(msg.file_id);
+        if(url) { imgEl.src = url; imgEl.style.opacity = '1'; }
+    },
+    renderFolders() {
+        const c = document.getElementById('chat-dynamic-folders');
+        if(!c) return;
+        if (this.currentTopic !== 'all' && !(this.chatFolders || []).some(x => String(x.id) === String(this.currentTopic))) {
+            this.currentTopic = 'all';
+        }
+        c.innerHTML = (this.chatFolders || []).map(f => `
+            <button onclick="window.ChatEngine.switchFolder('${window.escapeHTML(String(f.id))}')" oncontextmenu="event.preventDefault(); window.ChatEngine.openFolderManager('${window.escapeHTML(String(f.id))}')" id="chat-folder-${window.escapeHTML(String(f.id))}" class="chat-folder-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all border border-slate-200 bg-white text-slate-600 flex items-center gap-1">
+                <span>${window.escapeHTML(String(f.icon || '📁'))}</span> ${window.escapeHTML(String(f.name || 'Thư mục'))}
+            </button>
+        `).join('');
+        this.switchFolder(this.currentTopic, {silent:true});
+    },
+    switchFolder(id, opts = {}) {
+        if(!opts.silent) window.vibrate?.(10);
+        this.currentTopic = String(id || 'all');
+        document.querySelectorAll('.chat-folder-btn').forEach(b => {
+            b.className = 'chat-folder-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all border border-slate-200 bg-white text-slate-600 flex items-center gap-1';
+            if (b.id === 'chat-folder-all') {
+                b.className = 'chat-folder-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border border-slate-200 bg-white text-slate-600';
+            }
+        });
+        const active = document.getElementById(`chat-folder-${this.currentTopic}`);
+        if (active) {
+            const f = (this.chatFolders || []).find(x => String(x.id) === String(this.currentTopic));
+            active.className = `chat-folder-btn active shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-md text-white flex items-center gap-1 ${f?.color || 'bg-slate-800'}`;
+        } else {
+            this.currentTopic = 'all';
+            const all = document.getElementById('chat-folder-all');
+            if(all) all.className = 'chat-folder-btn active shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-slate-800 text-white shadow-md';
+        }
+        this.render();
+    },
+    openFolderManager(id = null) {
+        window.vibrate?.(15);
+        const modal = document.getElementById('chat-folder-modal');
+        if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        const idEl = document.getElementById('folder-id');
+        const nameEl = document.getElementById('folder-name');
+        const iconEl = document.getElementById('folder-icon');
+        const delBtn = document.getElementById('folder-btn-delete');
+        const titleEl = document.getElementById('folder-modal-title');
+        if(id) {
+            const f = (this.chatFolders || []).find(x => String(x.id) === String(id));
+            if(f) {
+                if(idEl) idEl.value = f.id;
+                if(nameEl) nameEl.value = f.name;
+                if(iconEl) iconEl.value = f.icon;
+                this.selectFolderColor(f.color, document.querySelector(`button[onclick*="${f.color}"]`));
+                delBtn?.classList.remove('hidden');
+                if(titleEl) titleEl.textContent = 'Sửa Thư mục';
+            }
+        } else {
+            if(idEl) idEl.value = '';
+            if(nameEl) nameEl.value = '';
+            if(iconEl) iconEl.value = '📁';
+            this.selectFolderColor('bg-blue-500', document.querySelector('button[onclick*="bg-blue-500"]'));
+            delBtn?.classList.add('hidden');
+            if(titleEl) titleEl.textContent = 'Thư mục Mới';
+        }
+    },
+    closeFolderManager() {
+        const modal = document.getElementById('chat-folder-modal');
+        if(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    },
+    selectFolderColor(color, btn) {
+        const val = document.getElementById('folder-color-val');
+        if(val) val.value = color || 'bg-blue-500';
+        document.querySelectorAll('.folder-color-btn').forEach(b => {
+            b.classList.remove('border-slate-800', 'scale-110');
+            b.classList.add('border-transparent');
+        });
+        if(btn) {
+            btn.classList.remove('border-transparent');
+            btn.classList.add('border-slate-800', 'scale-110');
+        }
+    },
+    saveFolder() {
+        const id = document.getElementById('folder-id')?.value;
+        const name = document.getElementById('folder-name')?.value.trim();
+        const icon = document.getElementById('folder-icon')?.value.trim() || '📁';
+        const color = document.getElementById('folder-color-val')?.value || 'bg-blue-500';
+        if(!name) { window.showToast?.('Vui lòng nhập tên thư mục', 'ph-warning-circle'); return; }
+        if(id) {
+            const f = (this.chatFolders || []).find(x => String(x.id) === String(id));
+            if(f) { f.name = name; f.icon = icon; f.color = color; }
+            window.showToast?.('Đã cập nhật thư mục', 'ph-check-circle');
+        } else {
+            const newFolder = { id: 'folder_' + Date.now(), name, icon, color, createdAt: Date.now() };
+            this.chatFolders.push(newFolder);
+            this.currentTopic = newFolder.id;
+            window.showToast?.('Đã tạo thư mục', 'ph-folder-plus');
+        }
+        this.saveAndSync();
+        this.renderFolders();
+        this.closeFolderManager();
+    },
+    deleteFolder() {
+        const id = document.getElementById('folder-id')?.value;
+        if(!id) return;
+        window.chatHistory.forEach(m => { if(String(m.topic_id) === String(id)) delete m.topic_id; });
+        this.chatFolders = (this.chatFolders || []).filter(x => String(x.id) !== String(id));
+        if(String(this.currentTopic) === String(id)) this.currentTopic = 'all';
+        this.saveAndSync();
+        this.renderFolders();
+        window.showToast?.('Đã xóa thư mục (Giữ nguyên tin nhắn)', 'ph-trash');
+        this.closeFolderManager();
     },
     render() {
         const container = document.getElementById('chat-messages');
@@ -4998,9 +5363,13 @@ window.ChatEngine = {
         const profileKey = this.getKey();
         const messages = Array.isArray(window.chatHistory) ? window.chatHistory : [];
         const emptyHtml = `<div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-8"><div class="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-3"><i class="ph-duotone ph-chats-teardrop text-4xl text-primary"></i></div><div class="text-sm font-black text-slate-600">Chưa có tin nhắn</div><div class="text-xs font-semibold mt-1">Gửi lời nhắn hoặc file đầu tiên cho gia đình.</div></div>`;
-        const visibleMessages = messages.filter(m => !(m.isPrivate && String(m.sender || '') !== String(profileKey)));
-        if (!visibleMessages.length) { container.innerHTML = emptyHtml; return; }
-        container.innerHTML = visibleMessages.map(m => {
+        const filteredChat = messages.filter(m => {
+            if (m.isPrivate && String(m.sender || '') !== String(profileKey)) return false;
+            if (this.currentTopic !== 'all') return String(m.topic_id || '') === String(this.currentTopic);
+            return true;
+        });
+        if (!filteredChat.length) { container.innerHTML = emptyHtml; return; }
+        container.innerHTML = filteredChat.map(m => {
             const isMe = String(m.sender || '') === String(profileKey);
             const alignCls = isMe ? 'justify-end' : 'justify-start';
             const bubbleCls = isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm border border-slate-200';
@@ -5010,11 +5379,13 @@ window.ChatEngine = {
             const avatarHtml = `<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-lg shadow-sm shrink-0">${window.escapeHTML(String(senderProf.icon || '👤'))}</div>`;
             let contentHtml = '';
             if(m.type === 'text') {
-                contentHtml = `<p class="text-sm font-medium whitespace-pre-wrap break-words">${window.escapeHTML(String(m.text || ''))}</p>`;
+                contentHtml = `<p class="text-sm font-medium whitespace-pre-wrap break-words">${window.escapeHTML(String(m.text || ''))}</p>
+                               ${m.isEdited ? '<span class="text-[9px] text-slate-400 italic mt-1 block">(Đã chỉnh sửa)</span>' : ''}`;
             } else {
                 const elId = 'file-' + String(m.id).replace(/[^a-zA-Z0-9_-]/g, '_');
                 if(m.type === 'image') {
-                    contentHtml = `<img src="" id="${elId}" class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover pointer-events-none" alt="Photo">`;
+                    const imgMsgId = window.escapeHTML(String(m.id || ''));
+                    contentHtml = `<img src="" id="${elId}" onclick="event.stopPropagation(); window.ChatEngine.openLightbox('${imgMsgId}')" class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover cursor-pointer hover:brightness-95 transition" alt="Photo">`;
                 } else if(m.type === 'video') {
                     contentHtml = `<video src="" id="${elId}" controls class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover"></video>`;
                 } else if(m.type === 'audio') {
@@ -9215,7 +9586,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 
     getNextCopyTitle(sourceTitle, data){
       const base = String(sourceTitle || "Nhiệm vụ").trim();
-      const escaped = base.replace(/[.*+?^${}()|[\]\]/g, "\$&");
+      const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\$&");
       const re = new RegExp("^" + escaped + "_copy(\d+)$", "i");
       let max = 0;
       (data || []).forEach(t => {
@@ -9445,5 +9816,38 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   };
 })();
 </script>
+
+<div id="chat-folder-modal" class="hidden fixed inset-0 z-[9999999] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-scaleIn flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+            <h2 id="folder-modal-title" class="text-lg font-black text-slate-800">Quản lý Thư mục</h2>
+            <button onclick="window.ChatEngine.closeFolderManager()" class="p-2 text-slate-400 hover:text-rose-500 active:scale-90" aria-label="Đóng quản lý thư mục"><i class="ph-bold ph-x text-xl pointer-events-none"></i></button>
+        </div>
+        <input type="hidden" id="folder-id">
+        <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Icon (1 Emoji) & Tên Thư mục</label>
+            <div class="flex gap-2">
+                <input type="text" id="folder-icon" maxlength="2" placeholder="📁" class="w-14 text-center bg-slate-50 border border-slate-200 rounded-xl font-bold text-lg outline-none focus:border-primary">
+                <input type="text" id="folder-name" placeholder="Ví dụ: Du lịch hè..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-primary">
+            </div>
+        </div>
+        <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Màu sắc</label>
+            <div class="flex justify-between" id="folder-colors">
+                <button type="button" onclick="window.ChatEngine.selectFolderColor('bg-blue-500', this)" class="w-8 h-8 rounded-full bg-blue-500 border-2 border-transparent hover:scale-110 transition folder-color-btn active" aria-label="Màu xanh dương"></button>
+                <button type="button" onclick="window.ChatEngine.selectFolderColor('bg-rose-500', this)" class="w-8 h-8 rounded-full bg-rose-500 border-2 border-transparent hover:scale-110 transition folder-color-btn" aria-label="Màu hồng"></button>
+                <button type="button" onclick="window.ChatEngine.selectFolderColor('bg-emerald-500', this)" class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-transparent hover:scale-110 transition folder-color-btn" aria-label="Màu xanh lá"></button>
+                <button type="button" onclick="window.ChatEngine.selectFolderColor('bg-amber-500', this)" class="w-8 h-8 rounded-full bg-amber-500 border-2 border-transparent hover:scale-110 transition folder-color-btn" aria-label="Màu vàng"></button>
+                <button type="button" onclick="window.ChatEngine.selectFolderColor('bg-purple-500', this)" class="w-8 h-8 rounded-full bg-purple-500 border-2 border-transparent hover:scale-110 transition folder-color-btn" aria-label="Màu tím"></button>
+            </div>
+            <input type="hidden" id="folder-color-val" value="bg-blue-500">
+        </div>
+        <div class="flex gap-2 mt-2">
+            <button type="button" id="folder-btn-delete" onclick="window.ChatEngine.deleteFolder()" class="hidden px-4 py-3 bg-rose-100 text-rose-600 font-bold rounded-xl active:scale-95" title="Xóa thư mục"><i class="ph-bold ph-trash pointer-events-none"></i></button>
+            <button type="button" onclick="window.ChatEngine.saveFolder()" class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg active:scale-95 transition hover:brightness-110">Lưu Thư Mục</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
