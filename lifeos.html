@@ -36,6 +36,24 @@
 }
 .weather-daily-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
 
+/* PHA 21: Weather AI Summary Banner */
+.weather-ai-summary {
+  margin: 8px 0 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff4bf;
+  border: 1px solid #f6d26b;
+  color: #6b3b00;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500; /* Hạ font-weight xuống một chút để chữ dài dễ đọc hơn */
+  min-height: 60px; /* Đảm bảo khung không bị teo nhỏ khi rỗng */
+  transition: all 0.3s ease;
+}
+.weather-ai-summary.hidden {
+  display: none !important;
+}
+
 :root, [data-theme="light"] { --lifeos-bottom-nav-h: 72px; --c-primary: #6366f1; --c-hover: #4f46e5; --c-bg: #f8fafc; --c-card: #ffffff; --c-sub: #f1f5f9; --c-border: #e2e8f0; --c-text: #0f172a; --c-mut: #64748b; }
 [data-theme="lemon"] { --c-primary: #84cc16; --c-hover: #65a30d; --c-bg: #fefce8; --c-card: #ffffff; --c-sub: #fef9c3; --c-border: #fef08a; --c-text: #3f6212; --c-mut: #65a30d; }
 [data-theme="orange"] { --c-primary: #f97316; --c-hover: #ea580c; --c-bg: #fff7ed; --c-card: #ffffff; --c-sub: #ffedd5; --c-border: #fed7aa; --c-text: #7c2d12; --c-mut: #c2410c; }
@@ -3512,6 +3530,24 @@ body.music-player-active #mini-player {
             </div>
         </div>
 
+        <div class="mt-5 border-t border-slate-100 pt-5">
+            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 mb-3"><i class="ph-bold ph-clock text-sky-500 text-sm"></i> Dự báo 24 giờ tới</div>
+            <div id="weather-ai-summary" class="weather-ai-summary flex flex-col gap-2 hidden">
+                <div class="flex items-start gap-2">
+                    <i class="ph-fill ph-magic-wand text-amber-600 text-lg shrink-0 mt-0.5" id="weather-ai-icon"></i>
+                    <span id="weather-ai-text" class="flex-grow">Đang phân tích...</span>
+                </div>
+                <div id="weather-ai-progress-wrap" class="hidden w-full bg-amber-200/50 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div id="weather-ai-progress-bar" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-end">
+                    <button id="weather-ai-btn" type="button" onclick="window.WeatherAIEngine.activateNanoUI()" class="hidden text-[10px] font-bold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg active:scale-95 border border-amber-300 shadow-sm hover:brightness-95 transition flex items-center gap-1"><i class="ph-bold ph-download-simple text-sm"></i> Kích hoạt AI Thời tiết</button>
+                </div>
+            </div>
+            <div id="weather-hourly-list" class="flex gap-2.5 overflow-x-auto hide-scrollbar custom-scroll-area pb-2 snap-x">
+                </div>
+        </div>
+
         <div class="mt-6 border-t border-slate-100 pt-5">
              <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 mb-3"><i class="ph-bold ph-calendar-dots text-primary text-sm"></i> Dự báo 5 ngày tới</div>
              <div id="weather-daily-list" class="flex gap-3 overflow-x-auto hide-scrollbar custom-scroll-area pb-2 snap-x">
@@ -5827,14 +5863,76 @@ window.testWeatherSources=async function(){const results={};for(const key of Obj
 
 window.WEATHER_CACHE_TTL_MS=20*60*1000;
 window.weatherState={selected:'hanoi',loading:false,lastData:null};
-window.weatherApiUrl=function(loc){return `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Asia%2FBangkok&forecast_days=5`};
+window.weatherApiUrl=function(loc){
+    return `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Asia%2FBangkok&forecast_days=5`;
+};
 window.weatherCodeToText=function(code){code=Number(code);if(code===0)return'Trời quang';if([1,2,3].includes(code))return code===1?'Ít mây':'Nhiều mây';if([45,48].includes(code))return'Sương mù';if([51,53,55].includes(code))return'Mưa phùn';if([61,63,65].includes(code))return'Mưa';if([66,67].includes(code))return'Mưa đóng băng';if([71,73,75].includes(code))return'Tuyết';if([80,81,82].includes(code))return'Mưa rào';if(code===95)return'Dông';if([96,99].includes(code))return'Dông kèm mưa đá';return'Theo dữ liệu hiện tại'};
 window.weatherCodeToIcon=function(code){code=Number(code);if(code===0)return'ph-sun';if([1,2].includes(code))return'ph-cloud-sun';if(code===3)return'ph-cloud';if([45,48].includes(code))return'ph-cloud-fog';if([51,53,55,61,63,65,66,67,80,81,82].includes(code))return'ph-cloud-rain';if([95,96,99].includes(code))return'ph-cloud-lightning';return'ph-cloud-sun'};
 window.weatherFmtNum=function(v,d=1){const n=Number(v);return Number.isFinite(n)?n.toFixed(d).replace(/\.0$/,''):'--'};
 window.weatherFmtDate=function(s){try{const d=new Date(s+'T00:00:00');return `${window.formatDate2(d.getDate())}/${window.formatDate2(d.getMonth()+1)}`}catch(e){return s||'--'}};
 window.getWeatherCache=function(locationKey){try{const raw=localStorage.getItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey));if(!raw)return null;const obj=JSON.parse(raw);return obj&&obj.data?obj:null}catch(e){console.warn('[WEATHER CACHE READ FAIL]',locationKey,e);return null}};
 window.setWeatherCache=function(locationKey,data){try{localStorage.setItem(window.WEATHER_CACHE_KEYS?.[locationKey]||('lifeos_weather_cache_'+locationKey),JSON.stringify({savedAt:Date.now(),data}))}catch(e){console.warn('[WEATHER CACHE WRITE FAIL]',locationKey,e)}};
-window.normalizeOpenMeteoWeather=function(raw,location){const c=raw?.current||{};const d=raw?.daily||{};const len=Array.isArray(d.time)?Math.min(d.time.length,5):0;const daily=[];for(let i=0;i<len;i++){daily.push({date:d.time?.[i],code:d.weather_code?.[i],tempMax:d.temperature_2m_max?.[i],tempMin:d.temperature_2m_min?.[i],precipSum:d.precipitation_sum?.[i],precipProb:d.precipitation_probability_max?.[i],text:window.weatherCodeToText(d.weather_code?.[i]),icon:window.weatherCodeToIcon(d.weather_code?.[i])})}return{source:'open-meteo',fetchedAt:Date.now(),location:{...location},current:{time:c.time,temperature:c.temperature_2m,apparent:c.apparent_temperature,humidity:c.relative_humidity_2m,wind:c.wind_speed_10m,precipitation:c.precipitation,rain:c.rain,code:c.weather_code,text:window.weatherCodeToText(c.weather_code),icon:window.weatherCodeToIcon(c.weather_code)},daily,raw}};
+window.normalizeOpenMeteoWeather=function(raw,location){
+    const c=raw?.current||{};
+    const d=raw?.daily||{};
+    const len=Array.isArray(d.time)?Math.min(d.time.length,5):0;
+    const daily=[];
+    for(let i=0;i<len;i++){
+        daily.push({
+            date:d.time?.[i],
+            code:d.weather_code?.[i],
+            tempMax:d.temperature_2m_max?.[i],
+            tempMin:d.temperature_2m_min?.[i],
+            precipSum:d.precipitation_sum?.[i],
+            precipProb:d.precipitation_probability_max?.[i],
+            text:window.weatherCodeToText(d.weather_code?.[i]),
+            icon:window.weatherCodeToIcon(d.weather_code?.[i])
+        });
+    }
+
+    const h = raw?.hourly || {};
+    const hourly = [];
+    if(Array.isArray(h.time)) {
+        const now = new Date();
+        const currentIsoHour = now.getFullYear() + '-' +
+                               String(now.getMonth()+1).padStart(2,'0') + '-' +
+                               String(now.getDate()).padStart(2,'0') + 'T' +
+                               String(now.getHours()).padStart(2,'0') + ':00';
+
+        let startIndex = h.time.findIndex(t => t >= currentIsoHour);
+        if(startIndex === -1) startIndex = 0;
+
+        for(let i = startIndex; i < startIndex + 24 && i < h.time.length; i++) {
+            hourly.push({
+                time: h.time[i],
+                temp: h.temperature_2m?.[i],
+                precipProb: h.precipitation_probability?.[i],
+                icon: window.weatherCodeToIcon(h.weather_code?.[i])
+            });
+        }
+    }
+
+    return{
+        source:'open-meteo',
+        fetchedAt:Date.now(),
+        location:{...location},
+        current:{
+            time:c.time,
+            temperature:c.temperature_2m,
+            apparent:c.apparent_temperature,
+            humidity:c.relative_humidity_2m,
+            wind:c.wind_speed_10m,
+            precipitation:c.precipitation,
+            rain:c.rain,
+            code:c.weather_code,
+            text:window.weatherCodeToText(c.weather_code),
+            icon:window.weatherCodeToIcon(c.weather_code)
+        },
+        daily,
+        hourly,
+        raw
+    };
+};
 window.setWeatherStatus=function(msg,type='info'){
     const box=el('weather-status');
     if(!box)return;
@@ -5877,19 +5975,498 @@ window.renderWeather=function(data,opts={}){
 
     window.setWeatherStatus(opts.fromCache?'Đang hiển thị dữ liệu lưu tạm. Cần mạng để làm mới.': '', opts.fromCache?'warn':'hidden');
 
+    const hourlyList = el('weather-hourly-list');
+    if(hourlyList && data.hourly) {
+        hourlyList.innerHTML = data.hourly.map((x, i) => {
+            const timeStr = String(x.time||'').split('T')[1] || '--:--';
+            const rainProb = Number(x.precipProb || 0);
+            const probStr = rainProb > 0
+                ? `<div class="text-[10px] font-bold text-sky-500 mt-1 flex items-center justify-center gap-0.5"><i class="ph-bold ph-drop"></i>${window.weatherFmtNum(rainProb,0)}%</div>`
+                : `<div class="text-[10px] font-bold text-transparent mt-1">-</div>`;
+
+            // Highlight giờ hiện tại (index === 0)
+            const isCurrent = i === 0;
+            const cardCls = isCurrent
+                ? 'bg-primary/5 border-primary ring-2 ring-primary/30 hourly-current'
+                : 'bg-slate-50 border-slate-100';
+            const timeCls = isCurrent ? 'text-primary' : 'text-slate-500';
+
+            return `
+                <div class="flex-shrink-0 flex flex-col items-center justify-center border rounded-[1.25rem] p-3 w-[72px] snap-start hover:shadow-md transition-shadow ${cardCls}">
+                    <div class="text-[11px] font-bold mb-1 ${timeCls}">${isCurrent ? 'Bây giờ' : timeStr}</div>
+                    <i class="ph-fill ${x.icon || 'ph-cloud'} text-[26px] ${isCurrent ? 'text-primary' : 'text-sky-500'} my-1 drop-shadow-sm"></i>
+                    <div class="text-[13px] font-black text-slate-800">${window.weatherFmtNum(x.temp,0)}°</div>
+                    ${probStr}
+                </div>
+            `;
+        }).join('');
+
+        // Kích hoạt AI Summary
+        if(window.WeatherAIEngine) window.WeatherAIEngine.analyze(data);
+
+        // Auto Scroll để đưa thẻ hiện tại vào tầm nhìn
+        setTimeout(() => {
+            const currentCard = hourlyList.querySelector('.hourly-current');
+            if (currentCard && hourlyList) {
+                const scrollLeft = currentCard.offsetLeft - 16;
+                hourlyList.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+            }
+        }, 150);
+    }
+
     const list=el('weather-daily-list');
     if(list){
-        list.innerHTML=(data.daily||[]).slice(0,5).map(x=>`
-            <div class="weather-daily-card">
-                <div class="text-[11px] font-black text-slate-500 mb-1">${window.weatherFmtDate(x.date)}</div>
+        const todayIso = window.getIsoDate();
+        list.innerHTML=(data.daily||[]).slice(0,5).map(x=> {
+            const isToday = x.date === todayIso;
+            const dateLabel = isToday ? '<span class="text-rose-600 font-black tracking-wide">Hôm nay</span>' : window.weatherFmtDate(x.date);
+            const cardBg = isToday ? 'bg-rose-50/50 border-rose-200 shadow-sm' : 'bg-white border-slate-100';
+            
+            return `
+            <div class="weather-daily-card ${cardBg} border">
+                <div class="text-[11px] font-black text-slate-500 mb-1">${dateLabel}</div>
                 <i class="ph-fill ${x.icon||'ph-cloud-sun'} text-[32px] text-sky-500 my-2 drop-shadow-sm"></i>
                 <div class="text-[10px] font-bold text-slate-500 leading-tight min-h-[28px] flex items-center text-center">${x.text||'--'}</div>
                 <div class="text-sm font-black text-slate-800 mt-2">${window.weatherFmtNum(x.tempMax,0)}° <span class="text-xs font-bold text-slate-400">/ ${window.weatherFmtNum(x.tempMin,0)}°</span></div>
                 <div class="text-[10px] font-bold text-sky-500 mt-1.5 bg-sky-50 px-2 py-0.5 rounded-md w-full text-center"><i class="ph-bold ph-drop"></i> ${x.precipProb!=null?window.weatherFmtNum(x.precipProb,0)+'%':window.weatherFmtNum(x.precipSum)+' mm'}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 };
+window.WeatherAIEngine = {
+    nanoSession: null,
+    nanoReady: localStorage.getItem("lifeos_weather_nano_ready") === "1",
+    currentWData: null,
+    isStreaming: false,
+    currentRequestId: 0,
+
+    getFallback(w) {
+        if (!w || typeof w !== 'object') return "Đang nạp dữ liệu thời tiết...";
+        const feelsLike = Number(w.feelsLike ?? w.temp ?? 0);
+        const humidity = Number(w.humidity ?? 0);
+        const rain = Number(w.rain ?? 0);
+        const fc24h = String(w.fc24hLocked || "Không thấy mốc mưa đáng chú ý trong 24 giờ tới.");
+        if (!Number.isFinite(feelsLike) && !Number.isFinite(humidity) && !Number.isFinite(rain)) return "Đang nạp dữ liệu thời tiết...";
+
+        let currentLine = "Dữ liệu hiện tại đang được cập nhật.";
+        if (Number.isFinite(feelsLike) && feelsLike >= 38) {
+            currentLine = `Cảm giác ngoài trời khoảng ${Math.round(feelsLike)}°C, nền nhiệt và độ ẩm cao dễ tạo cảm giác oi bức.`;
+        } else if (Number.isFinite(humidity) && humidity >= 75) {
+            currentLine = `Độ ẩm khoảng ${Math.round(humidity)}%, không khí dễ nặng và bí hơn so với nhiệt độ thực tế.`;
+        } else if (Number.isFinite(rain) && rain > 0) {
+            currentLine = `Khu vực đang có dấu hiệu mưa hoặc ẩm ướt, mặt đường có thể trơn và tầm nhìn giảm.`;
+        } else if (Number.isFinite(w.temp)) {
+            currentLine = `Nhiệt độ hiện tại khoảng ${Math.round(Number(w.temp))}°C, các chỉ số đang ở mức tương đối ổn định.`;
+        }
+
+        let adviceLine = "Sinh hoạt bình thường, nhưng vẫn nên theo dõi thời tiết trước khi ra ngoài.";
+        if (Number.isFinite(feelsLike) && feelsLike >= 38) adviceLine = "Ưu tiên uống đủ nước, đội mũ và hạn chế đứng lâu ngoài nắng.";
+        else if (Number.isFinite(rain) && rain > 0) adviceLine = "Nên chuẩn bị ô hoặc áo mưa và đi chậm khi di chuyển.";
+        else if (/mưa đáng chú ý/i.test(fc24h)) adviceLine = "Nên mang theo đồ che mưa nếu phải ra ngoài trong các khung giờ được báo.";
+        else if (Number.isFinite(humidity) && humidity >= 75) adviceLine = "Nên mặc đồ thoáng, giữ phòng thông gió và tránh vận động quá sức.";
+
+        return this.composeWeatherFinalText(w, currentLine, adviceLine);
+    },    cleanText(text) {
+        return String(text || "")
+            .replace(/<br\s*\/?>/gi, "\n")
+            .replace(/\r/g, "")
+            .replace(/^\s*["'“”*]+|["'“”*]+\s*$/g, "")
+            .trim();
+    },    normalizeNanoStatus(status) {
+        return ['readily', 'available', 'downloadable', 'downloading'].includes(String(status || '').toLowerCase());
+    },
+
+    formatWeatherHour(timeValue) {
+        const d = new Date(timeValue);
+        if (Number.isNaN(d.getTime())) {
+            const raw = String(timeValue || '').split('T')[1] || '';
+            return raw.slice(0, 5) || '--:--';
+        }
+        return String(d.getHours()).padStart(2, '0') + ':00';
+    },
+
+    validateNanoLine(line) {
+        const s = String(line || '').trim();
+        if (!s) return '';
+        const banned = /(\b\d{1,2}:\d{2}\b|\b\d{1,2}h\b|mưa\s+lúc|mưa\s+kết\s+thúc|dự\s+kiến\s+mưa|24\s*giờ\s*tới|5\s*ngày\s*tới|ngày\s+tới|khung\s+giờ)/i;
+        if (banned.test(s)) return '';
+        return s;
+    },
+
+    weatherLineFallback(w, kind) {
+        const data = (w && typeof w === 'object') ? w : {};
+        const temp = Number(data.temp);
+        const feelsLike = Number(data.feelsLike);
+        const humidity = Number(data.humidity);
+        const rain = Number(data.rain);
+        const wind = Number(data.wind);
+        const heatGap = Number.isFinite(temp) && Number.isFinite(feelsLike) ? (feelsLike - temp) : 0;
+        const fc24h = String(data.fc24hLocked || '');
+        const hasFutureRain = Array.isArray(data.rainHoursFuture) && data.rainHoursFuture.length > 0;
+
+        if (kind === 'advice') {
+            if (Number.isFinite(feelsLike) && feelsLike >= 38) return 'Ra ngoài nên mang nước, đội mũ và tránh đứng lâu dưới nắng; người già và trẻ nhỏ nên nghỉ ở nơi thoáng, uống nước đều.';
+            if (Number.isFinite(rain) && rain > 0) return 'Nên đi chậm, chọn giày dép chống trơn và chuẩn bị đồ che mưa trước khi ra ngoài.';
+            if (hasFutureRain || /Có mưa đáng chú ý/i.test(fc24h)) return 'Nếu phải ra ngoài, nên để sẵn ô hoặc áo mưa trong túi để chủ động khi thời tiết đổi nhanh.';
+            if (Number.isFinite(humidity) && humidity >= 75) return 'Nên mặc đồ thoáng, mở cửa hoặc bật quạt để thông gió; người già và trẻ nhỏ nên uống nước từng ngụm đều trong ngày.';
+            if (Number.isFinite(wind) && wind >= 25) return 'Khi đi đường nên giữ chắc mũ áo, hạn chế dừng lâu ở nơi trống gió.';
+            return 'Sinh hoạt có thể diễn ra bình thường; vẫn nên chuẩn bị nước uống và giữ nhịp nghỉ hợp lý khi ra ngoài.';
+        }
+
+        if (Number.isFinite(temp) && Number.isFinite(feelsLike) && heatGap >= 3) {
+            return `Nhiệt độ đo được khoảng ${Math.round(temp)}°C nhưng cơ thể cảm nhận tới ${Math.round(feelsLike)}°C, vì độ ẩm làm mồ hôi bay hơi chậm và khả năng thoát nhiệt kém hơn.`;
+        }
+        if (Number.isFinite(feelsLike) && feelsLike >= 38) return `Cảm giác ngoài trời khoảng ${Math.round(feelsLike)}°C, cơ thể dễ mất nước vì thoát nhiệt kém và nhanh mệt nếu di chuyển lâu.`;
+        if (Number.isFinite(humidity) && humidity >= 75) return `Độ ẩm khoảng ${Math.round(humidity)}%, mồ hôi bay hơi chậm nên cơ thể thoát nhiệt kém và dễ thấy oi bí hơn.`;
+        if (Number.isFinite(rain) && rain > 0) return 'Khu vực đang có mưa hoặc ẩm ướt, mặt đường có thể trơn và tầm nhìn giảm nhẹ.';
+        if (Number.isFinite(temp)) return `Nhiệt độ hiện tại khoảng ${Math.round(temp)}°C, các chỉ số nhìn chung khá dễ chịu cho sinh hoạt.`;
+        return 'Dữ liệu hiện tại đang được cập nhật.';
+    },
+
+    parseNanoWeatherLines(rawText) {
+        const out = {};
+        const raw = String(rawText || '').replace(/\r/g, '\n');
+        raw.split(/\n+/).forEach(line => {
+            const m = line.match(/^\s*(HIEN_TAI|LOI_KHUYEN)\s*=\s*(.+?)\s*$/i);
+            if (!m) return;
+            const key = m[1].toUpperCase();
+            const val = this.validateNanoLine(this.cleanText(m[2]));
+            if (!val) return;
+            if (key === 'HIEN_TAI') out.current = val;
+            if (key === 'LOI_KHUYEN') out.advice = val;
+        });
+        return out;
+    },
+
+    composeWeatherFinalText(w, currentLine, adviceLine) {
+        const data = (w && typeof w === 'object') ? w : {};
+        const current = this.validateNanoLine(currentLine) || this.weatherLineFallback(data, 'current');
+        const advice = this.validateNanoLine(adviceLine) || this.weatherLineFallback(data, 'advice');
+        const fc24h = String(data.fc24hLocked || 'Không thấy mốc mưa đáng chú ý trong 24 giờ tới.').replace(/^\s*24\s*giờ\s*tới\s*[:：-]?\s*/i, '').trim();
+        const fc5d = String(data.fc5dLocked || 'thời tiết tương đối ổn định.').replace(/^\s*5\s*ngày\s*tới\s*[:：-]?\s*/i, '').trim();
+        return [
+            `Hiện tại: ${current}`,
+            `24 giờ tới: ${fc24h}`,
+            `5 ngày tới: ${fc5d}`,
+            `Lời khuyên: ${advice}`
+        ].join('\n');
+    },
+
+    renderWeatherAIText(text) {
+        const normalized = String(text || 'Đang nạp dữ liệu thời tiết...')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/\r/g, '\n');
+        const safeHTML = (window.escapeHTML ? window.escapeHTML(normalized) : normalized.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])))
+            .replace(/\n/g, '<br/>');
+        return `<span class="text-amber-900">${safeHTML}</span>`;
+    },
+
+    async createVietnameseNanoSession(options = {}) {
+        const monitor = options.monitor;
+        const candidates = [
+            { expectedInputs: [{ type: 'text', languages: ['vi'] }], expectedOutputs: [{ type: 'text', languages: ['vi'] }], monitor },
+            { expectedOutputLanguages: ['vi'], monitor },
+            { outputLanguage: 'vi', monitor },
+            { monitor }
+        ];
+        let lastError = null;
+        for (const cfg of candidates) {
+            try {
+                const cleanCfg = {};
+                Object.keys(cfg).forEach(k => { if (cfg[k] !== undefined) cleanCfg[k] = cfg[k]; });
+                return await window.LanguageModel.create(cleanCfg);
+            } catch(e) {
+                lastError = e;
+            }
+        }
+        throw lastError || new Error('Không tạo được phiên LanguageModel');
+    },
+
+    async activateNanoUI() {
+        window.vibrate?.(10);
+        const btn = document.getElementById('weather-ai-btn');
+        const progWrap = document.getElementById('weather-ai-progress-wrap');
+        const progBar = document.getElementById('weather-ai-progress-bar');
+        const textEl = document.getElementById('weather-ai-text');
+
+        if (!window.LanguageModel) {
+            window.showToast?.("Chrome trên thiết bị này chưa mở Prompt API", "ph-warning-circle");
+            return;
+        }
+
+        if(btn) btn.style.display = 'none';
+        if(progWrap) progWrap.classList.remove('hidden');
+
+        try {
+            const availability = await window.LanguageModel.availability();
+            if (availability === "unavailable") {
+                if(textEl) textEl.innerHTML = `<span class="text-rose-600">Thiết bị không hỗ trợ Gemini Nano. Đang dùng bản tiêu chuẩn.</span>`;
+                if(progWrap) progWrap.classList.add('hidden');
+                return;
+            }
+
+            this.nanoSession = await this.createVietnameseNanoSession({
+                monitor(m) {
+                    m.addEventListener("downloadprogress", (e) => {
+                        const percent = Math.round((e.loaded / (e.total || 1)) * 100);
+                        if(progBar) progBar.style.width = `${percent}%`;
+                        if(textEl) textEl.innerHTML = `<span class="opacity-50 line-through mr-1 text-[11px] block mb-1">${window.WeatherAIEngine.getFallback(window.WeatherAIEngine.currentWData)}</span><span class="text-amber-700">Đang nạp Model AI: ${percent}%... (Lần sau sẽ rất nhanh)</span>`;
+                    });
+                }
+            });
+
+            this.nanoReady = true;
+            localStorage.setItem("lifeos_weather_nano_ready", "1");
+            if(progWrap) progWrap.classList.add('hidden');
+
+            if (this.currentWData) {
+                this.currentRequestId = Number(this.currentRequestId) || 0;
+                this.generateAIText(this.currentWData, this.currentRequestId);
+            }
+
+        } catch(e) {
+            console.warn('[Weather AI Activate]', e);
+            if(textEl) textEl.innerHTML = this.renderWeatherAIText(this.getFallback(this.currentWData));
+            if(progWrap) progWrap.classList.add('hidden');
+            if(btn) btn.style.display = 'flex'; 
+        }
+    },    async generateAIText(wData, reqId) {
+        const textEl = document.getElementById('weather-ai-text');
+        const iconEl = document.getElementById('weather-ai-icon');
+        const fallbackText = this.getFallback(wData);
+
+        if (reqId == null) reqId = this.currentRequestId;
+        if (!textEl) return;
+
+        if (!this.nanoSession || !this.nanoReady) {
+            textEl.innerHTML = this.renderWeatherAIText(fallbackText);
+            return;
+        }
+
+        this.isStreaming = true;
+
+        try {
+            if (this.currentRequestId !== reqId) return;
+            if(iconEl) iconEl.classList.add('animate-spin');
+            textEl.style.opacity = 1;
+            textEl.innerHTML = `<span class="text-amber-600 animate-pulse font-bold">Đang làm mềm câu hiện tại và lời khuyên...</span>`;
+
+            const temp = Number(wData.temp || 0);
+            const feelsLike = Number(wData.feelsLike || 0);
+            const heatGap = Math.round(feelsLike - temp);
+            const hasFutureRain = Array.isArray(wData.rainHoursFuture) && wData.rainHoursFuture.length > 0;
+
+            const prompt = `Bạn là một CHUYÊN GIA KHÍ TƯỢNG THỰC TẾ VÀ TẬN TÂM cho gia đình Việt Nam.
+Nhiệm vụ: viết tiếng Việt tự nhiên, có chiều sâu khoa học, nhưng vẫn gần gũi, dễ hiểu.
+Không nói như máy đọc số. Không hù dọa. Không phóng đại.
+
+Chỉ trả về đúng 2 dòng theo format khóa dưới đây:
+HIEN_TAI=...
+LOI_KHUYEN=...
+
+QUY TẮC BẮT BUỘC:
+- Không chào hỏi.
+- Không dùng markdown.
+- Không viết phần "24 giờ tới".
+- Không viết phần "5 ngày tới".
+- Không nhắc mốc giờ mưa.
+- Không bịa giờ.
+- Không dùng cụm "mưa lúc", "mưa kết thúc", "dự kiến mưa", "khung giờ".
+- HIEN_TAI viết 1-2 câu, giải thích CƠ CHẾ gây cảm giác hiện tại.
+- LOI_KHUYEN viết 1-2 câu, là lời khuyên sinh hoạt cụ thể, có tâm, dùng được ngay.
+- Nếu trời nóng/oi: ưu tiên giải thích bằng “độ ẩm cao làm mồ hôi bay hơi chậm, cơ thể thoát nhiệt kém, chỉ số nhiệt/cảm giác nóng tăng”.
+- Nếu cảm giác cao hơn nhiệt độ thực: phải nêu rõ vì sao cơ thể cảm thấy nóng hơn số đo.
+- Nếu gió yếu: có thể nói “không khí ít lưu thông làm cảm giác bí hơn”.
+- Nếu có mưa hiện tại: nói về mặt đường trơn, tầm nhìn, độ ẩm, không tự dự báo thêm.
+- Không bắt buộc dùng thuật ngữ phức tạp. Chỉ dùng thuật ngữ khi đúng ngữ cảnh.
+- Tránh dùng “hiệu ứng nhà kính” nếu chỉ đang giải thích cảm giác oi nóng của cơ thể; ưu tiên “bay hơi mồ hôi”, “thoát nhiệt”, “chỉ số nhiệt”, “độ ẩm cao”.
+
+Dữ liệu thực tế:
+- Địa điểm: ${wData.location}
+- Thời gian hiện tại: ${wData.nowHour}
+- Nhiệt độ đo được: ${wData.temp}°C
+- Nhiệt độ cơ thể cảm nhận: ${wData.feelsLike}°C
+- Độ chênh cảm giác: ${heatGap}°C
+- Độ ẩm không khí: ${wData.humidity}%
+- Tốc độ gió: ${wData.wind} km/h
+- Lượng mưa hiện tại: ${wData.rain} mm
+- Có mưa tương lai hay không: ${hasFutureRain ? 'Có' : 'Không'}
+
+Ví dụ phong cách đúng:
+HIEN_TAI=Cảm giác nóng cao hơn nhiệt độ đo vì độ ẩm làm mồ hôi bay hơi chậm, cơ thể thoát nhiệt kém nên dễ thấy oi và mệt hơn.
+LOI_KHUYEN=Ra ngoài nên mang nước, đội mũ và tránh đứng lâu dưới nắng; người già và trẻ nhỏ nên nghỉ nơi thoáng, uống nước đều.
+
+Trả về đúng 2 dòng khóa, không thêm dòng thứ ba.`;
+
+            if (this.currentRequestId !== reqId) return;
+
+            let rawText = "";
+            if (typeof this.nanoSession.prompt === 'function') {
+                rawText = await this.nanoSession.prompt(prompt);
+            } else if (typeof this.nanoSession.promptStreaming === 'function') {
+                const stream = await this.nanoSession.promptStreaming(prompt);
+                for await (const chunk of stream) {
+                    if (this.currentRequestId !== reqId) return;
+                    const piece = String(chunk || "");
+                    if (rawText && piece.startsWith(rawText)) rawText = piece;
+                    else rawText += piece;
+                }
+            } else {
+                throw new Error('LanguageModel session has no prompt method');
+            }
+
+            if (this.currentRequestId !== reqId) return;
+
+            const parsed = this.parseNanoWeatherLines(rawText);
+            const currentLine = parsed.current || this.weatherLineFallback(wData, 'current');
+            const adviceLine = parsed.advice || this.weatherLineFallback(wData, 'advice');
+            const finalText = this.composeWeatherFinalText(wData, currentLine, adviceLine);
+
+            if (this.currentRequestId !== reqId) return;
+            textEl.innerHTML = this.renderWeatherAIText(finalText);
+            if(iconEl) iconEl.classList.remove('animate-spin');
+
+            if (this._ttsTimeout) clearTimeout(this._ttsTimeout);
+            this._ttsTimeout = setTimeout(() => {
+                if (this.currentRequestId !== reqId) return;
+                if (window.soundEnabled && window.ttsActive && !window.isAlarmRinging) {
+                    if(window.synth) window.synth.cancel();
+                    window.playSpeechTTS(finalText.replace(/\n+/g, '. '));
+                }
+            }, 600);
+
+        } catch(e) {
+            console.warn('[Weather AI Data-Locked Renderer]', e);
+            if (this.currentRequestId === reqId && textEl) textEl.innerHTML = this.renderWeatherAIText(fallbackText);
+            if(iconEl) iconEl.classList.remove('animate-spin');
+        } finally {
+            if (this.currentRequestId === reqId) this.isStreaming = false;
+        }
+    },
+
+    analyze: async function(data) {
+        const box = document.getElementById('weather-ai-summary');
+        const textEl = document.getElementById('weather-ai-text');
+        const btn = document.getElementById('weather-ai-btn');
+        const progWrap = document.getElementById('weather-ai-progress-wrap');
+
+        if(!box || !textEl || !data) return;
+
+        this.currentRequestId = (Number(this.currentRequestId) || 0) + 1;
+        const reqId = this.currentRequestId;
+
+        box.classList.remove('hidden');
+        if(progWrap) progWrap.classList.add('hidden');
+
+        const now = new Date();
+        const cutoff24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const nowHourStr = String(now.getHours()).padStart(2, '0') + "h" + String(now.getMinutes()).padStart(2, '0');
+
+        let maxTemp = -99;
+        const rainHoursFuture = [];
+        const hourlyRows = [];
+
+        if(Array.isArray(data.hourly)) {
+            data.hourly.forEach(h => {
+                const hTime = new Date(h.time);
+                if (Number.isNaN(hTime.getTime())) return;
+                if (hTime <= now || hTime > cutoff24h) return;
+
+                hourlyRows.push(h);
+                const tempVal = Number(h.temp);
+                if (!Number.isNaN(tempVal) && tempVal > maxTemp) maxTemp = tempVal;
+
+                const p = Number(h.precipProb || 0);
+                if (p >= 30 && rainHoursFuture.length < 5) {
+                    const timeStr = this.formatWeatherHour(h.time);
+                    if(!rainHoursFuture.includes(timeStr)) rainHoursFuture.push(timeStr);
+                }
+            });
+        }
+
+        const dailyRows = Array.isArray(data.daily) ? data.daily.slice(0, 5) : [];
+        let rainDays = 0;
+        let next5DaysMaxTemp = -99;
+        dailyRows.forEach(d => {
+            const tMax = Number(d.tempMax);
+            if(!Number.isNaN(tMax) && tMax > next5DaysMaxTemp) next5DaysMaxTemp = tMax;
+            const p = Number(d.precipProb || 0);
+            const sum = Number(d.precipSum || 0);
+            if(p > 40 || sum > 2) rainDays++;
+        });
+
+        const c = data.current || {};
+        const loc = data.location || {};
+
+        const currentTemp = Number(c.temperature || 0);
+        const feelsLike = Number(c.apparent || 0);
+        const humidity = Number(c.humidity || 0);
+        const rainNow = Number(c.precipitation || 0);
+
+        const fc24hLocked = rainHoursFuture.length > 0
+            ? `Có mưa đáng chú ý vào các khung giờ: ${rainHoursFuture.join(', ')}.`
+            : `Không thấy mốc mưa đáng chú ý trong 24 giờ tới.`;
+
+        let fc5dLocked = `thời tiết tương đối ổn định.`;
+        if (rainDays >= 3) fc5dLocked = `có nhiều ngày mưa, nên theo dõi trước khi ra ngoài.`;
+        else if (next5DaysMaxTemp >= 36) fc5dLocked = `có xu hướng nắng nóng, đỉnh khoảng ${Math.round(next5DaysMaxTemp)}°C.`;
+
+        const insights = [];
+        if (maxTemp > -90) insights.push(`Nhiệt độ cao nhất trong 24 giờ tới khoảng ${Math.round(maxTemp)}°C.`);
+        insights.push(fc24hLocked);
+        insights.push(fc5dLocked);
+
+        this.currentWData = {
+            location: loc.name || "Khu vực",
+            temp: currentTemp,
+            feelsLike: feelsLike,
+            humidity: humidity,
+            wind: Number(c.wind || 0),
+            rain: rainNow,
+            nowHour: nowHourStr,
+            rainHoursFuture: rainHoursFuture,
+            fc24hLocked: fc24hLocked,
+            fc5dLocked: fc5dLocked,
+            insights: insights.join(' ')
+        };
+
+        textEl.innerHTML = this.renderWeatherAIText(this.getFallback(this.currentWData));
+
+        if (!('LanguageModel' in window)) {
+            if(btn) btn.style.display = 'none';
+            return;
+        }
+
+        try {
+            const availability = await window.LanguageModel.availability();
+            if (!this.normalizeNanoStatus(availability)) {
+                this.nanoReady = false;
+                localStorage.setItem("lifeos_weather_nano_ready", "0");
+                if(btn) btn.style.display = 'flex';
+                if (this.currentRequestId === reqId) textEl.innerHTML = this.renderWeatherAIText(this.getFallback(this.currentWData));
+                return;
+            }
+
+            if (this.nanoReady) {
+                if(btn) btn.style.display = 'none';
+                if (!this.nanoSession) {
+                    this.nanoSession = await this.createVietnameseNanoSession();
+                }
+                if (this.currentRequestId !== reqId) return;
+                this.generateAIText(this.currentWData, reqId);
+            } else {
+                if(btn) btn.style.display = 'flex';
+                if (this.currentRequestId === reqId) textEl.innerHTML = this.renderWeatherAIText(this.getFallback(this.currentWData));
+            }
+        } catch(e) {
+            console.warn('[Weather AI Analyze]', e);
+            if(btn) btn.style.display = 'flex';
+            if(this.currentRequestId === reqId && textEl) textEl.innerHTML = this.renderWeatherAIText(this.getFallback(this.currentWData));
+        }
+    }
+};
+
 window.fetchWeather=window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');const res=await fetch(window.weatherApiUrl(loc),{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
 window.setWeatherLocation=function(locationKey){window.vibrate?.(10);return window.fetchWeather(locationKey,{force:false})};
 window.refreshWeather=function(){window.vibrate?.(10);return window.fetchWeather(window.weatherState?.selected||'hanoi',{force:true})};
@@ -9915,6 +10492,15 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
         </div>
     </div>
 </div>
+
+<script id="lifeos-weather-nano-prime-boot">
+// Boot khởi động mồi Nano âm thầm
+setTimeout(() => {
+    if(window.WeatherAIEngine) {
+        // window.WeatherAIEngine.primeGeminiNano().catch(e=>console.log('Nano Prime Skip'));
+    }
+}, 3000); // Trễ 3s để không chặn quá trình load UI ban đầu
+</script>
 
 </body>
 </html>
