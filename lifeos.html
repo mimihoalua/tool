@@ -5955,6 +5955,36 @@ window.VaultState={data:[],activeInterval:null,activeCategory:'all'};
 window.VaultStorageLayer={_k:'',init(u){this._k='lifeos_v8_vault_'+u;try{const r=localStorage.getItem(this._k);this._data=r?JSON.parse(r):[];if(!Array.isArray(this._data))this._data=[]}catch(e){this._data=[]}window.VaultState.data=window.VaultUtils.migrateLegacyData(this._data)},getData(){return window.VaultState.data||[]},saveLocalOnly(){localStorage.setItem(this._k,JSON.stringify(window.VaultState.data||[]))},add(e){window.VaultState.data.unshift(e);this.saveLocalOnly()},update(id,u){const i=window.VaultState.data.findIndex(e=>String(e.id)===String(id));if(i!==-1){Object.assign(window.VaultState.data[i],u);this.saveLocalOnly()}},remove(id){window.VaultState.data=window.VaultState.data.filter(e=>String(e.id)!==String(id));this.saveLocalOnly()},replaceAll(d){window.VaultState.data=window.VaultUtils.migrateLegacyData(Array.isArray(d)?d:[]);this.saveLocalOnly()}};
 
 window.VaultUI={_c:'all',_q:'',_tI:null,
+    expandedSet: new Set(),
+    isAllExpanded: false,
+
+    toggleExpandAll() {
+        window.vibrate(10);
+        this.isAllExpanded = !this.isAllExpanded;
+        const btnIcon = document.querySelector('#vault-bulk-expand-all i');
+        
+        if(this.isAllExpanded) {
+            window.VaultStorageLayer.getData().forEach(e => this.expandedSet.add(String(e.id)));
+            if(btnIcon) btnIcon.className = 'ph-bold ph-arrows-in-line-vertical text-lg';
+            window.showToast("Đã bung mở toàn bộ", "ph-arrows-out-line-vertical");
+        } else {
+            this.expandedSet.clear();
+            if(btnIcon) btnIcon.className = 'ph-bold ph-arrows-out-line-vertical text-lg';
+            window.showToast("Đã thu gọn toàn bộ", "ph-arrows-in-line-vertical");
+        }
+        this.renderVaultCards();
+    },
+
+    toggleCard(id) {
+        window.vibrate(10);
+        const strId = String(id);
+        if(this.expandedSet.has(strId)) {
+            this.expandedSet.delete(strId);
+        } else {
+            this.expandedSet.add(strId);
+        }
+        this.renderVaultCards();
+    },
     openModal(id){
         window.vibrate(15); showFlex('vaultFormModal');
         setVal('vaultEntryId',''); setVal('vaultEntryName',''); setVal('vaultEntryContent',''); setVal('vaultEntryCategory','account'); setVal('vaultEntryCustomCategory',''); hideEl('vaultCustomCatWrapper'); setTxt('vaultModalTitle','Thêm Mục Mới');
@@ -5991,7 +6021,28 @@ window.VaultUI={_c:'all',_q:'',_tI:null,
             if(p.rawNotes && p.rawNotes.trim() !== '') f+=`<div class="text-sm text-slate-600 leading-relaxed mt-3 border-t border-slate-100 pt-2 whitespace-pre-wrap px-1 break-words">${window.escapeHTML(p.rawNotes)}</div>`;
             if(!f.trim()) f=`<div class="text-sm text-slate-400 italic mt-2 px-1">(Trống)</div>`;
             
-            return `<div onclick="window.VaultUI.openModal('${e.id}')" class="cursor-pointer break-inside-avoid mb-6 bg-white backdrop-blur-md rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full"><div class="flex items-start justify-between mb-4 border-b border-slate-100 pb-3 flex-shrink-0"><div class="min-w-0 flex-grow pr-2"><h3 class="font-bold text-slate-800 text-base lg:text-lg leading-tight break-words">${sn}</h3><span class="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1 border border-primary/20">${ci} ${window.escapeHTML(dc)}</span></div><div class="flex gap-2 flex-shrink-0"><button type="button" onclick="event.stopPropagation();window.VaultApp.copyEntry('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary bg-slate-50 hover:bg-primary/10 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Copy nội dung"><i class="ph-bold ph-copy text-lg"></i></button><button type="button" onclick="event.stopPropagation();window.VaultUI.openModal('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Sửa"><i class="ph-bold ph-pencil-simple text-lg"></i></button><button type="button" onclick="event.stopPropagation();window.VaultApp.confirmDeleteEntry('${e.id}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Xóa"><i class="ph-bold ph-trash text-lg"></i></button></div></div><div onclick="event.stopPropagation()" class="flex-grow">${f}</div></div>`
+            const strId = String(e.id);
+            const isExpanded = window.VaultUI.expandedSet.has(strId) || !!this._q;
+            const contentCls = isExpanded ? '' : 'hidden';
+            const chevronRot = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+
+            return `<div data-vault-id="${strId}" onclick="window.VaultUI.toggleCard('${strId}')" class="vault-card-wrapper cursor-pointer break-inside-avoid mb-6 bg-white backdrop-blur-md rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                <div class="flex items-start justify-between mb-4 border-b border-slate-100 pb-3 flex-shrink-0">
+                    <div class="min-w-0 flex-grow pr-2">
+                        <h3 class="font-bold text-slate-800 text-base lg:text-lg leading-tight break-words">${sn}</h3>
+                        <span class="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1 border border-primary/20">${ci} ${window.escapeHTML(dc)}</span>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <div class="w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 rounded-xl transition border border-slate-200 shadow-sm" style="transform: ${chevronRot}; transition: transform 0.3s;" id="vault-chevron-${strId}">
+                            <i class="ph-bold ph-caret-down text-lg"></i>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation();window.VaultApp.copyEntry('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary bg-slate-50 hover:bg-primary/10 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Copy nội dung"><i class="ph-bold ph-copy text-lg"></i></button>
+                        <button type="button" onclick="event.stopPropagation();window.VaultUI.openModal('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Sửa"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                        <button type="button" onclick="event.stopPropagation();window.VaultApp.confirmDeleteEntry('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Xóa"><i class="ph-bold ph-trash text-lg"></i></button>
+                    </div>
+                </div>
+                <div id="vault-content-${strId}" onclick="event.stopPropagation()" class="flex-grow ${contentCls}">${f}</div>
+            </div>`
         }).join('');
     }
 };
@@ -7410,7 +7461,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     color: #e11d48;
     border: 1px solid #fecdd3;
   }
-  #vault-bulk-delete:disabled {
+  #vault-bulk-delete:disabled, #vault-bulk-export:disabled {
     opacity: .45;
     filter: grayscale(.35);
     pointer-events: none;
@@ -7463,7 +7514,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     #vault-bulk-toolbar .vault-bulk-actions {
       width: 100%;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
     }
     #vault-bulk-toolbar button {
@@ -7522,9 +7573,11 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       toolbar.innerHTML = [
         '<div class="vault-bulk-info"><i class="ph-bold ph-check-square"></i><span>Đã chọn: <span id="vault-bulk-count" class="vault-bulk-count">0</span></span></div>',
         '<div class="vault-bulk-actions">',
-          '<button id="vault-bulk-select-all" type="button" onclick="window.VaultBulkDelete.selectAllVisible()"><i class="ph-bold ph-checks"></i><span>Chọn tất cả</span></button>',
-          '<button id="vault-bulk-clear" type="button" onclick="window.VaultBulkDelete.clearSelection()"><i class="ph-bold ph-x-circle"></i><span>Bỏ chọn</span></button>',
-          '<button id="vault-bulk-delete" type="button" onclick="window.VaultBulkDelete.confirmDeleteSelected()" disabled><i class="ph-bold ph-trash"></i><span>Xóa đã chọn</span></button>',
+          '<button id="vault-bulk-expand-all" type="button" onclick="window.VaultUI.toggleExpandAll()"><i class="ph-bold ph-arrows-out-line-vertical text-lg"></i><span class="hidden sm:inline">Mở/Gập</span></button>',
+          '<button id="vault-bulk-select-all" type="button" onclick="window.VaultBulkDelete.selectAllVisible()"><i class="ph-bold ph-checks text-lg"></i><span class="hidden sm:inline">Tất cả</span></button>',
+          '<button id="vault-bulk-clear" type="button" onclick="window.VaultBulkDelete.clearSelection()"><i class="ph-bold ph-x-circle text-lg"></i><span class="hidden sm:inline">Bỏ chọn</span></button>',
+          '<button id="vault-bulk-export" type="button" onclick="window.VaultBulkDelete.exportSelected()" disabled class="!bg-blue-50 !text-blue-600 !border-blue-200"><i class="ph-bold ph-download-simple text-lg"></i><span class="hidden sm:inline">Xuất JSON</span></button>',
+          '<button id="vault-bulk-delete" type="button" onclick="window.VaultBulkDelete.confirmDeleteSelected()" disabled><i class="ph-bold ph-trash text-lg"></i><span class="hidden sm:inline">Xóa</span></button>',
         '</div>'
       ].join('');
       filters.insertAdjacentElement('afterend', toolbar);
@@ -7534,9 +7587,11 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       this.ensureToolbar();
       var countEl = $('vault-bulk-count');
       var deleteBtn = $('vault-bulk-delete');
+      var exportBtn = $('vault-bulk-export');
       var n = selected.size;
       if(countEl) countEl.textContent = String(n);
       if(deleteBtn) deleteBtn.disabled = n === 0;
+      if(exportBtn) exportBtn.disabled = n === 0;
       getVisibleCards().forEach(function(card){
         var id = String(card.dataset.vaultId || '');
         card.classList.toggle('vault-selected', selected.has(id));
@@ -7548,14 +7603,11 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
     },
     decorateCards: function(){
       this.ensureToolbar();
-      var cards = Array.prototype.slice.call(document.querySelectorAll('#vaultCardsContainer > div[onclick^="window.VaultUI.openModal"]'));
+      var cards = Array.prototype.slice.call(document.querySelectorAll('#vaultCardsContainer > .vault-card-wrapper'));
       cards.forEach(function(card){
-        var onclick = card.getAttribute('onclick') || '';
-        var m = onclick.match(/openModal\(['\"]([^'\"]+)['\"]\)/);
-        if(!m) return;
-        var id = String(m[1]);
+        var id = String(card.dataset.vaultId || '');
+        if(!id) return;
         card.classList.add('vault-bulk-card');
-        card.dataset.vaultId = id;
         if(!card.querySelector('.vault-bulk-check')){
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -7596,6 +7648,21 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
       vibrate(10);
       this.updateToolbar();
       safeToast('Đã bỏ chọn','ph-x-circle');
+    },
+    exportSelected: function(){
+      var ids = Array.from(selected);
+      if(!ids.length){ safeToast('Chưa chọn mục nào để xuất','ph-warning-circle'); return; }
+      var exportData = getData().filter(function(e){ return selected.has(String(e.id)); });
+      vibrate(20);
+      var b = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+      var u = URL.createObjectURL(b);
+      var a = document.createElement('a');
+      a.href = u;
+      a.download = 'lifeos_vault_selected_' + window.getTodayStr().replace(/-/g,'') + '.json';
+      a.click();
+      URL.revokeObjectURL(u);
+      safeToast('Đã xuất ' + exportData.length + ' mục!', 'ph-download-simple');
+      this.clearSelection();
     },
     confirmDeleteSelected: function(){
       var ids = Array.from(selected);
