@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Card Visit - Tân Thành Phát</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700&family=Lobster&display=swap" rel="stylesheet">
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    background: #e3e3e3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* =========================================================
+   CARD
+   TỶ LỆ GẦN SÁT ẢNH MẪU 2
+   ========================================================= */
+
+.card-container {
+    position: relative;
+
+    width: min(1380px, 96vw);
+    aspect-ratio: 1381 / 793;
+
+    background: #fff;
+
+    border: 5px solid #f58220;
+
+    overflow: hidden;
+
+    box-shadow: none;
+}
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.logo-area {
+    position: absolute;
+
+    left: 4.8%;
+    top: 4.5%;
+
+    width: 11.5%;
+    height: 19%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 5;
+}
+
+.logo-area img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+/* =========================================================
+   TIÊU ĐỀ CÔNG TY
+   ========================================================= */
+
+.title-area {
+    position: absolute;
+
+    left: 18.0%;
+    right: 2.5%;
+    top: 4.8%;
+
+    height: 16%;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    overflow: visible;
+}
+
+.company-title {
+    margin: 0;
+
+    width: 100%;
+
+    color: #183574;
+
+    /*
+       Anton rất gần kiểu chữ cao - hẹp trong ảnh mẫu.
+    */
+    font-family: "Anton", "Arial Narrow", Impact, sans-serif;
+
+    font-size: clamp(35px, 4.05vw, 67px);
+
+    font-weight: 400;
+
+    line-height: 0.98;
+
+    letter-spacing: -1px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    transform: scaleX(0.91);
+
+    transform-origin: center top;
+}
+
+/* =========================================================
+   DÒNG DỊCH VỤ CHÍNH + SLOGAN
+   ========================================================= */
+
+.subtitle-area {
+    position: absolute;
+
+    left: 2.0%;
+    right: 2.0%;
+    top: 23.0%;
+
+    height: 10%;
+
+    display: flex;
+    align-items: center;
+
+    white-space: nowrap;
+}
+
+.subtitle-text {
+    flex: 0 0 35%;
+
+    color: #e5222a;
+
+    font-family: "Lobster", cursive;
+
+    font-size: clamp(30px, 3.2vw, 55px);
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    text-align: left;
+
+    transform: scaleX(0.92);
+
+    transform-origin: left center;
+}
+
+.slogan-text {
+    flex: 1;
+
+    color: #df2228;
+
+    font-family: "Anton", "Arial Narrow", Impact, sans-serif;
+
+    font-size: clamp(31px, 3.25vw, 56px);
+
+    font-weight: 400;
+
+    line-height: 1;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    transform: scaleX(0.91);
+
+    transform-origin: center center;
+}
+
+/* =========================================================
+   SERVICES
+   ========================================================= */
+
+.services-area {
+    position: absolute;
+
+    left: 2.1%;
+    right: 2.0%;
+
+    top: 35.5%;
+    bottom: 20.5%;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: space-between;
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 21%;
+
+    overflow: visible;
+}
+
+.service-icon {
+    flex: 0 0 auto;
+
+    width: clamp(30px, 3.0vw, 47px);
+    height: clamp(30px, 3.0vw, 47px);
+
+    margin-right: 1.1%;
+
+    fill: #1c72a8;
+
+    display: block;
+}
+
+.service-text {
+    color: #183574;
+
+    font-family:
+        "Barlow Condensed",
+        "Arial Narrow",
+        Arial,
+        sans-serif;
+
+    font-size: clamp(26px, 2.75vw, 48px);
+
+    font-weight: 700;
+
+    line-height: 1.03;
+
+    letter-spacing: -0.4px;
+
+    white-space: nowrap;
+
+    transform: scaleX(0.97);
+
+    transform-origin: left center;
+
+    width: 100%;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer-area {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 20.0%;
+
+    background: #1c3677;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0.8%
+        1.3%
+        0.8%
+        1.8%;
+}
+
+/* =========================================================
+   THÔNG TIN LIÊN HỆ
+   ========================================================= */
+
+.contact-info {
+    color: #ffffff;
+
+    font-family:
+        "Barlow Condensed",
+        "Arial Narrow",
+        Arial,
+        sans-serif;
+
+    font-size: clamp(24px, 2.25vw, 39px);
+
+    font-weight: 700;
+
+    line-height: 1.32;
+
+    white-space: nowrap;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+/* =========================================================
+   QR
+   ========================================================= */
+
+.qr-area {
+    flex: 0 0 auto;
+
+    width: 10.5%;
+    aspect-ratio: 1 / 1;
+
+    background: #ffffff;
+
+    padding: 0.35%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-left: 1%;
+}
+
+.qr-area img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+
+    image-rendering: pixelated;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .card-container {
+        width: 98vw;
+    }
+
+    .company-title {
+        letter-spacing: -0.5px;
+    }
+
+    .service-text {
+        letter-spacing: -0.3px;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .card-container {
+        border-width: 3px;
+    }
+
+    .subtitle-area {
+        top: 22%;
+    }
+
+    .services-area {
+        top: 35%;
+        bottom: 21%;
+    }
+
+    .service-icon {
+        margin-right: 1%;
+    }
+
+    .contact-info {
+        font-size: clamp(11px, 2.5vw, 18px);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card-container">
+
+    <!-- =====================================================
+         LOGO
+         ===================================================== -->
+
+    <div class="logo-area">
+        <img
+            src="logo.png"
+            alt="Logo Tân Thành Phát"
+        >
+    </div>
+
+
+    <!-- =====================================================
+         TIÊU ĐỀ
+         ===================================================== -->
+
+    <div class="title-area">
+        <h1 class="company-title">
+            TT THIẾT BỊ &amp; KỸ THUẬT MÁY VĂN PHÒNG TÂN THÀNH PHÁT
+        </h1>
+    </div>
+
+
+    <!-- =====================================================
+         DỊCH VỤ CHÍNH + SLOGAN
+         ===================================================== -->
+
+    <div class="subtitle-area">
+
+        <div class="subtitle-text">
+            Dịch vụ chính:
+        </div>
+
+        <div class="slogan-text">
+            LUÔN ĐỒNG HÀNH CÙNG BẠN
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DANH SÁCH DỊCH VỤ
+         ===================================================== -->
+
+    <div class="services-area">
+
+
+        <!-- 1 -->
+        <div class="service-item">
+
+            <svg
+                class="service-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+
+            <div class="service-text">
+                Sửa chữa, bảo trì nhanh tận nơi Máy Tính, Mạng, Camera, Máy in...
+            </div>
+
+        </div>
+
+
+        <!-- 2 -->
+        <div class="service-item">
+
+            <svg
+                class="service-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M16,11V5H8v6H2v6h5v-4h10v4h5v-6H16z M17,17h-3v-4H10v4H7v-4H4v-2h2v-2h12v2h2v2H17V17z M14,9h-4V7h4V9z M22,9h-2V7h-2V5h4V9z M6,9H4V7H2V5h4V9z"/>
+            </svg>
+
+            <div class="service-text">
+                Tư vấn, Lắp đặt hệ thống Máy vi tính, Mạng, Camera...
+            </div>
+
+        </div>
+
+
+        <!-- 3 -->
+        <div class="service-item">
+
+            <svg
+                class="service-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M7,18c-1.1,0-1.99,0.9-1.99,2S5.9,22,7,22s2-0.9,2-2S8.1,18,7,18z M1,2v2h2l3.6,7.59l-1.35,2.45c-0.16,0.28-0.25,0.61-0.25,0.96c0,1.1,0.9,2,2,2h12v-2H7.42c-0.14,0-0.25-0.11-0.25-0.25l0.03-0.12l0.9-1.63h7.45c0.75,0,1.41-0.41,1.75-1.03l3.58-6.49C20.92,4.31,20.96,4.14,20.96,3.97C20.96,3.42,20.51,3,19.96,3H5.21l-0.94-2H1z M17,18c-1.1,0-1.99,0.9-1.99,2s0.89,2,1.99,2s2-0.9,2-2S18.1,18,17,18z"/>
+            </svg>
+
+            <div class="service-text">
+                Cung cấp, Bán máy cũ/mới, Linh kiện, Phụ kiện, Phần mềm bản quyền
+            </div>
+
+        </div>
+
+
+        <!-- 4 -->
+        <div class="service-item">
+
+            <svg
+                class="service-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M20,6h-4V4c0-1.1-0.9-2-2-2h-4C8.9,2,8,2.9,8,4v2H4C2.9,6,2,6.9,2,8v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M10,4h4v2h-4V4z M20,20H4V8h16V20z M11,16h2v-2h2v-2h-2v-2h-2v2H9v2h2V16z M15,10h-6l-1,1v4l1,1h6l1-1v-4L15,10z"/>
+            </svg>
+
+            <div class="service-text">
+                Xử lý lỗi Virus, Lỗi phần mềm, Dịch vụ tận nơi theo yêu cầu
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <div class="footer-area">
+
+        <div class="contact-info">
+
+            Đ/c: KCN Nội Bài - Thôn Ninh Bắc - Xã Nội Bài - Hà Nội<br>
+
+            ĐT / Zalo: 0936.168.219
+            &nbsp;&nbsp;
+            Email: mayvptxt@gmail.com
+
+        </div>
+
+
+        <div class="qr-area">
+
+            <img
+                src="qr.png"
+                alt="QR Code"
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
